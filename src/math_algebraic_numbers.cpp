@@ -1925,12 +1925,19 @@ std::string AlgebraicNumber::toString(FormatExpressions* format) const {
   return out.str();
 }
 
+std::string AlgebraicNumber::toMathMLFinal(FormatExpressions* format) const {
+  return
+  MathML::toMathMLFinal(
+    this->toMathML(format), this->toString(format), format
+  );
+}
+
 std::string AlgebraicNumber::toMathML(
   FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
-      return "0";
+      return "<mn>0</mn>";
     }
     return this->element.coefficients[0].toMathML(format, outputProperties);
   }

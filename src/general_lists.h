@@ -714,6 +714,10 @@ public:
   void toString(std::string& output, FormatExpressions* format = nullptr) const {
     output = this->toString(format);
   }
+  std::string toMathML(FormatExpressions* format) const;
+  std::string toMathMLFinal(
+    FormatExpressions* format, const std::string& separator = ", "
+  ) const;
   int getIndex(const Object& o) const;
   bool contains(const Object& o) const {
     return this->getIndex(o) != - 1;

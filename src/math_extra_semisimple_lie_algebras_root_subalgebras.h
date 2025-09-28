@@ -490,6 +490,8 @@ public:
   int totalParabolics;
   int totalNonPseudoParabolic;
   int upperLimitElementsWeylGroup;
+  int64_t extensionComputationTimeInMilliseconds;
+  int64_t sortingTimeInMilliseconds;
   std::string ReportStringNonNilradicalParabolic;
   bool flagComputingLprohibitingWeights;
   bool flagUsingParabolicsInCentralizers;
@@ -501,6 +503,7 @@ public:
   bool flagStoringNilradicals;
   bool flagPrintGAPInput;
   bool flagPrintParabolicPseudoParabolicInfo;
+  bool flagComputeInclusions;
   SemisimpleLieAlgebra& getOwnerSemisimpleLieAlgebra() const;
   WeylGroupData& getOwnerWeyl() const;
   bool checkInitialization() const;
@@ -515,10 +518,7 @@ public:
     ProgressReport& progressReport
   );
   void maybeExtendByHighestWeightOfModuleIndex(
-    RootSubalgebra& toBeExtended,
-    int indexOfToBeExtended,
-    int j,
-    ProgressReport& progressReport
+    RootSubalgebra& toBeExtended, int indexOfToBeExtended, int j
   );
   void computeKmodMultTables();
   bool approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(

@@ -2937,7 +2937,6 @@ bool RootSubalgebra::computeEssentialsIfNew(
   this->generatorsK = this->simpleRootsReductiveSubalgebra;
   this->checkInitialization();
   ProgressReport report;
-  std::stringstream reportStream;
   this->simpleBasisKScaledToActByTwo = this->simpleRootsReductiveSubalgebra;
   for (int i = 0; i < this->simpleRootsReductiveSubalgebra.size; i ++) {
     this->simpleBasisKScaledToActByTwo[i] *= 2 /
@@ -2947,8 +2946,8 @@ bool RootSubalgebra::computeEssentialsIfNew(
     );
   }
   if (report.tickAndWantReport()) {
-    reportStream << "Computing root subalgebra... ";
-    report.report(reportStream.str());
+    report.reportStream() << "Computing root subalgebra... ";
+    report.report();
   }
   if (baseSubalgebraWeExtend != nullptr) {
     this->simpleRootsReductiveSubalgebra.getGramMatrix(
@@ -2998,8 +2997,8 @@ bool RootSubalgebra::computeEssentialsIfNew(
     );
   }
   if (report.tickAndWantReport()) {
-    reportStream << "...found a candidate type... ";
-    report.report(reportStream.str());
+    report.reportStream() << "Found a candidate type. ";
+    report.report();
   }
   if (
     this->simpleRootsReductiveSubalgebra.getRankLinearSpan() !=
@@ -3018,8 +3017,8 @@ bool RootSubalgebra::computeEssentialsIfNew(
     return false;
   }
   if (report.tickAndWantReport()) {
-    reportStream << "...the candidate's roots are maximally dominant... ";
-    report.report(reportStream.str());
+    report.reportStream() << "The candidate's roots are maximally dominant. ";
+    report.report();
   }
   this->dynkinDiagram.ambientBilinearForm =
   this->getAmbientWeyl().cartanSymmetric;
@@ -3044,15 +3043,13 @@ bool RootSubalgebra::computeEssentialsIfNew(
     }
   }
   if (report.tickAndWantReport()) {
-    reportStream
-    << "...module decomposition computed, subalgebra type: "
+    report.reportStream()
+    << "Computed all internals of: "
     << this->dynkinType.toString()
-    << ", centralizer type: "
+    << ". Centralizer type: "
     << this->centralizerDynkinType.toString()
-    << ". Computing outer automorphisms that "
-    << "have zero action on centralizer "
-    << "and extend to ambient automorphisms... ";
-    report.report(reportStream.str());
+    << ". ";
+    report.report();
   }
   return true;
 }
@@ -3209,17 +3206,33 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
     "RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism"
   );
   this->initOwnerMustBeNonZero();
+  int startTime = global.getElapsedMilliseconds();
   this->computeAllReductiveRootSubalgebrasInitialize();
   HashedList<Vector<Rational> > gapVectors;
   this->flagPrintGAPInput =
   this->owner->weylGroup.loadGAPRootSystem(gapVectors);
-  ProgressReport report2;
-  report2.ticksPerReport = 1;
+  ProgressReport subalgebraCounterReport;
+  ProgressReport subalgebrasReport;
+  subalgebrasReport.ticksPerReport = 1;
+  subalgebraCounterReport.ticksPerReport = 1;
   RootSubalgebra cartanSubalgebra;
   cartanSubalgebra.owner = this;
   cartanSubalgebra.indexInducingSubalgebra = - 1;
   cartanSubalgebra.computeEssentialsIfNew(nullptr);
+  if (subalgebraCounterReport.tickAndWantReport()) {
+    subalgebraCounterReport.reportStream()
+    << "Computed essentials of: "
+    << cartanSubalgebra.dynkinType.toString();
+    subalgebraCounterReport.report();
+  }
   this->subalgebras.addOnTop(cartanSubalgebra);
+  if (subalgebraCounterReport.tickAndWantReport()) {
+    subalgebraCounterReport.reportStream()
+    << "Subalgebra "
+    << cartanSubalgebra.dynkinType.toString()
+    << " adjoined. ";
+    subalgebraCounterReport.report();
+  }
   for (int i = 0; i < this->subalgebras.size; i ++) {
     // Make an explicit copy of the underlying root subalgebra.
     // We will be expanding the subalgebras container as we go.
@@ -3231,77 +3244,91 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
     // the currentlyExtended object when our subalgebras array
     // runs out of buffer space.
     RootSubalgebra currentlyExtended = this->subalgebras[i];
+    if (subalgebraCounterReport.tickAndWantReport()) {
+      subalgebraCounterReport.reportStream()
+      << "Computing potential extensions of subalgebra "
+      << currentlyExtended.dynkinType.toString()
+      << " ("
+      << i + 1
+      << " out of "
+      << this->subalgebras.size
+      << ")";
+      subalgebraCounterReport.report();
+    }
     currentlyExtended.computePotentialExtensions();
-    this->findAllExtensions(currentlyExtended, i, report2);
+    if (subalgebraCounterReport.tickAndWantReport()) {
+      subalgebraCounterReport.reportStream()
+      << "Attempting to realize potential extensions of: "
+      << currentlyExtended.dynkinType.toString()
+      << " ("
+      << i + 1
+      << " out of "
+      << this->subalgebras.size
+      << ")";
+      subalgebraCounterReport.report();
+    }
+    this->findAllExtensions(currentlyExtended, i, subalgebrasReport);
   }
-  std::stringstream reportStream;
-  if (report2.tickAndWantReport()) {
-    reportStream
+  this->extensionComputationTimeInMilliseconds =
+  global.getElapsedMilliseconds() - startTime;
+  if (subalgebrasReport.tickAndWantReport()) {
+    subalgebrasReport.reportStream()
     << "Reductive root subalgebra computation done: total "
     << this->subalgebras.size
     << " subalgebras. Proceeding to sort the subalgebras...";
-    report2.report(reportStream.str());
+    subalgebrasReport.report();
   }
   this->sortDescendingOrderBySemisimpleRank();
+  if (subalgebrasReport.tickAndWantReport()) {
+    subalgebrasReport.reportStream() << "Computing immediate inclusions... ";
+    subalgebrasReport.report();
+  }
   this->computeImmediateInclusions();
+  if (subalgebrasReport.tickAndWantReport()) {
+    subalgebrasReport.reportStream() << "Computing all inclusions... ";
+    subalgebrasReport.report();
+  }
   this->computeAllInclusions();
-  if (report2.tickAndWantReport()) {
-    reportStream << "done. ";
-    report2.report(reportStream.str());
+  if (subalgebrasReport.tickAndWantReport()) {
+    subalgebrasReport.reportStream()
+    << "Sorted all asubalgebras and computed inclusions. ";
+    subalgebrasReport.report();
   }
   if (this->flagComputeConeCondition) {
-    if (report2.tickAndWantReport()) {
-      reportStream << "Proceeding to compute the module pairing tables ... ";
-      report2.report(reportStream.str());
+    if (subalgebrasReport.tickAndWantReport()) {
+      subalgebrasReport.reportStream()
+      << "Proceeding to compute the module pairing tables ... ";
+      subalgebrasReport.report();
     }
     this->computeKmodMultTables();
-    if (report2.tickAndWantReport()) {
-      reportStream << " done. ";
-      report2.report(reportStream.str());
+    if (subalgebrasReport.tickAndWantReport()) {
+      subalgebrasReport.reportStream() << "Module paring tables computed. ";
+      subalgebrasReport.report();
     }
   }
   if (this->flagPrintParabolicPseudoParabolicInfo) {
-    if (report2.tickAndWantReport()) {
-      reportStream
+    if (subalgebrasReport.tickAndWantReport()) {
+      subalgebrasReport.reportStream()
       << "Computing which subalgebras are "
       << "pseudo parabolic/parabolic/neither... ";
-      report2.report(reportStream.str());
+      subalgebrasReport.report();
     }
     this->computeParabolicPseudoParabolicNeitherOrder();
-    if (report2.tickAndWantReport()) {
-      reportStream << " done. ";
-      report2.report(reportStream.str());
+    if (subalgebrasReport.tickAndWantReport()) {
+      subalgebrasReport.reportStream() << "Computed pseudo-parabolics. ";
+      subalgebrasReport.report();
     }
   }
 }
 
 void RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex(
-  RootSubalgebra& toBeExtended,
-  int indexOfToBeExtended,
-  int j,
-  ProgressReport& progressReport
+  RootSubalgebra& toBeExtended, int indexOfToBeExtended, int j
 ) {
   STACK_TRACE("RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex");
   if (toBeExtended.highestWeightsPrimalSimple[j].isEqualToZero()) {
     return;
   }
-  if (progressReport.tickAndWantReport()) {
-    std::stringstream out;
-    out
-    << "Exploring extensions of subalgebra "
-    << indexOfToBeExtended + 1
-    << " out of "
-    << this->subalgebras.size
-    << ". Type current SA: "
-    << toBeExtended.dynkinType.toString()
-    << ". Possible standard parabolic extensions: "
-    << toBeExtended.toStringPotentialExtensions()
-    << ". Exploring extension by lowest weight vector of module "
-    << j + 1
-    << " out of "
-    << toBeExtended.modules.size;
-    progressReport.report(out.str());
-  }
+  ProgressReport progressReport;
   const Vector<Rational>& extensionWeight =
   toBeExtended.lowestWeightsPrimalSimple[j];
   RootSubalgebra candidate;
@@ -3317,6 +3344,12 @@ void RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex(
   if (!candidate.computeEssentialsIfNew(&toBeExtended)) {
     return;
   }
+  if (progressReport.tickAndWantReport()) {
+    progressReport.reportStream()
+    << "Computed fully: "
+    << toBeExtended.dynkinType.toString();
+    progressReport.report();
+  }
   if (
     candidate.simpleRootsReductiveSubalgebra.getRankLinearSpan() !=
     candidate.simpleRootsReductiveSubalgebra.size
@@ -3325,7 +3358,18 @@ void RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex(
     << "<br>simple basis vectors not linearly independent! "
     << global.fatal;
   }
+  if (progressReport.tickAndWantReport()) {
+    progressReport.reportStream() << "Adding candidate on top ...";
+    progressReport.report();
+  }
   this->subalgebras.addOnTop(candidate);
+  if (progressReport.tickAndWantReport()) {
+    progressReport.reportStream()
+    << "New candidate "
+    << candidate.dynkinType.toString()
+    << " accounted for.";
+    progressReport.report();
+  }
 }
 
 void RootSubalgebras::findAllExtensions(
@@ -3334,9 +3378,35 @@ void RootSubalgebras::findAllExtensions(
   ProgressReport& progressReport
 ) {
   for (int j = 0; j < toBeExtended.modules.size; j ++) {
+    if (progressReport.tickAndWantReport()) {
+      progressReport.reportStream()
+      << "Exploring extensions of subalgebra "
+      << indexOfToBeExtended + 1
+      << " out of "
+      << this->subalgebras.size
+      << ", module "
+      << j
+      << " out of "
+      << toBeExtended.modules.size
+      << ". Type current SA: "
+      << toBeExtended.dynkinType.toString()
+      << ". Possible standard parabolic extensions: "
+      << toBeExtended.toStringPotentialExtensions()
+      << ". ";
+      progressReport.report();
+    }
     this->maybeExtendByHighestWeightOfModuleIndex(
-      toBeExtended, indexOfToBeExtended, j, progressReport
+      toBeExtended, indexOfToBeExtended, j
     );
+  }
+  if (progressReport.tickAndWantReport()) {
+    progressReport.reportStream()
+    << "Explored fully extensions of subalgebra "
+    << indexOfToBeExtended + 1
+    << " out of "
+    << this->subalgebras.size
+    << ". ";
+    progressReport.report();
   }
 }
 
@@ -3476,9 +3546,22 @@ void RootSubalgebras::computeAllInclusionsOfOneSubalgebra(
 
 void RootSubalgebras::computeImmediateInclusions() {
   STACK_TRACE("RootSubalgebras::computeImmediateInclusions");
+  if (!this->flagComputeInclusions) {
+    return;
+  }
   this->getOwnerWeyl().computeRho(false);
+  ProgressReport report;
   for (int i = 0; i < this->subalgebras.size; i ++) {
     RootSubalgebra& rootSubalgebra = this->subalgebras[i];
+    if (report.tickAndWantReport()) {
+      report.reportStream()
+      << "Computing inclusions for subalgebra: "
+      << rootSubalgebra.dynkinType.toString()
+      << i + 1
+      << " out of "
+      << this->subalgebras.size;
+      report.report();
+    }
     this->computeImmediateInclusionsOnce(rootSubalgebra, i);
   }
 }
@@ -3521,6 +3604,8 @@ void RootSubalgebras::computeImmediateInclusionsOnce(
 
 void RootSubalgebras::sortDescendingOrderBySemisimpleRank() {
   STACK_TRACE("RootSubalgebras::sortDescendingOrderBySemisimpleRank");
+  int64_t start = global.getElapsedMilliseconds();
+  ProgressReport report;
   // Bubble sort.
   RootSubalgebras output;
   List<int> sortingArray;
@@ -3529,8 +3614,22 @@ void RootSubalgebras::sortDescendingOrderBySemisimpleRank() {
   for (int i = 0; i < this->subalgebras.size; i ++) {
     sortingArray[i] = i;
   }
+  if (report.tickAndWantReport()) {
+    report.reportStream() << "Bubble-sorting subalgebras. ";
+    report.report();
+  }
   for (int i = 0; i < this->subalgebras.size; i ++) {
     for (int j = i + 1; j < this->subalgebras.size; j ++) {
+      if (report.tickAndWantReport()) {
+        report.reportStream()
+        << "Bubble-sort: "
+        << i + 1
+        << ", "
+        << j + 1
+        << " out of "
+        << this->subalgebras.size;
+        report.report();
+      }
       if (
         this->subalgebras[sortingArray[j]].dynkinDiagram.isGreaterThan(
           this->subalgebras[sortingArray[i]].dynkinDiagram
@@ -3539,6 +3638,10 @@ void RootSubalgebras::sortDescendingOrderBySemisimpleRank() {
         sortingArray.swapTwoIndices(i, j);
       }
     }
+  }
+  if (report.tickAndWantReport()) {
+    report.reportStream() << "Bubble-sorting subalgebras done. ";
+    report.report();
   }
   inverseOfSortingArray.setSize(sortingArray.size);
   for (int i = 0; i < sortingArray.size; i ++) {
@@ -3563,6 +3666,7 @@ void RootSubalgebras::sortDescendingOrderBySemisimpleRank() {
   for (int i = 0; i < this->subalgebras.size; i ++) {
     this->subalgebras[i] = output.subalgebras[i];
   }
+  this->sortingTimeInMilliseconds = global.getElapsedMilliseconds() - start;
 }
 
 void RootSubalgebras::toHTML(FormatExpressions* format) {
@@ -4004,6 +4108,7 @@ std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(
 }
 
 void RootSubalgebras::computeKmodMultTables() {
+  STACK_TRACE("RootSubalgebras::computeKmodMultTables");
   for (int i = 0; i < this->subalgebras.size; i ++) {
     this->subalgebras[i].generateKModuleLieBracketTable(
       this->subalgebras[i].pairingTable, this->subalgebras[i].oppositeKModules
@@ -4193,6 +4298,7 @@ RootSubalgebras::RootSubalgebras() {
   this->flagComputeConeCondition = false;
   this->flagUsingActionsNormalizerCentralizerNilradical = true;
   this->flagLookingForMinimalRels = false;
+  this->flagComputeInclusions = true;
   this->linesPerTableLatex = 20;
   this->columnsPerTableLatex = 4;
   this->upperLimitElementsWeylGroup = 0;
@@ -4203,6 +4309,8 @@ RootSubalgebras::RootSubalgebras() {
   this->totalNonPseudoParabolic = 0;
   this->totalParabolics = 0;
   this->totalPseudoParabolicNonParabolic = 0;
+  this->extensionComputationTimeInMilliseconds = 0;
+  this->sortingTimeInMilliseconds = 0;
 }
 
 void RootSubalgebras::initForNilradicalGeneration() {

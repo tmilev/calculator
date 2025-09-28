@@ -104,4 +104,31 @@ public:
   static Calculator& converterCalculator();
 };
 
+template <class Object>
+std::string List<Object>::toMathMLFinal(
+  FormatExpressions* format, const std::string& separator
+) const {
+  List<std::string> result;
+  for (const Object& object : *this) {
+    result.addOnTop(object.toMathMLFinal(format));
+  }
+  return result.toStringWithSeparator(separator);
+}
+
+template <class Object>
+std::string List<Object>::toMathML(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "<mrow>" << MathML::leftParenthesis;
+  for (int i = 0; i < this->size; i ++) {
+    const Object& object = (*this)[i];
+    out << object.toMathML(format);
+    if (i != this->size - 1) {
+      out << "<mo>,</mo>";
+    }
+  }
+  out << MathML::rightParenthesis;
+  out << "</mrow>";
+  return out.str();
+}
+
 #endif // header_math_mathml_ALREADY_INCLUDED

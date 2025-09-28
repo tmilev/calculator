@@ -1564,7 +1564,9 @@ template <class Coefficient>
 Vector<Coefficient> AffineHyperplane<Coefficient>::projectOnMe(
   Vector<Coefficient>& input
 ) const {
-  // output = input + x * normal  and <input + x * normal, normal> = 0 =>
+  // output = input + x * normal
+  // <input + x * normal, normal> = 0
+  // Therefore:
   // x = -<input, normal> / <normal, normal>
   Coefficient normalCoefficient = - input.scalarEuclidean(this->normal) /
   this->normal.scalarEuclidean(this->normal);

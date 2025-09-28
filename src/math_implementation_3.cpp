@@ -305,6 +305,16 @@ bool ProgressReport::tickAndWantReport() {
   return this->ticks == 0;
 }
 
+std::stringstream& ProgressReport::reportStream() {
+  this->reportStreamInternal.str("");
+  this->reportStreamInternal.clear();
+  return this->reportStreamInternal;
+}
+
+void ProgressReport::report() {
+  this->report(this->reportStreamInternal.str());
+}
+
 void ProgressReport::report(const std::string& stringToReport) {
   if (!this->flagInitialized) {
     return;
@@ -5932,6 +5942,11 @@ bool DynkinType::grow(
   List<List<int> >* outputPermutationRoots
 ) const {
   STACK_TRACE("DynkinType::grow");
+  ProgressReport report;
+  if (report.tickAndWantReport()) {
+    report.reportStream() << "Growing: " << this->toString();
+    report.report();
+  }
   output.setSize(0);
   if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->setSize(0);
@@ -5967,6 +5982,16 @@ bool DynkinType::grow(
     minimalComponent.grow(simpleTypes, &lastComponentRootInjections);
     currentRootInjection.setSize(this->getRank() + 1);
     for (int i = 0; i < simpleTypes.size; i ++) {
+      if (report.tickAndWantReport()) {
+        report.reportStream()
+        << "Growing: "
+        << this->toString()
+        << ", simple type: "
+        << i + 1
+        << " out of "
+        << simpleTypes.size;
+        report.report();
+      }
       bool isGood = true;
       for (int j = 0; j < typeMinusMinimal.size(); j ++) {
         if (simpleTypes[i] > typeMinusMinimal[j]) {

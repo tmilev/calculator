@@ -1729,7 +1729,8 @@ void SlTwoSubalgebras::findSl2Subalgebras(
     reportStream0
     << "Finding sl(2)-subalgebras (and thus a "
     << "full list of the nilpotent orbits) of "
-    << inputOwner.weylGroup.dynkinType.toString();
+    << inputOwner.weylGroup.dynkinType.toString()
+    << ".";
     report0.report(reportStream0.str());
   }
   inputOwner.checkConsistency();
@@ -1737,7 +1738,12 @@ void SlTwoSubalgebras::findSl2Subalgebras(
   output.checkConsistency();
   output.getOwner().computeChevalleyConstants();
   output.rootSubalgebras.owner = &inputOwner;
+  int64_t startTime = global.getElapsedMilliseconds();
+  global.comments << "<br>DEBUG: not computing inclusions! ";
+  output.rootSubalgebras.flagComputeInclusions = false;
   output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
+  output.millisecondsRootSubalgebraComputation =
+  global.getElapsedMilliseconds() - startTime;
   output.sl2sPerRootSubalgebras.setSize(
     output.rootSubalgebras.subalgebras.size
   );
@@ -1750,16 +1756,17 @@ void SlTwoSubalgebras::findSl2Subalgebras(
   }
   ProgressReport report;
   for (int i = 0; i < output.rootSubalgebras.subalgebras.size; i ++) {
-    std::stringstream currentStream;
-    currentStream
-    << "\nExploring root subalgebra "
-    << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
-    << " ("
-    << (i + 1)
-    << " out of "
-    << output.rootSubalgebras.subalgebras.size
-    << ")\n";
-    report.report(currentStream.str());
+    if (report.tickAndWantReport()) {
+      report.reportStream()
+      << "\nExploring root subalgebra "
+      << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
+      << " ("
+      << (i + 1)
+      << " out of "
+      << output.rootSubalgebras.subalgebras.size
+      << ")\n";
+      report.report();
+    }
     output.appendSSl2SubalgebrasFromRootSubalgebra(
       output.rootSubalgebras.subalgebras[i],
       output,
@@ -2022,7 +2029,21 @@ void SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra(
 }
 
 void SlTwoSubalgebras::computeCentralizers() {
-  for (SlTwoSubalgebra& currentSubalgebra : this->allSubalgebras) {
+  STACK_TRACE("SlTwoSubalgebras::computeCentralizers");
+  ProgressReport centralizerReport;
+  for (int i = 0; i < this->allSubalgebras.size; i ++) {
+    SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras.getElement(i);
+    if (centralizerReport.tickAndWantReport()) {
+      centralizerReport.reportStream()
+      << "Computing centralizer of subalgebra: A_1^"
+      << (currentSubalgebra.lengthHSquared / 2)
+      << " ("
+      << i + 1
+      << " out of "
+      << this->allSubalgebras.size
+      << ").";
+      centralizerReport.report();
+    }
     currentSubalgebra.attemptToComputeCentralizer();
   }
 }
@@ -2559,17 +2580,17 @@ std::string CentralizerComputer::toString(FormatExpressions* format) const {
     << " (dimension: "
     << this->centralizerBasis.size
     << "): "
-    << this->centralizerBasis.toStringCommaDelimited();
+    << this->centralizerBasis.toMathMLFinal(format);
     out
     << "\n<br>\nBasis of centralizer intersected with cartan (dimension: "
     << this->centralizerIntersectedWithAmbientCartan.size
     << "): "
-    << this->centralizerIntersectedWithAmbientCartan.toStringCommaDelimited();
+    << this->centralizerIntersectedWithAmbientCartan.toMathMLFinal(format);
     out
     << "\n<br>\nCartan of centralizer (dimension: "
     << this->centralizerCartan.size
     << "): "
-    << this->centralizerCartan.toStringCommaDelimited();
+    << this->centralizerCartan.toMathMLFinal(format);
   } else {
     out << ": not computed.";
   }
@@ -2593,21 +2614,14 @@ std::string CentralizerComputer::toString(FormatExpressions* format) const {
   out
   << "\n<br>\nEigenvalues of ad H: "
   << this->semisimpleElementAdjointEigenvalueFinder.
-  eigenValuesWithoutMultiplicity.toStringCommaDelimited();
+  eigenValuesWithoutMultiplicity.toMathMLFinal(format);
   out
   << "\n<br>\n"
   << this->semisimpleElementAdjointEigenvalueFinder.numberOfEigenVectors()
-  << " eigenvectors of ad H: ";
-  List<std::string> eigenvectorStrings;
-  for (
-    const Vectors<AlgebraicNumber>& eigenVectorSet :
-    this->semisimpleElementAdjointEigenvalueFinder.eigenvectors
-  ) {
-    for (const Vector<AlgebraicNumber>& eigenVector : eigenVectorSet) {
-      eigenvectorStrings.addOnTop(eigenVector.toMathMLFinal(format));
-    }
-  }
-  out << eigenvectorStrings.toStringCommaDelimited();
+  << " eigenvectors of ad H: "
+  << this->semisimpleElementAdjointEigenvalueFinder.eigenvectors.toMathMLFinal(
+    format
+  );
   out << "\n<br>\nCentralizer type: " << this->typeIfKnown.toString();
   out
   << "\n<br>\nReductive components ("
@@ -3508,14 +3522,16 @@ std::string CartanElementCandidate::toHTML(FormatExpressions* format) const {
   out << this->h.toMathMLFinal(format);
   if (!this->e.isEqualToZero()) {
     out
-    << " matching e: "
+    << "\n<br>\nmatching e: "
     << this->e.toMathMLFinal(format)
-    << ", verification: "
+    << "\n<br>\nverification: "
     << MathML::toMathMLFinal(
       this->toMathMLVerification(), this->toStringVerification(), format
     );
   }
-  out << " adjoint action: " << this->adjointAction.toMathMLFinal(format);
+  out
+  << "\n<br>\nadjoint action: "
+  << this->adjointAction.toMathMLFinal(format);
   return out.str();
 }
 

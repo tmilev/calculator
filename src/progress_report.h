@@ -22,6 +22,7 @@
 class ProgressReport {
 private:
   void initialize();
+  std::stringstream reportStreamInternal;
 public:
   int currentLevel;
   int threadIndex;
@@ -44,6 +45,9 @@ public:
   // are expected to cost more than the mathematical computations
   // they are reporting.
   void report(const std::string& stringToReport);
+  // Reports the contents of the reportStreamInternal.
+  void report();
+  std::stringstream& reportStream();
   bool tickAndWantReport();
   ProgressReport(
     int inputTicksPerReport = 1, const std::string& inputName = ""

@@ -670,9 +670,12 @@ public:
   // but we couldn't realize it.
   MapList<Vector<Rational>, List<int> > unsuitableHs;
   int indexZeroWeight;
+  int millisecondsRootSubalgebraComputation;
   RootSubalgebras rootSubalgebras;
   ~SlTwoSubalgebras() {}
-  SlTwoSubalgebras(): owner(nullptr) {}
+  SlTwoSubalgebras():
+  owner(nullptr),
+  millisecondsRootSubalgebraComputation(0) {}
   SlTwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner) {}
   bool operator==(const SlTwoSubalgebras& other) const {
     if (this->owner == nullptr) {

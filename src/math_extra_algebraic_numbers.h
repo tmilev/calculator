@@ -194,6 +194,7 @@ public:
     FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
+  std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
   std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
   class Test {
   public:

@@ -616,10 +616,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "If the number of weights in the weight "
     "support exceeds this number, only "
     "the first 10 000 weights will be drawn. "
-    "<b>Warning. Drawing text (i.e. multiplicities) "
+    "Warning. Drawing text (i.e. multiplicities) "
     "is very javascript-processor-intensive. "
     "Use only for *small* examples, "
-    "else you might hang your browser. </b>",
+    "else you might hang your browser. ",
     "DrawWeightSupportWithMults{}(B_3, (0, 1, 1));\n"
     "DrawWeightSupportWithMults{}(G_2, (1, 0))",
     "CalculatorFunctions::drawWeightSupportWithMults",
@@ -727,7 +727,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::
     writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel,
     "",
-    "<b>Experimental, please don't use</b>. "
+    "Experimental, please don't use. "
     "Embeds a Lie algebra in the Weyl algebra "
     "with matrix coefficients. The third argument "
     "gives the highest weight. The non-zero entries "
@@ -929,10 +929,9 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "to the i^th simple root. You will get your "
     "output as a .png file link, you must click onto "
     "the link to see the end result. "
-    "<b>Please do not use for subalgebras "
-    "larger than B_4 (so(9)). The vpf program has "
-    "no problem handling this function up to "
-    "E_6 but LaTeX crashes trying to process the output. </b>",
+    "Subalgebras "
+    "larger than B_4 (so(9)) have been known to produce output"
+    "that has crashed versions of LaTeX. ",
     "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",
     "CalculatorLieTheory::parabolicWeylGroupsBruhatGraph",
     "ParabolicsInfoBruhatGraph",
@@ -1057,8 +1056,6 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebras",
     CalculatorLieTheory::printSemisimpleSubalgebrasRegular,
     "",
-    "<b>This function is being developed "
-    "and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebras(B_3)",
     "CalculatorLieTheory::printSemisimpleSubalgebrasRegular",
@@ -1069,7 +1066,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebrasRecompute",
     CalculatorLieTheory::printSemisimpleSubalgebrasRecompute,
     "",
-    "<b>This function is being developed and is not implemented fully yet.</b>"
+    "This function is being developed and is not implemented fully yet. "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",
     "CalculatorLieTheory::printSemisimpleSubalgebrasRecompute",
@@ -1080,7 +1077,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebrasNoCentralizers",
     CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers,
     "",
-    "<b>This function is being developed and is not implemented fully yet.</b>"
+    "This function is being developed and is not implemented fully yet. "
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
     "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
     "CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers",
@@ -1091,7 +1088,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebrasFull",
     CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals,
     "",
-    "<b>This function is being developed and is not implemented fully yet.</b>"
+    "This function is being developed and is not implemented fully yet. "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasFull{}(A_2)",
     "CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals",
@@ -1132,8 +1129,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "LoadSemisimpleSubalgebras",
     CalculatorConversions::loadSemisimpleSubalgebras,
     "",
-    "<b>This function is being developed "
-    "and is not implemented fully yet.</b>"
+    "This function is being developed "
+    "and is not implemented fully yet. "
     "Loads a semisimpleSubalgebra from expression. ",
     "LoadSemisimpleSubalgebras {}"
     "(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
@@ -1145,8 +1142,6 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SltwoSubalgebra",
     CalculatorConversions::slTwoSubalgebraPrecomputed,
     "",
-    "<b>This function is being developed "
-    "and is not implemented fully yet. </b>"
     "Loads an sl(2) subalgebra from expression. ",
     "SltwoSubalgebra(\n"
     "B_{3},\n"
@@ -1361,7 +1356,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch
     ,
     "",
-    "<b>Work in progress. Please do not use.</b> "
+    "Work in progress. Please do not use. "
     "Computes from scratch the irreducible representations "
     "and the character table of a Weyl group.",
     "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);",

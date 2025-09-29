@@ -145,7 +145,7 @@ class AtomHandler {
       result.appendChild(element);
     }
     let infoElement = document.createElement("span");
-    infoElement.textContent = this.description;
+    miscellaneousFrontend.writeHTML(infoElement, this.description);
     infoElement.className = "calculatorExamplePanel";
     result.appendChild(infoElement);
     let example = document.createElement("b");

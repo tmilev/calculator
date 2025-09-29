@@ -4512,7 +4512,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   if (mustRecompute) {
     SlTwoSubalgebras slTwoSubalgebras(*semisimpleLieAlgebra.content);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo =
-    true;
+    false;
     slTwoSubalgebras.findSl2Subalgebras(
       *semisimpleLieAlgebra.content,
       slTwoSubalgebras,

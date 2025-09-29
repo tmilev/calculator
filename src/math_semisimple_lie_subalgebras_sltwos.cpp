@@ -1739,8 +1739,6 @@ void SlTwoSubalgebras::findSl2Subalgebras(
   output.getOwner().computeChevalleyConstants();
   output.rootSubalgebras.owner = &inputOwner;
   int64_t startTime = global.getElapsedMilliseconds();
-  global.comments << "<br>DEBUG: not computing inclusions! ";
-  output.rootSubalgebras.flagComputeInclusions = false;
   output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   output.millisecondsRootSubalgebraComputation =
   global.getElapsedMilliseconds() - startTime;
@@ -2035,8 +2033,8 @@ void SlTwoSubalgebras::computeCentralizers() {
     SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras.getElement(i);
     if (centralizerReport.tickAndWantReport()) {
       centralizerReport.reportStream()
-      << "Computing centralizer of subalgebra: A_1^"
-      << (currentSubalgebra.lengthHSquared / 2)
+      << "Computing centralizer of subalgebra: "
+      << (currentSubalgebra.toStringDynkinType())
       << " ("
       << i + 1
       << " out of "
@@ -2858,7 +2856,24 @@ bool CentralizerComputer::subsplitRootSpaces(
   onePair.negativeSpace = negativeRootSpace;
   onePair.positiveSpace = rootSpace;
   nonSplitPairs.addOnTop(onePair);
+  ProgressReport report;
   while (nonSplitPairs.size > 0) {
+    if (report.tickAndWantReport()) {
+      int dimension = 0;
+      for (const RootSpacePair& pair : nonSplitPairs) {
+        dimension += pair.positiveSpace.size;
+      }
+      report.reportStream()
+      << "Subsplitting "
+      << nonSplitPairs.size
+      << " root space pairs "
+      << " with total positive root space dimension "
+      << dimension
+      << "; total "
+      << fullySplitPairs.size
+      << " fully split positive dimension ";
+      report.report();
+    }
     RootSpacePair currentPair = nonSplitPairs.popLastObject();
     if (this->subsplitRootSpacesOnce(currentPair, nonSplitPairs)) {
       continue;
@@ -2872,7 +2887,17 @@ bool CentralizerComputer::subsplitRootSpaces(
     }
     fullySplitPairs.addOnTop(currentPair);
   }
-  for (const RootSpacePair& pair : fullySplitPairs) {
+  for (int i = 0; i < fullySplitPairs.size; i ++) {
+    const RootSpacePair& pair = fullySplitPairs[i];
+    if (report.tickAndWantReport()) {
+      report.reportStream()
+      << "Processing root space pair "
+      << i + 1
+      << " out of "
+      << fullySplitPairs.size
+      << ".";
+      report.report();
+    }
     if (
       !this->computeRootSpaceFromEAndF(
         startingEigenvalue, pair.positiveSpace[0], pair.negativeSpace[0]

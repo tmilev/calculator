@@ -336,9 +336,230 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
       List<Rational>({1, - 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
     }
   }
+  if (type == 'D' && rank == 8) {
+    if (dynkinIndex == 184) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 120) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 110) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 88) {
+      return
+      List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 63) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 60) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 40) {
+      return
+      List<Rational>({
+          1,
+          - 1,
+          1,
+          - 1,
+          1,
+          - 1,
+          1,
+          - 2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        });
+    }
+    if (dynkinIndex == 39) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 34) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 22) {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 14 && h == "(4, 6, 8, 10, 10, 10, 5, 5)") {
+      return List<Rational>({1, - 1, 1, - 1, 1, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 14 && h == "(4, 6, 8, 9, 10, 11, 6, 6)") {
+      return
+      List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, - 2, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 8) {
+      return List<Rational>({1, - 1, 1, - 1, 0, - 1, 1, - 2, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 7) {
+      return List<Rational>({1, - 1, 1, - 1, 1, 0, 0, - 2, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 6) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 5 && h == "(2, 4, 5, 6, 6, 6, 3, 3)") {
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 5 && h == "(2, 3, 4, 5, 6, 7, 4, 4)") {
+      return List<Rational>({1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0});
+    }
+  }
+  if (type == 'E' && rank == 8) {
+    if (dynkinIndex == 760) {
+      return List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, 1, 1, 0, 0});
+    }
+    if (dynkinIndex == 520) {
+      return List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 232) {
+      return
+      List<Rational>(
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0}
+      );
+    }
+    if (dynkinIndex == 231) {
+      return
+      List<Rational>({
+          1,
+          - 1,
+          2,
+          - 2,
+          3,
+          - 3,
+          4,
+          - 4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        });
+    }
+    if (dynkinIndex == 184) {
+      return
+      List<Rational>({
+          1,
+          - 1,
+          1,
+          - 1,
+          1,
+          - 1,
+          1,
+          - 1,
+          1,
+          - 1,
+          1,
+          - 1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        });
+    }
+    if (dynkinIndex == 159) {
+      return List<Rational>({1, - 1, 1, - 1, 1, - 1, 1, 1, 1, 1, 1,});
+    }
+    if (dynkinIndex == 88) {
+      return
+      List<Rational>({
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        });
+    }
+    if (dynkinIndex == 63) {
+      return
+      List<Rational>(
+        {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0}
+      );
+    }
+    if (dynkinIndex == 34) {
+      return
+      List<Rational>(
+        {1, - 1, 2, - 2, 3, - 3, 4, - 4, 1, - 1, 1, - 1, 1, - 1, 1, 1, 1}
+      );
+    }
+    if (dynkinIndex == 16) {
+      return
+      List<Rational>({1, 0, 2, - 2, 3, - 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 8) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 6) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 4) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 3) {
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 2) {
+      return List<Rational>({1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+  }
   return
   List<Rational>(
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
   );
 }
 
@@ -683,6 +904,106 @@ List<int> CentralizerComputer::hardCodedArbitraryCoefficientsCartan(
       return List<int>({1, 11, - 9, - 5, 6, 7, 2});
     }
   }
+  if (ambientSimpleType == 'D' && ambientRank == 8) {
+    if (dynkinIndexOfSlTwo == 110) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 60) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 30) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 29) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 28) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 14) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 12) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 11) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 10) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 9) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 6) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 5) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 4) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 3) {
+      return List<int>({1, 11, - 9, - 7, 5, 6, 2});
+    }
+    if (dynkinIndexOfSlTwo == 2) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+  }
+  if (ambientSimpleType == 'E' && ambientRank == 8) {
+    if (dynkinIndexOfSlTwo == 156) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 110) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 60) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 36) {
+      return List<int>({1, 11, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 35) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 29) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 28) {
+      return List<int>({1, 9, - 7, - 5, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 20) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 12) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 11) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 10) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 9) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 8) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 6) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 4) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 3) {
+      return List<int>({1, 11, - 9, - 7, 4, 3, 2});
+    }
+    if (dynkinIndexOfSlTwo == 2) {
+      return List<int>({- 7, 19, - 17, - 13, 11, 7, - 5, 3});
+    }
+  }
   return List<int>({});
 }
 
@@ -814,6 +1135,91 @@ List<int> CentralizerComputer::hardCodedCoefficientsToFormSemisimpleElement(
     }
     if (dynkinIndexOfSlTwo == 7) {
       return CentralizerComputer::onesAtPositions(List<int>({0, 1, 4}), 21);
+    }
+  }
+  if (ambientSimpleType == 'E' && ambientRank == 8) {
+    if (dynkinIndexOfSlTwo == 2) {
+      return
+      List<int>({
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          9,
+          13,
+          17,
+          25,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        });
     }
   }
   return List<int>({});

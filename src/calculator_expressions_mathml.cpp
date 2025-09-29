@@ -1,4 +1,5 @@
 #include "calculator_interface.h"
+#include "math_general_implementation.h" // IWYU pragma: keep: breaks g++ 'make optimize=1' build.
 
 template < >
 bool Expression::toMathMLBuiltIn<Rational>(

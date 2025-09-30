@@ -9563,7 +9563,7 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
     if (i >= this->unknownNegativeGenerators.size) {
       out
-      << "Cartan element "
+              << "Cartan element " << this->cartanElementsScaledToActByTwo[i].toString() << ": "
       << i + 1
       << ": unknown generators not computed.";
       return out.str();
@@ -9572,7 +9572,7 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
     << "<br><b>Cartan element "
     << i + 1
     << ": </b><br>"
-    << this->toStringSubSystemOfRank(i, i);
+    << this->toStringSubSystemOfRank(i, 1);
   }
   return out.str();
 }
@@ -9585,7 +9585,13 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystemOfRank(
   int firstExcludedIndex =
   startCartanGeneratorIndex + numberOfCartanGenerators;
   for (int i = startCartanGeneratorIndex; i < firstExcludedIndex; i ++) {
+    if (i >= this->unknownNegativeGenerators.size) {
+      return "Unknown negative generators not computed. ";
+    }
     for (int j = startCartanGeneratorIndex; j < firstExcludedIndex; j ++) {
+      if (j >= this->unknownNegativeGenerators.size) {
+        return "Unknown positive generators not computed. ";
+      }
       this->prepareSystemSerreRelationsForIndexPair(i, j, system);
     }
   }

@@ -1590,9 +1590,13 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(
     ownerSemisimple.content->weylGroup.dynkinType
   );
-  subalgebras.subalgebrasNonEmbedded =
-  &calculator.objectContainer.semisimpleLieAlgebras;
-  subalgebras.owner = ownerSemisimple.content;
+  subalgebras.initHookUpPointers(
+    *ownerSemisimple.content,
+    &calculator.objectContainer.algebraicClosure,
+    &calculator.objectContainer.algebraicClosuresForLargeComputations,
+    &calculator.objectContainer.semisimpleLieAlgebras,
+    &calculator.objectContainer.slTwoSubalgebras
+  );
   reportStream << " Initializing data structures... ";
   report.report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
@@ -1608,7 +1612,6 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   subalgebras.flagComputePairingTable = false;
   subalgebras.flagComputeNilradicals = false;
   subalgebras.millisecondsComputationStart = global.getElapsedMilliseconds();
-  subalgebras.ownerField = &calculator.objectContainer.algebraicClosure;
   reportStream
   << " done. <br>Total subalgebras: "
   << subalgebrasElement.size() - 1

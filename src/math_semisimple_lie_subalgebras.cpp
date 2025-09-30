@@ -1352,6 +1352,8 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
   STACK_TRACE(
     "SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand"
   );
+  // Computing inclusions between sl(2)'s is slow and not really needed.
+  this->slTwoSubalgebras.rootSubalgebras.flagComputeInclusions = false;
   this->slTwoSubalgebras.findSl2Subalgebras(
     this->getSemisimpleOwner(),
     this->slTwoSubalgebras,
@@ -4389,24 +4391,25 @@ void CandidateSemisimpleSubalgebra::prepareSystemCentralizerCommutingRelations(
 }
 
 void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
-  int leftIndex,
-  int rightIndex,
+  int negativeGeneratorIndex,
+  int positiveGeneratorIndex,
   List<Polynomial<AlgebraicNumber> >& outputSystem
 ) const {
   STACK_TRACE(
     "CandidateSemisimpleSubalgebra::"
-    "prepareSystemSerreRelationsForIndices"
+    "prepareSystemSerreRelationsForIndexPair"
   );
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero;
-  if (leftIndex == rightIndex) {
+  if (positiveGeneratorIndex == negativeGeneratorIndex) {
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > goalValue;
     Vector<Polynomial<Rational> > desiredHPart;
-    desiredHPart = this->cartanElementsScaledToActByTwo[leftIndex];
+    desiredHPart =
+    this->cartanElementsScaledToActByTwo[positiveGeneratorIndex];
     // <-implicit type conversion here!
     goalValue.makeCartanGenerator(desiredHPart, *this->owner->owner);
     this->getAmbientSemisimpleLieAlgebra().lieBracket(
-      this->unknownPositiveGenerators[leftIndex],
-      this->unknownNegativeGenerators[leftIndex],
+      this->unknownPositiveGenerators[positiveGeneratorIndex],
+      this->unknownNegativeGenerators[negativeGeneratorIndex],
       mustBeZero
     );
     mustBeZero -= goalValue;
@@ -4420,13 +4423,17 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
     this->indexNonEmbeddedMeNonStandardCartan
   ];
   this->getAmbientSemisimpleLieAlgebra().lieBracket(
-    this->unknownNegativeGenerators[leftIndex],
-    this->unknownPositiveGenerators[rightIndex],
+    this->unknownNegativeGenerators[positiveGeneratorIndex],
+    this->unknownPositiveGenerators[negativeGeneratorIndex],
     mustBeZero
   );
   this->addToSystem(mustBeZero, outputSystem);
-  positiveRoot1.makeEi(this->weylNonEmbedded->getDimension(), leftIndex);
-  positiveRoot2.makeEi(this->weylNonEmbedded->getDimension(), rightIndex);
+  positiveRoot1.makeEi(
+    this->weylNonEmbedded->getDimension(), positiveGeneratorIndex
+  );
+  positiveRoot2.makeEi(
+    this->weylNonEmbedded->getDimension(), negativeGeneratorIndex
+  );
   int alphaStringLength = - 1;
   if (
     !nonEmbeddedMe.getMaxQForWhichBetaMinusQAlphaIsARoot(
@@ -4442,18 +4449,22 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
     << global.fatal;
   }
   // Positive-positive generator Serre relations
-  mustBeZero = this->unknownPositiveGenerators[rightIndex];
+  mustBeZero = this->unknownPositiveGenerators[negativeGeneratorIndex];
   for (int k = 0; k < alphaStringLength + 1; k ++) {
     this->getAmbientSemisimpleLieAlgebra().lieBracket(
-      this->unknownPositiveGenerators[leftIndex], mustBeZero, mustBeZero
+      this->unknownPositiveGenerators[positiveGeneratorIndex],
+      mustBeZero,
+      mustBeZero
     );
   }
   this->addToSystem(mustBeZero, outputSystem);
   // Negative-negative generator Serre relations
-  mustBeZero = this->unknownNegativeGenerators[rightIndex];
+  mustBeZero = this->unknownNegativeGenerators[negativeGeneratorIndex];
   for (int k = 0; k < alphaStringLength + 1; k ++) {
     this->getAmbientSemisimpleLieAlgebra().lieBracket(
-      this->unknownNegativeGenerators[rightIndex], mustBeZero, mustBeZero
+      this->unknownNegativeGenerators[negativeGeneratorIndex],
+      mustBeZero,
+      mustBeZero
     );
   }
   this->addToSystem(mustBeZero, outputSystem);
@@ -9550,11 +9561,18 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   std::stringstream out;
   out << " <br><br><b>sl(2)-subsystems:</b><br>";
   for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
+    if (i >= this->unknownNegativeGenerators.size) {
+      out
+      << "Cartan element "
+      << i + 1
+      << ": unknown generators not computed.";
+      return out.str();
+    }
     out
     << "<br><b>Cartan element "
     << i + 1
     << ": </b><br>"
-    << this->toStringSubSystemOfRank(i, 1);
+    << this->toStringSubSystemOfRank(i, i);
   }
   return out.str();
 }

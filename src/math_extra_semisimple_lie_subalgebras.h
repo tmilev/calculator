@@ -459,8 +459,8 @@ public:
   );
   void prepareSystemCentralizerCommutingRelations();
   void prepareSystemSerreRelationsForIndexPair(
-    int leftIndex,
-    int rightIndex,
+    int negativeGeneratorIndex,
+    int positiveGeneratorIndex,
     List<Polynomial<AlgebraicNumber> >& outputSystem
   ) const;
   void prepareSystemSerreRelations();

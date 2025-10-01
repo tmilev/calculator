@@ -1451,12 +1451,14 @@ int WebWorker::processFolder() {
   std::stringstream outPage;
   std::stringstream outError;
   outPage << "<!DOCTYPE html><body>";
+  bool shouldIncludeDirectoryStem = false;
   if (this->relativePhysicalFileName.size() > 0) {
     if (
       this->relativePhysicalFileName[this->relativePhysicalFileName.size() - 1]
       !=
       '/'
     ) {
+      shouldIncludeDirectoryStem = true;
       this->relativePhysicalFileName.push_back('/');
     }
   }
@@ -1504,17 +1506,29 @@ int WebWorker::processFolder() {
   << "<hr>";
   List<std::string> folderLinksSanitized;
   List<std::string> fileLinksSanitized;
+  List<std::string> filenameSplitter;
+  StringRoutines::splitExcludeDelimiter(
+    this->relativePhysicalFileName, '/', filenameSplitter
+  );
+  std::string stem = "";
+  if (filenameSplitter.size > 0) {
+    stem = *filenameSplitter.lastObject();
+  }
   for (int i = 0; i < fileNames.size; i ++) {
+    std::string anchorLink =
+    HtmlRoutines::convertStringToURLString(fileNames[i], false);
+    if (shouldIncludeDirectoryStem) {
+      anchorLink =
+      HtmlRoutines::convertStringToURLString(stem, false) + "/" + anchorLink;
+    }
     std::stringstream currentStream;
     bool isDir = (fileTypes[i] == ".d");
-    currentStream
-    << "<a href=\""
-    << HtmlRoutines::convertStringToURLString(fileNames[i], false);
+    currentStream << "<a href='" << anchorLink;
     if (isDir) {
       currentStream << "/";
     }
     currentStream
-    << "\">"
+    << "'>"
     << HtmlRoutines::convertStringToHtmlString(fileNames[i], false);
     if (isDir) {
       currentStream << "/";

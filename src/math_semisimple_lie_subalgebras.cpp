@@ -9563,7 +9563,9 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
     if (i >= this->unknownNegativeGenerators.size) {
       out
-              << "Cartan element " << this->cartanElementsScaledToActByTwo[i].toString() << ": "
+      << "Cartan element "
+      << this->cartanElementsScaledToActByTwo[i].toString()
+      << ": "
       << i + 1
       << ": unknown generators not computed.";
       return out.str();

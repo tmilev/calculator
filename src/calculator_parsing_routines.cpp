@@ -3538,6 +3538,16 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
+  if (
+    secondToLastS == "\\\\" && (
+      thirdToLastS == "," || thirdToLastS == "+" || thirdToLastS == "-"
+    )
+  ) {
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName = "[Rule: remove \\\\ from X\\\\]";
+    }
+    return this->popBelowStackTop();
+  }
   if (secondToLastS == "\\int" && lastS == "Expression") {
     return this->replaceOXbyEX();
   }

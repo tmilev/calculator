@@ -217,12 +217,30 @@ toStringPolynomialBasisStatusShort() {
   STACK_TRACE("GroebnerBasisComputation::toStringPolynomialBasisStatusShort");
   std::stringstream out;
   out << "The basis follows.";
+  int charactersSoFar = 0;
+  int maximumDataCharacters = 0;
   for (int i = 0; i < this->basis.size; i ++) {
-    out << "<br>" << this->basis[i].toString(&this->format);
+    std::string next = this->basis[i].toString(&this->format);
+    charactersSoFar += next.size();
+    if (charactersSoFar > maximumDataCharacters) {
+      out << "<br>... printout too large, suppressing the rest.";
+      break;
+    }
+    out << "<br>" << next;
   }
   out << "<br>There are " << this->basisCandidates.size << " candidates. ";
+  if (charactersSoFar > maximumDataCharacters) {
+    out << "<br>Printout too large, suppressing. ";
+    return out.str();
+  }
   for (int i = 0; i < this->basisCandidates.size; i ++) {
-    out << "<br>" << this->basisCandidates[i].toString(&this->format);
+    std::string next = this->basisCandidates[i].toString(&this->format);
+    charactersSoFar += next.size();
+    if (charactersSoFar > maximumDataCharacters) {
+      out << "<br>... printout too large, suppressing the rest.";
+      break;
+    }
+    out << "<br>" << next;
   }
   return out.str();
 }
@@ -483,6 +501,32 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
 }
 
 template <class Coefficient>
+std::string GroebnerBasisComputation<Coefficient>::toStringBasisShort() const {
+  FormatExpressions formatCopy;
+  formatCopy = this->format;
+  std::stringstream out;
+  if (this->basis.size > 3) {
+    out
+    << this->basis.size
+    << " basis elements total: "
+    << this->basis.size
+    << ":\n<br>\n";
+  }
+  int totalCharacters = 0;
+  int maximumCharacters = 500;
+  for (const BasisElement& basisElement : this->basis) {
+    std::string next = basisElement.toStringShort(&formatCopy);
+    totalCharacters += next.size();
+    if (totalCharacters > maximumCharacters) {
+      out << "\n<br>\n... [output too large]";
+      break;
+    }
+    out << "\n<br>\n" << next;
+  }
+  return out.str();
+}
+
+template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::
 remainderDivisionByBasisFailureAllowed(
   const Polynomial<Coefficient>& input,
@@ -509,10 +553,10 @@ remainderDivisionByBasisFailureAllowed(
   if (this->flagDoProgressReport) {
     std::stringstream reportStream;
     reportStream
-    << "Computing remainder of division of "
-    << input.toString(&this->format)
-    << " by "
-    << this->basis.toString(&this->format);
+    << "Computing remainder of division of:\n<br>\n"
+    << input.toStringIfShort(&this->format)
+    << "\n<br>by:\n<br>\n"
+    << this->toStringBasisShort();
     reportHeader.report(reportStream.str());
   }
   Polynomial<Coefficient> currentRemainder = input;
@@ -557,9 +601,7 @@ remainderDivisionByBasisFailureAllowed(
       << "<br>"
       << outputRemainder.size()
       << " monomials in the final output remainder.";
-      out
-      << "<br>Current basis: "
-      << this->basis.toStringCommaDelimited(&this->format);
+      out << "<br>Current basis: " << this->toStringBasisShort();
       out
       << "<br>Current remainder: "
       << currentRemainder.toString(&this->format);
@@ -648,6 +690,19 @@ std::string GroebnerBasisComputation<Coefficient>::BasisElement::toString(
   << this->leadingMonomial.toString(format)
   << "]] "
   << this->element.toString(format);
+  return out.str();
+}
+
+template <class Coefficient>
+std::string GroebnerBasisComputation<Coefficient>::BasisElement::toStringShort(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out
+  << "[["
+  << this->leadingMonomial.toString(format)
+  << "]] "
+  << this->element.toStringIfShort(format);
   return out.str();
 }
 
@@ -1542,10 +1597,8 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     << "<br>Number of remaining variables to solve for: "
     << this->numberOfVariablesToSolveForAfterReduction;
     out
-    << "<br>The gaussian elimination is: "
-    << this->toStringCalculatorInputFromSystem(
-      this->gaussianEliminatedSystem
-    );
+    << "<br>Gaussian-eliminated system summary: "
+    << this->toStringPolynomialSystemSummary(this->gaussianEliminatedSystem);
     report2.report(out.str());
   }
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;
@@ -1633,6 +1686,20 @@ std::string GroebnerBasisComputation<Coefficient>::toStringDivision(
   << toBeDivided.toString()
   << "<br>by:<br>"
   << this->basis.toStringCommaDelimited();
+  return out.str();
+}
+
+template <class Coefficient>
+std::string PolynomialSystem<Coefficient>::toStringPolynomialSystemSummary(
+  const List<Polynomial<Coefficient> >& inputSystem
+) const {
+  std::stringstream out;
+  out << "Total equations: " << inputSystem.size;
+  int totalMonomials = 0;
+  for (const Polynomial<Coefficient>& equation : inputSystem) {
+    totalMonomials += equation.size();
+  }
+  out << " with " << totalMonomials << " monomials total.";
   return out.str();
 }
 

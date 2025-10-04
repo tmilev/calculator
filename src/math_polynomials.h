@@ -1099,6 +1099,7 @@ public:
     MonomialPolynomial leadingMonomial;
     Coefficient leadingCoefficient;
     std::string toString(FormatExpressions* format) const;
+    std::string toStringShort(FormatExpressions* format) const;
   };
 
   List<BasisElement> basis;
@@ -1174,6 +1175,7 @@ public:
   std::string toStringLimits() const;
   std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
   std::string toStringStatusGroebnerBasisTransformation();
+  std::string toStringBasisShort() const;
 };
 
 template <class Coefficient>
@@ -1220,6 +1222,9 @@ public:
   ArbitrarySubstitutionsProvider<Coefficient> substitutionsProvider;
   PolynomialSystem();
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
+  std::string toStringPolynomialSystemSummary(
+    const List<Polynomial<Coefficient> >& inputSystem
+  ) const;
   std::string toStringCalculatorInputFromSystem(
     const List<Polynomial<Coefficient> >& inputSystem
   ) const;

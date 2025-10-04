@@ -73,6 +73,7 @@ public:
   std::string toString(
     FormatExpressions* format = nullptr, int* outputNumberOfLines = nullptr
   ) const;
+  std::string toStringIfShort(FormatExpressions* format = nullptr) const;
   // Same as toString but uses a default alphabet "x", "y", ...
   // for the first few variables.
   std::string toStringPretty() const {
@@ -1455,6 +1456,26 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     }
   }
   out << "</mrow>";
+  return out.str();
+}
+
+template <class TemplateMonomial, class Coefficient>
+std::string LinearCombination<TemplateMonomial, Coefficient>::toStringIfShort(
+  FormatExpressions* format
+) const {
+  STACK_TRACE("LinearCombination::toStringIfShort");
+  if (this->size() < 25) {
+    return this->toString(format);
+  }
+  std::stringstream out;
+  TemplateMonomial leadingMonomial;
+  Coefficient leadingCoefficient;
+  this->getIndexLeadingMonomial(&leadingMonomial, &leadingCoefficient);
+  out
+  << this->getTermString(leadingCoefficient, leadingMonomial, format, "")
+  << "+ ... [large linear combination with "
+  << this->size()
+  << " monomials]. ";
   return out.str();
 }
 

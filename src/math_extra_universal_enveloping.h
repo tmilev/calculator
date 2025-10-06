@@ -8,9 +8,9 @@ template <class Coefficient>
 class MonomialUniversalEnveloping: public MonomialTensor<Coefficient> {
 private:
 public:
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   SemisimpleLieAlgebra* owner;
@@ -211,7 +211,7 @@ public:
       logStream
     );
   }
-  bool needsBracketForMultiplication() {
+  bool needsBracketForMultiplication() const {
     return this->size > 1;
   }
   bool applyMinusTransposeAutoOnMe();

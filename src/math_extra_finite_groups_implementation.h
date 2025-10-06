@@ -8,7 +8,7 @@
 
 template <class Coefficient>
 std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   std::stringstream out;
   out << "Number of generators: " << this->generators.size;
@@ -465,7 +465,7 @@ computeCCRepresentativesPreimages() {
 
 template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::toStringElements(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   STACK_TRACE("FiniteGroup::toStringElements");
   (void) format;
@@ -486,14 +486,14 @@ std::string FiniteGroup<elementSomeGroup>::toStringElements(
 
 template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) {
   STACK_TRACE("FiniteGroup::toStringConjugacyClasses");
   std::stringstream out;
   out << "<br>Size: " << this->getSize().toString() << "\n";
   FormatExpressions charPolyFormat;
   charPolyFormat.polynomialAlphabet.setSize(1);
-  charPolyFormat.polynomialAlphabet[0] = VariableLetter("q", "q");
+  charPolyFormat.polynomialAlphabet[0] = MathMLAndLatex("q", "q");
   if (this->conjugacyClassCount() > 0) {
     out
     << "<br>"
@@ -2416,7 +2416,7 @@ const {
 
 template <class someFiniteGroup, typename Coefficient>
 std::string ClassFunction<someFiniteGroup, Coefficient>::toString(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   (void) format;
   if (this->G == 0) {
@@ -2441,7 +2441,7 @@ std::string ClassFunction<someFiniteGroup, Coefficient>::toString(
 
 template <class someFiniteGroup, typename Coefficient>
 std::string ClassFunction<someFiniteGroup, Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) format;
   (void) outputProperties;

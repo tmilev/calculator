@@ -66,8 +66,8 @@ public:
   void subtractSmallerPositive(const LargeIntegerUnsigned& x);
   void toString(std::string& output) const;
   void toStringLargeElementDecimal(std::string& output) const;
-  std::string toMathML() const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(const FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toStringAbbreviate(FormatExpressions* format = nullptr) const;
   void dividePositive(
     const LargeIntegerUnsigned& divisor,
@@ -272,14 +272,14 @@ public:
   }
   void multiplyByInt(int x);
   void toString(std::string& output) const;
-  std::string toString(FormatExpressions* format = nullptr) const {
+  std::string toString(const FormatExpressions* format = nullptr) const {
     (void) format;
     std::string currentString;
     this->toString(currentString);
     return currentString;
   }
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   bool isIntegerFittingInInt(int* whichInt);
@@ -303,7 +303,7 @@ public:
   bool tryIsPower(
     bool& outputIsPower, LargeInteger& outputBase, int& outputPower
   ) const;
-  bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
+  bool needsParenthesisForMultiplication(const FormatExpressions* unused) const {
     (void) unused;
     return false;
   }
@@ -566,10 +566,9 @@ public:
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
     return this->isNegative();
   }
-  bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
+  bool needsParenthesisForMultiplication(const FormatExpressions* unused) const {
     (void) unused;
     return false;
-    // return this->isNegative();
   }
   bool getSquareRootIfRational(Rational& output) const;
   // Scales a vector of rationals so as to make all coordinates
@@ -700,10 +699,10 @@ public:
     this->simplify();
   }
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;
   std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr)
   const;

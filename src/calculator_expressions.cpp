@@ -13,8 +13,9 @@
 // here and nowhere else (discovered through extremely painful
 // experimentation).
 template < >
-List<Expression>::Comparator* FormatExpressions::getMonomialOrder<Expression>()
-{
+const List<Expression>::Comparator* FormatExpressions::getMonomialOrder<
+  Expression
+>() const {
   return nullptr;
 }
 
@@ -5585,7 +5586,7 @@ bool Expression::toStringWithCompositeHandler(
 
 bool Expression::toStringWithUnfoldedCommandEnclosures(
   std::stringstream& out,
-  FormatExpressions* format,
+  const FormatExpressions* format,
   Expression* startingExpression,
   JSData* outputJS
 ) const {
@@ -5623,7 +5624,7 @@ bool Expression::toStringWithUnfoldedCommandEnclosures(
 }
 
 std::string Expression::toString(
-  FormatExpressions* format,
+  const FormatExpressions* format,
   Expression* startingExpression,
   bool unfoldCommandEnclosures,
   JSData* outputJS
@@ -5632,7 +5633,7 @@ std::string Expression::toString(
   MemorySaving<FormatExpressions> formatContainer;
   if (format == nullptr) {
     format = &formatContainer.getElement();
-    format->flagUseQuotes = false;
+    formatContainer.getElement().flagUseQuotes = false;
   }
   if (this->owner != nullptr) {
     if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
@@ -5658,34 +5659,34 @@ std::string Expression::toString(
   if (notationIndex != - 1) {
     return owner->objectContainer.expressionNotation[notationIndex];
   }
+  FormatExpressions formatCopy;
+  if (format != nullptr) {
+    formatCopy = *format;
+  }
   if (
     !this->isOfType<std::string>() &&
     !this->startsWith(this->owner->opCommandSequence())
   ) {
-    if (startingExpression == nullptr) {
-      format->flagUseQuotes = true;
-    } else {
-      format->flagUseQuotes = false;
-    }
+    formatCopy.flagUseQuotes = (startingExpression == nullptr);
   }
   if (outputJS != nullptr) {
     outputJS->reset();
   }
-  if (this->toStringData(out, format)) {} else if (
-    this->toStringWithAtomHandler(out, format)
-  ) {} else if (this->toStringWithCompositeHandler(out, format, nullptr)) {}
- else if (
-    this->toStringEndStatement(out, startingExpression, outputJS, format)
+  if (this->toStringData(out, &formatCopy)) {} else if (
+    this->toStringWithAtomHandler(out, &formatCopy)
+  ) {} else if (this->toStringWithCompositeHandler(out, &formatCopy, nullptr)) {
+  } else if (
+    this->toStringEndStatement(out, startingExpression, outputJS, &formatCopy)
   ) {} else if (this->size() == 1) {
-    out << (*this)[0].toString(format);
-  } else if (this->toStringGeneral(out, format)) {} else {
+    out << (*this)[0].toString(&formatCopy);
+  } else if (this->toStringGeneral(out, &formatCopy)) {} else {
     // <-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)";
   }
   if (startingExpression != nullptr) {
     return
     this->toStringWithStartingExpression(
-      format, startingExpression, out, outputJS
+      &formatCopy, startingExpression, out, outputJS
     );
   }
   if (outputJS != nullptr) {

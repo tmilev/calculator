@@ -619,7 +619,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   FormatExpressions format;
   context.getFormat(format);
   HashedList<std::string> variableNames;
-  for (const VariableLetter& variable : format.polynomialAlphabet) {
+  for (const MathMLAndLatex& variable : format.polynomialAlphabet) {
     variableNames.addOnTopNoRepetition(variable.latexLetter);
   }
   for (char i = 0; i < 26; i ++) {
@@ -628,7 +628,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
     currentString = currentLetter;
     if (!variableNames.contains(currentString)) {
       format.polynomialAlphabet.addOnTop(
-        VariableLetter(currentString, currentString)
+        MathMLAndLatex(currentString, currentString)
       );
     }
   }

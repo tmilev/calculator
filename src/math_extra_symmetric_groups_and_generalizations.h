@@ -304,8 +304,8 @@ public:
   }
   template <typename somestream>
   somestream& intoStream(somestream& out) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toMathML(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
+  std::string toMathML(const FormatExpressions* format = nullptr) const;
   friend std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
   {
     return data.intoStream(out);
@@ -404,7 +404,7 @@ public:
   bool isIdentity() const {
     return this->k.isIdentity() && this->h.isIdentity();
   }
-  std::string toString(FormatExpressions* format = nullptr) const {
+  std::string toString(const FormatExpressions* format = nullptr) const {
     std::stringstream out;
     char leftDelimiter = '[';
     char rightDelimiter = ']';
@@ -413,13 +413,13 @@ public:
       rightDelimiter = ')';
     }
     out << leftDelimiter;
-    out << h.toString(format);
+    out << this->h.toString(format);
     out << ',';
-    out << k.toString(format);
+    out << this->k.toString(format);
     out << rightDelimiter;
     return out.str();
   }
-  std::string toMathML(FormatExpressions* format = nullptr) const {
+  std::string toMathML(const FormatExpressions* format = nullptr) const {
     std::stringstream out;
     out << "<mrow>" << MathML::leftParenthesis;
     out << h.toMathML(format);
@@ -616,13 +616,12 @@ public:
     }
     return false;
   }
-  std::string toMathML(FormatExpressions* format = nullptr) const {
+  std::string toMathML(const FormatExpressions* format = nullptr) const {
     (void) format;
     std::stringstream out;
     out << "<mrow>";
     for (int i = 0; i < this->bits.size; i ++) {
       out << "<mn>" << (this->bits[i] ? '1' : '0') << "</mn>";
-      // parentheses are needed because << binds like a bitwise operator
       if (i != this->bits.size - 1) {
         out << "<mo>,</mo>";
       }
@@ -630,17 +629,15 @@ public:
     out << "</mrow>";
     return out.str();
   }
-  std::string toString(FormatExpressions* format = nullptr) const {
+  std::string toString(const FormatExpressions* format = nullptr) const {
     std::stringstream out;
     if (format == nullptr) {
       for (int i = 0; i < this->bits.size; i ++) {
-        // parentheses are needed because << binds like a bitwise operator
         out << (this->bits[i] ? '1' : '0');
       }
     } else {
       for (int i = 0; i < this->bits.size; i ++) {
         out << (this->bits[i] ? '1' : '0');
-        // parentheses are needed because << binds like a bitwise operator
         if (i != this->bits.size - 1) {
           out << ",";
         }

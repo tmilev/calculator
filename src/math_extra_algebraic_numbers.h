@@ -75,7 +75,8 @@ public:
   // coefficients.
   AlgebraicNumber getDenominator() const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
-  bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
+  bool needsParenthesisForMultiplication(const FormatExpressions* unused)
+  const;
   bool checkConsistency() const;
   bool checkNonZeroOwner() const;
   bool checkCommonOwner(const AlgebraicNumber& other) const;
@@ -189,12 +190,12 @@ public:
     this->operator*=(Rational(other));
   }
   bool operator>(const AlgebraicNumber& other) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
-  std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
+  std::string toMathMLFinal(const FormatExpressions* format = nullptr) const;
   std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
   class Test {
   public:
@@ -237,7 +238,7 @@ public:
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInteger> quadraticRadicals;
   List<LargeInteger> quadraticRadicalsCorrespondingToBasisElements;
-  List<VariableLetter> displayNamesBasisElements;
+  List<MathMLAndLatex> displayNamesBasisElements;
   void injectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
   void appendAdditiveEiBasis();
   void assignDefaultBasisDisplayNames();

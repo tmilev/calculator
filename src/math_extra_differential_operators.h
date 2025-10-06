@@ -38,7 +38,7 @@ public:
     }
     return this->matrixMonomial > other.matrixMonomial;
   }
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
 };
 
 template <class Coefficient>
@@ -46,7 +46,7 @@ class QuasiDifferentialOperator: public LinearCombination<
   QuasiDifferentialMononomial, Coefficient
 > {
 public:
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   void generateBasisLieAlgebra(
     List<QuasiDifferentialOperator<Coefficient> >& inputElements,
     FormatExpressions* format = nullptr
@@ -207,7 +207,7 @@ void QuasiDifferentialOperator<Coefficient>::operator*=(
 
 template <class Coefficient>
 std::string QuasiDifferentialOperator<Coefficient>::toString(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   bool combineWeylPart = true;
   if (format != nullptr) {

@@ -21,9 +21,8 @@
 #include <vector>
 
 template < >
-List<Polynomial<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
-  Polynomial<Rational>
->() {
+const List<Polynomial<Rational> >::Comparator* FormatExpressions::
+getMonomialOrder<Polynomial<Rational> >() const {
   return nullptr;
 }
 

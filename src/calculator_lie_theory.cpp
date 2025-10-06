@@ -114,7 +114,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   << "-parabolic subalgebra.}\\\\<br>";
   List<ModuleSSalgebra<RationalFraction<Rational> > > modules;
   modules.setSize(highestWeights.size);
-  Vector<RationalFraction<Rational> > tempV;
+  Vector<RationalFraction<Rational> > vector;
   int totalStartingVariables = hwContext.numberOfVariables();
   std::stringstream reportfourierTransformedCalculatorCommands;
   std::stringstream reportCalculatorCommands;
@@ -126,11 +126,11 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   double currentTime = 0;
   for (int i = 0; i < highestWeights.size; i ++) {
     ModuleSSalgebra<RationalFraction<Rational> >& currentModule = modules[i];
-    tempV = highestWeights[i];
+    vector = highestWeights[i];
     if (
       !currentModule.makeFromHW(
         semisimpleLieAlgebra,
-        tempV,
+        vector,
         selInducing,
         RationalFraction<Rational>(Rational::one()),
         RationalFraction<Rational>(Rational::zero()),
@@ -197,10 +197,10 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         << "}";
         if (
           weylFormat.polynomialAlphabet.contains(
-            VariableLetter(currentStream2.str(), currentStream2.str())
+            MathMLAndLatex(currentStream2.str(), currentStream2.str())
           ) ||
           weylFormat.polynomialAlphabet.contains(
-            VariableLetter(currentStream3.str(), currentStream3.str())
+            MathMLAndLatex(currentStream3.str(), currentStream3.str())
           )
         ) {
           return
@@ -1044,7 +1044,7 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   }
   FormatExpressions format;
   format.polynomialAlphabet.setSize(1);
-  format.polynomialAlphabet[0] = VariableLetter("q", "q");
+  format.polynomialAlphabet[0] = MathMLAndLatex("q", "q");
   out
   << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
@@ -1137,8 +1137,10 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
 ) {
   STACK_TRACE("CalculatorLieTheory::printB3G2branchingIntermediate");
   (void) input;
-  std::stringstream out, timeReport;
-  std::stringstream latexTable, latexTable2;
+  std::stringstream out;
+  std::stringstream timeReport;
+  std::stringstream latexTable;
+  std::stringstream latexTable2;
   bool isFD = (g2inB3Data.inducing.cardinalitySelection == 0);
   if (isFD) {
     out
@@ -1252,7 +1254,9 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
         out << "<tr>";
         if (k == 0 && counter == 0) {
           g2inB3Data.format.customPlusSign = "\\oplus ";
-          g2inB3Data.format.fundamentalWeightLetter = "\\omega";
+          g2inB3Data.format.fundamentalWeightLetter.latexLetter = "\\omega";
+          g2inB3Data.format.fundamentalWeightLetter.mathMLLetter =
+          "<mi>&omega;</mi>";
           out
           << "<td rowspan =\""
           << numEigenVectors.toString()
@@ -1260,12 +1264,13 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           << g2inB3Data.ambientCharacter.toString(&g2inB3Data.format)
           << "</td> ";
           if (!isFD) {
-            out << "<td rowspan =\"" << numEigenVectors.toString() << "\">";
+            out << "<td rowspan='" << numEigenVectors.toString() << "'>";
             for (
               int charcounter1 = 0; charcounter1 < g2inB3Data.
               characterDifferences.size; charcounter1 ++
             ) {
-              std::string currentString = g2inB3Data.format.customPlusSign;
+              std::string currentString =
+              g2inB3Data.format.customPlusSign.latexLetter;
               g2inB3Data.format.customPlusSign = "";
               out
               << "A_{"
@@ -1310,7 +1315,9 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
         }
         latexTable << " & ";
         if (counter == 0) {
-          g2inB3Data.format.fundamentalWeightLetter = "\\psi";
+          g2inB3Data.format.fundamentalWeightLetter.latexLetter = "\\psi";
+          g2inB3Data.format.fundamentalWeightLetter.mathMLLetter =
+          "<mi>&psi;</mi>";
           g2inB3Data.format.customPlusSign = "\\oplus ";
           out
           << "<td rowspan =\""
@@ -1573,7 +1580,9 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     character.splitCharacterOverReductiveSubalgebra(
       nullptr, outputChar, g3InB3Data
     );
-    g3InB3Data.format.fundamentalWeightLetter = "\\omega";
+    g3InB3Data.format.fundamentalWeightLetter.latexLetter = "\\omega";
+    g3InB3Data.format.fundamentalWeightLetter.mathMLLetter =
+    "<mi>&omega;</mi>";
     out << "<tr><td> " << character.toString(&g3InB3Data.format) << "</td> ";
     Vector<RationalFraction<Rational> > simpleCoordinates;
     simpleCoordinates =
@@ -2165,8 +2174,10 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   FormatExpressions currentFormat;
   currentFormat.maximumLineLength = 60;
   currentFormat.flagUseLatex = true;
-  currentFormat.fundamentalWeightLetter = "\\psi";
-  currentFormat.customPlusSign = "\\oplus ";
+  currentFormat.fundamentalWeightLetter.latexLetter = "\\psi";
+  currentFormat.fundamentalWeightLetter.mathMLLetter = "<mi>&psi;</mi>";
+  currentFormat.customPlusSign.latexLetter = "\\oplus ";
+  currentFormat.customPlusSign.mathMLLetter = "<mo>&oplus;</mo>";
   hwContext.getFormat(currentFormat);
   out
   << "<br>Character of finite dimensional module:"
@@ -4855,7 +4866,8 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     out
     << "<table><tr><td>Element</td><td>weight simple coords</td>"
     << "<td>weight fund. coords</td></tr>";
-    format.fundamentalWeightLetter = "\\omega";
+    format.fundamentalWeightLetter.latexLetter = "\\omega";
+    format.fundamentalWeightLetter.mathMLLetter = "<mi>&omega;</mi>";
     for (
       int i = 0; i < subgroup.representativesQuotientAmbientOrder.size; i ++
     ) {
@@ -4894,7 +4906,9 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
         highestWeightSimpleCoordinates
       );
       std::string fundamentalString =
-      root.toStringLetterFormat(format.fundamentalWeightLetter, &format);
+      root.toStringLetterFormat(
+        format.fundamentalWeightLetter.latexLetter, &format
+      );
       out
       << "<td>"
       << (
@@ -5025,8 +5039,11 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   Weight<RationalFraction<Rational> > monomial;
   character.makeZero();
   FormatExpressions formatChars;
-  formatChars.finiteDimensionalRepresentationLetter = "L";
-  formatChars.fundamentalWeightLetter = "\\omega";
+  formatChars.finiteDimensionalRepresentationLetter.latexLetter = "L";
+  formatChars.finiteDimensionalRepresentationLetter.mathMLLetter =
+  "<mi>L</mi>";
+  formatChars.fundamentalWeightLetter.latexLetter = "\\omega";
+  formatChars.fundamentalWeightLetter.mathMLLetter = "<mi>omega</mi>";
   formatChars.flagUseLatex = true;
   subgroup.ambientWeyl = kazhdanLusztigPolynomials.weylGroup;
   for (int i = 0; i < weylGroupElements.size; i ++) {

@@ -909,14 +909,14 @@ public:
   ) const;
   std::string toStringTreeHtml(int depth) const;
   std::string toString(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     Expression* startingExpression = nullptr,
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const;
   bool toStringWithUnfoldedCommandEnclosures(
     std::stringstream& out,
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     Expression* startingExpression = nullptr,
     JSData* outputJS = nullptr
   ) const;

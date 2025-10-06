@@ -44,9 +44,9 @@ public:
   ClassFunction operator-(const ClassFunction& other) const;
   ClassFunction reducedWithCharacters(const List<ClassFunction>& chars);
   Coefficient& operator[](int i) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   static unsigned int hashFunction(const ClassFunction& input);
@@ -211,7 +211,7 @@ public:
     bool flagElementsComputed;
     bool flagRepresentativeWordComputed;
     List<int> representativeWord;
-    std::string toString(FormatExpressions* format = nullptr) const {
+    std::string toString(const FormatExpressions* format = nullptr) const {
       (void) format;
       std::stringstream out;
       out << "Conj. class size: " << this->size.toString();
@@ -287,7 +287,7 @@ public:
   bool checkConjugacyClassRepresentationsMatchCCSizes();
   bool checkOrthogonalityCharacterTable();
   void initialize();
-  std::string toString(FormatExpressions* format = nullptr) {
+  std::string toString(const FormatExpressions* format = nullptr) {
     std::stringstream out;
     out << this->toStringElements(format);
     if (this->flagCCRepresentativesComputed) {
@@ -295,8 +295,11 @@ public:
     }
     return out.str();
   }
-  std::string toStringElements(FormatExpressions* format = nullptr) const;
-  std::string toStringConjugacyClasses(FormatExpressions* format = nullptr);
+  std::string toStringElements(const FormatExpressions* format = nullptr)
+  const;
+  std::string toStringConjugacyClasses(
+    const FormatExpressions* format = nullptr
+  );
   int conjugacyClassCount() const;
   LargeInteger getSize();
   LargeInteger sizeByFormulaOrNegative1() {
@@ -561,9 +564,9 @@ public:
   void makeIdentity(const ElementWeylGroup& initializeFrom);
   bool isIdentity();
   std::string toStringInvariants(FormatExpressions* format) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   unsigned int hashFunction() const;
@@ -638,7 +641,7 @@ public:
   List<MatrixTensor<Coefficient> > generators;
   HashedList<MatrixTensor<Coefficient> > elements;
   bool generateElements(int upperBoundNonPositiveMeansNoLimit);
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
 };
 
 template <class Coefficient>
@@ -1570,8 +1573,8 @@ public:
   JSData toJSON();
   template <typename somestream>
   somestream& intoStream(somestream& out) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toMathML(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
+  std::string toMathML(const FormatExpressions* format = nullptr) const;
   friend std::ostream& operator<<(
     std::ostream& out, GroupRepresentation<someGroup, Coefficient>& data
   ) {
@@ -1700,10 +1703,12 @@ void GroupRepresentation<someGroup, Coefficient>::makeTensorRepresentation(
   GroupRepresentation<someGroup, Coefficient>& right,
   GroupRepresentation<someGroup, Coefficient>& left
 ) {
-  ownerGroup = right.ownerGroup;
-  generators.setSize(right.generators.size);
+  this->ownerGroup = right.ownerGroup;
+  this->generators.setSize(right.generators.size);
   for (int i = 0; i < right.generators.size; i ++) {
-    generators[i].assignTensorProduct(right.generators[i], left.generators[i]);
+    this->generators[i].assignTensorProduct(
+      right.generators[i], left.generators[i]
+    );
   }
 }
 
@@ -1719,7 +1724,7 @@ somestream&GroupRepresentation<someGroup, Coefficient>::intoStream(
   }
   // WeylGroup needs to be printable
   // WeylGroup really needs to be printable lol
-  out << "Representation of group " << ownerGroup->toString();
+  out << "Representation of group " << this->ownerGroup->toString();
   if (!this->identifyingString.empty()) {
     out << "identified as " << identifyingString;
   }
@@ -1729,7 +1734,7 @@ somestream&GroupRepresentation<someGroup, Coefficient>::intoStream(
 
 template <typename someGroup, typename Coefficient>
 std::string GroupRepresentation<someGroup, Coefficient>::toString(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   (void) format;
   // portable way of avoiding unused parameter warning
@@ -1740,7 +1745,7 @@ std::string GroupRepresentation<someGroup, Coefficient>::toString(
 
 template <typename someGroup, typename Coefficient>
 std::string GroupRepresentation<someGroup, Coefficient>::toMathML(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   return this->toString(format);
 }

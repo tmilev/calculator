@@ -53,9 +53,9 @@ public:
     this->generatorIndex = other.generatorIndex;
   }
   bool operator>(const ChevalleyGenerator& other) const;
-  std::string toString(FormatExpressions* inputFormat = nullptr) const;
+  std::string toString(const FormatExpressions* inputFormat = nullptr) const;
   std::string toMathML(
-    FormatExpressions* inputFormat = nullptr,
+    const FormatExpressions* inputFormat = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   void checkConsistencyWithOther(const ChevalleyGenerator& other) const;
@@ -176,12 +176,13 @@ public:
   Rational getRatioLongRootToFirst() const {
     return this->getRatioLongRootToFirst(this->letter, this->rank);
   }
-  std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toStringNonTechnicalName(FormatExpressions* format = nullptr)
-  const;
-  std::string toMathMLFinal(FormatExpressions* format) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
+  std::string toStringNonTechnicalName(
+    const FormatExpressions* format = nullptr
+  ) const;
+  std::string toMathMLFinal(const FormatExpressions* format) const;
   std::string toMathML(
-    FormatExpressions* format,
+    const FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   void operator++(int);

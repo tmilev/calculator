@@ -52,109 +52,108 @@ unsigned long long int Rational::totalSmallMultiplications = 0;
 std::stringstream HtmlRoutines::outputStream;
 
 template < >
-List<OnePartialFractionDenominator>::Comparator* FormatExpressions::
-getMonomialOrder<OnePartialFractionDenominator>() {
+const List<OnePartialFractionDenominator>::Comparator* FormatExpressions::
+getMonomialOrder<OnePartialFractionDenominator>() const {
   return nullptr;
 }
 
 template < >
-List<Vector<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
+const List<Vector<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
   Vector<Rational>
->() {
+>() const {
   return nullptr;
 }
 
 // Format expression monomial orders for the toString() function follow.
 template < >
-List<MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> > >
-::Comparator* FormatExpressions::getMonomialOrder<
+const List<
   MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >
->() {
+>::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >
+>() const {
   return nullptr;
 }
 
 template < >
-List<MonomialPolynomial>::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialPolynomial
->() {
+const List<MonomialPolynomial>::Comparator* FormatExpressions::getMonomialOrder
+<MonomialPolynomial>() const {
   return &this->monomialOrder;
 }
 
 template < >
-List<Polynomial<AlgebraicNumber> >::Comparator* FormatExpressions::
-getMonomialOrder<Polynomial<AlgebraicNumber> >() {
+const List<Polynomial<AlgebraicNumber> >::Comparator* FormatExpressions::
+getMonomialOrder<Polynomial<AlgebraicNumber> >() const {
   return nullptr;
 }
 
 template < >
-List<MonomialVector>::Comparator* FormatExpressions::getMonomialOrder<
+const List<MonomialVector>::Comparator* FormatExpressions::getMonomialOrder<
   MonomialVector
->() {
+>() const {
   return nullptr;
 }
 
 template < >
-List<MonomialWeylAlgebra>::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialWeylAlgebra
->() {
+const List<MonomialWeylAlgebra>::Comparator* FormatExpressions::
+getMonomialOrder<MonomialWeylAlgebra>() const {
   return nullptr;
 }
 
 template < >
-List<MonomialUniversalEnveloping<RationalFraction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<
+const List<MonomialUniversalEnveloping<RationalFraction<Rational> > >::
+Comparator* FormatExpressions::getMonomialOrder<
   MonomialUniversalEnveloping<RationalFraction<Rational> >
->() {
+>() const {
   return nullptr;
 }
 
 template < >
-List<MonomialGeneralizedVerma<RationalFraction<Rational> > >::Comparator*
+const List<MonomialGeneralizedVerma<RationalFraction<Rational> > >::Comparator*
 FormatExpressions::getMonomialOrder<
   MonomialGeneralizedVerma<RationalFraction<Rational> >
->() {
+>() const {
   return nullptr;
 }
 
 template < >
-List<ChevalleyGenerator>::Comparator* FormatExpressions::getMonomialOrder<
-  ChevalleyGenerator
->() {
+const List<ChevalleyGenerator>::Comparator* FormatExpressions::getMonomialOrder
+<ChevalleyGenerator>() const {
   return nullptr;
 }
 
 template < >
-List<MonomialMatrix>::Comparator* FormatExpressions::getMonomialOrder<
+const List<MonomialMatrix>::Comparator* FormatExpressions::getMonomialOrder<
   MonomialMatrix
->() {
+>() const {
   return nullptr;
 }
 
 template < >
-List<MonomialUniversalEnveloping<Rational> >::Comparator* FormatExpressions::
-getMonomialOrder<MonomialUniversalEnveloping<Rational> >() {
+const List<MonomialUniversalEnveloping<Rational> >::Comparator*
+FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<Rational> >()
+const {
   return nullptr;
 }
 
 template < >
-List<MonomialTensorGeneralizedVermas<RationalFraction<Rational> > >::Comparator
-* FormatExpressions::getMonomialOrder<
+const List<MonomialTensorGeneralizedVermas<RationalFraction<Rational> > >::
+Comparator* FormatExpressions::getMonomialOrder<
   MonomialTensorGeneralizedVermas<RationalFraction<Rational> >
->() {
+>() const {
   return nullptr;
 }
 
 template < >
-List<QuasiDifferentialMononomial>::Comparator* FormatExpressions::
-getMonomialOrder<QuasiDifferentialMononomial>() {
+const List<QuasiDifferentialMononomial>::Comparator* FormatExpressions::
+getMonomialOrder<QuasiDifferentialMononomial>() const {
   return nullptr;
 }
 
 template < >
-List<MonomialUniversalEnveloping<Polynomial<Rational> > >::Comparator*
+const List<MonomialUniversalEnveloping<Polynomial<Rational> > >::Comparator*
 FormatExpressions::getMonomialOrder<
   MonomialUniversalEnveloping<Polynomial<Rational> >
->() {
+>() const {
   return nullptr;
 }
 
@@ -764,7 +763,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     // It must fit in the largest possible encoding:
     // b_11110???,b_10??????,b_10??????,b_10??????  (3+3*6=21 payload bits).
     // We convert the code point to the 4-byte bigendian sequence that
-    // represents the integer. 
+    // represents the integer.
     List<unsigned char> fourBytes;
     Crypto::convertUnsignedInt32ToUnsignedCharBigendian(input, fourBytes);
     out << fourBytes[0] << fourBytes[1] << fourBytes[2] << fourBytes[3];
@@ -2591,7 +2590,7 @@ std::string StringRoutines::Differ::differenceHTMLPartTwo(
 }
 
 StringRoutines::Differ::Differ() {
-  this->maximumMatrixSize = 200000000;
+  this->maximumMatrixSize = 400000000;
   this->currentCommonStringLength = 0;
 }
 
@@ -3522,14 +3521,14 @@ void FormatExpressions::makeAlphabetXYZUW() {
   }
   List<std::string> letters = List<std::string>({"x", "y", "z", "u", "w"});
   for (const std::string& letter : letters) {
-    this->polynomialAlphabet.addOnTop(VariableLetter(letter, letter));
+    this->polynomialAlphabet.addOnTop(MathMLAndLatex(letter, letter));
   }
 }
 
 FormatExpressions* FormatExpressions::defaultFormat() {
   static FormatExpressions result;
   if (result.polynomialAlphabet.size == 0) {
-    result.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
+    result.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
   }
   return &result;
 }
@@ -3541,7 +3540,8 @@ FormatExpressions::FormatExpressions() {
   this->chevalleyHGeneratorLetter = "h";
   this->polynomialDefaultLetter = "x";
   this->weylAlgebraDefaultLetter = "\\partial";
-  this->finiteDimensionalRepresentationLetter = "V";
+  this->finiteDimensionalRepresentationLetter.latexLetter = "V";
+  this->finiteDimensionalRepresentationLetter.mathMLLetter = "<mi>V</mi>";
   this->simpleRootLetter = "\\eta";
   this->maximumLineLength = 100;
   this->flagPassCustomCoefficientMonomialSeparatorToCoefficients = false;
@@ -3700,7 +3700,7 @@ void OnePartialFractionDenominator::computeOneCheckSum(
 }
 
 std::string OnePartialFractionDenominator::toLatex(
-  const Polynomial<LargeInteger>& numerator, FormatExpressions* format
+  const Polynomial<LargeInteger>& numerator, const FormatExpressions* format
 ) const {
   STACK_TRACE("OnePartialFractionDenominator::toLatex");
   std::stringstream out;
@@ -3717,15 +3717,16 @@ std::string OnePartialFractionDenominator::toLatex(
   return out.str();
 }
 
-std::string OnePartialFractionDenominator::toString(FormatExpressions* format)
-const {
+std::string OnePartialFractionDenominator::toString(
+  const FormatExpressions* format
+) const {
   if (this->denominatorsNoScale.size() == 0) {
     return "1";
   }
   MemorySaving<FormatExpressions> backupFormat;
   if (format == nullptr) {
+    backupFormat.getElement().makeAlphabetXYZUW();
     format = &backupFormat.getElement();
-    format->makeAlphabetXYZUW();
   }
   std::stringstream out;
   out << "/(";
@@ -3735,7 +3736,7 @@ const {
 }
 
 std::string OnePartialFractionDenominator::toStringDenominatorOnly(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   STACK_TRACE("OnePartialFractionDenominator::toStringDenominatorOnly");
   if (this->owner == nullptr) {
@@ -5378,7 +5379,7 @@ bool OnePartialFractionDenominatorComponent::operator>(
 }
 
 std::string OnePartialFractionDenominatorComponent::toStringOneDenominator(
-  int elongation, int multiplicity, FormatExpressions* format
+  int elongation, int multiplicity, const FormatExpressions* format
 ) const {
   if (this->owner == nullptr) {
     return "(uninitialized OnePartialFractionDenominator)";
@@ -5415,7 +5416,7 @@ std::string OnePartialFractionDenominatorComponent::toStringInternal() const {
 }
 
 std::string OnePartialFractionDenominatorComponent::toString(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   if (this->owner == nullptr) {
     return "(uninitialized)";
@@ -6417,7 +6418,7 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
 }
 
 std::string DynkinSimpleType::toStringNonTechnicalName(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   (void) format;
   std::stringstream out;
@@ -6441,7 +6442,7 @@ std::string DynkinSimpleType::toStringNonTechnicalName(
 }
 
 std::string DynkinSimpleType::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   bool hasAmbient = false;
@@ -6477,14 +6478,15 @@ std::string DynkinSimpleType::toMathML(
   return out.str();
 }
 
-std::string DynkinSimpleType::toMathMLFinal(FormatExpressions* format) const {
+std::string DynkinSimpleType::toMathMLFinal(const FormatExpressions* format)
+const {
   return
   MathML::toMathMLFinal(
     this->toMathML(format), this->toString(format), format
   );
 }
 
-std::string DynkinSimpleType::toString(FormatExpressions* format) const {
+std::string DynkinSimpleType::toString(const FormatExpressions* format) const {
   std::stringstream out;
   bool includeTechnicalNames = format ==
   nullptr ? true : format->flagIncludeLieAlgebraTypes;
@@ -7621,7 +7623,7 @@ ElementWeylGroup ElementWeylGroup::inverse() const {
   return out;
 }
 
-std::string ElementWeylGroup::toString(FormatExpressions* format) const {
+std::string ElementWeylGroup::toString(const FormatExpressions* format) const {
   STACK_TRACE("ElementWeylGroup::toString");
   (void) format;
   if (this->generatorsLastAppliedFirst.size == 0) {
@@ -7635,7 +7637,7 @@ std::string ElementWeylGroup::toString(FormatExpressions* format) const {
 }
 
 std::string ElementWeylGroup::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   STACK_TRACE("ElementWeylGroup::toString");
   (void) format;
@@ -15666,13 +15668,13 @@ bool ConeCollection::findMaxLFOverConeProjective(
   return true;
 }
 
-bool VariableLetter::operator==(const VariableLetter& other) const {
+bool MathMLAndLatex::operator==(const MathMLAndLatex& other) const {
   return
   this->latexLetter == other.latexLetter &&
   this->mathMLLetter == other.mathMLLetter;
 }
 
-void VariableLetter::operator=(const std::string& other) {
+void MathMLAndLatex::operator=(const std::string& other) {
   this->latexLetter = other;
   this->mathMLLetter = other;
 }

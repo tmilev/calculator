@@ -35,13 +35,14 @@ public:
     typeRationalFraction = 2,
     typeError = 3
   };
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
-  bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
-  const;
+  bool needsParenthesisForMultiplication(
+    const FormatExpressions* unused = nullptr
+  ) const;
   bool findOneVariableRationalRoots(List<Rational>& output);
   static RationalFraction one();
   static RationalFraction zero();
@@ -461,7 +462,7 @@ bool RationalFraction<Coefficient>::findOneVariableRationalRoots(
 
 template <class Coefficient>
 bool RationalFraction<Coefficient>::needsParenthesisForMultiplication(
-  FormatExpressions* unused
+  const FormatExpressions* unused
 ) const {
   (void) unused;
   switch (this->expressionType) {
@@ -478,7 +479,7 @@ bool RationalFraction<Coefficient>::needsParenthesisForMultiplication(
 
 template <class Coefficient>
 std::string RationalFraction<Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   if (this->expressionType == this->typeError) {
     return "<mtext>[error]</mtext>";
@@ -503,8 +504,9 @@ std::string RationalFraction<Coefficient>::toMathML(
 }
 
 template <class Coefficient>
-std::string RationalFraction<Coefficient>::toString(FormatExpressions* format)
-const {
+std::string RationalFraction<Coefficient>::toString(
+  const FormatExpressions* format
+) const {
   if (this->expressionType == this->typeError) {
     return "[error]";
   }

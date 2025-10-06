@@ -458,7 +458,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   }
   out << "\n\\(sl{}(2)\\)-module decomposition of the ambient Lie algebra: ";
   formatCharacter.vectorSpaceEiBasisNames.addOnTop(
-    VariableLetter("\\psi", "&psi;")
+    MathMLAndLatex("\\psi", "&psi;")
   );
   out
   << this->moduleDecompositionAmbientSubalgebra.toMathMLFinal(
@@ -2332,7 +2332,7 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "</th></tr>";
   FormatExpressions formatCharacterMathML;
   formatCharacterMathML.vectorSpaceEiBasisNames.addOnTop(
-    VariableLetter("\\psi", "&psi;")
+    MathMLAndLatex("\\psi", "&psi;")
   );
   formatCharacterMathML.flagSupressDynkinIndexOne = false;
   formatCharacterMathML.bootstrapScriptType = format ==

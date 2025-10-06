@@ -550,9 +550,9 @@ public:
   bool operator==(const OnePartialFractionDenominatorComponent& right) const;
   bool operator>(const OnePartialFractionDenominatorComponent& other) const;
   std::string toStringInternal() const;
-  std::string toString(FormatExpressions* format) const;
+  std::string toString(const FormatExpressions* format) const;
   std::string toStringOneDenominator(
-    int elongation, int multiplicity, FormatExpressions* format
+    int elongation, int multiplicity, const FormatExpressions* format
   ) const;
   bool checkInitialization() const;
 };
@@ -721,9 +721,10 @@ public:
   void addMultiplicity(
     const Vector<Rational>& normalizedVector, int multiplicity, int elongation
   );
-  std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toStringDenominatorOnly(FormatExpressions* format = nullptr)
-  const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
+  std::string toStringDenominatorOnly(
+    const FormatExpressions* format = nullptr
+  ) const;
   bool getDifferentialOperatorForm(List<ElementWeylAlgebra<Rational> >& output)
   const;
   void computeDifferentialOperatorConstant(Rational& output) const;
@@ -732,7 +733,7 @@ public:
   ) const;
   std::string toLatex(
     const Polynomial<LargeInteger>& numerator,
-    FormatExpressions* format = nullptr
+    const FormatExpressions* format = nullptr
   ) const;
   bool checkInitialization() const;
   bool operator>(const OnePartialFractionDenominator& other) const;

@@ -285,7 +285,7 @@ std::string PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(
   const Polynomial<ElementZmodP>& other
 ) {
   FormatExpressions format;
-  format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
+  format.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
   format.flagSuppressModP = true;
   std::stringstream out;
   out << other.toString(&format);
@@ -397,7 +397,7 @@ bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
   leftElement *= rightElement;
   FormatExpressions format;
   format.flagSuppressModP = true;
-  format.polynomialAlphabet.addOnTop(VariableLetter("x"));
+  format.polynomialAlphabet.addOnTop(MathMLAndLatex("x"));
   if (leftElement.value.toString(&format) != expected) {
     global.fatal
     << "Product of "

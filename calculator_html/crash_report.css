@@ -1,0 +1,15 @@
+span.spanStringEqual {
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: green
+}
+
+span.spanStringDifferent {
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: red
+}
+
+td.cellCalculatorResult {
+  border: 1 px solid black;
+}

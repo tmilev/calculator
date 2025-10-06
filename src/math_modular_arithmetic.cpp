@@ -6,7 +6,7 @@
 const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
 
 bool ElementZmodP::needsParenthesisForMultiplication(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   if (format == nullptr) {
     return true;
@@ -54,7 +54,7 @@ std::string ElementZmodP::toStringPolynomialCalculator(
   return out.str();
 }
 
-std::string ElementZmodP::toString(FormatExpressions* format) const {
+std::string ElementZmodP::toString(const FormatExpressions* format) const {
   bool suppressModulus = false;
   if (format != nullptr) {
     suppressModulus = format->flagSuppressModP;
@@ -69,7 +69,7 @@ std::string ElementZmodP::toString(FormatExpressions* format) const {
 }
 
 std::string ElementZmodP::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   bool suppressModulus = false;

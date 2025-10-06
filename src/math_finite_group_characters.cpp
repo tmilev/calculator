@@ -5,9 +5,9 @@
 #include "math_general_implementation.h"
 
 template < >
-List<ElementWeylGroup>::Comparator* FormatExpressions::getMonomialOrder<
+const List<ElementWeylGroup>::Comparator* FormatExpressions::getMonomialOrder<
   ElementWeylGroup
->() {
+>() const {
   return nullptr;
 }
 

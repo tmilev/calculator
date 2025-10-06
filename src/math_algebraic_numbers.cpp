@@ -8,7 +8,7 @@
 #include "progress_report.h"
 
 std::string MonomialVector::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   if (
@@ -28,7 +28,7 @@ std::string MonomialVector::toMathML(
   return out.str();
 }
 
-std::string MonomialVector::toString(FormatExpressions* format) const {
+std::string MonomialVector::toString(const FormatExpressions* format) const {
   if (format != nullptr) {
     if (
       this->monomialIndex < format->vectorSpaceEiBasisNames.size &&
@@ -166,7 +166,7 @@ void AlgebraicClosureRationals::computeQuadraticRadicals() {
     }
     int index = this->getIndexFromRadicalSelection(selection);
     this->quadraticRadicalsCorrespondingToBasisElements[index] = radical;
-    VariableLetter displayName;
+    MathMLAndLatex displayName;
     displayName.latexLetter = latexRadical.str();
     displayName.mathMLLetter = mathMLRadical.str();
     this->displayNamesBasisElements[index] = displayName;
@@ -796,7 +796,7 @@ AlgebraicNumber AlgebraicNumber::getDenominator() const {
 }
 
 bool AlgebraicNumber::needsParenthesisForMultiplication(
-  FormatExpressions* unused
+  const FormatExpressions* unused
 ) const {
   (void) unused;
   if (this->owner == nullptr) {
@@ -859,7 +859,7 @@ void AlgebraicClosureRationals::reset() {
   this->basisInjections[0][0].makeEi(0);
   this->quadraticRadicals.clear();
   this->displayNamesBasisElements.setSize(1);
-  this->displayNamesBasisElements[0] = VariableLetter("", "");
+  this->displayNamesBasisElements[0] = MathMLAndLatex("", "");
   this->generatingElementTensorForm.makeIdentity(1);
   this->generatingElementMatrixForm.makeIdentityMatrix(
     1, Rational::one(), Rational::zero()
@@ -1898,7 +1898,7 @@ bool AlgebraicNumber::isEqualToZero() const {
   return this->element.isEqualToZero();
 }
 
-std::string AlgebraicNumber::toString(FormatExpressions* format) const {
+std::string AlgebraicNumber::toString(const FormatExpressions* format) const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
       return "0";
@@ -1925,7 +1925,8 @@ std::string AlgebraicNumber::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-std::string AlgebraicNumber::toMathMLFinal(FormatExpressions* format) const {
+std::string AlgebraicNumber::toMathMLFinal(const FormatExpressions* format)
+const {
   return
   MathML::toMathMLFinal(
     this->toMathML(format), this->toString(format), format
@@ -1933,7 +1934,7 @@ std::string AlgebraicNumber::toMathMLFinal(FormatExpressions* format) const {
 }
 
 std::string AlgebraicNumber::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {

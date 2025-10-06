@@ -37,7 +37,7 @@ public:
   List<Coefficient>() {
     *this = List<OtherCoefficient>(input);
   }
-  std::string toString(FormatExpressions* format = nullptr) const {
+  std::string toString(const FormatExpressions* format = nullptr) const {
     std::stringstream out;
     out.precision(5);
     out << "(";
@@ -51,7 +51,7 @@ public:
     return out.str();
   }
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const {
     (void) outputProperties;
@@ -113,11 +113,11 @@ public:
     return out.str();
   }
   std::string toMathMLLetterFormat(
-    const std::string& inputLetter, FormatExpressions* format = nullptr
+    const std::string& inputLetter, const FormatExpressions* format = nullptr
   ) const;
   std::string toStringLetterFormat(
     const std::string& inputLetter,
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     bool dontIncludeLastVar = false
   ) const;
   std::string toStringEpsilonFormat(FormatExpressions* format = nullptr) const {

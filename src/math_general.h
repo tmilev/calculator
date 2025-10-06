@@ -212,7 +212,7 @@ public:
   MonomialWrapper(const Type& input) {
     this->content = input;
   }
-  std::string toString(FormatExpressions* format = nullptr) const {
+  std::string toString(const FormatExpressions* format = nullptr) const {
     (void) format;
     std::stringstream out;
     out << "(" << this->content << ")";
@@ -608,12 +608,12 @@ public:
     }
   }
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toStringLatex(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
+  std::string toStringLatex(const FormatExpressions* format = nullptr) const;
   std::string toStringSystemLatex(
     Matrix<Coefficient>* constantTerms = 0, FormatExpressions* format = nullptr
   ) const;
@@ -1937,18 +1937,22 @@ void Matrix<Coefficient>::initialize(
   this->resize(desiredNumberOfRows, desiredNumberOfColumns, false);
 }
 
-struct VariableLetter {
+struct MathMLAndLatex {
   std::string latexLetter;
   std::string mathMLLetter;
-  VariableLetter(
+  MathMLAndLatex(
     const std::string& inputLatexLetter, const std::string& inputMathMLLetter
   ):
   latexLetter(inputLatexLetter),
   mathMLLetter(inputMathMLLetter) {}
-  VariableLetter(const std::string& inputLetter = ""):
+  MathMLAndLatex(const std::string& inputLetter = ""):
   latexLetter(inputLetter),
   mathMLLetter(inputLetter) {}
-  bool operator==(const VariableLetter& other) const;
+  void clear() {
+    this->mathMLLetter = "";
+    this->latexLetter = "";
+  }
+  bool operator==(const MathMLAndLatex& other) const;
   void operator=(const std::string& other);
 };
 
@@ -1957,16 +1961,16 @@ public:
   // alphabetBases must contain at least two elements
   std::string chevalleyGGeneratorLetter;
   std::string chevalleyHGeneratorLetter;
-  std::string fundamentalWeightLetter;
+  MathMLAndLatex fundamentalWeightLetter;
   std::string polynomialDefaultLetter;
   std::string weylAlgebraDefaultLetter;
-  std::string customPlusSign;
+  MathMLAndLatex customPlusSign;
   std::string customCoefficientMonomialSeparator;
-  std::string finiteDimensionalRepresentationLetter;
+  MathMLAndLatex finiteDimensionalRepresentationLetter;
   std::string simpleRootLetter;
-  List<VariableLetter> polynomialAlphabet;
+  List<MathMLAndLatex> polynomialAlphabet;
   List<std::string> weylAlgebraLetters;
-  List<VariableLetter> vectorSpaceEiBasisNames;
+  List<MathMLAndLatex> vectorSpaceEiBasisNames;
   Rational ambientCartanSymmetricInverseScale;
   int extraLinesCounterLatex;
   int numberOfAmpersandsPerNewLineForLaTeX;
@@ -2006,7 +2010,7 @@ public:
   char ambientWeylLetter;
   List<MonomialPolynomial>::Comparator monomialOrder;
   template <typename TemplateMonomial>
-  typename List<TemplateMonomial>::Comparator* getMonomialOrder();
+  const typename List<TemplateMonomial>::Comparator* getMonomialOrder() const;
   std::string polynomialLatexLetter(int index) const;
   std::string polynomialMathMLLetter(int index) const;
   FormatExpressions();
@@ -2015,6 +2019,7 @@ public:
     const std::string& inputDefaultLetter, int letterCount
   );
   void makeAlphabetXYZUW();
+  const MathMLAndLatex& fetchCustomPlusSign();
 };
 
 template <class SourceCoefficient, class TargetCoefficient>
@@ -2037,9 +2042,9 @@ public:
   int monomialIndex;
   MonomialVector(): monomialIndex(- 1) {}
   MonomialVector(int inputIndex): monomialIndex(inputIndex) {}
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   unsigned int hashFunction() const {
@@ -2155,7 +2160,7 @@ class Complex {
 public:
   Coefficient imaginaryPart;
   Coefficient realPart;
-  std::string toString(FormatExpressions* unused = nullptr) const {
+  std::string toString(const FormatExpressions* unused = nullptr) const {
     (void) unused;
     std::stringstream currentStream;
     currentStream << *this;
@@ -2222,7 +2227,7 @@ public:
     this->imaginaryPart = - this->imaginaryPart;
     this->realPart = - this->realPart;
   }
-  bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
+  bool needsParenthesisForMultiplication(const FormatExpressions* unused) const {
     (void) unused;
     if (this->realPart == 0 && this->imaginaryPart >= 0) {
       return false;
@@ -2713,7 +2718,7 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
 
 template <class Coefficient>
 std::string Vector<Coefficient>::toMathMLLetterFormat(
-  const std::string& inputLetter, FormatExpressions* format
+  const std::string& inputLetter, const FormatExpressions* format
 ) const {
   if (this->isEqualToZero()) {
     return "<mn>0</mn>";
@@ -2726,7 +2731,8 @@ std::string Vector<Coefficient>::toMathMLLetterFormat(
     if ((*this)[i].isEqualToZero()) {
       continue;
     }
-    term = (*this)[i].toMathML(format);
+    MathExpressionProperties properties;
+    term = (*this)[i].toMathML(format, &properties);
     if ((*this)[i].needsParenthesisForMultiplication(format)) {
       term = MathML::leftParenthesis + term + MathML::rightParenthesis;
     }
@@ -2736,17 +2742,14 @@ std::string Vector<Coefficient>::toMathMLLetterFormat(
     if (term == "<mo>-</mo><mn>1</mn>") {
       term = "<mo>-</mo>";
     }
-    if (found && !StringRoutines::stringBeginsWith(term, "<mo>-</mo>")) {
+    if (found && !properties.startsWithMinus) {
       out << "<mo>+</mo>";
     }
     found = true;
     out << term;
     if (format != nullptr) {
       if (format->vectorSpaceEiBasisNames.size > i) {
-        out
-        << "<mi>"
-        << format->vectorSpaceEiBasisNames[i].mathMLLetter
-        << "</mi>";
+        out << format->vectorSpaceEiBasisNames[i].mathMLLetter;
         continue;
       }
     }
@@ -2765,7 +2768,7 @@ std::string Vector<Coefficient>::toMathMLLetterFormat(
 template <class Coefficient>
 std::string Vector<Coefficient>::toStringLetterFormat(
   const std::string& inputLetter,
-  FormatExpressions* format,
+  const FormatExpressions* format,
   bool dontIncludeLastVar
 ) const {
   if (this->isEqualToZero()) {
@@ -2912,7 +2915,8 @@ simplifyEqualConsecutiveGenerators(int lowestNonReducedIndex) {
 }
 
 template <typename Coefficient>
-std::string Matrix<Coefficient>::toStringLatex(FormatExpressions* format) const {
+std::string Matrix<Coefficient>::toStringLatex(const FormatExpressions* format)
+const {
   FormatExpressions formatCopy;
   if (format != nullptr) {
     formatCopy = *format;
@@ -2976,7 +2980,7 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
 
 template <typename Coefficient>
 std::string Matrix<Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   std::stringstream out;
@@ -3022,7 +3026,8 @@ std::string Matrix<Coefficient>::toMathMLFinal(FormatExpressions* format) const 
 }
 
 template <typename Coefficient>
-std::string Matrix<Coefficient>::toString(FormatExpressions* format) const {
+std::string Matrix<Coefficient>::toString(const FormatExpressions* format)
+const {
   std::stringstream out;
   std::string coefficientString;
   bool useHtml = (format == nullptr) ? true : format->flagUseHTML;
@@ -3327,7 +3332,7 @@ public:
     this->isIdentity = true;
   }
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const {
     (void) format;
@@ -3351,7 +3356,7 @@ public:
     }
     return out.str();
   }
-  std::string toString(FormatExpressions* format = nullptr) const {
+  std::string toString(const FormatExpressions* format = nullptr) const {
     (void) format;
     std::stringstream out;
     if (!this->isIdentity) {

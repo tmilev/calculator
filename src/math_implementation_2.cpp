@@ -791,11 +791,14 @@ void LargeIntegerUnsigned::dividePositive(
   }
 }
 
-std::string LargeIntegerUnsigned::toMathML() const {
+std::string LargeIntegerUnsigned::toMathML(const FormatExpressions* format)
+const {
+  (void) format;
   return "<mn>" + this->toString() + "</mn>";
 }
 
-std::string LargeIntegerUnsigned::toString(FormatExpressions* format) const {
+std::string LargeIntegerUnsigned::toString(const FormatExpressions* format)
+const {
   (void) format;
   // to avoid unused paramater warning
   std::string currentString;
@@ -1633,7 +1636,7 @@ void LargeInteger::toString(std::string& output) const {
 }
 
 std::string LargeInteger::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) format;
   if (this->isEqualToZero()) {
@@ -2521,7 +2524,7 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
 }
 
 std::string Rational::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) format;
   std::stringstream out;
@@ -2549,7 +2552,7 @@ std::string Rational::toMathML(
   return out.str();
 }
 
-std::string Rational::toString(FormatExpressions* format) const {
+std::string Rational::toString(const FormatExpressions* format) const {
   if (format != nullptr) {
     if (format->flagUseFrac) {
       return this->toStringFrac();

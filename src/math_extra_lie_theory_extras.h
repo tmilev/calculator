@@ -1024,7 +1024,7 @@ void MonomialUniversalEnveloping<Coefficient>::setNumberOfVariables(
 
 template <class Coefficient>
 std::string MonomialUniversalEnveloping<Coefficient>::toString(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   std::stringstream out;
   std::string currentString;
@@ -1051,7 +1051,7 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(
 
 template <class Coefficient>
 std::string MonomialUniversalEnveloping<Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   std::stringstream out;
@@ -2462,8 +2462,10 @@ splitCharacterOverReductiveSubalgebra(
   }
   FormatExpressions format;
   format.flagUseLatex = true;
-  format.customPlusSign = "\\oplus ";
-  format.fundamentalWeightLetter = "\\omega";
+  format.customPlusSign.latexLetter = "\\oplus ";
+  format.customPlusSign.mathMLLetter = "<mo>&oplus;</mo>";
+  format.fundamentalWeightLetter.latexLetter = "\\omega";
+  format.fundamentalWeightLetter.mathMLLetter = "<mi>&omega;</mi>";
   out
   << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
   << HtmlRoutines::getMathNoDisplay(
@@ -2503,8 +2505,8 @@ splitCharacterOverReductiveSubalgebra(
   output.makeZero();
   while (!remainingCharProjected.isEqualToZero()) {
     localHighest = *remainingCharProjected.monomials.lastObject();
-    for (bool Found = true; Found;) {
-      Found = false;
+    for (bool found = true; found;) {
+      found = false;
       for (
         int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i
         ++
@@ -2518,7 +2520,7 @@ splitCharacterOverReductiveSubalgebra(
         getFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
         if (remainingCharProjected.monomials.contains(workingMonomial)) {
           localHighest = workingMonomial;
-          Found = true;
+          found = true;
         }
       }
     }

@@ -6,7 +6,8 @@
 #include "math_extra_universal_enveloping.h"
 #include "math_general.h"
 
-std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
+std::string MonomialWeylAlgebra::toString(const FormatExpressions* format)
+const {
   if (this->isConstant()) {
     return "1";
   }
@@ -30,7 +31,7 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
 }
 
 std::string MonomialWeylAlgebra::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   if (this->isConstant()) {
@@ -61,8 +62,9 @@ std::string MonomialWeylAlgebra::toMathML(
   return out.str();
 }
 
-std::string QuasiDifferentialMononomial::toString(FormatExpressions* format)
-const {
+std::string QuasiDifferentialMononomial::toString(
+  const FormatExpressions* format
+) const {
   std::stringstream out;
   out << this->weylMonomial.toString(format) << "\\otimes ";
   out << this->matrixMonomial.toString(format);
@@ -1389,7 +1391,7 @@ bool Cone::isInInterior(const Vector<Rational>& point) const {
 }
 
 std::string MonomialPolynomial::toMathML(
-  FormatExpressions* polynomialFormat,
+  const FormatExpressions* polynomialFormat,
   MathExpressionProperties* outputProperties
 ) const {
   std::stringstream out;
@@ -1424,8 +1426,9 @@ std::string MonomialPolynomial::toMathML(
   return out.str();
 }
 
-std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat)
-const {
+std::string MonomialPolynomial::toString(
+  const FormatExpressions* polynomialFormat
+) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> formatContainer;
   if (polynomialFormat == nullptr) {

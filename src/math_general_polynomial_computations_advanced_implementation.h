@@ -2100,8 +2100,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
     FormatExpressions format;
-    format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
-    format.polynomialAlphabet.addOnTop(VariableLetter("y", "y"));
+    format.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
+    format.polynomialAlphabet.addOnTop(MathMLAndLatex("y", "y"));
     global.fatal
     << "<br>While computing the gcd of left = "
     << left.toString(&format)
@@ -2240,7 +2240,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
   if (quotient.isConstant()) {
     FormatExpressions format;
     format.flagSuppressModP = true;
-    format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
+    format.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
     global.fatal
     << "While factoring: "
     << this->original.toString(&format)
@@ -2326,7 +2326,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::checkFactorization() const 
   if (!checkComputations.isEqualTo(this->original)) {
     FormatExpressions format;
     format.flagSuppressModP = true;
-    format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
+    format.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
     global.fatal
     << "Error in polynomial factorization function. "
     << "Product of factorization: "
@@ -2349,7 +2349,7 @@ std::string PolynomialFactorizationUnivariate<Coefficient>::toStringResult(
   if (format == nullptr) {
     format = &backup.getElement();
     format->flagSuppressModP = true;
-    format->polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
+    format->polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
   }
   std::string constantFactorString = this->constantFactor.toString(format);
   if (this->nonReduced.size + this->reduced.size == 0) {

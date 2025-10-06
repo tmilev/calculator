@@ -10,10 +10,10 @@
 #include "math_linear_combination.h"
 
 template < >
-List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*
+const List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*
 FormatExpressions::getMonomialOrder<
   ClassFunction<WeylGroupData::WeylGroupBase, Rational>
->() {
+>() const {
   return nullptr;
 }
 
@@ -605,7 +605,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   weyl.dynkinType.getEpsilonMatrix(epsilonCoordinateMatrix);
   for (int i = 0; i < outputOrbit.size; i ++) {
     format.simpleRootLetter = "\\alpha";
-    format.fundamentalWeightLetter = "\\psi";
+    format.fundamentalWeightLetter.latexLetter = "\\psi";
+    format.fundamentalWeightLetter.mathMLLetter = "<mi>&psi;</mi>";
     std::string orbitElementString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
     epsilonCoordinateMatrix.actOnVectorColumn(epsilonVector, zero);
@@ -613,7 +614,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     epsilonVector.toStringLetterFormat("\\varepsilon", &format);
     std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
-    toStringLetterFormat(format.fundamentalWeightLetter, &format);
+    toStringLetterFormat(format.fundamentalWeightLetter.latexLetter, &format);
     out
     << "<tr>"
     << "<td>"
@@ -727,7 +728,6 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   Vectors<Polynomial<Rational> > highestWeights;
   FormatExpressions format;
   semisimpleLieAlgebra.context.getFormat(format);
-  //  format.fundamentalWeightLetter ="\\psi";
   highestWeights.addOnTop(highestWeightSimpleCoordinates);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
@@ -820,7 +820,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   out << integralPositiveRootReflectionGraph.toStringPsTricks(nullptr);
   for (int i = 0; i < outputOrbit.size; i ++) {
     format.simpleRootLetter = "\\alpha";
-    format.fundamentalWeightLetter = "\\psi";
+    format.fundamentalWeightLetter.latexLetter = "\\psi";
+    format.fundamentalWeightLetter.mathMLLetter = "<mi>&psi;</mi>";
     std::string orbitElementString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
     epsilonCoordinatesMatrix.actOnVectorColumn(epsilonVector, zero);
@@ -828,7 +829,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     epsilonVector.toStringLetterFormat("\\varepsilon", &format);
     std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
-    toStringLetterFormat(format.fundamentalWeightLetter, &format);
+    toStringLetterFormat(format.fundamentalWeightLetter.latexLetter, &format);
     out
     << "<tr>"
     << "<td>"

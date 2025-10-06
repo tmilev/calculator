@@ -330,7 +330,7 @@ public:
 class SelectionPositiveIntegers {
 public:
   Vector<LargeIntegerUnsigned> integers;
-  std::string toString(FormatExpressions* format = nullptr) {
+  std::string toString(const FormatExpressions* format = nullptr) {
     (void) format;
     return this->integers.toString();
   }

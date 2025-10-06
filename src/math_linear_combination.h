@@ -27,16 +27,16 @@ private:
     std::ostream& output,
     const LinearCombination<TemplateMonomial, Coefficient>& collection
   );
-  std::string getTermString(
+  std::string termToString(
     const Coefficient& coefficient,
     const TemplateMonomial& monomial,
-    FormatExpressions* format,
+    const FormatExpressions* format,
     const std::string& customCoefficientMonomialSeparator
   ) const;
   void termToMathML(
     const Coefficient& coefficient,
     const TemplateMonomial& monomial,
-    FormatExpressions* format,
+    const FormatExpressions* format,
     const std::string& customCoefficientMonomialSeparator,
     List<std::string>& rowOutputs,
     MathExpressionProperties& outputProperties
@@ -59,8 +59,9 @@ public:
   ~LinearCombination() {
     this->flagDeallocated = true;
   }
-  bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
-  const {
+  bool needsParenthesisForMultiplication(
+    const FormatExpressions* unused = nullptr
+  ) const {
     (void) unused;
     return this->size() > 1;
   }
@@ -68,12 +69,14 @@ public:
   // needed,
   // it will be enclosed in a \begin{array} ... \end{array} pair.
   std::string toStringWithPossibleLineBreak(
-    FormatExpressions* format = nullptr, int* outputNumberOfLines = nullptr
+    const FormatExpressions* format = nullptr,
+    int* outputNumberOfLines = nullptr
   ) const;
   std::string toString(
-    FormatExpressions* format = nullptr, int* outputNumberOfLines = nullptr
+    const FormatExpressions* format = nullptr,
+    int* outputNumberOfLines = nullptr
   ) const;
-  std::string toStringIfShort(FormatExpressions* format = nullptr) const;
+  std::string toStringIfShort(const FormatExpressions* format = nullptr) const;
   // Same as toString but uses a default alphabet "x", "y", ...
   // for the first few variables.
   std::string toStringPretty() const {
@@ -82,7 +85,7 @@ public:
     return this->toString(&format);
   }
   std::string toMathML(
-    FormatExpressions* format,
+    const FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   std::string toMathMLFinal(FormatExpressions* format) const;
@@ -1255,10 +1258,10 @@ getBlendCoefficientAndMonomial(
 }
 
 template <class TemplateMonomial, class Coefficient>
-std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
+std::string LinearCombination<TemplateMonomial, Coefficient>::termToString(
   const Coefficient& coefficient,
   const TemplateMonomial& monomial,
-  FormatExpressions* format,
+  const FormatExpressions* format,
   const std::string& customCoefficientMonomialSeparator
 ) const {
   bool fracSpecialDesired = false;
@@ -1316,7 +1319,7 @@ template <class TemplateMonomial, class Coefficient>
 void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
   const Coefficient& coefficient,
   const TemplateMonomial& monomial,
-  FormatExpressions* format,
+  const FormatExpressions* format,
   const std::string& customCoefficientMonomialSeparator,
   List<std::string>& rowOutputs,
   MathExpressionProperties& outputProperties
@@ -1368,7 +1371,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::
 toStringWithPossibleLineBreak(
-  FormatExpressions* format, int* outputNumberOfLines
+  const FormatExpressions* format, int* outputNumberOfLines
 ) const {
   int lines = 1;
   if (outputNumberOfLines == nullptr) {
@@ -1394,7 +1397,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathMLFinal(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   STACK_TRACE("LinearCombination::toMathML");
   if (this->size() == 0) {
@@ -1408,7 +1411,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
   // FormatExpressions::getMonomialOrder<TemplateMonomial>()
   // and make it return 0 (or a pointer to a monomial order, should you
   // wish to use a custom one.
-  typename List<TemplateMonomial>::Comparator* monomialOrder = (
+  const typename List<TemplateMonomial>::Comparator* monomialOrder = (
     format == nullptr
   ) ?
   nullptr :
@@ -1416,14 +1419,13 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
   sortedMonomials.quickSortDescending(monomialOrder);
   bool useCustomPlus = false;
   std::string customTimes = "";
+  MemorySaving<FormatExpressions> formatHolder;
+  FormatExpressions* formatForTerm = format ==
+  nullptr ? nullptr : &formatHolder.getElement();
   if (format != nullptr) {
-    useCustomPlus = (format->customPlusSign != "");
-    if (
-      format->flagPassCustomCoefficientMonomialSeparatorToCoefficients == false
-    ) {
-      customTimes = format->customCoefficientMonomialSeparator;
-      format->customCoefficientMonomialSeparator = "";
-    }
+    *formatForTerm = *format;
+    formatForTerm->customCoefficientMonomialSeparator = "";
+    useCustomPlus = (format->customPlusSign.mathMLLetter != "");
   }
   out << "<mrow>";
   for (int i = 0; i < sortedMonomials.size; i ++) {
@@ -1433,14 +1435,19 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     List<std::string> termStrings;
     MathExpressionProperties termProperties;
     this->termToMathML(
-      coefficient, monomial, format, customTimes, termStrings, termProperties
+      coefficient,
+      monomial,
+      formatForTerm,
+      customTimes,
+      termStrings,
+      termProperties
     );
     if (i == 0 && outputProperties != nullptr) {
       *outputProperties = termProperties;
     }
     if (i > 0) {
       if (useCustomPlus) {
-        out << format->customPlusSign;
+        out << format->customPlusSign.mathMLLetter;
       } else if (!termProperties.startsWithMinus) {
         out << "<mo>+</mo>";
       }
@@ -1449,19 +1456,13 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
       out << termString;
     }
   }
-  if (format != nullptr) {
-    format->customCoefficientMonomialSeparator = customTimes;
-    if (format->suffixLinearCombination != "") {
-      out << " " << format->suffixLinearCombination;
-    }
-  }
   out << "</mrow>";
   return out.str();
 }
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toStringIfShort(
-  FormatExpressions* format
+  const FormatExpressions* format
 ) const {
   STACK_TRACE("LinearCombination::toStringIfShort");
   if (this->size() < 25) {
@@ -1472,7 +1473,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toStringIfShort(
   Coefficient leadingCoefficient;
   this->getIndexLeadingMonomial(&leadingMonomial, &leadingCoefficient);
   out
-  << this->getTermString(leadingCoefficient, leadingMonomial, format, "")
+  << this->termToString(leadingCoefficient, leadingMonomial, format, "")
   << "+ ... [large linear combination with "
   << this->size()
   << " monomials]. ";
@@ -1481,7 +1482,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toStringIfShort(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
-  FormatExpressions* format, int* outputNumberOfLines
+  const FormatExpressions* format, int* outputNumberOfLines
 ) const {
   STACK_TRACE("LinearCombination::toString");
   if (outputNumberOfLines != nullptr) {
@@ -1498,7 +1499,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   // FormatExpressions::getMonomialOrder<TemplateMonomial>()
   // and make it return 0 (or a pointer to a monomial order, should you
   // wish to use a custom one.
-  typename List<TemplateMonomial>::Comparator* monomialOrder = (
+  const typename List<TemplateMonomial>::Comparator* monomialOrder = (
     format == nullptr
   ) ?
   0 :
@@ -1513,13 +1514,17 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   bool flagUseLaTeX = (format == nullptr) ? false : format->flagUseLatex;
   bool isInNumerator = (format == nullptr) ? false : format->flagIsInNumerator;
   std::string customTimes = "";
+  MemorySaving<FormatExpressions> formatHolder;
+  FormatExpressions* formatForTerms = format ==
+  nullptr ? nullptr : &formatHolder.getElement();
   if (format != nullptr) {
-    useCustomPlus = (format->customPlusSign != "");
+    useCustomPlus = (format->customPlusSign.latexLetter != "");
+    *formatForTerms = *format;
+    customTimes = format->customCoefficientMonomialSeparator;
     if (
       format->flagPassCustomCoefficientMonomialSeparatorToCoefficients == false
     ) {
-      customTimes = format->customCoefficientMonomialSeparator;
-      format->customCoefficientMonomialSeparator = "";
+      formatForTerms->customCoefficientMonomialSeparator = "";
     }
   }
   for (int i = 0; i < sortedMonomials.size; i ++) {
@@ -1527,7 +1532,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
     int coefficientIndex = this->monomials.getIndex(monomial);
     Coefficient& coefficient = this->coefficients[coefficientIndex];
     std::string termString =
-    this->getTermString(coefficient, monomial, format, customTimes);
+    this->termToString(coefficient, monomial, formatForTerms, customTimes);
     if (i > 0) {
       if (!useCustomPlus) {
         if (termString.size() > 0) {
@@ -1540,7 +1545,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
           cutOffCounter += 1;
         }
       } else {
-        out << format->customPlusSign;
+        out << format->customPlusSign.latexLetter;
       }
     }
     out << termString;
@@ -1562,12 +1567,6 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
           out << " ";
         }
       }
-    }
-  }
-  if (format != nullptr) {
-    format->customCoefficientMonomialSeparator = customTimes;
-    if (format->suffixLinearCombination != "") {
-      out << " " << format->suffixLinearCombination;
     }
   }
   return out.str();
@@ -1794,7 +1793,8 @@ public:
     }
     *this = output;
   }
-  std::string toStringMatrixForm(FormatExpressions* format = nullptr) const {
+  std::string toStringMatrixForm(const FormatExpressions* format = nullptr)
+  const {
     if (this->isEqualToZero()) {
       return "(0)";
     }
@@ -1803,7 +1803,7 @@ public:
     return matrix.toString(format);
   }
   std::string toMathMLMatrixForm(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const {
     if (this->isEqualToZero()) {

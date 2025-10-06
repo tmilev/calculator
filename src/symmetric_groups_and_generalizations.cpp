@@ -711,7 +711,7 @@ unsigned int PermutationR2::hashFunction() const {
   return acc;
 }
 
-std::string PermutationR2::toString(FormatExpressions* format) const {
+std::string PermutationR2::toString(const FormatExpressions* format) const {
   std::stringstream out;
   if (format != nullptr) {
     out << "(";
@@ -732,7 +732,7 @@ std::string PermutationR2::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-std::string PermutationR2::toMathML(FormatExpressions* format) const {
+std::string PermutationR2::toMathML(const FormatExpressions* format) const {
   std::stringstream out;
   (void) format;
   out << "<mrow>" << MathML::leftParenthesis;

@@ -4,7 +4,7 @@
 #include "html_routines.h"
 #include "math_extra_differential_operators.h"
 #include "math_extra_drawing_variables.h"
-#include "math_extra_lie_theory_extras.h"
+#include "math_extra_lie_theory_extras.h" // IWYU pragma: keep. Breaks the build, this is actually needed.
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general.h"
@@ -36,10 +36,10 @@ public:
     this->monomialCoefficientOne = other.monomialCoefficientOne;
   }
   std::string toString(
-    FormatExpressions* format = nullptr, bool includeV = true
+    const FormatExpressions* format = nullptr, bool includeV = true
   ) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
@@ -205,10 +205,10 @@ public:
     }
   }
   std::string toString(
-    FormatExpressions* format = nullptr, bool includeV = true
+    const FormatExpressions* format = nullptr, bool includeV = true
   ) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   MonomialTensorGeneralizedVermas() {}
@@ -242,11 +242,11 @@ public:
     if (other.monomials.size > this->monomials.size) {
       return false;
     }
-    // /This might need a rewrite. As it is, it will cause monomials to be
+    // This might need a rewrite. As it is, it will cause monomials to be
     // sorted according to the
-    // /alphabetical order of their human-readable strings. If I have time, I
+    // alphabetical order of their human-readable strings. If I have time, I
     // will make a better scheme for
-    // /comparison.
+    // comparison.
     return this->toString() > other.toString();
   }
 };
@@ -289,19 +289,14 @@ public:
   generatingWordsGrouppedByWeight;
   List<List<MonomialTensor<int, HashFunctions::hashFunction> > >
   generatingWordsIntegersGrouppedByWeight;
-  // List<List<List<ElementUniversalEnveloping<Coefficient> > > >
-  // actionsSimpleGens;
-  // List<Matrix<Coefficient> > actionsSimpleGensMatrixForM;
   List<Matrix<Coefficient> > bilinearFormsAtEachWeightLevel;
   List<Matrix<Coefficient> > bilinearFormsInverted;
-  // Vectors<Rational> weightsSimpleGens;
   Vector<Coefficient> highestWeightDualCoordinatesBaseField;
   Vector<Coefficient> highestWeightSimpleCoordinatesBaseField;
   Vector<Coefficient> highestWeightFundamentalCoordinatesBaseField;
   Vector<Rational> highestWeightFiniteDimensionalPartDualCoordinates;
   Vector<Rational> highestWeightFiniteDimensionalPartSimpleCoordinates;
   Vector<Rational> highestWeightFiniteDimensionalPartFundamentalCoordinates;
-  // List<List<Matrix<Coefficient> > >
   HashedList<Vector<Rational> > moduleWeightsSimpleCoordinates;
   CharacterSemisimpleLieAlgebraModule<Coefficient> characterOverH;
   CharacterSemisimpleLieAlgebraModule<Coefficient> character;
@@ -461,10 +456,10 @@ public:
     const Coefficient& ringUnit,
     const Coefficient& ringZero
   );
-  std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toMathML(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
+  std::string toMathML(const FormatExpressions* format = nullptr) const;
   std::string elementToStringHighestWeightVector(
-    FormatExpressions* format = nullptr
+    const FormatExpressions* format = nullptr
   ) const {
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
@@ -479,7 +474,7 @@ public:
     return out.str();
   }
   std::string elementToMathMLHighestWeightVector(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const {
     (void) outputProperties;
@@ -2279,8 +2274,9 @@ void ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight(
 }
 
 template <class Coefficient>
-std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format)
-const {
+std::string ModuleSSalgebra<Coefficient>::toString(
+  const FormatExpressions* format
+) const {
   STACK_TRACE("ModuleSSalgebra::toString");
   if (this->owner == nullptr) {
     return "(Error: module not initialized)";
@@ -2313,6 +2309,8 @@ const {
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   latexFormat.maximumLineLength = 0;
+  latexFormat.fundamentalWeightLetter.latexLetter = "\\omega";
+  latexFormat.fundamentalWeightLetter.mathMLLetter = "<mi>&omega;</mi>";
   if (this->characterOverH.size() < 100) {
     out
     << HtmlRoutines::getMathNoDisplay(
@@ -2907,7 +2905,7 @@ bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
 
 template <class Coefficient>
 std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(
-  FormatExpressions* format, bool includeV
+  const FormatExpressions* format, bool includeV
 ) const {
   std::stringstream out;
   if (this->monomials.size > 1) {
@@ -2932,7 +2930,7 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(
 
 template <class Coefficient>
 std::string MonomialTensorGeneralizedVermas<Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   std::stringstream out;
@@ -2960,7 +2958,7 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toMathML(
 
 template <class Coefficient>
 std::string MonomialGeneralizedVerma<Coefficient>::toString(
-  FormatExpressions* format, bool includeV
+  const FormatExpressions* format, bool includeV
 ) const {
   if (this->owner == nullptr) {
     global.fatal
@@ -3002,7 +3000,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(
 
 template <class Coefficient>
 std::string MonomialGeneralizedVerma<Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   if (this->owner == nullptr) {
     global.fatal

@@ -804,15 +804,15 @@ std::string UserCalculatorData::toStringUnsecure() {
 }
 
 template < >
-List<Weight<RationalFraction<Rational> > >::Comparator* FormatExpressions::
-getMonomialOrder<Weight<RationalFraction<Rational> > >() {
+const List<Weight<RationalFraction<Rational> > >::Comparator* FormatExpressions
+::getMonomialOrder<Weight<RationalFraction<Rational> > >() const {
   return nullptr;
 }
 
 template < >
-List<Weight<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
+const List<Weight<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
   Weight<Rational>
->() {
+>() const {
   return nullptr;
 }
 

@@ -232,6 +232,7 @@ bool Calculator::Test::builtInFunctionsABTest(
     std::stringstream crashFile;
     crashFile
     << "<!DOCTYPE html>"
+    << "<link rel='stylesheet' href='../calculator_html/crash_report.css'>"
     << "<body><div style='overflow:auto;height:100%'>"
     << test.reportHtml
     << "</div></body></html>";

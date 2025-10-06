@@ -112,7 +112,7 @@ class CandidateSemisimpleSubalgebra {
   friend std::ostream& operator<<(
     std::ostream& output, const CandidateSemisimpleSubalgebra& candidate
   ) {
-    output << candidate.toString(nullptr, false);
+    output << candidate.toString(nullptr);
     return output;
   }
 public:
@@ -485,7 +485,7 @@ public:
   std::string toStringType(FormatExpressions* format = nullptr) const;
   std::string toStringTypeAndHs(FormatExpressions* format = nullptr) const;
   std::string toStringGenerators(FormatExpressions* format) const;
-  std::string toString(FormatExpressions* format, bool generateLinks) const;
+  std::string toString(FormatExpressions* format) const;
   std::string toStringSystem(FormatExpressions* format = nullptr) const;
   std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;
   std::string toStringInvolvedPositiveRoots() const;
@@ -497,9 +497,7 @@ public:
     int startCartanGeneratorIndex, int numberOfCartanGenerators
   ) const;
   std::string toStringLoadUnknown(FormatExpressions* format = nullptr) const;
-  std::string toStringCentralizer(
-    FormatExpressions* format, bool writeToHardDisk
-  ) const;
+  std::string toStringCentralizer(FormatExpressions* format) const;
   std::string toStringCentralizerDebugData(FormatExpressions* format = nullptr)
   const;
   std::string toStringCartanSubalgebra(FormatExpressions* format = nullptr)
@@ -527,7 +525,7 @@ public:
   friend std::ostream& operator<<(
     std::ostream& output, const RealizedSemisimpleSubalgebra& input
   ) {
-    output << input.toString(nullptr, false);
+    output << input.toString(nullptr);
     return output;
   }
   bool operator>(const RealizedSemisimpleSubalgebra& other) const;
@@ -537,7 +535,7 @@ public:
   RealizedSemisimpleSubalgebra();
   ~RealizedSemisimpleSubalgebra();
   bool checkAll() const;
-  std::string toString(FormatExpressions* format, bool generateLinks) const;
+  std::string toString(FormatExpressions* format) const;
 };
 
 class NonRealizedSemisimpleSubalgebra {
@@ -721,9 +719,8 @@ public:
   ) const;
   void computeFolderNames(FormatExpressions& outputFormat);
   void checkFileWritePermissions();
-  void writeReportToFiles();
   std::string toStringAlgebraLink(
-    int actualindexSubalgebra, FormatExpressions* format, bool writeToHardDisk
+    int actualindexSubalgebra, FormatExpressions* format
   ) const;
   std::string getRelativePhysicalFileNameSubalgebra(int actualIndexSubalgebra)
   const;
@@ -776,7 +773,6 @@ public:
   bool combinatorialCriteriaAllowRealization();
   bool centralizersComputedToHaveUnsuitableNilpotentOrbits();
   bool centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits();
-  void writeProgressFile();
   void initHookUpPointers(
     SemisimpleLieAlgebra& inputOwner,
     AlgebraicClosureRationals* field,
@@ -815,14 +811,12 @@ public:
   std::string toStringState(FormatExpressions* format = nullptr);
   std::string toStringCurrentChain(FormatExpressions* format = nullptr);
   std::string toStringProgressReport(FormatExpressions* format = nullptr);
-  std::string toStringHTML();
+  std::string toHTML();
   std::string toStringHeader(FormatExpressions* format);
   std::string toString(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringPart2(FormatExpressions* format, bool writeToHardDisk);
-  std::string toStringTableSubalgebraLinksTable(FormatExpressions* format);
-  std::string toStringSubalgebrasNoHDWrite(
-    FormatExpressions* format, bool generateLinks
-  );
+  std::string toHTMLTableSubalgebraLinksTable(FormatExpressions* format);
+  std::string toStringSubalgebrasNoHDWrite(FormatExpressions* format);
   std::string toStringRealizedSubalgebraCollection(
     FormatExpressions* format,
     MapReferences<Vectors<Rational>, RealizedSemisimpleSubalgebra>& collection,
@@ -831,9 +825,8 @@ public:
   std::string toStringNonRealizedSubalgebraCollection(
     FormatExpressions* format
   );
-  std::string toStringSubalgebrasWithHDWrite(
-    FormatExpressions* format = nullptr
-  );
+  void writeReportToFiles();
+  void writeProgressFile();
   void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
   std::string toStringPart3(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringSl2s(FormatExpressions* format = nullptr);

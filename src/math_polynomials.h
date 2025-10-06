@@ -87,9 +87,10 @@ public:
     }
     return result;
   }
-  std::string toString(FormatExpressions* polynomialFormat = nullptr) const;
+  std::string toString(const FormatExpressions* polynomialFormat = nullptr)
+  const;
   std::string toMathML(
-    FormatExpressions* polynomialFormat = nullptr,
+    const FormatExpressions* polynomialFormat = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   void makeFromPowers(const Vector<Rational>& inputMonomialBody);
@@ -312,9 +313,9 @@ public:
     this->polynomialPart.isConstant() &&
     this->differentialPart.isConstant();
   }
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   static unsigned int hashFunction(const MonomialWeylAlgebra& input) {

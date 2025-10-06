@@ -148,9 +148,9 @@ bool Polynomial<Rational>::Test::all() {
 
 template < >
 void Polynomial<Rational>::Test::initialize() {
-  this->format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
-  this->format.polynomialAlphabet.addOnTop(VariableLetter("y", "y"));
-  this->format.polynomialAlphabet.addOnTop(VariableLetter("z", "z"));
+  this->format.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
+  this->format.polynomialAlphabet.addOnTop(MathMLAndLatex("y", "y"));
+  this->format.polynomialAlphabet.addOnTop(MathMLAndLatex("z", "z"));
   this->format.flagUseHTML = false;
 }
 
@@ -353,7 +353,7 @@ bool Polynomial<Rational>::Test::differential() {
   );
   for (const std::string& variable : variables) {
     this->formatDifferentials.polynomialAlphabet.addOnTop(
-      VariableLetter(variable, variable)
+      MathMLAndLatex(variable, variable)
     );
   }
   this->oneDifferential("1", "0");

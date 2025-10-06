@@ -174,7 +174,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
   }
   if (includeRootSubalgebras) {
     out
-    << "<a href = '"
+    << "<a href='"
     << relativeTo
     << this->fileNames.fileNameNoPathRootSubalgebras()
     << "'>Root subalgebras / root subsystems</a>.<br>";
@@ -183,7 +183,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
   }
   if (includeSl2Subalgebras) {
     out
-    << "<a href = '"
+    << "<a href='"
     << relativeTo
     << this->fileNames.fileNameRelativePathSlTwoSubalgebras()
     << "'>sl(2)-subalgebras</a>.<br>";
@@ -1980,7 +1980,8 @@ bool ChevalleyGenerator::isInRootSpace(Vector<Rational>* whichRootSpace) const {
 }
 
 std::string ChevalleyGenerator::toMathML(
-  FormatExpressions* inputFormat, MathExpressionProperties* outputProperties
+  const FormatExpressions* inputFormat,
+  MathExpressionProperties* outputProperties
 ) const {
   this->checkInitialization();
   if (outputProperties != nullptr) {
@@ -1992,7 +1993,8 @@ std::string ChevalleyGenerator::toMathML(
   this->owner->toMathMLChevalleyGenerator(this->generatorIndex, inputFormat);
 }
 
-std::string ChevalleyGenerator::toString(FormatExpressions* inputFormat) const {
+std::string ChevalleyGenerator::toString(const FormatExpressions* inputFormat)
+const {
   this->checkInitialization();
   return
   this->owner->toStringChevalleyGenerator(this->generatorIndex, inputFormat);
@@ -2003,7 +2005,7 @@ bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other) const {
 }
 
 std::string SemisimpleLieAlgebra::toMathMLChevalleyGenerator(
-  int index, FormatExpressions* polynomialFormat
+  int index, const FormatExpressions* polynomialFormat
 ) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> currentFormat;
@@ -2037,7 +2039,7 @@ std::string SemisimpleLieAlgebra::toMathMLChevalleyGenerator(
 }
 
 std::string SemisimpleLieAlgebra::toStringChevalleyGenerator(
-  int index, FormatExpressions* polynomialFormat
+  int index, const FormatExpressions* polynomialFormat
 ) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> currentFormat;

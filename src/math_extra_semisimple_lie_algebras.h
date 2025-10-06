@@ -431,10 +431,10 @@ public:
   static std::string toHTMLCalculatorBodyOnload();
   static std::string toHTMLCalculatorMainDiv();
   std::string toStringChevalleyGenerator(
-    int index, FormatExpressions* polynomialFormat
+    int index, const FormatExpressions* polynomialFormat
   ) const;
   std::string toMathMLChevalleyGenerator(
-    int index, FormatExpressions* polynomialFormat
+    int index, const FormatExpressions* polynomialFormat
   ) const;
   std::string toHTMLLieAlgebraNameFull(FormatExpressions* format) const;
   std::string toStringLieAlgebraName() const;
@@ -698,9 +698,9 @@ public:
     CharacterSemisimpleLieAlgebraModule<Coefficient>& output,
     const Coefficient& zero = Coefficient::zero()
   ) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   inline unsigned int hashFunction() const {
@@ -1016,7 +1016,8 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(
 }
 
 template <class Coefficient>
-std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
+std::string Weight<Coefficient>::toString(const FormatExpressions* format)
+const {
   std::stringstream out;
   bool formatWeightAsIndexVectorSpace = format ==
   nullptr ? true : format->flagFormatWeightAsVectorSpaceIndex;
@@ -1037,41 +1038,30 @@ std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
     return
     weightEpsilonCoordinates.toStringLetterFormat("\\varepsilon", format);
   }
-  bool useOmega = true;
-  std::string oldCustomPlus;
-  std::string VectorSpaceLetter = "V";
-  if (format != nullptr) {
-    useOmega = (format->fundamentalWeightLetter == "");
-    oldCustomPlus = format->customPlusSign;
-    format->customPlusSign = "";
-    VectorSpaceLetter = format->finiteDimensionalRepresentationLetter;
+  std::string fundamentalWeightLetter = format ==
+  nullptr ?
+  std::string("\\omega") :
+  format->fundamentalWeightLetter.latexLetter;
+  if (fundamentalWeightLetter == "") {
+    fundamentalWeightLetter = "\\omega";
   }
-  if (useOmega) {
-    out
-    << VectorSpaceLetter
-    << "_{"
-    << this->weightFundamentalCoordinates.toStringLetterFormat(
-      "\\omega", format
-    )
-    << "}";
-  } else {
-    out
-    << VectorSpaceLetter
-    << "_{"
-    << this->weightFundamentalCoordinates.toStringLetterFormat(
-      format->fundamentalWeightLetter, format
-    )
-    << "}";
-  }
-  if (format != nullptr) {
-    format->customPlusSign = oldCustomPlus;
-  }
+  std::string vectorSpaceLetter = format ==
+  nullptr ?
+  std::string("V") :
+  format->finiteDimensionalRepresentationLetter.latexLetter;
+  out
+  << vectorSpaceLetter
+  << "_{"
+  << this->weightFundamentalCoordinates.toStringLetterFormat(
+    fundamentalWeightLetter, nullptr
+  )
+  << "}";
   return out.str();
 }
 
 template <class Coefficient>
 std::string Weight<Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   if (outputProperties != nullptr) {
     outputProperties->isOne = false;
@@ -1084,7 +1074,9 @@ std::string Weight<Coefficient>::toMathML(
   if (!formatWeightAsIndexVectorSpace) {
     if (this->owner == nullptr) {
       return
-      this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", format);
+      this->weightFundamentalCoordinates.toMathMLLetterFormat(
+        "<mi>&psi;</mi>", format
+      );
     }
     Vector<Coefficient> weightEpsilonCoordinates;
     Vector<Coefficient> weightSimpleCoordinates;
@@ -1098,31 +1090,20 @@ std::string Weight<Coefficient>::toMathML(
     return
     weightEpsilonCoordinates.toStringLetterFormat("\\varepsilon", format);
   }
-  bool useOmega = true;
-  std::string oldCustomPlus;
-  std::string vectorSpaceLetter = "V";
-  if (format != nullptr) {
-    useOmega = (format->fundamentalWeightLetter == "");
-    oldCustomPlus = format->customPlusSign;
-    format->customPlusSign = "";
-    vectorSpaceLetter = format->finiteDimensionalRepresentationLetter;
-  }
-  out << "<msub><mi>" << vectorSpaceLetter << "</mi>";
-  if (useOmega) {
-    out
-    << this->weightFundamentalCoordinates.toMathMLLetterFormat(
-      "\\omega", format
-    );
-  } else {
-    out
-    << this->weightFundamentalCoordinates.toMathMLLetterFormat(
-      format->fundamentalWeightLetter, format
-    );
-  }
+  std::string fundamentalWeightLetter = format ==
+  nullptr ?
+  std::string("<mi>&omega;</mi>") :
+  format->fundamentalWeightLetter.mathMLLetter;
+  std::string vectorSpaceLetter = format ==
+  nullptr ?
+  std::string("<mi>V</mi>") :
+  format->finiteDimensionalRepresentationLetter.mathMLLetter;
+  out << "<msub>" << vectorSpaceLetter;
+  out
+  << this->weightFundamentalCoordinates.toMathMLLetterFormat(
+    fundamentalWeightLetter, format
+  );
   out << "</msub>";
-  if (format != nullptr) {
-    format->customPlusSign = oldCustomPlus;
-  }
   return out.str();
 }
 

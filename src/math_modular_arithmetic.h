@@ -77,9 +77,9 @@ public:
   ElementZmodP operator/(const ElementZmodP& other) const;
   ElementZmodP operator*(const Rational& other) const;
   ElementZmodP operator*(const ElementZmodP& other) const;
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
-    FormatExpressions* format = nullptr,
+    const FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
   std::string toStringModP() const;
@@ -89,8 +89,9 @@ public:
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
-  bool needsParenthesisForMultiplication(FormatExpressions* format = nullptr)
-  const;
+  bool needsParenthesisForMultiplication(
+    const FormatExpressions* format = nullptr
+  ) const;
   static void convertPolynomialRationalToModular(
     const Polynomial<Rational>& input,
     Polynomial<ElementZmodP>& output,

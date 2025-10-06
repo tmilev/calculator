@@ -358,7 +358,7 @@ private:
   double precision;
   double value;
 public:
-  std::string toString(FormatExpressions* format = nullptr) const {
+  std::string toString(const FormatExpressions* format = nullptr) const {
     (void) format;
     std::stringstream out;
     out << this->value;

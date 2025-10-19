@@ -60,6 +60,8 @@ public:
   );
   static std::string leftParenthesis;
   static std::string rightParenthesis;
+  static std::string leftBracket;
+  static std::string rightBracket;
   static std::string negativeSign;
   static std::string positiveSign;
   static std::string mtableDefault;

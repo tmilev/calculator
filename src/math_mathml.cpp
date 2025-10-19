@@ -5,6 +5,10 @@ std::string MathML::leftParenthesis =
 "<mo fence='true' stretchy='true' form='prefix'>(</mo>";
 std::string MathML::rightParenthesis =
 "<mo fence='true' stretchy='true' form='suffix'>)</mo>";
+std::string MathML::leftBracket =
+"<mo fence='true' stretchy='true' form='prefix'>[</mo>";
+std::string MathML::rightBracket =
+"<mo fence='true' stretchy='true' form='suffix'>]</mo>";
 std::string MathML::negativeSign = "<mo>&minus;</mo>";
 std::string MathML::positiveSign = "<mo>+</mo>";
 std::string MathML::mtableDefault = "<mtable>";
@@ -42,6 +46,11 @@ std::string MathML::toMathMLFinal(
 MapList<std::string, std::string>& MathML::mapFromLatexToMathMLEquivalents() {
   static MapList<std::string, std::string> result;
   if (result.size() == 0) {
+    result.setKeyValue("\\sin", "<mo>sin</mo>");
+    result.setKeyValue("\\cos", "<mo>cos</mo>");
+    result.setKeyValue("\\cot", "<mo>cot</mo>");
+    result.setKeyValue("\\tan", "<mo>tan</mo>");
+    result.setKeyValue("\\log", "<mo>log</mo>");
     result.setKeyValue("\\alpha", "<mi>&alpha;</mi>");
     result.setKeyValue("\\beta", "<mi>&beta;</mi>");
     result.setKeyValue("\\gamma", "<mi>&gamma;</mi>");

@@ -1150,6 +1150,7 @@ bool Expression::toMathMLEndStatementNested(
   out << "<mtable>";
   for (int i = 1; i < this->size(); i ++) {
     out << "<mtr><mtd>";
+    out <<
     (*this)[i].toMathML(format, nullptr, nullptr, false, nullptr);
     out << "</mtd></mtr>";
   }
@@ -1792,6 +1793,192 @@ bool Expression::toMathMLIsDenotedBy(
   return true;
 }
 
+bool Expression::toMathMLLnAbsoluteInsteadOfLogarithm(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (
+    !input.owner->flagUseLnAbsInsteadOfLogForIntegrationNotation ||
+    !input.startsWith(input.owner->opLog(), 2)
+  ) {
+    return false;
+  }
+  const Expression& firstExpression = input[1];
+  std::string argument = firstExpression.toMathML(format);
+  out << "<mrow>";
+  if (firstExpression.startsWith(input.owner->opAbsoluteValue())) {
+    out << "<mo>ln</mo> " << argument;
+  } else {
+    out << "<mo>ln</mo> <mo>|</mo>" << argument << "<mo>|</mo>";
+  }
+  out << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLLogBase(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opLogBase(), 3)) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << "<msub><mo>log</mo>"
+  << input[1].toMathML(format)
+  << MathML::leftParenthesis
+  << input[2].toMathML(format)
+  << MathML::rightParenthesis;
+  return true;
+}
+
+bool Expression::toMathMLIntervalOpen(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opIntervalOpen(), 3)) {
+    return false;
+  }
+  out << "<mrow>";
+  if (!input.owner->flagUseBracketsForIntervals) {
+    out << "<mo>IntervalOpen</mo>";
+  }
+  out
+  << MathML::leftParenthesis
+  << input[1].toMathML(format)
+  << "<mo>,</mo>"
+  << input[2].toMathML(format)
+  << MathML::rightParenthesis;
+  out << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLIntervalLeftClosed(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (input.startsWith(input.owner->opIntervalLeftClosed(), 2)) {
+    out << "<mrow>";
+    if (input[1].isSequenceNElements(2)) {
+      out
+      << MathML::leftBracket
+      << input[1][1].toMathML(format)
+      << "<mo>,</mo>"
+      << input[1][2].toMathML(format)
+      << MathML::rightParenthesis;
+    } else {
+      out
+      << input[0].toMathML(format)
+      << "<mo>{}</mo>"
+      << input[1].toMathML(format);
+    }
+    out << "</mrow>";
+    return true;
+  }
+  if (input.startsWith(input.owner->opIntervalLeftClosed(), 3)) {
+    out
+    << "<mrow>"
+    << MathML::leftBracket
+    << input[1].toMathML(format)
+    << "<mo>,</mo>"
+    << input[2].toMathML(format)
+    << MathML::rightParenthesis
+    << "</mrow>";
+    return true;
+  }
+  return false;
+}
+
+bool Expression::toMathMLIntervalRightClosed(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (input.startsWith(input.owner->opIntervalRightClosed(), 3)) {
+    out
+    << "<mrow>"
+    << MathML::leftParenthesis
+    << input[1].toMathML(format)
+    << "<mo>,</mo>"
+    << input[2].toMathML(format)
+    << MathML::rightBracket
+    << "</mrow>";
+    return true;
+  }
+  if (input.startsWith(input.owner->opIntervalRightClosed(), 2)) {
+    out << "<mrow>";
+    if (input[1].isSequenceNElements(2)) {
+      out
+      << MathML::leftParenthesis
+      << input[1][1].toMathML(format)
+      << "<mo>,</mo>"
+      << input[1][2].toMathML(format)
+      << MathML::rightBracket;
+    } else {
+      out
+      << input[0].toMathML(format)
+      << "<mo>{}</mo>"
+      << input[1].toMathML(format);
+    }
+    out << "</mrow>";
+    return true;
+  }
+  return false;
+}
+
+bool Expression::toMathMLIntervalClosed(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (input.startsWith(input.owner->opIntervalClosed(), 2)) {
+    out << "<mrow>";
+    if (input[1].isSequenceNElements(2)) {
+      out
+      << MathML::leftBracket
+      << input[1][1].toMathML(format)
+      << "<mo>,</mo>"
+      << input[1][2].toMathML(format)
+      << MathML::rightBracket;
+    } else {
+      out
+      << input[0].toMathML(format)
+      << "<mo>{}</mo>"
+      << input[1].toMathML(format);
+    }
+    out << "</mrow>";
+    return true;
+  }
+  if (input.startsWith(input.owner->opIntervalClosed(), 3)) {
+    out
+    << "<mrow>"
+    << MathML::leftBracket
+    << input[1].toMathML(format)
+    << "<mo>,</mo>"
+    << input[2].toMathML(format)
+    << MathML::rightBracket
+    << "</mrow>";
+    return true;
+  }
+  return false;
+}
+
 void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
   STACK_TRACE("Expression::initializeToMathMLHandlers");
   toBeInitialized.addOneMathMLAtomHandler(
@@ -1801,24 +1988,24 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opIsDenotedBy(), Expression::toMathMLIsDenotedBy
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLog(), Expression::toStringLnAbsoluteInsteadOfLogarithm
+    toBeInitialized.opLog(), Expression::toMathMLLnAbsoluteInsteadOfLogarithm
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLogBase(), Expression::toStringLogBase
+    toBeInitialized.opLogBase(), Expression::toMathMLLogBase
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntervalOpen(), Expression::toStringIntervalOpen
+    toBeInitialized.opIntervalOpen(), Expression::toMathMLIntervalOpen
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opIntervalRightClosed(),
-    Expression::toStringIntervalRightClosed
+    Expression::toMathMLIntervalRightClosed
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opIntervalLeftClosed(),
-    Expression::toStringIntervalLeftClosed
+    Expression::toMathMLIntervalLeftClosed
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntervalClosed(), Expression::toStringIntervalClosed
+    toBeInitialized.opIntervalClosed(), Expression::toMathMLIntervalClosed
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opQuote(), Expression::toStringQuote

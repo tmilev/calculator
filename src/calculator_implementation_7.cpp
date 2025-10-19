@@ -10501,6 +10501,7 @@ bool Calculator::Test::calculatorTestRun() {
     report.report(reportStream.str());
   }
   global.setWebInput(WebAPI::Request::debugFlag, this->debugFlagAtStart);
+  global << "Done with calculator tests. " << Logger::endL;
   return this->processResults();
 }
 

@@ -686,8 +686,8 @@ bool Calculator::getMatrixExpressions(
   return true;
 }
 
-bool Calculator::Test::processOneTest(JSData& input) {
-  STACK_TRACE("Calculator::Test::processOneTest");
+bool Calculator::Test::loadOneTest(JSData& input) {
+  STACK_TRACE("Calculator::Test::loadOneTest");
   Calculator::Test::OneTest readerTest;
   if (!readerTest.fromJSON(input)) {
     return false;
@@ -703,9 +703,6 @@ bool Calculator::Test::processOneTest(JSData& input) {
     << "otherwise, it isn't.";
     global << Logger::red << reportStream.str() << Logger::endL;
     return false;
-  }
-  if (!this->commands.contains(command)) {
-    this->commands.setKeyValue(command, readerTest);
   }
   Calculator::Test::OneTest& output =
   this->commands.getValueNoFailNonConst(command);
@@ -777,7 +774,7 @@ bool Calculator::Test::loadTestStrings(std::stringstream* commentsOnFailure) {
     return false;
   }
   for (int i = 0; i < this->storedResults.listObjects.size; i ++) {
-    this->processOneTest(this->storedResults.listObjects[i]);
+    this->loadOneTest(this->storedResults.listObjects[i]);
   }
   return true;
 }
@@ -874,7 +871,7 @@ bool Calculator::Test::processResults() {
     << Logger::red
     << "Failed to load test strings. "
     << Logger::endL
-    << commentsOnFailure.str();
+        << commentsOnFailure.str() << Logger::endL;
     out
     << "<b style='color:red'>Failed to load test strings. </b>"
     << commentsOnFailure.str();
@@ -919,7 +916,7 @@ bool Calculator::Test::processResults() {
     currentLine << "<td style='min-width:25px;'>" << i << "</td>";
     currentLineConsole << "Test " << i << "\n";
     currentLine
-    << "<td style = 'min-width:200px;'>"
+    << "<td style='min-width:200px;'>"
     << currentTest.functionAdditionalIdentifier
     << "</td>";
     currentLineConsole
@@ -1002,7 +999,7 @@ bool Calculator::Test::processResults() {
       << "Expected:\n"
       << currentTest.expectedResultMathML
       << "\n";
-      isUnknown = true;
+      isBad = true;
       this->inconsistenciesMathML ++;
     }
     currentLine << "</tr>";
@@ -1092,7 +1089,7 @@ bool Calculator::Test::processResults() {
   << global.getElapsedMilliseconds() - this->startTime
   << " ms. ";
   this->reportHtml = out.str();
-  return this->inconsistencies == 0;
+  return this->inconsistencies == 0 && this->inconsistenciesMathML==0;
 }
 
 int Calculator::getNumberOfBuiltInFunctions() {

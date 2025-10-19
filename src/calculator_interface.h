@@ -537,6 +537,12 @@ public:
     FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   );
+  static bool toMathMLLnAbsoluteInsteadOfLogarithm(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
   static bool toStringDifferential(
     const Expression& input,
     std::stringstream& out,
@@ -580,6 +586,12 @@ public:
     MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringLogBase(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
+  static bool toMathMLLogBase(
     const Expression& input,
     std::stringstream& out,
     FormatExpressions* format,
@@ -813,7 +825,19 @@ public:
     FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   );
+  static bool toMathMLIntervalOpen(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
   static bool toStringIntervalLeftClosed(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
+  static bool toMathMLIntervalLeftClosed(
     const Expression& input,
     std::stringstream& out,
     FormatExpressions* format,
@@ -825,7 +849,19 @@ public:
     FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   );
+  static bool toMathMLIntervalRightClosed(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
   static bool toStringIntervalClosed(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
+  static bool toMathMLIntervalClosed(
     const Expression& input,
     std::stringstream& out,
     FormatExpressions* format,
@@ -3298,7 +3334,7 @@ public:
     bool processResults();
     bool loadTestStrings(std::stringstream* commentsOnFailure);
     bool writeTestStrings(std::stringstream* commentsOnFailure);
-    bool processOneTest(JSData& input);
+    bool loadOneTest(JSData& input);
     static bool all(bool updateABTestFile);
     static bool cacheWorks();
     static bool loopDetection();

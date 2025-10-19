@@ -2309,8 +2309,8 @@ std::string ModuleSSalgebra<Coefficient>::toString(
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   latexFormat.maximumLineLength = 0;
-  latexFormat.fundamentalWeightLetter.latexLetter = "\\omega";
-  latexFormat.fundamentalWeightLetter.mathMLLetter = "<mi>&omega;</mi>";
+  latexFormat.fundamentalWeightLetter.latex = "\\omega";
+  latexFormat.fundamentalWeightLetter.mathML = "<mi>&omega;</mi>";
   if (this->characterOverH.size() < 100) {
     out
     << HtmlRoutines::getMathNoDisplay(

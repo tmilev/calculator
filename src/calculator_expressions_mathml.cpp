@@ -926,163 +926,6 @@ bool Expression::toMathMLDefine(
   return true;
 }
 
-void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
-  STACK_TRACE("Expression::initializeToMathMLHandlers");
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDefine(), Expression::toMathMLDefine
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIsDenotedBy(), Expression::toStringIsDenotedBy
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLog(), Expression::toStringLnAbsoluteInsteadOfLogarithm
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLogBase(), Expression::toStringLogBase
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntervalOpen(), Expression::toStringIntervalOpen
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntervalRightClosed(),
-    Expression::toStringIntervalRightClosed
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntervalLeftClosed(),
-    Expression::toStringIntervalLeftClosed
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntervalClosed(), Expression::toStringIntervalClosed
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opQuote(), Expression::toStringQuote
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDefineConditional(),
-    Expression::toStringDefineConditional
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDivide(), Expression::toMathMLDivide
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opTensor(), Expression::toMathMLTensor
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIn(), Expression::toStringIn
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opOr(), Expression::toStringOr
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opAnd(), Expression::toStringAnd
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opBinom(), Expression::toStringBinom
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opUnderscore(), Expression::toMathMLUnderscore
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opSetMinus(), Expression::toStringSetMinus
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLimitBoundary(), Expression::toStringLimitBoundary
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opTimes(), Expression::toMathMLTimes
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opCrossProduct(), Expression::toStringCrossProduct
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opSqrt(), Expression::toMathMLSqrt
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opFactorial(), Expression::toMathMLFactorial
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opAbsoluteValue(), Expression::toStringAbsoluteValue
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opPower(), Expression::toMathMLPower
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opPlus(), Expression::toMathMLPlus
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDirectSum(), Expression::toStringDirectSum
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opMinus(), Expression::toMathMLMinus
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opBind(), Expression::toStringBind
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opEqualEqual(), Expression::toStringEqualEqual
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opEqualEqualEqual(), Expression::toStringEqualEqualEqual
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDifferentiate(), Expression::toStringDifferentiate
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDifferential(), Expression::toStringDifferential
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opSum(), Expression::toStringSumOrIntegral
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntegral(), Expression::toStringSumOrIntegral
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opGreaterThan(), Expression::toStringGreaterThan
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opGreaterThanOrEqualTo(),
-    Expression::toStringGreaterThanOrEqualTo
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLessThanOrEqualTo(),
-    Expression::toStringLessThanOrEqualTo
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLimit(), Expression::toStringLimit
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLimitProcess(), Expression::toStringLimitProcess
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLessThan(), Expression::toStringLessThan
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opSequence(), Expression::toMathMLSequence
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLieBracket(), Expression::toStringLieBracket
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opMod(), Expression::toStringMod
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opUnion(), Expression::toStringUnion
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntersection(), Expression::toStringIntersection
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opUnionNoRepetition(),
-    Expression::toStringUnionNoRepetition
-  );
-  toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opError(), Expression::toStringError
-  );
-  toBeInitialized.addOneMathMLCompositeHandler(
-    toBeInitialized.opMatrix(), Expression::toMathMLMatrix
-  );
-}
-
 std::string Expression::toMathMLFinal(FormatExpressions* format) const {
   return
   MathML::toMathMLFinal(
@@ -1147,9 +990,11 @@ void Expression::toMathML(
     outputJS->reset();
   }
   int notationIndex =
-  owner->objectContainer.expressionWithNotation.getIndex(*this);
+  owner->objectContainer.expressionsWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
-    out << owner->objectContainer.expressionNotation[notationIndex];
+    out
+    << owner->objectContainer.expressionsWithNotation.values[notationIndex].
+    mathML;
     return;
   }
   if (this->toMathMLData(out, format, outputProperties)) {
@@ -1926,4 +1771,180 @@ std::string ExpressionContext::toMathML() const {
     << this->getAmbientSemisimpleLieAlgebra()->weylGroup.dynkinType.toString();
   }
   return out.str();
+}
+
+bool Expression::toMathMLIsDenotedBy(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opIsDenotedBy())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>=:</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
+  STACK_TRACE("Expression::initializeToMathMLHandlers");
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opDefine(), Expression::toMathMLDefine
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIsDenotedBy(), Expression::toMathMLIsDenotedBy
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLog(), Expression::toStringLnAbsoluteInsteadOfLogarithm
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLogBase(), Expression::toStringLogBase
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIntervalOpen(), Expression::toStringIntervalOpen
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIntervalRightClosed(),
+    Expression::toStringIntervalRightClosed
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIntervalLeftClosed(),
+    Expression::toStringIntervalLeftClosed
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIntervalClosed(), Expression::toStringIntervalClosed
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opQuote(), Expression::toStringQuote
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opDefineConditional(),
+    Expression::toStringDefineConditional
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opDivide(), Expression::toMathMLDivide
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opTensor(), Expression::toMathMLTensor
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIn(), Expression::toStringIn
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opOr(), Expression::toStringOr
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opAnd(), Expression::toStringAnd
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opBinom(), Expression::toStringBinom
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opUnderscore(), Expression::toMathMLUnderscore
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opSetMinus(), Expression::toStringSetMinus
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLimitBoundary(), Expression::toStringLimitBoundary
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opTimes(), Expression::toMathMLTimes
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opCrossProduct(), Expression::toStringCrossProduct
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opSqrt(), Expression::toMathMLSqrt
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opFactorial(), Expression::toMathMLFactorial
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opAbsoluteValue(), Expression::toStringAbsoluteValue
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opPower(), Expression::toMathMLPower
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opPlus(), Expression::toMathMLPlus
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opDirectSum(), Expression::toStringDirectSum
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opMinus(), Expression::toMathMLMinus
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opBind(), Expression::toStringBind
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opEqualEqual(), Expression::toStringEqualEqual
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opEqualEqualEqual(), Expression::toStringEqualEqualEqual
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opDifferentiate(), Expression::toStringDifferentiate
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opDifferential(), Expression::toStringDifferential
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opSum(), Expression::toStringSumOrIntegral
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIntegral(), Expression::toStringSumOrIntegral
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opGreaterThan(), Expression::toStringGreaterThan
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opGreaterThanOrEqualTo(),
+    Expression::toStringGreaterThanOrEqualTo
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLessThanOrEqualTo(),
+    Expression::toStringLessThanOrEqualTo
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLimit(), Expression::toStringLimit
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLimitProcess(), Expression::toStringLimitProcess
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLessThan(), Expression::toStringLessThan
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opSequence(), Expression::toMathMLSequence
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opLieBracket(), Expression::toStringLieBracket
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opMod(), Expression::toStringMod
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opUnion(), Expression::toStringUnion
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opIntersection(), Expression::toStringIntersection
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opUnionNoRepetition(),
+    Expression::toStringUnionNoRepetition
+  );
+  toBeInitialized.addOneMathMLAtomHandler(
+    toBeInitialized.opError(), Expression::toStringError
+  );
+  toBeInitialized.addOneMathMLCompositeHandler(
+    toBeInitialized.opMatrix(), Expression::toMathMLMatrix
+  );
 }

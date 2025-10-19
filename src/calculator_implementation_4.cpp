@@ -617,10 +617,15 @@ bool CalculatorBasics::standardIsDenotedBy(
   << withNotation.toString()
   << " will be denoted by "
   << notation.toString();
-  calculator.objectContainer.expressionNotation.addOnTop(notation.toString());
-  calculator.objectContainer.expressionWithNotation.addOnTop(withNotation);
+  MathMLAndLatex notationStrings;
+  notationStrings.latex = notation.toString();
+  notationStrings.mathML = notation.toMathML();
+  calculator.objectContainer.expressionsWithNotation.setKeyValue(
+    withNotation, notationStrings
+  );
   output = input;
   output.setChildAtomValue(0, calculator.opDefine());
+  output.hashFunction();
   if (
     withNotation.isOfType<
       ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
@@ -2241,32 +2246,21 @@ std::string Calculator::toString() {
     }
   }
   out << "<hr>";
-  out
-  << "Children expressions ("
-  << this->allChildExpressions.size
-  << " total): <br>";
-  int expressionsToDisplay = this->allChildExpressions.size;
-  if (this->allChildExpressions.size > 1000) {
-    expressionsToDisplay = 1000;
-    out << " <b>Displaying first " << expressionsToDisplay << " only </b><br>";
-  }
-  for (int i = 0; i < expressionsToDisplay; i ++) {
-    out << this->allChildExpressions[i].toString() << ", ";
-  }
+  out << this->toStringAllChildExpressions();
   out << "<hr>";
   out
   << "\n Cached expressions ("
   << this->cachedExpressionsPerStack.size()
   << " total):\n<br>\n";
-  expressionsToDisplay = this->cachedExpressionsPerStack.size();
-  if (expressionsToDisplay > 1000) {
-    expressionsToDisplay = 1000;
+  int cachesToDisplay = this->cachedExpressionsPerStack.size();
+  if (cachesToDisplay > 1000) {
+    cachesToDisplay = 1000;
     out
     << "<b>Displaying first "
-    << expressionsToDisplay
+    << cachesToDisplay
     << " expressions only. </b><br>";
   }
-  for (int i = 0; i < expressionsToDisplay; i ++) {
+  for (int i = 0; i < cachesToDisplay; i ++) {
     out
     << this->cachedExpressionsPerStack.keys[i].toString()
     << " -> "
@@ -2277,6 +2271,23 @@ std::string Calculator::toString() {
   }
   out2 << out.str();
   return out2.str();
+}
+
+std::string Calculator::toStringAllChildExpressions() const {
+  std::stringstream out;
+  out
+  << "Children expressions ("
+  << this->allChildExpressions.size
+  << " total): <br>";
+  int expressionsToDisplay = this->allChildExpressions.size;
+  if (this->allChildExpressions.size > 1000) {
+    expressionsToDisplay = 1000;
+    out << " <b>Displaying first " << expressionsToDisplay << " only </b><br>";
+  }
+  for (int i = 0; i < expressionsToDisplay; i ++) {
+    out << this->allChildExpressions[i].toStringSemiFull() << ", ";
+  }
+  return out.str();
 }
 
 std::string CalculatorParser::toStringSyntacticStackHTMLTable(
@@ -2480,8 +2491,7 @@ void ObjectContainer::reset() {
   this->doubleNumbers.addOnTop(std::nan(""));
   this->allStrings.clear();
   this->jsonObjects.clear();
-  this->expressionNotation.clear();
-  this->expressionWithNotation.clear();
+  this->expressionsWithNotation.clear();
   this->constraints.clear();
   this->lakshmibaiSeshadriPaths.clear();
   this->matrixTensorRationals.clear();

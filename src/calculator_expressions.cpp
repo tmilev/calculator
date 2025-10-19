@@ -1450,8 +1450,7 @@ bool Expression::setChildAtomValue(int childIndex, int atomValue) {
   Expression atom;
   atom.makeAtom(*this->owner, atomValue);
   this->children.setObjectAtIndex(
-    childIndex,
-    this->owner->allChildExpressions.addNoRepetitionOrReturnIndexFirst(atom)
+    childIndex, this->owner->addChildExpression(atom)
   );
   return true;
 }
@@ -5655,9 +5654,12 @@ std::string Expression::toString(
     return out.str();
   }
   int notationIndex =
-  owner->objectContainer.expressionWithNotation.getIndex(*this);
+  this->owner->objectContainer.expressionsWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
-    return owner->objectContainer.expressionNotation[notationIndex];
+    return
+    this->owner->objectContainer.expressionsWithNotation.values[
+      notationIndex
+    ].latex;
   }
   FormatExpressions formatCopy;
   if (format != nullptr) {

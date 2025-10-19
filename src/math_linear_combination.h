@@ -1425,7 +1425,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
   if (format != nullptr) {
     *formatForTerm = *format;
     formatForTerm->customCoefficientMonomialSeparator = "";
-    useCustomPlus = (format->customPlusSign.mathMLLetter != "");
+    useCustomPlus = (format->customPlusSign.mathML != "");
   }
   out << "<mrow>";
   for (int i = 0; i < sortedMonomials.size; i ++) {
@@ -1447,7 +1447,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     }
     if (i > 0) {
       if (useCustomPlus) {
-        out << format->customPlusSign.mathMLLetter;
+        out << format->customPlusSign.mathML;
       } else if (!termProperties.startsWithMinus) {
         out << "<mo>+</mo>";
       }
@@ -1518,7 +1518,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   FormatExpressions* formatForTerms = format ==
   nullptr ? nullptr : &formatHolder.getElement();
   if (format != nullptr) {
-    useCustomPlus = (format->customPlusSign.latexLetter != "");
+    useCustomPlus = (format->customPlusSign.latex != "");
     *formatForTerms = *format;
     customTimes = format->customCoefficientMonomialSeparator;
     if (
@@ -1545,7 +1545,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
           cutOffCounter += 1;
         }
       } else {
-        out << format->customPlusSign.latexLetter;
+        out << format->customPlusSign.latex;
       }
     }
     out << termString;

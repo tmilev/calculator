@@ -605,8 +605,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   weyl.dynkinType.getEpsilonMatrix(epsilonCoordinateMatrix);
   for (int i = 0; i < outputOrbit.size; i ++) {
     format.simpleRootLetter = "\\alpha";
-    format.fundamentalWeightLetter.latexLetter = "\\psi";
-    format.fundamentalWeightLetter.mathMLLetter = "<mi>&psi;</mi>";
+    format.fundamentalWeightLetter.latex = "\\psi";
+    format.fundamentalWeightLetter.mathML = "<mi>&psi;</mi>";
     std::string orbitElementString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
     epsilonCoordinateMatrix.actOnVectorColumn(epsilonVector, zero);
@@ -614,7 +614,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     epsilonVector.toStringLetterFormat("\\varepsilon", &format);
     std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
-    toStringLetterFormat(format.fundamentalWeightLetter.latexLetter, &format);
+    toStringLetterFormat(format.fundamentalWeightLetter.latex, &format);
     out
     << "<tr>"
     << "<td>"
@@ -820,8 +820,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   out << integralPositiveRootReflectionGraph.toStringPsTricks(nullptr);
   for (int i = 0; i < outputOrbit.size; i ++) {
     format.simpleRootLetter = "\\alpha";
-    format.fundamentalWeightLetter.latexLetter = "\\psi";
-    format.fundamentalWeightLetter.mathMLLetter = "<mi>&psi;</mi>";
+    format.fundamentalWeightLetter.latex = "\\psi";
+    format.fundamentalWeightLetter.mathML = "<mi>&psi;</mi>";
     std::string orbitElementString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
     epsilonCoordinatesMatrix.actOnVectorColumn(epsilonVector, zero);
@@ -829,7 +829,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     epsilonVector.toStringLetterFormat("\\varepsilon", &format);
     std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
-    toStringLetterFormat(format.fundamentalWeightLetter.latexLetter, &format);
+    toStringLetterFormat(format.fundamentalWeightLetter.latex, &format);
     out
     << "<tr>"
     << "<td>"

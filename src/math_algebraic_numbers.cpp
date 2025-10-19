@@ -17,7 +17,7 @@ std::string MonomialVector::toMathML(
     this->monomialIndex >= 0
   ) {
     std::string result =
-    format->vectorSpaceEiBasisNames[this->monomialIndex].mathMLLetter;
+    format->vectorSpaceEiBasisNames[this->monomialIndex].mathML;
     if (outputProperties != nullptr && (result == "" || result == "1")) {
       outputProperties->isOne = true;
     }
@@ -34,7 +34,7 @@ std::string MonomialVector::toString(const FormatExpressions* format) const {
       this->monomialIndex < format->vectorSpaceEiBasisNames.size &&
       this->monomialIndex >= 0
     ) {
-      return format->vectorSpaceEiBasisNames[this->monomialIndex].latexLetter;
+      return format->vectorSpaceEiBasisNames[this->monomialIndex].latex;
     }
   }
   std::stringstream out;
@@ -167,8 +167,8 @@ void AlgebraicClosureRationals::computeQuadraticRadicals() {
     int index = this->getIndexFromRadicalSelection(selection);
     this->quadraticRadicalsCorrespondingToBasisElements[index] = radical;
     MathMLAndLatex displayName;
-    displayName.latexLetter = latexRadical.str();
-    displayName.mathMLLetter = mathMLRadical.str();
+    displayName.latex = latexRadical.str();
+    displayName.mathML = mathMLRadical.str();
     this->displayNamesBasisElements[index] = displayName;
   } while (selection.incrementReturnFalseIfPastLast());
 }
@@ -1724,10 +1724,10 @@ const {
     out << "<br>";
     std::stringstream formulaStream;
     if (i < this->displayNamesBasisElements.size) {
-      if (this->displayNamesBasisElements[i].latexLetter == "") {
+      if (this->displayNamesBasisElements[i].latex == "") {
         formulaStream << "1";
       } else {
-        formulaStream << this->displayNamesBasisElements[i].latexLetter;
+        formulaStream << this->displayNamesBasisElements[i].latex;
       }
     } else {
       formulaStream << " e_{" << i + 1 << "}";

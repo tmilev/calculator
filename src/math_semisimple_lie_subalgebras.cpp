@@ -6924,8 +6924,8 @@ computePrimalModuleDecompositionHighestWeightsLastPart() {
     this->getNonPrimalWeightFirstGenerator(this->modules[i][0][0]);
   }
   this->subalgebraModules = this->primalSubalgebraModules;
-  this->characterFormat.getElement().customPlusSign.latexLetter = "\\oplus ";
-  this->characterFormat.getElement().customPlusSign.mathMLLetter =
+  this->characterFormat.getElement().customPlusSign.latex = "\\oplus ";
+  this->characterFormat.getElement().customPlusSign.mathML =
   "<mo>&oplus;</mo>";
   int rank = this->weylNonEmbedded->getDimension();
   this->characterFormat.getElement().vectorSpaceEiBasisNames.setSize(
@@ -6949,10 +6949,9 @@ computePrimalModuleDecompositionHighestWeightsLastPart() {
         mathMLStream << "<mi>&psi;</mi>";
       }
     }
-    this->characterFormat.getElement().vectorSpaceEiBasisNames[i].latexLetter =
+    this->characterFormat.getElement().vectorSpaceEiBasisNames[i].latex =
     currentStream.str();
-    this->characterFormat.getElement().vectorSpaceEiBasisNames[i].mathMLLetter
-    =
+    this->characterFormat.getElement().vectorSpaceEiBasisNames[i].mathML =
     mathMLStream.str();
   }
   int numberOfModules = 0;

@@ -1450,10 +1450,10 @@ public:
     this->initializeHashesToOne();
   }
   std::string toString(FormatExpressions* format) const {
-    return this->List<Object>::toString(format);
+    return this->TemplateList::toString(format);
   }
   std::string toString() const {
-    return this->::List<Object>::toString();
+    return this->TemplateList::toString();
   }
   void operator=(const HashedList<Object, hashFunctionObject>& from) {
     if (&from == this) {

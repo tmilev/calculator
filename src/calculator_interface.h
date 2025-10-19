@@ -573,6 +573,12 @@ public:
     FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   );
+  static bool toMathMLIsDenotedBy(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
   static bool toStringLogBase(
     const Expression& input,
     std::stringstream& out,
@@ -1890,9 +1896,7 @@ public:
   HashedListReferences<std::string, HashFunctions::hashFunction<std::string> >
   allStrings;
   HashedListReferences<JSData> jsonObjects;
-  HashedListReferences<std::string, HashFunctions::hashFunction<std::string> >
-  expressionNotation;
-  HashedListReferences<Expression> expressionWithNotation;
+  MapReferences<Expression, MathMLAndLatex> expressionsWithNotation;
   HashedListReferences<Expression> constraints;
   HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
   HashedListReferences<MatrixTensor<Rational> > matrixTensorRationals;
@@ -2714,6 +2718,7 @@ public:
   }
   std::string toStringRuleStatusUser();
   std::string toString();
+  std::string toStringAllChildExpressions() const;
   JSData toJSONPerformance();
   JSData toJSONPerformancePerHandler();
   Expression getNewBoundVariable();

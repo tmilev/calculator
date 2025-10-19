@@ -2462,10 +2462,10 @@ splitCharacterOverReductiveSubalgebra(
   }
   FormatExpressions format;
   format.flagUseLatex = true;
-  format.customPlusSign.latexLetter = "\\oplus ";
-  format.customPlusSign.mathMLLetter = "<mo>&oplus;</mo>";
-  format.fundamentalWeightLetter.latexLetter = "\\omega";
-  format.fundamentalWeightLetter.mathMLLetter = "<mi>&omega;</mi>";
+  format.customPlusSign.latex = "\\oplus ";
+  format.customPlusSign.mathML = "<mo>&oplus;</mo>";
+  format.fundamentalWeightLetter.latex = "\\omega";
+  format.fundamentalWeightLetter.mathML = "<mi>&omega;</mi>";
   out
   << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
   << HtmlRoutines::getMathNoDisplay(

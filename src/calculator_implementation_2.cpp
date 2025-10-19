@@ -1289,6 +1289,10 @@ bool Calculator::EvaluateLoop::detectLoopsWithStatistics() {
 }
 
 bool Calculator::EvaluateLoop::detectLoops() {
+  this->intermediateOutputs.grandMasterConsistencyCheck();
+  if (this->output->flagDeallocated) {
+    global.fatal << "Not allowed to have deallocation here. " << global.fatal;
+  }
   if (!this->intermediateOutputs.contains(*this->output)) {
     return false;
   }

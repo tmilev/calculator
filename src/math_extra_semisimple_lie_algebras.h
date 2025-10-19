@@ -1040,16 +1040,14 @@ const {
     weightEpsilonCoordinates.toStringLetterFormat("\\varepsilon", format);
   }
   std::string fundamentalWeightLetter = format ==
-  nullptr ?
-  std::string("\\omega") :
-  format->fundamentalWeightLetter.latexLetter;
+  nullptr ? std::string("\\omega") : format->fundamentalWeightLetter.latex;
   if (fundamentalWeightLetter == "") {
     fundamentalWeightLetter = "\\omega";
   }
   std::string vectorSpaceLetter = format ==
   nullptr ?
   std::string("V") :
-  format->finiteDimensionalRepresentationLetter.latexLetter;
+  format->finiteDimensionalRepresentationLetter.latex;
   out
   << vectorSpaceLetter
   << "_{"
@@ -1094,11 +1092,11 @@ std::string Weight<Coefficient>::toMathML(
   std::string fundamentalWeightLetter = format ==
   nullptr ?
   std::string("<mi>&omega;</mi>") :
-  format->fundamentalWeightLetter.mathMLLetter;
+  format->fundamentalWeightLetter.mathML;
   std::string vectorSpaceLetter = format ==
   nullptr ?
   std::string("<mi>V</mi>") :
-  format->finiteDimensionalRepresentationLetter.mathMLLetter;
+  format->finiteDimensionalRepresentationLetter.mathML;
   out << "<msub>" << vectorSpaceLetter;
   out
   << this->weightFundamentalCoordinates.toMathMLLetterFormat(

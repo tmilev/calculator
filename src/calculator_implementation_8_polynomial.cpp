@@ -620,7 +620,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   context.getFormat(format);
   HashedList<std::string> variableNames;
   for (const MathMLAndLatex& variable : format.polynomialAlphabet) {
-    variableNames.addOnTopNoRepetition(variable.latexLetter);
+    variableNames.addOnTopNoRepetition(variable.latex);
   }
   for (char i = 0; i < 26; i ++) {
     char currentLetter = 'a' + i;

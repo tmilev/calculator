@@ -1938,19 +1938,24 @@ void Matrix<Coefficient>::initialize(
 }
 
 struct MathMLAndLatex {
-  std::string latexLetter;
-  std::string mathMLLetter;
+  friend std::ostream& operator<<(
+    std::ostream& output, const MathMLAndLatex& element
+  ) {
+    return output << element.latex;
+  }
+  std::string latex;
+  std::string mathML;
   MathMLAndLatex(
     const std::string& inputLatexLetter, const std::string& inputMathMLLetter
   ):
-  latexLetter(inputLatexLetter),
-  mathMLLetter(inputMathMLLetter) {}
+  latex(inputLatexLetter),
+  mathML(inputMathMLLetter) {}
   MathMLAndLatex(const std::string& inputLetter = ""):
-  latexLetter(inputLetter),
-  mathMLLetter(inputLetter) {}
+  latex(inputLetter),
+  mathML(inputLetter) {}
   void clear() {
-    this->mathMLLetter = "";
-    this->latexLetter = "";
+    this->mathML = "";
+    this->latex = "";
   }
   bool operator==(const MathMLAndLatex& other) const;
   void operator=(const std::string& other);
@@ -2749,7 +2754,7 @@ std::string Vector<Coefficient>::toMathMLLetterFormat(
     out << term;
     if (format != nullptr) {
       if (format->vectorSpaceEiBasisNames.size > i) {
-        out << format->vectorSpaceEiBasisNames[i].mathMLLetter;
+        out << format->vectorSpaceEiBasisNames[i].mathML;
         continue;
       }
     }
@@ -2803,7 +2808,7 @@ std::string Vector<Coefficient>::toStringLetterFormat(
       out << term;
       if (format != nullptr) {
         if (format->vectorSpaceEiBasisNames.size > i) {
-          out << format->vectorSpaceEiBasisNames[i].latexLetter;
+          out << format->vectorSpaceEiBasisNames[i].latex;
           continue;
         }
       }

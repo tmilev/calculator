@@ -3540,8 +3540,8 @@ FormatExpressions::FormatExpressions() {
   this->chevalleyHGeneratorLetter = "h";
   this->polynomialDefaultLetter = "x";
   this->weylAlgebraDefaultLetter = "\\partial";
-  this->finiteDimensionalRepresentationLetter.latexLetter = "V";
-  this->finiteDimensionalRepresentationLetter.mathMLLetter = "<mi>V</mi>";
+  this->finiteDimensionalRepresentationLetter.latex = "V";
+  this->finiteDimensionalRepresentationLetter.mathML = "<mi>V</mi>";
   this->simpleRootLetter = "\\eta";
   this->maximumLineLength = 100;
   this->flagPassCustomCoefficientMonomialSeparatorToCoefficients = false;
@@ -3581,7 +3581,7 @@ FormatExpressions::FormatExpressions() {
 
 std::string FormatExpressions::polynomialLatexLetter(int index) const {
   if (index < this->polynomialAlphabet.size) {
-    return this->polynomialAlphabet[index].latexLetter;
+    return this->polynomialAlphabet[index].latex;
   }
   std::stringstream out;
   out << this->polynomialDefaultLetter << "_{" << index + 1 << "}";
@@ -3590,7 +3590,7 @@ std::string FormatExpressions::polynomialLatexLetter(int index) const {
 
 std::string FormatExpressions::polynomialMathMLLetter(int index) const {
   if (index < this->polynomialAlphabet.size) {
-    return "<mi>" + this->polynomialAlphabet[index].mathMLLetter + "</mi>";
+    return "<mi>" + this->polynomialAlphabet[index].mathML + "</mi>";
   }
   std::stringstream out;
   out
@@ -15669,12 +15669,10 @@ bool ConeCollection::findMaxLFOverConeProjective(
 }
 
 bool MathMLAndLatex::operator==(const MathMLAndLatex& other) const {
-  return
-  this->latexLetter == other.latexLetter &&
-  this->mathMLLetter == other.mathMLLetter;
+  return this->latex == other.latex && this->mathML == other.mathML;
 }
 
 void MathMLAndLatex::operator=(const std::string& other) {
-  this->latexLetter = other;
-  this->mathMLLetter = other;
+  this->latex = other;
+  this->mathML = other;
 }

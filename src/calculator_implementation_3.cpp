@@ -688,11 +688,11 @@ bool Calculator::getMatrixExpressions(
 
 bool Calculator::Test::processOneTest(JSData& input) {
   STACK_TRACE("Calculator::Test::processOneTest");
-  Calculator::Test::OneTest oneTest;
-  if (!oneTest.fromJSON(input)) {
+  Calculator::Test::OneTest readerTest;
+  if (!readerTest.fromJSON(input)) {
     return false;
   }
-  std::string command = oneTest.command;
+  std::string command = readerTest.command;
   if (!this->commands.contains(command)) {
     std::stringstream reportStream;
     reportStream
@@ -704,7 +704,13 @@ bool Calculator::Test::processOneTest(JSData& input) {
     global << Logger::red << reportStream.str() << Logger::endL;
     return false;
   }
-  this->commands.setKeyValue(command, oneTest);
+  if (!this->commands.contains(command)) {
+    this->commands.setKeyValue(command, readerTest);
+  }
+  Calculator::Test::OneTest& output =
+  this->commands.getValueNoFailNonConst(command);
+  output.expectedResult = readerTest.expectedResult;
+  output.expectedResultMathML = readerTest.expectedResultMathML;
   return true;
 }
 
@@ -713,12 +719,12 @@ bool Calculator::Test::OneTest::fromJSON(JSData& input) {
     global << Logger::red << "Input command is missing. " << Logger::endL;
     return false;
   }
-  std::string command = input["input"].stringValue;
+  this->command = input["input"].stringValue;
   if (input["output"].elementType != JSData::Type::tokenString) {
     global
     << Logger::red
     << "Command: "
-    << command
+    << this->command
     << " is missing its expected output. "
     << Logger::endL;
     return false;
@@ -1058,7 +1064,9 @@ bool Calculator::Test::processResults() {
     << Logger::orange
     << "There were "
     << this->unknown
-    << " commands with no previous recorded results."
+    << " commands with missing expected results and "
+    << this->unknownMathML
+    << " commands with missing mathML expected results. "
     << Logger::endL;
     if (this->flagTestResultsExist) {
       out

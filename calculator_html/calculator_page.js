@@ -656,22 +656,28 @@ class Calculator {
       processMonitoring.monitor.start(inputParsed.workerId);
       return result;
     }
+    const syntaxErrors = inputParsed.syntaxErrors;
+    const hasSyntaxErrors =
+      syntaxErrors !== undefined &&
+      syntaxErrors !== null &&
+      syntaxErrors !== "";
+    if (hasSyntaxErrors) {
+      result.appendChild(this.constructSyntaxErrors(syntaxErrors))
+    }
+    const hasResult = inputParsed.result !== undefined && inputParsed.result !== null;
+    const hasHtmlResult = inputParsed.resultHtml !== undefined && inputParsed.resultHtml !== null;
     if (
-      inputParsed.result === undefined &&
-      inputParsed.resultHtml !== undefined
+      !hasSyntaxErrors && !hasResult && hasHtmlResult
     ) {
-      // If both resultHTML and result are specified,
-      // resultHTML must be a fallback, 
-      // so we ignore it.
-      let resultHTML = document.createElement("div");
-      writeHTML(resultHTML, inputParsed.resultHtml);
-      result.appendChild(resultHTML);
+      // The result is mimssing, so show the fallback resultHTML.
+      let resultHtml = document.createElement("div");
+      writeHTML(resultHtml, inputParsed.resultHtml);
+      result.appendChild(resultHtml);
     }
-    if (inputParsed.result === undefined) {
-      return result;
+    if (hasResult) {
+      const inputOutputAndComments = this.constructInputOutputAndComments(inputParsed);
+      result.appendChild(inputOutputAndComments);
     }
-    const inputOutputComments = this.constructInputOutputComments(inputParsed);
-    result.appendChild(inputOutputComments);
     if (inputParsed.parsingLog !== undefined) {
       let element = document.createElement("div");
       writeHTML(element, inputParsed.parsingLog.join("<hr>"));
@@ -680,7 +686,22 @@ class Calculator {
     return result;
   }
 
-  constructInputOutputComments(
+  constructSyntaxErrors(syntaxErrors) {
+    const result = document.createElement("div");
+    const element = document.createElement("div");
+    writeHTML(element, syntaxErrors);
+    const syntaxErrorsDiv = document.createElement("div");
+    syntaxErrorsDiv.textContent = "Syntax errors"
+    syntaxErrorsDiv.style.fontWeight = "bold";
+    syntaxErrorsDiv.style.color = "purple";
+    syntaxErrorsDiv.style.marginTop = "20px";
+    element.style.marginTop = "20px";
+    result.appendChild(element);
+    result.appendChild(syntaxErrorsDiv);
+    return result;
+  }
+
+  constructInputOutputAndComments(
     inputParsed,
   ) {
     let inputOutputComments = document.createElement("div");
@@ -688,11 +709,6 @@ class Calculator {
     let inputOutput = document.createElement("div");
     inputOutputComments.appendChild(inputOutput);
     inputOutput.className = "calculatorInputOutput";
-    if (inputParsed.syntaxErrors !== undefined) {
-      let element = document.createElement("div");
-      writeHTML(element, inputParsed.syntaxErrors);
-      inputOutput.appendChild(element);
-    }
     let inputOutputTable = this.constructInputOutput(inputParsed);
     inputOutput.appendChild(inputOutputTable);
     let commentsContainer = this.constructComments(inputParsed);

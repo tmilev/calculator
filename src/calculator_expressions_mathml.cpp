@@ -84,6 +84,24 @@ bool Expression::toMathMLBuiltIn<
 }
 
 template < >
+bool Expression::toMathMLBuiltIn<SemisimpleLieAlgebra*>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  STACK_TRACE("Expression::toStringBuiltIn(SemisimpleLieAlgebra*)");
+  (void) format;
+  (void) outputProperties;
+  out
+  << "<mi>SSLieAlg</mi><mo>{</mo><mo>}</mo>"
+  << MathML::leftParenthesis
+  << input.getValue<SemisimpleLieAlgebra*>()->toMathMLLieAlgebraName()
+  << MathML::rightParenthesis;
+  return true;
+}
+
+template < >
 bool Expression::toMathMLBuiltIn<RationalFraction<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
@@ -802,10 +820,116 @@ std::string ElementZmodP::toMathMLPolynomialCalculator(
   return out.str();
 }
 
+bool Expression::toMathMLFactorial(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opFactorial(), 2)) {
+    return false;
+  }
+  out << "<mrow>";
+  if (input[1].needsParenthesisForBaseOfExponent()) {
+    out
+    << MathML::leftParenthesis
+    << input[1].toMathML(format)
+    << MathML::rightParenthesis;
+  } else {
+    out << input[1].toMathML(format);
+  }
+  out << "<mo>!</mo>" << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLSqrt(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opSqrt())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toMathMLSqrt2(input, out, format);
+  }
+  return Expression::toMathMLSqrt3(input, out, format);
+}
+
+bool Expression::toMathMLSqrt2(
+  const Expression& input, std::stringstream& out, FormatExpressions* format
+) {
+  if (!input.startsWith(input.owner->opSqrt(), 2)) {
+    return false;
+  }
+  out << "<msqrt>" << input[1].toMathML(format) << "</msqrt>";
+  return true;
+}
+
+bool Expression::toMathMLSqrt3(
+  const Expression& input, std::stringstream& out, FormatExpressions* format
+) {
+  if (!input.startsWith(input.owner->opSqrt(), 3)) {
+    return false;
+  }
+  int power = 0;
+  bool hasPowerTwo = input[1].isSmallInteger(&power);
+  if (hasPowerTwo) {
+    hasPowerTwo = (power == 2);
+  }
+  if (hasPowerTwo) {
+    out << "<msqrt>" << input[2].toMathML(format) << "</msqrt>";
+  } else {
+    out
+    << "<mroot>"
+    << input[2].toMathML(format)
+    << input[1].toMathML(format)
+    << "</mroot>";
+  }
+  return true;
+}
+
+bool Expression::toMathMLDefine(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opDefine(), 3)) {
+    return false;
+  }
+  std::string firstE = input[1].toMathML(format);
+  std::string secondE = input[2].toMathML(format);
+  out << "<mrow>";
+  if (
+    input[1].isListStartingWithAtom(input.owner->opDefine()) ||
+    input[1].isListStartingWithAtom(input.owner->opGreaterThan()) ||
+    input[1].isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo()) ||
+    input[1].isListStartingWithAtom(input.owner->opLessThan()) ||
+    input[1].isListStartingWithAtom(input.owner->opLessThanOrEqualTo())
+  ) {
+    out << MathML::leftParenthesis << firstE << MathML::rightParenthesis;
+  } else {
+    out << firstE;
+  }
+  out << "<mo>=</mo>";
+  if (input[2].isListStartingWithAtom(input.owner->opDefine())) {
+    out << MathML::leftParenthesis << secondE << MathML::rightParenthesis;
+  } else {
+    out << secondE;
+  }
+  out << "</mrow>";
+  return true;
+}
+
 void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
   STACK_TRACE("Expression::initializeToMathMLHandlers");
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDefine(), Expression::toStringDefine
+    toBeInitialized.opDefine(), Expression::toMathMLDefine
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opIsDenotedBy(), Expression::toStringIsDenotedBy
@@ -871,10 +995,10 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opCrossProduct(), Expression::toStringCrossProduct
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opSqrt(), Expression::toStringSqrt
+    toBeInitialized.opSqrt(), Expression::toMathMLSqrt
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opFactorial(), Expression::toStringFactorial
+    toBeInitialized.opFactorial(), Expression::toMathMLFactorial
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opAbsoluteValue(), Expression::toStringAbsoluteValue
@@ -1028,12 +1152,14 @@ void Expression::toMathML(
     out << owner->objectContainer.expressionNotation[notationIndex];
     return;
   }
-  if (this->toMathMLData(out, format, outputProperties)) {} else if (
-    this->toMathMLWithAtomHandler(out, outputProperties)
-  ) {} else if (this->toMathMLWithCompositeHandler(out, outputProperties)) {}
- else if (
-    this->toMathMLEndStatement(out, startingExpression, outputJS, format)
-  ) {} else if (this->size() == 1) {
+  if (this->toMathMLData(out, format, outputProperties)) {
+    return;
+  } else if (this->toMathMLWithAtomHandler(out, outputProperties)) {
+    return;
+  } else if (this->toMathMLWithCompositeHandler(out, outputProperties)) {} else
+  if (this->toMathMLEndStatement(out, startingExpression, outputJS, format)) {
+    return;
+  } else if (this->size() == 1) {
     (*this)[0].toMathML(
       out, format, outputProperties, nullptr, false, nullptr
     );

@@ -439,6 +439,7 @@ public:
   std::string toHTMLLieAlgebraNameFull(FormatExpressions* format) const;
   std::string toStringLieAlgebraName() const;
   std::string toMathMLFinalLieAlgebraName() const;
+  std::string toMathMLLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;
   int getNumberOfGenerators() const {
     return

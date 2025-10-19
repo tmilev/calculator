@@ -561,6 +561,12 @@ public:
     FormatExpressions* format,
     MathExpressionProperties* outputProperties
   );
+  static bool toMathMLDefine(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+  );
   static bool toStringIsDenotedBy(
     const Expression& input,
     std::stringstream& out,
@@ -777,6 +783,18 @@ public:
   static bool toStringSqrt3(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
+  static bool toMathMLSqrt(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
+  static bool toMathMLSqrt2(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+  );
+  static bool toMathMLSqrt3(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+  );
   static bool toStringOr(
     const Expression& input,
     std::stringstream& out,
@@ -832,6 +850,12 @@ public:
     MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringFactorial(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
+  static bool toMathMLFactorial(
     const Expression& input,
     std::stringstream& out,
     FormatExpressions* format,
@@ -3259,6 +3283,8 @@ public:
       std::string expectedResult;
       std::string expectedResultMathML;
       OneTest();
+      JSData toJSON() const;
+      bool fromJSON(JSData& input);
     };
 
     MapList<std::string, Calculator::Test::OneTest> commands;

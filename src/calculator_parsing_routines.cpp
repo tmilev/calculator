@@ -427,6 +427,8 @@ void Calculator::EvaluationStatistics::reset() {
   this->trivialPerformancePerHandler.makeZero();
   this->nonTrivialPerformancePerHandler.makeZero();
   this->patternMatchMilliseconds = 0;
+  this->loopDetectionMilliseconds = 0;
+  this->cachePerformanceMilliseconds = 0;
 }
 
 void Calculator::reset() {

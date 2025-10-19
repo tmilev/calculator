@@ -688,11 +688,11 @@ bool Calculator::getMatrixExpressions(
 
 bool Calculator::Test::processOneTest(JSData& input) {
   STACK_TRACE("Calculator::Test::processOneTest");
-  if (input["input"].elementType != JSData::Type::tokenString) {
-    global << Logger::red << "Input command is missing. " << Logger::endL;
+  Calculator::Test::OneTest oneTest;
+  if (!oneTest.fromJSON(input)) {
     return false;
   }
-  std::string command = input["input"].stringValue;
+  std::string command = oneTest.command;
   if (!this->commands.contains(command)) {
     std::stringstream reportStream;
     reportStream
@@ -704,6 +704,16 @@ bool Calculator::Test::processOneTest(JSData& input) {
     global << Logger::red << reportStream.str() << Logger::endL;
     return false;
   }
+  this->commands.setKeyValue(command, oneTest);
+  return true;
+}
+
+bool Calculator::Test::OneTest::fromJSON(JSData& input) {
+  if (input["input"].elementType != JSData::Type::tokenString) {
+    global << Logger::red << "Input command is missing. " << Logger::endL;
+    return false;
+  }
+  std::string command = input["input"].stringValue;
   if (input["output"].elementType != JSData::Type::tokenString) {
     global
     << Logger::red
@@ -716,10 +726,8 @@ bool Calculator::Test::processOneTest(JSData& input) {
   if (input["outputMathML"].elementType != JSData::Type::tokenString) {
     input["outputMathML"] = "";
   }
-  Calculator::Test::OneTest& currentTest =
-  this->commands.getValueCreateEmpty(command);
-  currentTest.expectedResult = input["output"].stringValue;
-  currentTest.expectedResultMathML = input["outputMathML"].stringValue;
+  this->expectedResult = input["output"].stringValue;
+  this->expectedResultMathML = input["outputMathML"].stringValue;
   return true;
 }
 
@@ -781,17 +789,24 @@ std::string Calculator::writeFileToOutputFolderReturnLink(
   );
 }
 
+JSData Calculator::Test::OneTest::toJSON() const {
+  JSData result;
+  result["input"] = this->command;
+  result["output"] = this->actualResult;
+  if (this->actualResultMathML != "") {
+    result["outputMathML"] = this->actualResultMathML;
+  }
+  return result;
+}
+
 bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
   STACK_TRACE("Calculator::Test::writeTestStrings");
   JSData result;
   result.elementType = JSData::Type::tokenArray;
-  result.listObjects.setSize(this->commands.size());
-  for (int i = 0; i < this->commands.size(); i ++) {
-    JSData nextEntry;
-    nextEntry["input"] = this->commands.keys[i];
-    Calculator::Test::OneTest& output = this->commands.values[i];
-    nextEntry["output"] = output.actualResult;
-    result.listObjects[i] = nextEntry;
+  result.listObjects.setExpectedSize(this->commands.size());
+  result.listObjects.clear();
+  for (Calculator::Test::OneTest& output : this->commands.values) {
+    result.listObjects.addOnTop(output.toJSON());
   }
   return
   FileOperations::writeFileVirtual(
@@ -952,8 +967,9 @@ bool Calculator::Test::processResults() {
     }
     if (currentTest.actualResultMathML == currentTest.expectedResultMathML) {
       currentLine
-      <<
-      "<td style='min-width:30px;'><b style='color:green;'>mathml OK</b></td>";
+      << "<td style='min-width:30px;'>"
+      << "<b style='color:green;'>mathml OK</b>"
+      << "</td>";
     } else if (currentTest.expectedResultMathML == "") {
       currentLine
       << "<td><b style='color:orange;'>expected mathml unknown</b></td>";
@@ -1025,11 +1041,19 @@ bool Calculator::Test::processResults() {
     << Logger::endL;
     global << badCommandsConsole.str() << Logger::endL;
   }
-  if (this->unknown > 0 || this->unknownMathML > 0) {
+  if (this->unknown > 0) {
     out
     << "<b style = 'color:orange'>There were "
     << this->unknown
-    << " commands with no previous recorded results. </b>";
+    << " commands with no previously recorded regular outputs. </b>";
+  }
+  if (this->unknownMathML > 0) {
+    out
+    << "<b style = 'color:orange'>There were "
+    << this->unknownMathML
+    << " commands with no previously recorded MathML outputs. </b>";
+  }
+  if (this->unknownMathML > 0 || this->unknown > 0) {
     global
     << Logger::orange
     << "There were "
@@ -1052,7 +1076,7 @@ bool Calculator::Test::processResults() {
   if (this->unknown == 0 && this->inconsistencies == 0) {
     out
     << "<b style='color:green'>"
-    << "No inconsistencies or uknown computations.</b> ";
+    << "No inconsistencies or unknown computations.</b> ";
   }
   out << "<table>" << goodCommands.str() << "</table>";
   out

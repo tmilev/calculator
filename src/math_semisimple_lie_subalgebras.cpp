@@ -114,6 +114,10 @@ std::string SemisimpleLieAlgebra::toMathMLFinalLieAlgebraName() const {
   return this->weylGroup.dynkinType.toMathMLFinal(nullptr);
 }
 
+std::string SemisimpleLieAlgebra::toMathMLLieAlgebraName() const {
+  return this->weylGroup.dynkinType.toMathML(nullptr);
+}
+
 std::string SemisimpleLieAlgebra::toStringLieAlgebraName() const {
   return this->weylGroup.dynkinType.toString();
 }

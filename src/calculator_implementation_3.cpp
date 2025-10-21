@@ -871,7 +871,8 @@ bool Calculator::Test::processResults() {
     << Logger::red
     << "Failed to load test strings. "
     << Logger::endL
-        << commentsOnFailure.str() << Logger::endL;
+    << commentsOnFailure.str()
+    << Logger::endL;
     out
     << "<b style='color:red'>Failed to load test strings. </b>"
     << commentsOnFailure.str();
@@ -1089,7 +1090,7 @@ bool Calculator::Test::processResults() {
   << global.getElapsedMilliseconds() - this->startTime
   << " ms. ";
   this->reportHtml = out.str();
-  return this->inconsistencies == 0 && this->inconsistenciesMathML==0;
+  return this->inconsistencies == 0 && this->inconsistenciesMathML == 0;
 }
 
 int Calculator::getNumberOfBuiltInFunctions() {

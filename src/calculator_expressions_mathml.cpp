@@ -489,7 +489,7 @@ bool Expression::toMathMLBuiltIn<RationalFraction<Rational> >(
     out << "<mrow>";
   }
   out
-  << "<mi>MakeRationalFunction{}</mi>"
+  << "<mi>MakeRationalFunction</mi>"
   << MathML::leftParenthesis
   << input.getValue<RationalFraction<Rational> >().toMathML(&formatLocal)
   << MathML::rightParenthesis;
@@ -544,26 +544,23 @@ bool Expression::toMathMLBuiltIn<Polynomial<AlgebraicNumber> >(
   bool showContext = input.owner ==
   nullptr ? false : input.owner->flagDisplayContext;
   formatLocal.flagUseFrac = true;
-  out << "PolynomialAlgebraicNumbers{}(";
+  out
+  << "<mrow><mtext>PolynomialAlgebraicNumbers</mtext>"
+  << MathML::leftParenthesis;
   std::string currentString =
-  input.getValue<Polynomial<AlgebraicNumber> >().toString(&formatLocal);
-  if (currentString.size() > 0) {
-    if (currentString[0] == '-') {
-      currentString = currentString.substr(1);
-      out << "-";
-    }
-  }
+  input.getValue<Polynomial<AlgebraicNumber> >().toMathML(&formatLocal);
   if (input.owner->flagUseNumberColors) {
-    out << "\\color{red}{";
+    out << "<mrow style='color:red'>";
   }
   out << currentString;
   if (input.owner->flagUseNumberColors) {
-    out << "}";
+    out << "</mrow>";
   }
-  out << ")";
+  out << MathML::rightParenthesis;
   if (showContext) {
-    out << "[" << input.getContext().toString() << "]";
+    out << "<mtext>[" << input.getContext().toString() << "]</mtext>";
   }
+  out << "</mrow>";
   return true;
 }
 
@@ -1150,8 +1147,7 @@ bool Expression::toMathMLEndStatementNested(
   out << "<mtable>";
   for (int i = 1; i < this->size(); i ++) {
     out << "<mtr><mtd>";
-    out <<
-    (*this)[i].toMathML(format, nullptr, nullptr, false, nullptr);
+    out << (*this)[i].toMathML(format, nullptr, nullptr, false, nullptr);
     out << "</mtd></mtr>";
   }
   out << "</mtable>";
@@ -1979,6 +1975,739 @@ bool Expression::toMathMLIntervalClosed(
   return false;
 }
 
+bool Expression::toMathMLQuote(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opQuote(), 2)) {
+    return false;
+  }
+  std::string content;
+  if (input[1].isOperation(&content)) {
+    out << "<mtext>\"" << content << "\"</mtext>";
+  } else {
+    out << "<mtext>(Corrupt string)</mtext>";
+  }
+  return true;
+}
+
+bool Expression::toMathMLDefineConditional(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opDefineConditional(), 4)) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>:</mo><mo>if</mo>"
+  << MathML::leftParenthesis
+  << input[2].toMathML(format)
+  << MathML::rightParenthesis
+  << "<mo>=</mo>"
+  << input[3].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLIn(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opIn(), 3)) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&in;</mo> "
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLOr(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opOr(), 3)) {
+    return false;
+  }
+  out << "<mrow>";
+  if (!input[1].isSequenceNElements()) {
+    out
+    << MathML::leftParenthesis
+    << input[1].toMathML()
+    << MathML::rightParenthesis;
+  } else {
+    out << input[1].toMathML();
+  }
+  out << "<mtext> or </mtext>";
+  if (!input[2].isSequenceNElements()) {
+    out
+    << MathML::leftParenthesis
+    << input[2].toMathML()
+    << MathML::rightParenthesis;
+  } else {
+    out << input[2].toMathML();
+  }
+  out << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLAnd(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  (void) format;
+  if (!input.startsWith(input.owner->opAnd(), 3)) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << MathML::leftParenthesis
+  << input[1].toMathML()
+  << MathML::rightParenthesis
+  << "<mtext>and</mtext>"
+  << MathML::leftParenthesis
+  << input[2].toMathML()
+  << MathML::rightParenthesis
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLBinom(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opBinom(), 3)) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << MathML::leftParenthesis
+  << "<mfrac linethickness='0'>"
+  << input[1].toMathML(format)
+  << input[2].toMathML(format)
+  << "</mfrac>"
+  << MathML::rightParenthesis
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLSetMinus(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opSetMinus(), 3)) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&setminus;</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLLimitBoundary(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opLimitBoundary(), 3)) {
+    return false;
+  }
+  out
+  << "<munderover><mo></mo>"
+  << input[1].toMathML(format)
+  << input[2].toMathML(format)
+  << "</munderover>";
+  return true;
+}
+
+bool Expression::toMathMLCrossProduct(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opCrossProduct())) {
+    return false;
+  }
+  input.toMathMLOpMultiplicative(out, "<mo>&otimes;</mo>", format);
+  return true;
+}
+
+bool Expression::toMathMLAbsoluteValue(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opAbsoluteValue(), 2)) {
+    return false;
+  }
+  out
+  << MathML::leftAbsoluteValueDelimiter
+  << input[1].toMathML(format)
+  << MathML::rightAbsoluteValueDelimiter;
+  return true;
+}
+
+bool Expression::toMathMLDirectSum(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opDirectSum())) {
+    return false;
+  }
+  if (input.children.size < 3) {
+    global.fatal
+    << "Direct sum operation takes at least 2 arguments, "
+    << "whereas this expression has "
+    << input.children.size
+    << " arguments. "
+    << global.fatal;
+  }
+  const Expression& left = input[1];
+  const Expression& right = input[2];
+  std::string leftString;
+  if (left.needsParenthesisForAddition()) {
+    leftString =
+    "<mrow>" +
+    MathML::leftParenthesis +
+    left.toMathML(format) +
+    MathML::rightParenthesis +
+    "</mrow>";
+  } else {
+    leftString = left.toMathML(format);
+  }
+  out << leftString;
+  std::string rightString =
+  right.needsParenthesisForAddition() ? (
+    "<mrow>" +
+    MathML::leftParenthesis +
+    right.toMathML(format) +
+    MathML::rightParenthesis +
+    "</mrow>"
+  ) : right.toMathML(format);
+  if (rightString.size() > 0) {
+    if (rightString[0] != '-') {
+      out << "<mo>&oplus;</mo>";
+    }
+  }
+  out << rightString;
+  return true;
+}
+
+bool Expression::toMathMLBind(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opBind(), 2)) {
+    return false;
+  }
+  out
+  << "<mrow><mo>{</mo><mo>{</mo>"
+  << input[1].toMathML(format)
+  << "<mo>}</mo><mo>}</mo></mrow>";
+  return true;
+}
+
+bool Expression::toMathMLEqualEqualEqual(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opEqualEqualEqual())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>===</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLEqualEqual(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opEqualEqual())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>==</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLDifferentiate(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
+    return false;
+  }
+  out << "<mfrac><mrow><mtext>d</mtext>";
+  if (input[2].needsParenthesisForMultiplication()) {
+    out
+    << MathML::leftParenthesis
+    << input[2].toMathML(format)
+    << MathML::rightParenthesis;
+  } else {
+    out << input[2].toMathML(format);
+  }
+  out
+  << "</mrow><mrow><mtext>d</mtext>"
+  << input[1].toMathML(format)
+  << "</mrow></mfrac>";
+  return true;
+}
+
+bool Expression::toMathMLDifferential(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opDifferential())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toMathMLDifferential2(input, out, format);
+  }
+  return Expression::toMathMLDifferential3(input, out, format);
+}
+
+bool Expression::toMathMLDifferential2(
+  const Expression& input, std::stringstream& out, FormatExpressions* format
+) {
+  if (!input.startsWith(input.owner->opDifferential(), 2)) {
+    return false;
+  }
+  bool needsParentheses = (!input[1].isAtom()) && (!input[1].isBuiltInType());
+  out << "<mrow><mtext>d</mtext> ";
+  if (needsParentheses) {
+    out << MathML::leftParenthesis;
+  }
+  out << input[1].toMathML(format);
+  if (needsParentheses) {
+    out << MathML::rightParenthesis;
+  }
+  out << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLDifferential3(
+  const Expression& input, std::stringstream& out, FormatExpressions* format
+) {
+  if (!input.startsWith(input.owner->opDifferential(), 3)) {
+    return false;
+  }
+  bool needsParen = input[2].needsParenthesisForMultiplication() ||
+  input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  if (input[2].startsWith(input.owner->opDivide())) {
+    needsParen = false;
+  }
+  out << "<mrow>";
+  bool rightNeedsParen = (!input[1].isAtom()) && (!input[1].isBuiltInType());
+  MathExpressionProperties properties;
+  std::string coefficient = input[2].toMathML(format, &properties);
+  if (properties.isOne) {
+    needsParen = false;
+    coefficient = "";
+  }
+  if (needsParen) {
+    out << MathML::leftParenthesis;
+  }
+  out << coefficient;
+  if (needsParen) {
+    out << MathML::rightParenthesis;
+  }
+  out << "<mtext>d</mtext>";
+  if (rightNeedsParen) {
+    out << MathML::leftParenthesis;
+  }
+  out << input[1].toMathML(format);
+  if (rightNeedsParen) {
+    out << MathML::rightParenthesis;
+  }
+  out << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLSumOrIntegral(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (
+    !input.startsWith(input.owner->opSum()) &&
+    !input.startsWith(input.owner->opIntegral())
+  ) {
+    return false;
+  }
+  std::string opString = input[0].toMathML(format);
+  int firstIndex = 2;
+  if (input.size() >= 2) {
+    if (input[1].startsWith(input.owner->opLimitBoundary(), 3)) {
+      out << "<munderover>" << opString;
+      out
+      << input[1][1].toMathML(format)
+      << input[1][2].toMathML(format)
+      << "</munderover>";
+    } else if (
+      input[1].isOperationGiven(input.owner->opIndefiniteIndicator())
+    ) {
+      out << opString;
+      firstIndex = 2;
+    } else {
+      out << opString;
+      firstIndex = 1;
+    }
+  }
+  if (input.size() <= firstIndex + 1) {
+    if (input.size() == firstIndex + 1) {
+      out << input[firstIndex].toMathML(format);
+    }
+  } else {
+    out << "<mrow>" << MathML::leftParenthesis;
+    for (int i = firstIndex; i < input.size(); i ++) {
+      out << input[i].toMathML(format);
+      if (i != input.size() - 1) {
+        out << "<mo>,</mo>";
+      }
+    }
+    out << MathML::rightParenthesis << "</mrow>";
+  }
+  return true;
+}
+
+bool Expression::toMathMLGreaterThan(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opGreaterThan())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&gt;</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLLessThanOrEqualTo(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&leq;</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLGreaterThanOrEqualTo(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&geq;</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLLimit(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opLimit(), 3)) {
+    return false;
+  }
+  out << "<mrow><munder><mo>lim</mo>";
+  if (!input[1].isSequenceNElements()) {
+    out << input[1].toMathML(format);
+  } else {
+    out << "<mrow>";
+    for (int i = 1; i < input[1].size(); i ++) {
+      out << input[1][i].toMathML(format);
+      if (i != input[1].size() - 1) {
+        out << "<mo>,</mo>";
+      }
+    }
+    out << "</mrow>";
+  }
+  out << "</munder>" << input[2].toMathML(format) << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLLimitProcess(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opLimitProcess())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&to;</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLLessThan(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opLessThan())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&lt;</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLLieBracket(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opLieBracket())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << MathML::leftBracket
+  << input[1].toMathML(format)
+  << "<mo>,</mo>"
+  << input[2].toMathML(format)
+  << MathML::rightBracket
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLMod(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opMod())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    out
+    << "<mrow>"
+    << "<mo>mod</mo>"
+    << input[1].toMathML(format)
+    << "</mrow>";
+    return true;
+  }
+  if (input.size() == 3) {
+    out
+    << "<mrow>"
+    << input[1].toMathML(format)
+    << "<mo>mod</mo>"
+    << input[2].toMathML(format)
+    << "</mrow>";
+    return true;
+  }
+  return false;
+}
+
+bool Expression::toMathMLUnion(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (
+    !input.isListStartingWithAtom(input.owner->opUnion()) || input.size() != 3
+  ) {
+    return false;
+  }
+  if (input[1].startsWith(input.owner->opIntersection())) {
+    out
+    << "<mrow>"
+    << MathML::leftParenthesis
+    << input[1].toMathML(format)
+    << MathML::rightParenthesis
+    << "<mo>&cup;</mo>"
+    << input[2].toMathML(format)
+    << "</mrow>";
+  } else {
+    out
+    << "<mrow>"
+    << input[1].toMathML(format)
+    << "<mo>&cup;</mo>"
+    << input[2].toMathML(format)
+    << "</mrow>";
+  }
+  return true;
+}
+
+bool Expression::toMathMLIntersection(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (
+    !input.isListStartingWithAtom(input.owner->opIntersection()) ||
+    input.size() != 3
+  ) {
+    return false;
+  }
+  if (input[1].startsWith(input.owner->opUnion())) {
+    out
+    << "<mrow>"
+    << MathML::leftParenthesis
+    << input[1].toMathML(format)
+    << MathML::rightParenthesis
+    << "<mo>&cap;</mo>"
+    << input[2].toMathML(format)
+    << "</mrow>";
+  } else {
+    out
+    << "<mrow>"
+    << input[1].toMathML(format)
+    << "<mo>&cap;</mo>"
+    << input[2].toMathML(format)
+    << "</mrow>";
+  }
+  return true;
+}
+
+bool Expression::toMathMLUnionNoRepetition(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isListStartingWithAtom(input.owner->opUnionNoRepetition())) {
+    return false;
+  }
+  out
+  << "<mrow>"
+  << input[1].toMathML(format)
+  << "<mo>&sqcup;</mo>"
+  << input[2].toMathML(format)
+  << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLError(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opError(), 2)) {
+    return false;
+  }
+  input.checkInitialization();
+  out << "<mtext>Error: " << input[1].toString(format) << "</mtext>";
+  return true;
+}
+
 void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
   STACK_TRACE("Expression::initializeToMathMLHandlers");
   toBeInitialized.addOneMathMLAtomHandler(
@@ -2008,11 +2737,11 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opIntervalClosed(), Expression::toMathMLIntervalClosed
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opQuote(), Expression::toStringQuote
+    toBeInitialized.opQuote(), Expression::toMathMLQuote
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opDefineConditional(),
-    Expression::toStringDefineConditional
+    Expression::toMathMLDefineConditional
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opDivide(), Expression::toMathMLDivide
@@ -2021,31 +2750,31 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opTensor(), Expression::toMathMLTensor
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIn(), Expression::toStringIn
+    toBeInitialized.opIn(), Expression::toMathMLIn
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opOr(), Expression::toStringOr
+    toBeInitialized.opOr(), Expression::toMathMLOr
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opAnd(), Expression::toStringAnd
+    toBeInitialized.opAnd(), Expression::toMathMLAnd
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opBinom(), Expression::toStringBinom
+    toBeInitialized.opBinom(), Expression::toMathMLBinom
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opUnderscore(), Expression::toMathMLUnderscore
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opSetMinus(), Expression::toStringSetMinus
+    toBeInitialized.opSetMinus(), Expression::toMathMLSetMinus
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLimitBoundary(), Expression::toStringLimitBoundary
+    toBeInitialized.opLimitBoundary(), Expression::toMathMLLimitBoundary
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opTimes(), Expression::toMathMLTimes
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opCrossProduct(), Expression::toStringCrossProduct
+    toBeInitialized.opCrossProduct(), Expression::toMathMLCrossProduct
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opSqrt(), Expression::toMathMLSqrt
@@ -2054,7 +2783,7 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opFactorial(), Expression::toMathMLFactorial
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opAbsoluteValue(), Expression::toStringAbsoluteValue
+    toBeInitialized.opAbsoluteValue(), Expression::toMathMLAbsoluteValue
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opPower(), Expression::toMathMLPower
@@ -2063,73 +2792,73 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opPlus(), Expression::toMathMLPlus
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDirectSum(), Expression::toStringDirectSum
+    toBeInitialized.opDirectSum(), Expression::toMathMLDirectSum
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opMinus(), Expression::toMathMLMinus
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opBind(), Expression::toStringBind
+    toBeInitialized.opBind(), Expression::toMathMLBind
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opEqualEqual(), Expression::toStringEqualEqual
+    toBeInitialized.opEqualEqual(), Expression::toMathMLEqualEqual
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opEqualEqualEqual(), Expression::toStringEqualEqualEqual
+    toBeInitialized.opEqualEqualEqual(), Expression::toMathMLEqualEqualEqual
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDifferentiate(), Expression::toStringDifferentiate
+    toBeInitialized.opDifferentiate(), Expression::toMathMLDifferentiate
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDifferential(), Expression::toStringDifferential
+    toBeInitialized.opDifferential(), Expression::toMathMLDifferential
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opSum(), Expression::toStringSumOrIntegral
+    toBeInitialized.opSum(), Expression::toMathMLSumOrIntegral
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntegral(), Expression::toStringSumOrIntegral
+    toBeInitialized.opIntegral(), Expression::toMathMLSumOrIntegral
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opGreaterThan(), Expression::toStringGreaterThan
+    toBeInitialized.opGreaterThan(), Expression::toMathMLGreaterThan
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opGreaterThanOrEqualTo(),
-    Expression::toStringGreaterThanOrEqualTo
+    Expression::toMathMLGreaterThanOrEqualTo
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opLessThanOrEqualTo(),
-    Expression::toStringLessThanOrEqualTo
+    Expression::toMathMLLessThanOrEqualTo
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLimit(), Expression::toStringLimit
+    toBeInitialized.opLimit(), Expression::toMathMLLimit
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLimitProcess(), Expression::toStringLimitProcess
+    toBeInitialized.opLimitProcess(), Expression::toMathMLLimitProcess
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLessThan(), Expression::toStringLessThan
+    toBeInitialized.opLessThan(), Expression::toMathMLLessThan
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opSequence(), Expression::toMathMLSequence
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opLieBracket(), Expression::toStringLieBracket
+    toBeInitialized.opLieBracket(), Expression::toMathMLLieBracket
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opMod(), Expression::toStringMod
+    toBeInitialized.opMod(), Expression::toMathMLMod
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opUnion(), Expression::toStringUnion
+    toBeInitialized.opUnion(), Expression::toMathMLUnion
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opIntersection(), Expression::toStringIntersection
+    toBeInitialized.opIntersection(), Expression::toMathMLIntersection
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opUnionNoRepetition(),
-    Expression::toStringUnionNoRepetition
+    Expression::toMathMLUnionNoRepetition
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opError(), Expression::toStringError
+    toBeInitialized.opError(), Expression::toMathMLError
   );
   toBeInitialized.addOneMathMLCompositeHandler(
     toBeInitialized.opMatrix(), Expression::toMathMLMatrix

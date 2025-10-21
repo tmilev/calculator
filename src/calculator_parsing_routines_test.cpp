@@ -242,7 +242,10 @@ bool Calculator::Test::builtInFunctionsABTest(
     << crashFileWriteReport.str()
     << "Calculator AB test failed with "
     << test.inconsistencies
-    << " inconsistencies. See report html in file:\n"
+    << " inconsistencies and "
+    << test.inconsistenciesMathML
+    << " mathML inconsistencies. "
+    << "See report html in file:\n"
     << "https://localhost:8166/output/crash_test.html\n"
     << global.fatal;
   }

@@ -62,6 +62,8 @@ public:
   static std::string rightParenthesis;
   static std::string leftBracket;
   static std::string rightBracket;
+  static std::string leftAbsoluteValueDelimiter;
+  static std::string rightAbsoluteValueDelimiter;
   static std::string negativeSign;
   static std::string positiveSign;
   static std::string mtableDefault;

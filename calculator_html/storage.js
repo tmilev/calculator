@@ -563,7 +563,6 @@ class StorageCalculator {
     writeInto[split[0]] = decodeURIComponent(split[1]);
   }
 
-
   loadSettings() {
     if (!configuration.configuration.calculatorDefaultsEnabled) {
       return;

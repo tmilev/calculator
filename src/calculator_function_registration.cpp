@@ -4048,23 +4048,25 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::handleUnderscorePowerLimits,
+    CalculatorFunctions::handlePowerLimits,
     "",
-    "Handles expressions of the form \\limits_a^b",
+    "Handles expressions of the form \\limits^b",
     "\\limits_a^b;\n"
-    "\\limits^b_a",
-    "CalculatorFunctions::handleUnderscorePowerLimits",
+    "\\limits^b_a;\n"
+    "\\limits^b",
+    "CalculatorFunctions::handlePowerLimits",
     "LimitBoundaryNotationPower",
     innerStandard
   );
   this->addOperationHandler(
     "_",
-    CalculatorFunctions::handleUnderscorePowerLimits,
+    CalculatorFunctions::handleUnderscoreLimits,
     "",
     "Handles expressions of the form \\limits_a^b",
     "\\limits_a^b;\n"
-    "\\limits^b_a",
-    "CalculatorFunctions::handleUnderscorePowerLimits",
+    "\\limits^b_a;\n"
+    "\\limits_a",
+    "CalculatorFunctions::handleUnderscoreLimits",
     "LimitBoundaryNotationUnderscore",
     innerStandard
   );

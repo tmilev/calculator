@@ -4013,6 +4013,7 @@ bool Expression::toStringPower(
   MathExpressionProperties* outputProperties
 ) {
   (void) outputProperties;
+  input.checkInitialization();
   Calculator& commands = *input.owner;
   if (!input.startsWith(commands.opPower(), 3)) {
     return false;
@@ -4032,6 +4033,16 @@ bool Expression::toStringPower(
     << "_{"
     << firstE[2].toString(format)
     << "}^{"
+    << secondE.toString(format)
+    << "}";
+    return true;
+  }
+  int opLimit = commands.opLimitBoundary();
+  if (firstE.startsWith(opLimit) || firstE.isOperationGiven(opLimit)) {
+    out
+    << "(\\ "
+    << firstE.toString(format)
+    << ")^{"
     << secondE.toString(format)
     << "}";
     return true;
@@ -5337,12 +5348,24 @@ bool Expression::toStringUnderscore(
   MathExpressionProperties* outputProperties
 ) {
   (void) outputProperties;
-  if (!input.startsWith(input.owner->opUnderscore())) {
+  if (!input.startsWith(input.owner->opUnderscore(), 3)) {
     return false;
+  }
+  input.checkInitialization();
+  const Expression& firstE = input[1];
+  int opLimit = input.owner->opLimitBoundary();
+  if (firstE.startsWith(opLimit) || firstE.isOperationGiven(opLimit)) {
+    out
+    << "(\\ "
+    << firstE.toString(format)
+    << ")_{"
+    << input[2].toString(format)
+    << "}";
+    return true;
   }
   out
   << "{"
-  << input[1].toString(format)
+  << firstE.toString(format)
   << "}_{"
   << input[2].toString(format)
   << "}";

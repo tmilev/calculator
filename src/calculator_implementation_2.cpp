@@ -278,6 +278,12 @@ Expression Calculator::expressionInfinity() {
   return result;
 }
 
+Expression Calculator::expressionIndefiniteIndicator() {
+  Expression result;
+  result.makeAtom(*this, this->opIndefiniteIndicator());
+  return result;
+}
+
 Expression Calculator::expressionMinusInfinity() {
   Expression result;
   result = this->expressionMinusOne() * this->expressionInfinity();

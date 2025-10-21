@@ -1115,28 +1115,69 @@ bool CalculatorFunctions::denominator(
   return output.assignValue(calculator, 1);
 }
 
-bool CalculatorFunctions::handleUnderscorePowerLimits(
+bool CalculatorFunctions::handlePowerLimits(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::handleUnderscorePowerLimits");
-  if (
-    !input.startsWith(calculator.opPower(), 3) &&
-    !input.startsWith(calculator.opUnderscore(), 3)
-  ) {
+  STACK_TRACE("CalculatorFunctions::handlePowerLimits");
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
-  if (!input[1].startsWith(calculator.opLimitBoundary())) {
+  const Expression& maybeLimit = input[1];
+  int opLimit = calculator.opLimitBoundary();
+  if (maybeLimit.isOperationGiven(opLimit)) {
+    // An expression of the form \limits^C.
+    // Convert to (\limits, IndifiniteIndicator, C)
+    return
+    output.makeXOX(
+      calculator,
+      opLimit,
+      calculator.expressionIndefiniteIndicator(),
+      input[2]
+    );
+  }
+  if (!maybeLimit.startsWith(opLimit, 3)) {
+    // Not of the form (limits, A, B)^C
     return false;
   }
-  output = input[1];
-  for (int i = output.size(); i < 3; i ++) {
-    output.addChildAtomOnTop(calculator.opIndefiniteIndicator());
+  if (!maybeLimit[2].isOperationGiven(calculator.opIndefiniteIndicator())) {
+    // Of the form (limits, A, B)^C
+    // with B not equal to IndefiniteIndicator.
+    return false;
   }
-  if (input.startsWith(calculator.opPower())) {
-    return output.setChild(2, input[2]);
-  } else {
-    return output.setChild(1, input[2]);
+  // Of the form (limits, A, IndefiniteIndicator)^C.
+  // Transform to (limits, A, C).
+  return output.makeXOX(calculator, opLimit, maybeLimit[1], input[2]);
+}
+
+bool CalculatorFunctions::handleUnderscoreLimits(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::handleUnderscoreLimits");
+  if (!input.startsWith(calculator.opUnderscore(), 3)) {
+    return false;
   }
+  const Expression& maybeLimit = input[1];
+  int opLimit = calculator.opLimitBoundary();
+  if (maybeLimit.isOperationGiven(opLimit)) {
+    // An expression of the form \limits_C.
+    // Convert to (\limits, C, IndifiniteIndicator)
+    return
+    output.makeXOX(
+      calculator, opLimit, input[2], calculator.expressionIndefiniteIndicator()
+    );
+  }
+  if (!maybeLimit.startsWith(opLimit, 3)) {
+    // Not of the form (limits, A, B)^C
+    return false;
+  }
+  if (!maybeLimit[1].isOperationGiven(calculator.opIndefiniteIndicator())) {
+    // Of the form (limits, A, B)_C
+    // with A not equal to IndefiniteIndicator.
+    return false;
+  }
+  // Of the form (limits, IndefiniteIndicator, B)_C.
+  // Transform to (limits, C, B).
+  return output.makeXOX(calculator, opLimit, input[2], maybeLimit[2]);
 }
 
 bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(

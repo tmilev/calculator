@@ -195,7 +195,7 @@ class Addresses {
       "calculatorInput": input,
     };
     let encoded = encodeURIComponent(JSON.stringify(url));
-    return `#${encoded}`;
+    return `?${encoded}`;
   }
 
   /** @return {string} */

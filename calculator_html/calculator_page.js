@@ -58,6 +58,7 @@ class AtomHandler {
     this.panel = null;
     /** @type {HTMLElement|null} */
     this.button = null;
+    this.useMathML = true;
   }
 
   fromObject(
@@ -175,9 +176,13 @@ class AtomHandler {
     let result = document.createElement("div");
     let anchor = document.createElement("a");
     anchor.className = "linkInfo";
-    let link = calculator.getComputationLink(this.example);
+    let exampleText = this.example;
+    if (this.useMathML) {
+      exampleText = "%UseMathML\n" + this.example;
+    }
+    let link = calculator.getComputationLink(exampleText);
     anchor.href = "#" + link;
-    anchor.textContent = this.atom;
+    anchor.textContent = this.useMathML ? (this.atom + " mathML") : this.atom;
     this.panel = this.toHTMLInfo();
     result.appendChild(this.toHTMLInfoButton());
     result.appendChild(this.panel);

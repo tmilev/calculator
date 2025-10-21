@@ -892,7 +892,10 @@ public:
   static bool sumAsOperatorToSumInternalNotation(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool handleUnderscorePowerLimits(
+  static bool handlePowerLimits(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool handleUnderscoreLimits(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool polynomialize(

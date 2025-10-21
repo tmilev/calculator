@@ -2473,54 +2473,6 @@ bool CalculatorParser::replaceEXXEXEXBy_CofEEE_X(int controlIndex) {
   return true;
 }
 
-bool CalculatorParser::replaceUnderscoreEPowerEbyLimits() {
-  SyntacticElement& bottom = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    3
-  ];
-  SyntacticElement& top = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    1
-  ];
-  Expression newExpression;
-  newExpression.reset(*this->owner, 3);
-  newExpression.addChildAtomOnTop(this->owner->opLimitBoundary());
-  newExpression.addChildOnTop(bottom.data);
-  newExpression.addChildOnTop(top.data);
-  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].data
-  =
-  newExpression;
-  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].
-  controlIndex =
-  this->conExpression();
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName =
-    "[Rule: Calculator::replaceUnderscoreEPowerEbyLimits]";
-  }
-  return this->decreaseStackSetCharacterRanges(3);
-}
-
-bool CalculatorParser::replacePowerEUnderScoreEbyLimits() {
-  SyntacticElement& bottom = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    3
-  ];
-  SyntacticElement& top = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    1
-  ];
-  MathRoutines::swap(bottom, top);
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName =
-    "[Rule: Calculator::replacePowerEUnderScoreEbyLimits]";
-  }
-  return this->replaceUnderscoreEPowerEbyLimits();
-}
-
 bool CalculatorParser::replaceXEXEXBy_CofEE(int operation) {
   SyntacticElement& lefT = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
@@ -3421,8 +3373,8 @@ bool CalculatorParser::applyOneRule() {
   }
   if (secondToLastS == "%" && lastS == "UseMathML") {
     this->owner->comments
-    <<
-    "<b style='color:red'>WORK IN PROGRESS.</b> Using mathML for the output.";
+    << "<b style='color:red'>WORK IN PROGRESS.</b> "
+    << "Using mathML for the output.";
     this->owner->flagUseMathML = true;
     return this->decreaseStack(2);
   }

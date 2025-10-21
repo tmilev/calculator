@@ -1303,6 +1303,7 @@ bool Expression::toMathMLPower(
     firstE[1].toMathML(out, format, outputProperties);
     firstE[2].toMathML(out, format, outputProperties);
     secondE.toMathML(out, format, outputProperties);
+    out << "</msubsup>";
     return true;
   }
   if (firstE.startsWith(- 1, 2)) {
@@ -1329,9 +1330,11 @@ bool Expression::toMathMLPower(
         ||
         firstE[1].startsWith(commands.opTimes())
       ) {
+        out << "<mrow>";
         out << MathML::leftParenthesis;
         firstE[1].toMathML(out, format, outputProperties);
         out << MathML::rightParenthesis;
+        out << "</mrow>";
       } else {
         firstE[1].toMathML(out, format, outputProperties);
       }
@@ -1352,11 +1355,11 @@ bool Expression::toMathMLPower(
       out << "<msup>";
       bool needsParentheses = input[1].needsParenthesisForBaseOfExponent();
       if (needsParentheses) {
-        out << MathML::leftParenthesis;
+        out << "<mrow>" << MathML::leftParenthesis;
       }
       input[1].toMathML(out, format, outputProperties);
       if (needsParentheses) {
-        out << MathML::rightParenthesis;
+        out << MathML::rightParenthesis << "</mrow>";
       }
       input[2].toMathML(out, format, outputProperties);
       out << "</msup>";

@@ -2312,8 +2312,8 @@ private:
   bool replaceOXEXEXEXByE();
   bool replaceEOEXByEX();
   bool replaceEPowerMinusEXByEX();
-  bool replaceUnderscoreEPowerEbyLimits();
-  bool replacePowerEUnderScoreEbyLimits();
+  bool replaceELimitsUnderscoreEPowerEByE();
+  bool replaceELimitsPowerEUnderscoreEByE();
   bool replaceXEEXBy_OofEE_X(int inputOperation);
   bool replaceXEEBy_OofEE(int inputOperation);
   bool replaceECByC();
@@ -3006,6 +3006,7 @@ public:
   Expression expressionHalf();
   Expression expressionMinusHalf();
   Expression expressionInfinity();
+  Expression expressionIndefiniteIndicator();
   Expression expressionMinusInfinity();
   Expression expressionSquareRootNegativeOne();
   void logFunctionWithTime(Function& input, int64_t startTime);

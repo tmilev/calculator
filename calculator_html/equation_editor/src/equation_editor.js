@@ -3025,16 +3025,21 @@ class LaTeXParser {
     if (secondToLast.syntacticRole in latexConstants.leftDelimiters &&
       last.syntacticRole in latexConstants.rightDelimiters) {
       this.lastRuleName = 'parenthetic expression to expression';
-      let leftDelimiter =
+      const leftDelimiter =
         latexConstants.leftDelimiters[secondToLast.syntacticRole];
-      let rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
-      let left = mathNodeFactory.leftDelimiter(
+      const rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
+      const left = mathNodeFactory.leftDelimiter(
         this.equationEditor, leftDelimiter, false);
-      let right = mathNodeFactory.rightDelimiter(
+      const right = mathNodeFactory.rightDelimiter(
         this.equationEditor, rightDelimiter, false);
-      let atom = mathNodeFactory.atom(this.equationEditor, '\u200B');
-      let horizontal = mathNodeFactory.horizontalMathFromArray(
+      const atom = mathNodeFactory.atom(this.equationEditor, '\u200B');
+      const horizontal = mathNodeFactory.horizontalMathFromArray(
         this.equationEditor, [left, atom, right]);
+      return this.replaceParsingStackTop(horizontal, '', -2);
+    }
+    if (secondToLast.syntacticRole === '\\' && last.content === "u") {
+      this.lastRuleName = "expression starting with backslash u";
+      const horizontal = mathNodeFactory.atom(this.equationEditor, "\\u");
       return this.replaceParsingStackTop(horizontal, '', -2);
     }
     if (last.isExpression() && secondToLast.syntacticRole === '_' &&
@@ -5420,8 +5425,6 @@ class MathNode {
     this.extraData = null;
   }
 
-
-
   /** Creates a the DOM element if missing. */
   createDOMElementIfMissing() {
     if (this.element !== null) {
@@ -5778,6 +5781,19 @@ class MathNode {
       return '';
     }
     return this.textContentOrInitialContent();
+  }
+
+  /** Returns whether the element contains an error. */
+  hasError() {
+    if (this.type.type === knownTypes.error.type) {
+      return true;
+    }
+    for (const child of this.children) {
+      if (child.hasError()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** 

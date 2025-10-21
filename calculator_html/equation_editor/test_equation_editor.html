@@ -65,7 +65,10 @@
   }
 
   function typesetMathML() {
-    const latex = editor.rootNode.toLatex();
+    let latex = editor.rootNode.toLatex();
+    if (editor.rootNode.hasError()) {
+      latex = editor.latexLastWritten;
+    }
     mathMLContainer.textContent = latex;
     mathMLContainer.setAttribute('typeset', 'false');
     typeset(mathMLContainer, null, {

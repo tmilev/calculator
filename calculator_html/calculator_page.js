@@ -58,7 +58,7 @@ class AtomHandler {
     this.panel = null;
     /** @type {HTMLElement|null} */
     this.button = null;
-    this.useMathML = true;
+    this.useMathML = false;
   }
 
   fromObject(

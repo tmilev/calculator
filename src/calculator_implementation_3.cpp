@@ -936,6 +936,11 @@ bool Calculator::Test::processResults() {
     << HtmlRoutines::getCalculatorComputationAnchorThisServer(
       this->commands.keys[i], this->commands.keys[i], true
     )
+    << "</td>"
+    << "<td>"
+    << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+      "%UseMathML" + this->commands.keys[i], "mathML link", true
+    )
     << "</td>";
     bool isBad = false;
     bool isUnknown = false;

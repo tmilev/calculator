@@ -1577,13 +1577,14 @@ Raises imaginary unit to an integer power.
 ```
 Converts degrees to radians
 
-*^* [LimitBoundaryNotationPower] {CalculatorFunctions::handleUnderscorePowerLimits}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5climits_a%5eb%3b%5cn%5c%5climits%5eb_a%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*^* [LimitBoundaryNotationPower] {CalculatorFunctions::handlePowerLimits}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5climits_a%5eb%3b%5cn%5c%5climits%5eb_a%3b%5cn%5c%5climits%5eb%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \limits_a^b;
-\limits^b_a
+\limits^b_a;
+\limits^b
 ```
-Handles expressions of the form \limits_a^b
+Handles expressions of the form \limits^b
 
 *^* [PowerIntegerByInteger] {CalculatorFunctionsBinaryOps::powerRationalByInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%7b3%5e3%7d%5e3%3b%5cn3%5e%7b3%5e3%7d%3b%5cn3%5e3%5e3%3b%5cn0%5e3%3b%5cn0%5e%7b-3%7d%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4081,11 +4082,12 @@ Augments matrix below by another matrix. Pastes the content of the second matrix
 
 Operator or function \_ is overloaded with 5 total handlers.
 
-*\_* [LimitBoundaryNotationUnderscore] {CalculatorFunctions::handleUnderscorePowerLimits}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5climits_a%5eb%3b%5cn%5c%5climits%5eb_a%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\_* [LimitBoundaryNotationUnderscore] {CalculatorFunctions::handleUnderscoreLimits}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5climits_a%5eb%3b%5cn%5c%5climits%5eb_a%3b%5cn%5c%5climits_a%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \limits_a^b;
-\limits^b_a
+\limits^b_a;
+\limits_a
 ```
 Handles expressions of the form \limits_a^b
 

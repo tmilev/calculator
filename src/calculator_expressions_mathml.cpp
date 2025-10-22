@@ -11,7 +11,7 @@ bool Expression::toMathMLBuiltIn<Rational>(
   MathExpressionProperties* outputProperties
 ) {
   (void) outputProperties;
-  out << input.getValue<Rational>().toMathML(format, nullptr);
+  out << input.getValue<Rational>().toMathML(format, outputProperties);
   return true;
 }
 
@@ -1300,9 +1300,9 @@ bool Expression::toMathMLPower(
   }
   if (isSuperScriptOfUnderscoredOperator) {
     out << "<msubsup>";
-    firstE[1].toMathML(out, format, outputProperties);
-    firstE[2].toMathML(out, format, outputProperties);
-    secondE.toMathML(out, format, outputProperties);
+    firstE[1].toMathML(out, format, nullptr);
+    firstE[2].toMathML(out, format, nullptr);
+    secondE.toMathML(out, format, nullptr);
     out << "</msubsup>";
     return true;
   }
@@ -1357,11 +1357,11 @@ bool Expression::toMathMLPower(
       if (needsParentheses) {
         out << "<mrow>" << MathML::leftParenthesis;
       }
-      input[1].toMathML(out, format, outputProperties);
+      input[1].toMathML(out, format, nullptr);
       if (needsParentheses) {
         out << MathML::rightParenthesis << "</mrow>";
       }
-      input[2].toMathML(out, format, outputProperties);
+      input[2].toMathML(out, format, nullptr);
       out << "</msup>";
     }
   }

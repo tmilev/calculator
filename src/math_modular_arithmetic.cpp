@@ -31,7 +31,6 @@ std::string ElementZmodP::toMathMLModP() const {
   << MathML::leftParenthesis
   << this->modulus.toMathML()
   << MathML::rightParenthesis
-  << MathML::rightParenthesis
   << "</mrow>";
   return out.str();
 }
@@ -78,14 +77,15 @@ std::string ElementZmodP::toMathML(
   }
   std::stringstream out;
   if (suppressModulus) {
-    out << this->value.toString();
+    out << this->value.toMathML();
   } else {
-    out
+    out <<"<mrow>"
     << MathML::leftParenthesis
     << this->value.toMathML()
     << " "
     << this->toMathMLModP()
-    << MathML::rightParenthesis;
+    << MathML::rightParenthesis
+        <<"<mrow>";
   }
   return out.str();
 }

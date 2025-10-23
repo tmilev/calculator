@@ -36,7 +36,7 @@ std::string MathML::toMathMLFinal(
   }
   out
   << "<span class='mathcalculatorbackendrendered'>"
-  << "<math>"
+  << "<math displaystyle='true'>"
   << "<semantics>"
   << mathMLContent
   << "<annotation encoding='application/x-tex'>"
@@ -231,4 +231,15 @@ Calculator& MathMLConverter::converterCalculator() {
     result.initialize(Calculator::Mode::educational);
   }
   return result;
+}
+
+std::string MathExpressionFormattingProperties::toString() const {
+  std::stringstream out;
+  out
+  << "{startsWithDigit: "
+  << this->startsWithDigit
+  << ", endsWithDigit: "
+  << this->endsWithDigit
+  << "}";
+  return out.str();
 }

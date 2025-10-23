@@ -50,7 +50,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toMathML(
     FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   ElementEllipticCurve() {
     this->flagInfinity = true;
@@ -183,7 +183,8 @@ std::string ElementEllipticCurve<Coefficient>::toString(
 
 template <typename Coefficient>
 std::string ElementEllipticCurve<Coefficient>::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) outputProperties;
   std::stringstream out;

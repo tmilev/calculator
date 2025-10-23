@@ -68,7 +68,8 @@ std::string ElementZmodP::toString(const FormatExpressions* format) const {
 }
 
 std::string ElementZmodP::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) outputProperties;
   bool suppressModulus = false;
@@ -79,13 +80,14 @@ std::string ElementZmodP::toMathML(
   if (suppressModulus) {
     out << this->value.toMathML();
   } else {
-    out <<"<mrow>"
+    out
+    << "<mrow>"
     << MathML::leftParenthesis
     << this->value.toMathML()
     << " "
     << this->toMathMLModP()
     << MathML::rightParenthesis
-        <<"<mrow>";
+    << "<mrow>";
   }
   return out.str();
 }

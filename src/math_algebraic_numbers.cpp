@@ -8,7 +8,8 @@
 #include "progress_report.h"
 
 std::string MonomialVector::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) outputProperties;
   if (
@@ -1934,7 +1935,8 @@ const {
 }
 
 std::string AlgebraicNumber::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {

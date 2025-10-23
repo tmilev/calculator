@@ -8,7 +8,7 @@ bool Expression::toMathMLBuiltIn<Rational>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   out << input.getValue<Rational>().toMathML(format, outputProperties);
@@ -20,7 +20,7 @@ bool Expression::toMathMLBuiltIn<Polynomial<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   out << input.getValue<Polynomial<Rational> >().toMathML(format, nullptr);
@@ -32,7 +32,7 @@ bool Expression::toMathMLBuiltIn<Weight<Polynomial<Rational> > >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -51,7 +51,7 @@ bool Expression::toMathMLBuiltIn<Weight<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   input.checkInitialization();
   (void) format;
@@ -67,7 +67,7 @@ bool Expression::toMathMLBuiltIn<
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -88,7 +88,7 @@ bool Expression::toMathMLBuiltIn<SemisimpleLieAlgebra*>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   STACK_TRACE("Expression::toStringBuiltIn(SemisimpleLieAlgebra*)");
   (void) format;
@@ -106,7 +106,7 @@ bool Expression::toMathMLBuiltIn<RationalFraction<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   bool showContext = input.owner ==
   nullptr ? false : input.owner->flagDisplayContext;
@@ -166,7 +166,7 @@ bool Expression::toMathMLBuiltIn<
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -188,7 +188,7 @@ bool Expression::toMathMLBuiltIn<
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -213,7 +213,7 @@ bool Expression::toMathMLBuiltIn<
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -228,7 +228,7 @@ bool Expression::toMathMLBuiltIn<JSData>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -243,7 +243,7 @@ bool Expression::toMathMLBuiltIn<VectorPartitionFunction>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   STACK_TRACE("Expression::toMathMLBuiltIn_VectorPartitionFunction");
   (void) format;
@@ -259,7 +259,7 @@ bool Expression::toMathMLBuiltIn<Lattice>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   STACK_TRACE("Expression::toMathMLBuiltIn_Lattice");
   (void) format;
@@ -279,7 +279,7 @@ bool Expression::toMathMLBuiltIn<LittelmannPath>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -294,7 +294,7 @@ bool Expression::toMathMLBuiltIn<
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -310,7 +310,7 @@ bool Expression::toMathMLBuiltIn<ElementHyperoctahedralGroupR2>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   out << input.getValue<ElementHyperoctahedralGroupR2>().toMathML(format);
@@ -322,7 +322,7 @@ bool Expression::toMathMLBuiltIn<ElementEllipticCurve<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -341,7 +341,7 @@ bool Expression::toMathMLBuiltIn<ElementEllipticCurve<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -360,7 +360,7 @@ bool Expression::toMathMLBuiltIn<InputBox>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -380,7 +380,7 @@ bool Expression::toMathMLBuiltIn<Plot>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
@@ -411,7 +411,7 @@ bool Expression::toMathMLBuiltIn<Polynomial<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -442,7 +442,7 @@ bool Expression::toMathMLBuiltIn<ElementZmodP>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   out << input.getValue<ElementZmodP>().toMathML(format, outputProperties);
   return true;
@@ -453,7 +453,7 @@ bool Expression::toMathMLBuiltIn<double>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -476,7 +476,7 @@ bool Expression::toMathMLBuiltIn<RationalFraction<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   bool showContext = input.owner ==
   nullptr ? false : input.owner->flagDisplayContext;
@@ -504,7 +504,7 @@ bool Expression::toMathMLBuiltIn<RationalFraction<AlgebraicNumber> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   bool showContext = input.owner ==
   nullptr ? false : input.owner->flagDisplayContext;
@@ -535,7 +535,7 @@ bool Expression::toMathMLBuiltIn<Polynomial<AlgebraicNumber> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -569,7 +569,7 @@ bool Expression::toMathMLBuiltIn<ElementWeylAlgebra<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -596,7 +596,7 @@ bool Expression::toMathMLBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -633,7 +633,7 @@ bool Expression::toMathMLBuiltIn<MatrixTensor<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -669,7 +669,7 @@ bool Expression::toMathMLBuiltIn<
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -702,7 +702,7 @@ bool Expression::toMathMLBuiltIn<std::string>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   bool useQuotes = format == nullptr ? false : format->flagUseQuotes;
@@ -732,7 +732,7 @@ bool Expression::toMathMLBuiltIn<AlgebraicNumber>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -740,7 +740,7 @@ bool Expression::toMathMLBuiltIn<AlgebraicNumber>(
   if (input.owner->flagUseFracInRationalLaTeX) {
     formatLocal.flagUseFrac = true;
   }
-  MathExpressionProperties properties;
+  MathExpressionFormattingProperties properties;
   std::string currentString =
   input.getValue<AlgebraicNumber>().toMathML(&formatLocal, &properties);
   bool useColors = input.owner ==
@@ -770,7 +770,7 @@ bool Expression::toMathMLBuiltIn<WeylGroupData>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -788,7 +788,7 @@ bool Expression::toMathMLBuiltIn<ElementWeylGroup>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -821,7 +821,7 @@ bool Expression::toMathMLFactorial(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opFactorial(), 2)) {
@@ -844,7 +844,7 @@ bool Expression::toMathMLSqrt(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opSqrt())) {
@@ -893,7 +893,7 @@ bool Expression::toMathMLDefine(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opDefine(), 3)) {
@@ -933,7 +933,7 @@ std::string Expression::toMathMLFinal(FormatExpressions* format) const {
 void Expression::toMathML(
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties,
+  MathExpressionFormattingProperties* outputProperties,
   Expression* startingExpression,
   bool unfoldCommandEnclosures,
   JSData* outputJS
@@ -1157,7 +1157,7 @@ bool Expression::toMathMLEndStatementNested(
 bool Expression::toMathMLData(
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toMathMLData");
   if (this->owner == nullptr) {
@@ -1219,7 +1219,7 @@ bool Expression::toMathMLData(
 bool Expression::toMathMLGeneral(
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   if (this->size() < 2) {
     return false;
@@ -1257,7 +1257,7 @@ bool Expression::toMathMLSequence(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   if (!input.isListStartingWithAtom(input.owner->opSequence())) {
     return false;
@@ -1283,7 +1283,7 @@ bool Expression::toMathMLPower(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   Calculator& commands = *input.owner;
   if (!input.startsWith(commands.opPower(), 3)) {
@@ -1372,7 +1372,7 @@ bool Expression::toMathMLUnderscore(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opUnderscore())) {
@@ -1406,14 +1406,14 @@ bool Expression::toMathMLTimes(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opTimes(), 3)) {
     return false;
   }
-  MathExpressionProperties secondExpressionProperties;
-  MathExpressionProperties firstExpressionProperties;
+  MathExpressionFormattingProperties secondExpressionProperties;
+  MathExpressionFormattingProperties firstExpressionProperties;
   std::string secondExpressionMathML =
   input[2].toMathML(format, &secondExpressionProperties);
   if (input[1].isOperationGiven(input.owner->opSqrt())) {
@@ -1459,12 +1459,7 @@ bool Expression::toMathMLTimes(
   } else {
     out << firstExpression;
   }
-  if (
-    !firstNeedsBrackets &&
-    !secondNeedsBrackets &&
-    firstExpression != "" &&
-    firstExpressionProperties.isNegativeOne
-  ) {
+  if (!firstNeedsBrackets && !secondNeedsBrackets && firstExpression != "") {
     if (secondExpressionProperties.startsWithDigit) {
       mustHaveTimes = true;
     }
@@ -1495,7 +1490,7 @@ bool Expression::toMathMLPlus(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opPlus())) {
@@ -1516,7 +1511,7 @@ bool Expression::toMathMLPlus(
   for (int i = 0; i < summands.size; i ++) {
     const Expression& summand = summands[i];
     bool needsParenthesesForAddition = summand.needsParenthesisForAddition();
-    MathExpressionProperties properties;
+    MathExpressionFormattingProperties properties;
     std::string summandString = summand.toMathML(format, &properties);
     if (i > 0) {
       if (needsParenthesesForAddition || !properties.startsWithMinus) {
@@ -1539,7 +1534,7 @@ bool Expression::toMathMLMatrix(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isMatrix()) {
@@ -1565,7 +1560,7 @@ bool Expression::toMathMLDivide(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   Calculator& commands = *input.owner;
@@ -1644,7 +1639,7 @@ bool Expression::toMathMLMinus(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opMinus())) {
@@ -1710,7 +1705,7 @@ bool Expression::toMathMLTensor(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opTensor(), 3)) {
@@ -1725,8 +1720,8 @@ void Expression::toMathMLOpMultiplicative(
   const std::string& operation,
   FormatExpressions* format
 ) const {
-  MathExpressionProperties propertiesOfFirst;
-  MathExpressionProperties propertiesOfSecond;
+  MathExpressionFormattingProperties propertiesOfFirst;
+  MathExpressionFormattingProperties propertiesOfSecond;
   std::string firstMathML = (*this)[1].toMathML(format, &propertiesOfFirst);
   std::string secondMathML = (*this)[2].toMathML(format, &propertiesOfSecond);
   bool firstNeedsBrackets = (*this)[1].needsParenthesisForMultiplication();
@@ -1777,7 +1772,7 @@ bool Expression::toMathMLIsDenotedBy(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opIsDenotedBy())) {
@@ -1796,7 +1791,7 @@ bool Expression::toMathMLLnAbsoluteInsteadOfLogarithm(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (
@@ -1821,7 +1816,7 @@ bool Expression::toMathMLLogBase(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opLogBase(), 3)) {
@@ -1841,7 +1836,7 @@ bool Expression::toMathMLIntervalOpen(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opIntervalOpen(), 3)) {
@@ -1865,7 +1860,7 @@ bool Expression::toMathMLIntervalLeftClosed(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (input.startsWith(input.owner->opIntervalLeftClosed(), 2)) {
@@ -1904,7 +1899,7 @@ bool Expression::toMathMLIntervalRightClosed(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (input.startsWith(input.owner->opIntervalRightClosed(), 3)) {
@@ -1943,7 +1938,7 @@ bool Expression::toMathMLIntervalClosed(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (input.startsWith(input.owner->opIntervalClosed(), 2)) {
@@ -1982,7 +1977,7 @@ bool Expression::toMathMLQuote(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -2002,7 +1997,7 @@ bool Expression::toMathMLDefineConditional(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opDefineConditional(), 4)) {
@@ -2025,7 +2020,7 @@ bool Expression::toMathMLIn(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opIn(), 3)) {
@@ -2044,7 +2039,7 @@ bool Expression::toMathMLOr(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) format;
   (void) outputProperties;
@@ -2077,7 +2072,7 @@ bool Expression::toMathMLAnd(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   (void) format;
@@ -2101,7 +2096,7 @@ bool Expression::toMathMLBinom(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opBinom(), 3)) {
@@ -2123,7 +2118,7 @@ bool Expression::toMathMLSetMinus(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opSetMinus(), 3)) {
@@ -2142,7 +2137,7 @@ bool Expression::toMathMLLimitBoundary(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opLimitBoundary(), 3)) {
@@ -2160,7 +2155,7 @@ bool Expression::toMathMLCrossProduct(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opCrossProduct())) {
@@ -2174,7 +2169,7 @@ bool Expression::toMathMLAbsoluteValue(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opAbsoluteValue(), 2)) {
@@ -2191,7 +2186,7 @@ bool Expression::toMathMLDirectSum(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opDirectSum())) {
@@ -2240,7 +2235,7 @@ bool Expression::toMathMLBind(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opBind(), 2)) {
@@ -2257,7 +2252,7 @@ bool Expression::toMathMLEqualEqualEqual(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opEqualEqualEqual())) {
@@ -2276,7 +2271,7 @@ bool Expression::toMathMLEqualEqual(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opEqualEqual())) {
@@ -2295,7 +2290,7 @@ bool Expression::toMathMLDifferentiate(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
@@ -2321,7 +2316,7 @@ bool Expression::toMathMLDifferential(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opDifferential())) {
@@ -2365,7 +2360,7 @@ bool Expression::toMathMLDifferential3(
   }
   out << "<mrow>";
   bool rightNeedsParen = (!input[1].isAtom()) && (!input[1].isBuiltInType());
-  MathExpressionProperties properties;
+  MathExpressionFormattingProperties properties;
   std::string coefficient = input[2].toMathML(format, &properties);
   if (properties.isOne) {
     needsParen = false;
@@ -2394,7 +2389,7 @@ bool Expression::toMathMLSumOrIntegral(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (
@@ -2443,7 +2438,7 @@ bool Expression::toMathMLGreaterThan(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opGreaterThan())) {
@@ -2462,7 +2457,7 @@ bool Expression::toMathMLLessThanOrEqualTo(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
@@ -2481,7 +2476,7 @@ bool Expression::toMathMLGreaterThanOrEqualTo(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
@@ -2500,7 +2495,7 @@ bool Expression::toMathMLLimit(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opLimit(), 3)) {
@@ -2527,7 +2522,7 @@ bool Expression::toMathMLLimitProcess(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opLimitProcess())) {
@@ -2546,7 +2541,7 @@ bool Expression::toMathMLLessThan(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opLessThan())) {
@@ -2565,7 +2560,7 @@ bool Expression::toMathMLLieBracket(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opLieBracket())) {
@@ -2586,7 +2581,7 @@ bool Expression::toMathMLMod(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opMod())) {
@@ -2616,7 +2611,7 @@ bool Expression::toMathMLUnion(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (
@@ -2648,7 +2643,7 @@ bool Expression::toMathMLIntersection(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (
@@ -2681,7 +2676,7 @@ bool Expression::toMathMLUnionNoRepetition(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.isListStartingWithAtom(input.owner->opUnionNoRepetition())) {
@@ -2700,7 +2695,7 @@ bool Expression::toMathMLError(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opError(), 2)) {

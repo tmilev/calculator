@@ -38,7 +38,7 @@ public:
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   bool needsParenthesisForMultiplication(
     const FormatExpressions* unused = nullptr
@@ -479,7 +479,8 @@ bool RationalFraction<Coefficient>::needsParenthesisForMultiplication(
 
 template <class Coefficient>
 std::string RationalFraction<Coefficient>::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   if (this->expressionType == this->typeError) {
     return "<mtext>[error]</mtext>";

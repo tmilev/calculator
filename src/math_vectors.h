@@ -52,7 +52,7 @@ public:
   }
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const {
     (void) outputProperties;
     std::stringstream out;

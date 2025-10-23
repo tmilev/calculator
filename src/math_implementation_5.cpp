@@ -31,7 +31,8 @@ const {
 }
 
 std::string MonomialWeylAlgebra::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) outputProperties;
   if (this->isConstant()) {
@@ -45,8 +46,8 @@ std::string MonomialWeylAlgebra::toMathML(
     currentFormat.polynomialDefaultLetter = format->weylAlgebraDefaultLetter;
     currentFormat.polynomialAlphabet = format->weylAlgebraLetters;
   }
-  MathExpressionProperties polynomialPartProperties;
-  MathExpressionProperties differentialPartProperties;
+  MathExpressionFormattingProperties polynomialPartProperties;
+  MathExpressionFormattingProperties differentialPartProperties;
   std::string firstS =
   this->polynomialPart.toMathML(format, &polynomialPartProperties);
   std::string secondS =
@@ -1392,7 +1393,7 @@ bool Cone::isInInterior(const Vector<Rational>& point) const {
 
 std::string MonomialPolynomial::toMathML(
   const FormatExpressions* polynomialFormat,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> formatContainer;
@@ -1405,7 +1406,7 @@ std::string MonomialPolynomial::toMathML(
     }
     return "<mi>1</mi>";
   }
-  MathExpressionProperties exponentProperties;
+  MathExpressionFormattingProperties exponentProperties;
   for (int i = 0; i < this->monomialBody.size; i ++) {
     const Rational& onePower = this->monomialBody[i];
     if (onePower.isEqualToZero()) {

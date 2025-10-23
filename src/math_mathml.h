@@ -6,7 +6,7 @@
 #include <sstream>
 
 // Properties of a printed mathml expression.
-class MathExpressionProperties {
+class MathExpressionFormattingProperties {
 public:
   bool startsWithMinus;
   bool isNegativeOne;
@@ -14,13 +14,18 @@ public:
   bool startsWithDigit;
   bool endsWithDigit;
   bool startsWithFraction;
-  MathExpressionProperties():
+  bool needsParenthesesForMultiplicationOnTheRight;
+  bool needsParenthesesWhenLastAndMultipliedOnTheLeft;
+  MathExpressionFormattingProperties():
   startsWithMinus(false),
   isNegativeOne(false),
   isOne(false),
   startsWithDigit(false),
   endsWithDigit(false),
-  startsWithFraction(false) {}
+  startsWithFraction(false),
+  needsParenthesesForMultiplicationOnTheRight(false),
+  needsParenthesesWhenLastAndMultipliedOnTheLeft(false) {}
+  std::string toString() const;
 };
 
 // Determines what output scripts we use for static output pages.

@@ -1051,7 +1051,8 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(
 
 template <class Coefficient>
 std::string MonomialUniversalEnveloping<Coefficient>::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) outputProperties;
   std::stringstream out;

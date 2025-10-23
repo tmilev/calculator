@@ -6442,7 +6442,8 @@ std::string DynkinSimpleType::toStringNonTechnicalName(
 }
 
 std::string DynkinSimpleType::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) outputProperties;
   bool hasAmbient = false;
@@ -7637,7 +7638,8 @@ std::string ElementWeylGroup::toString(const FormatExpressions* format) const {
 }
 
 std::string ElementWeylGroup::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("ElementWeylGroup::toString");
   (void) format;
@@ -8362,7 +8364,8 @@ std::string WeylGroupData::toString(FormatExpressions* format) {
 }
 
 std::string WeylGroupData::toMathML(
-  FormatExpressions* format, MathExpressionProperties* outputProperties
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) {
   STACK_TRACE("WeylGroupData::toMathML");
   (void) outputProperties;

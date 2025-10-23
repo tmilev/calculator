@@ -91,7 +91,7 @@ public:
   const;
   std::string toMathML(
     const FormatExpressions* polynomialFormat = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   void makeFromPowers(const Vector<Rational>& inputMonomialBody);
   void makeOne() {
@@ -316,7 +316,7 @@ public:
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   static unsigned int hashFunction(const MonomialWeylAlgebra& input) {
     return

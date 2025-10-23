@@ -2441,7 +2441,8 @@ std::string ClassFunction<someFiniteGroup, Coefficient>::toString(
 
 template <class someFiniteGroup, typename Coefficient>
 std::string ClassFunction<someFiniteGroup, Coefficient>::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) format;
   (void) outputProperties;

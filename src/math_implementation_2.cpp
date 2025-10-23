@@ -1635,25 +1635,37 @@ void LargeInteger::toString(std::string& output) const {
   output = out.str();
 }
 
+void LargeInteger::computeFormattingProperties(
+  MathExpressionFormattingProperties* outputProperties
+) const {
+  if (outputProperties == nullptr) {
+    return;
+  }
+  outputProperties->endsWithDigit = true;
+  if (this->sign == - 1) {
+    outputProperties->startsWithMinus = true;
+    outputProperties->startsWithDigit = false;
+    if (this->value.isEqualToOne()) {
+      outputProperties->isNegativeOne = true;
+    }
+  } else {
+    outputProperties->startsWithDigit = true;
+  }
+  outputProperties->isOne = this->isEqualToOne();
+}
+
 std::string LargeInteger::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) format;
+  this->computeFormattingProperties(outputProperties);
   if (this->isEqualToZero()) {
     return "<mn>0</mn>";
   }
   std::stringstream out;
   if (this->sign == - 1) {
-    if (outputProperties != nullptr) {
-      outputProperties->startsWithMinus = true;
-      if (this->value.isEqualToOne()) {
-        outputProperties->isNegativeOne = true;
-      }
-    }
     out << "<mrow>" << MathML::negativeSign;
-  }
-  if (outputProperties != nullptr) {
-    outputProperties->isOne = this->isEqualToOne();
   }
   out << this->value.toMathML();
   if (this->sign == - 1) {
@@ -2524,7 +2536,8 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
 }
 
 std::string Rational::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) format;
   std::stringstream out;

@@ -47,7 +47,7 @@ public:
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   static unsigned int hashFunction(const ClassFunction& input);
   unsigned int hashFunction() const;
@@ -567,7 +567,7 @@ public:
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const ElementWeylGroup& input) {
@@ -761,7 +761,7 @@ public:
   );
   std::string toMathML(
     FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   );
   std::string toString(FormatExpressions* format = nullptr);
   std::string toStringCppConjugacyClasses(FormatExpressions* format = nullptr);

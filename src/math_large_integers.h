@@ -278,9 +278,12 @@ public:
     this->toString(currentString);
     return currentString;
   }
+  void computeFormattingProperties(
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   bool isIntegerFittingInInt(int* whichInt);
   bool isPositive() const {
@@ -700,7 +703,7 @@ public:
   }
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;

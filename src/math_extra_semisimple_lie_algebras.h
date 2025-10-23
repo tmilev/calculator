@@ -702,7 +702,7 @@ public:
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   inline unsigned int hashFunction() const {
     return weightFundamentalCoordinates.hashFunction();
@@ -1060,7 +1060,8 @@ const {
 
 template <class Coefficient>
 std::string Weight<Coefficient>::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   if (outputProperties != nullptr) {
     outputProperties->isOne = false;

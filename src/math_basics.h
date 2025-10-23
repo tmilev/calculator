@@ -3,7 +3,7 @@
 
 #include "general_lists.h"
 
-class MathExpressionProperties;
+class MathExpressionFormattingProperties;
 
 class MathRoutines {
 public:

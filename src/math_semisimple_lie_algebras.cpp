@@ -1981,7 +1981,7 @@ bool ChevalleyGenerator::isInRootSpace(Vector<Rational>* whichRootSpace) const {
 
 std::string ChevalleyGenerator::toMathML(
   const FormatExpressions* inputFormat,
-  MathExpressionProperties* outputProperties
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   this->checkInitialization();
   if (outputProperties != nullptr) {

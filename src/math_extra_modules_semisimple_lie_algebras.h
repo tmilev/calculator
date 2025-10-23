@@ -40,7 +40,7 @@ public:
   ) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
     if (
@@ -209,7 +209,7 @@ public:
   ) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   MonomialTensorGeneralizedVermas() {}
   void operator=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
@@ -475,7 +475,7 @@ public:
   }
   std::string elementToMathMLHighestWeightVector(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const {
     (void) outputProperties;
     if (this->highestWeightVectorNotation != "") {
@@ -2930,7 +2930,8 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(
 
 template <class Coefficient>
 std::string MonomialTensorGeneralizedVermas<Coefficient>::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) outputProperties;
   std::stringstream out;
@@ -3000,7 +3001,8 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(
 
 template <class Coefficient>
 std::string MonomialGeneralizedVerma<Coefficient>::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   if (this->owner == nullptr) {
     global.fatal
@@ -3009,7 +3011,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toMathML(
   }
   (void) outputProperties;
   ModuleSSalgebra<Coefficient>& module = *this->owner;
-  MathExpressionProperties coefficientProperties;
+  MathExpressionFormattingProperties coefficientProperties;
   std::string coefficientString =
   this->monomialCoefficientOne.toMathML(format, &coefficientProperties);
   if (coefficientProperties.isOne) {
@@ -3023,7 +3025,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toMathML(
   );
   std::stringstream out;
   out << "<mrow>" << coefficientString;
-  MathExpressionProperties monomialProperties;
+  MathExpressionFormattingProperties monomialProperties;
   std::string monomialString =
   module.generatingWordsNonReduced[this->indexFDVector].toMathML(
     format, &monomialProperties

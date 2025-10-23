@@ -39,7 +39,7 @@ private:
     const FormatExpressions* format,
     const std::string& customCoefficientMonomialSeparator,
     List<std::string>& rowOutputs,
-    MathExpressionProperties& outputProperties
+    MathExpressionFormattingProperties& outputProperties
   ) const;
 public:
   HashedList<TemplateMonomial> monomials;
@@ -86,7 +86,7 @@ public:
   }
   std::string toMathML(
     const FormatExpressions* format,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   std::string toMathMLFinal(FormatExpressions* format) const;
   int size() const {
@@ -1322,11 +1322,11 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
   const FormatExpressions* format,
   const std::string& customCoefficientMonomialSeparator,
   List<std::string>& rowOutputs,
-  MathExpressionProperties& outputProperties
+  MathExpressionFormattingProperties& outputProperties
 ) const {
   STACK_TRACE("LinearCombination::termToMathML");
-  MathExpressionProperties coefficientProperites;
-  MathExpressionProperties monomialProperties;
+  MathExpressionFormattingProperties coefficientProperites;
+  MathExpressionFormattingProperties monomialProperties;
   rowOutputs.clear();
   std::string coefficientString;
   std::string monomialString;
@@ -1397,7 +1397,8 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathMLFinal(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
-  const FormatExpressions* format, MathExpressionProperties* outputProperties
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("LinearCombination::toMathML");
   if (this->size() == 0) {
@@ -1433,7 +1434,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     int coefficientIndex = this->monomials.getIndex(monomial);
     Coefficient& coefficient = this->coefficients[coefficientIndex];
     List<std::string> termStrings;
-    MathExpressionProperties termProperties;
+    MathExpressionFormattingProperties termProperties;
     this->termToMathML(
       coefficient,
       monomial,
@@ -1804,7 +1805,7 @@ public:
   }
   std::string toMathMLMatrixForm(
     const FormatExpressions* format = nullptr,
-    MathExpressionProperties* outputProperties = nullptr
+    MathExpressionFormattingProperties* outputProperties = nullptr
   ) const {
     if (this->isEqualToZero()) {
       return "<mrow><mo>(</mo><mn>0</mn><mo>)</mo></mrow>";

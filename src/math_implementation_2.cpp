@@ -1636,8 +1636,10 @@ void LargeInteger::toString(std::string& output) const {
 }
 
 void LargeInteger::computeFormattingProperties(
+  const FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
 ) const {
+  (void) format;
   if (outputProperties == nullptr) {
     return;
   }
@@ -1659,7 +1661,7 @@ std::string LargeInteger::toMathML(
   MathExpressionFormattingProperties* outputProperties
 ) const {
   (void) format;
-  this->computeFormattingProperties(outputProperties);
+  this->computeFormattingProperties(format, outputProperties);
   if (this->isEqualToZero()) {
     return "<mn>0</mn>";
   }
@@ -2563,6 +2565,18 @@ std::string Rational::toMathML(
   << denominator.toMathML()
   << "</mfrac>";
   return out.str();
+}
+
+void Rational::computeFormattingProperties(
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
+) const {
+  if (outputProperties == nullptr) {
+    return;
+  }
+  outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+  outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft =
+  this->needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
 }
 
 std::string Rational::toString(const FormatExpressions* format) const {

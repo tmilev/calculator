@@ -40,6 +40,16 @@ public:
     const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
+  void computeFormattingProperties(
+    const FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const {
+    if (outputProperties == nullptr) {
+      return;
+    }
+    outputProperties->needsParenthesesForMultiplicationOnTheRight =
+    this->needsParenthesisForMultiplication(format);
+  }
   bool needsParenthesisForMultiplication(
     const FormatExpressions* unused = nullptr
   ) const;

@@ -77,6 +77,16 @@ public:
   ElementZmodP operator/(const ElementZmodP& other) const;
   ElementZmodP operator*(const Rational& other) const;
   ElementZmodP operator*(const ElementZmodP& other) const;
+  void computeFormattingProperties(
+    const FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const {
+    if (outputProperties == nullptr) {
+      return;
+    }
+    outputProperties->needsParenthesesForMultiplicationOnTheRight =
+    this->needsParenthesisForMultiplication(format);
+  }
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,

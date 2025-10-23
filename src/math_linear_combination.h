@@ -59,6 +59,16 @@ public:
   ~LinearCombination() {
     this->flagDeallocated = true;
   }
+  void computeFormattingProperties(
+    const FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const {
+    if (outputProperties == nullptr) {
+      return;
+    }
+    outputProperties->needsParenthesesForMultiplicationOnTheRight =
+    this->needsParenthesisForMultiplication(format);
+  }
   bool needsParenthesisForMultiplication(
     const FormatExpressions* unused = nullptr
   ) const {
@@ -1271,8 +1281,10 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::termToString(
     }
   }
   std::string coefficientString;
+  MathExpressionFormattingProperties coefficientProperties;
+  coefficient.computeFormattingProperties(format, &coefficientProperties);
   std::string monomialString;
-  if (coefficient.needsParenthesisForMultiplication(format)) {
+  if (coefficientProperties.needsParenthesesForMultiplicationOnTheRight) {
     coefficientString = "\\left(" + coefficient.toString(format) + "\\right)";
   } else {
     coefficientString = coefficient.toString(format);

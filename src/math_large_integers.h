@@ -279,6 +279,7 @@ public:
     return currentString;
   }
   void computeFormattingProperties(
+    const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   std::string toMathML(
@@ -566,6 +567,10 @@ public:
   static std::string className() {
     return "Rational";
   }
+  void computeFormattingProperties(
+    const FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
     return this->isNegative();
   }
@@ -705,6 +710,9 @@ public:
     const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
+  void computeFormattingProperties(
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  );
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;
   std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr)

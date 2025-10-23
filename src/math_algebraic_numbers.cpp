@@ -808,6 +808,19 @@ bool AlgebraicNumber::needsParenthesisForMultiplication(
   return (additiveForm.size() > 1);
 }
 
+void AlgebraicNumber::computeFormattingProperties(
+  const FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
+) const {
+  if (outputProperties == nullptr) {
+    return;
+  }
+  outputProperties->needsParenthesesForMultiplicationOnTheRight =
+  this->needsParenthesisForMultiplication(format);
+  outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft =
+  this->needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+}
+
 bool AlgebraicNumber::
 needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
   if (this->owner == nullptr) {

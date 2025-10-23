@@ -74,6 +74,10 @@ public:
   // For the purposes fo rescaling rational functions with algebraic number
   // coefficients.
   AlgebraicNumber getDenominator() const;
+  void computeFormattingProperties(
+    const FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
   bool needsParenthesisForMultiplication(const FormatExpressions* unused)
   const;

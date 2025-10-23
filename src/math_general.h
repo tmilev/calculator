@@ -2232,6 +2232,17 @@ public:
     this->imaginaryPart = - this->imaginaryPart;
     this->realPart = - this->realPart;
   }
+  void computeFormattingProperties(
+    const FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const {
+    (void) format;
+    if (outputProperties == nullptr) {
+      return;
+    }
+    outputProperties->needsParenthesesForMultiplicationOnTheRight =
+    this->needsParenthesisForMultiplication(format);
+  }
   bool needsParenthesisForMultiplication(const FormatExpressions* unused) const {
     (void) unused;
     if (this->realPart == 0 && this->imaginaryPart >= 0) {

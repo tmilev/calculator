@@ -664,6 +664,10 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
       FileOperations::writeFileVirtual(
         newFileName, actualOutputString, nullptr
       );
+      global
+      << Logger::red
+      << "Problem interpretation changed. "
+      << Logger::endL;
       global.fatal
       << "Detected change in the expected problem "
       << "content and the actual one. Wrote the new output as "

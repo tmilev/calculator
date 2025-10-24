@@ -1654,6 +1654,8 @@ void LargeInteger::computeFormattingProperties(
     outputProperties->startsWithDigit = true;
   }
   outputProperties->isOne = this->isEqualToOne();
+  outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+  outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = true;
 }
 
 std::string LargeInteger::toMathML(
@@ -2571,12 +2573,14 @@ void Rational::computeFormattingProperties(
   const FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
 ) const {
+  (void) format;
   if (outputProperties == nullptr) {
     return;
   }
   outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+  outputProperties->startsWithMinus = this->isNegative();
   outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft =
-  this->needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  this->isNegative();
 }
 
 std::string Rational::toString(const FormatExpressions* format) const {

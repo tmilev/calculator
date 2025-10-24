@@ -1424,7 +1424,8 @@ bool Expression::toMathMLTimes(
   }
   std::string firstExpression =
   input[1].toMathML(format, &firstExpressionProperties);
-  bool firstNeedsBrackets = input[1].needsParenthesisForMultiplication();
+  bool firstNeedsBrackets =
+  firstExpressionProperties.needsParenthesesForMultiplicationOnTheRight;
   bool secondNeedsBrackets =
   input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
     &(input[1])
@@ -1724,8 +1725,10 @@ void Expression::toMathMLOpMultiplicative(
   MathExpressionFormattingProperties propertiesOfSecond;
   std::string firstMathML = (*this)[1].toMathML(format, &propertiesOfFirst);
   std::string secondMathML = (*this)[2].toMathML(format, &propertiesOfSecond);
-  bool firstNeedsBrackets = (*this)[1].needsParenthesisForMultiplication();
-  bool secondNeedsBrackets = (*this)[2].needsParenthesisForMultiplication();
+  bool firstNeedsBrackets =
+  propertiesOfFirst.needsParenthesesForMultiplicationOnTheRight;
+  bool secondNeedsBrackets =
+  propertiesOfSecond.needsParenthesesForMultiplicationOnTheRight;
   if (propertiesOfFirst.isNegativeOne) {
     firstMathML = MathML::negativeSign;
     firstNeedsBrackets = false;
@@ -2296,14 +2299,13 @@ bool Expression::toMathMLDifferentiate(
   if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
     return false;
   }
+  MathExpressionFormattingProperties secondProperties;
+  std::string secondString = input[2].toMathML(format, &secondProperties);
   out << "<mfrac><mrow><mtext>d</mtext>";
-  if (input[2].needsParenthesisForMultiplication()) {
-    out
-    << MathML::leftParenthesis
-    << input[2].toMathML(format)
-    << MathML::rightParenthesis;
+  if (secondProperties.needsParenthesesForMultiplicationOnTheRight) {
+    out << MathML::leftParenthesis << secondString << MathML::rightParenthesis;
   } else {
-    out << input[2].toMathML(format);
+    out << secondString;
   }
   out
   << "</mrow><mrow><mtext>d</mtext>"
@@ -2353,16 +2355,17 @@ bool Expression::toMathMLDifferential3(
   if (!input.startsWith(input.owner->opDifferential(), 3)) {
     return false;
   }
-  bool needsParen = input[2].needsParenthesisForMultiplication() ||
-  input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  MathExpressionFormattingProperties secondProperties;
+  std::string coefficient = input[2].toMathML(format, &secondProperties);
+  bool needsParen =
+  secondProperties.needsParenthesesForMultiplicationOnTheRight ||
+  secondProperties.needsParenthesesWhenLastAndMultipliedOnTheLeft;
   if (input[2].startsWith(input.owner->opDivide())) {
     needsParen = false;
   }
   out << "<mrow>";
   bool rightNeedsParen = (!input[1].isAtom()) && (!input[1].isBuiltInType());
-  MathExpressionFormattingProperties properties;
-  std::string coefficient = input[2].toMathML(format, &properties);
-  if (properties.isOne) {
+  if (secondProperties.isOne) {
     needsParen = false;
     coefficient = "";
   }

@@ -32,7 +32,7 @@
     },
     "problems/Indefinite-integral-asin2bx.html":{
       "randomSeed":0,
-      "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\n\n<br>\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle 6 \\int \\left(-\\frac{1}{20}\\right) {\\text{d}} \\left(\\sin{}\\left(10 x\\right)\\right)+6 \\int \\frac{1}{2} {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n\n\n\\begin{array}{rcll|l}\\displaystyle \\int 6 {\\sin^{2}}{}\\left(5 x\\right) {\\text d} x&=&\\displaystyle  6  \\int \\sin^{2}(5 x) {\\text d} x   \\\\&=&\\displaystyle   6  \\int \\frac{{1}-\\cos({2} \\cdot 5 x)}{{2}} {\\text d} x&&\\displaystyle \\text{Set } \\sin^{2} w=\\frac{{1}-\\cos({2w})}{{2}}\\\\&=&\\displaystyle  6 \\left(  \\frac{ x}{{2}}-\\frac{\\sin(10 x)}{{4}}  \\right)+C \\\\&=&\\displaystyle  -\\frac{3}{2} \\sin{}\\left(10 x\\right)+3 x+C\\\\\\end{array}\n</span>\n",
+      "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\n\n<br>\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle \\int 6 {\\sin^{2}}{}\\left(5 x\\right) {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n",
       "head":""
     },
     "problems/Indefinite-integral-x-cubed-sqrt-quadratic-no-lin-term-1.html":{
@@ -1752,7 +1752,7 @@
     },
     "problems/Series-convergence-ratio-test-1.html":{
       "randomSeed":0,
-      "body":"\nDetermine whether the series is convergent or divergent. If convergent, write ``convergent'', else write ``divergent''.\n<br>\nIn your pen and paper solution, indicate clearly which convergence/divergence tests you used and how you used them.\n<br>\n\\( \\displaystyle \\sum _{n=1}^{\\infty}\\frac{-n^{3}}{3^{n+4}} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n<br>\n\\( \\displaystyle \\sum _{n=9}^{\\infty}-20 n^{9}\\cdot 9^{n+7} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n",
+      "body":"\nDetermine whether the series is convergent or divergent. If convergent, write ``convergent'', else write ``divergent''.\n<br>\nIn your pen and paper solution, indicate clearly which convergence/divergence tests you used and how you used them.\n<br>\n\\( \\displaystyle \\sum _{n=1}^{\\infty}\\frac{-n^{3}}{3^{n+4}} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n<br>\n\\( \\displaystyle \\sum _{n=9}^{\\infty}\\left(-20 n^{9}\\right)9^{n+7} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n",
       "head":""
     },
     "problems/LHospitalsRule-at-infinity-1.html":{
@@ -2264,7 +2264,7 @@
     },
     "problems/Indefinite-integral-asin2bx.html":{
       "randomSeed":1,
-      "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\n\n<br>\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle 8 \\int \\left(-\\frac{1}{8}\\right) {\\text{d}} \\left(\\sin{}\\left(4 x\\right)\\right)+8 \\int \\frac{1}{2} {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n\n\n\\begin{array}{rcll|l}\\displaystyle \\int 8 {\\sin^{2}}{}\\left(2 x\\right) {\\text d} x&=&\\displaystyle  8  \\int \\sin^{2}(2 x) {\\text d} x   \\\\&=&\\displaystyle   8  \\int \\frac{{1}-\\cos({2} \\cdot 2 x)}{{2}} {\\text d} x&&\\displaystyle \\text{Set } \\sin^{2} w=\\frac{{1}-\\cos({2w})}{{2}}\\\\&=&\\displaystyle  8 \\left(  \\frac{ x}{{2}}-\\frac{\\sin(4 x)}{{4}}  \\right)+C \\\\&=&\\displaystyle  -2 \\sin{}\\left(4 x\\right)+4 x+C\\\\\\end{array}\n</span>\n",
+      "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\n\n<br>\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle \\int 8 {\\sin^{2}}{}\\left(2 x\\right) {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n",
       "head":""
     },
     "problems/Indefinite-integral-x-cubed-sqrt-quadratic-no-lin-term-1.html":{
@@ -4496,7 +4496,7 @@
     },
     "problems/Indefinite-integral-asin2bx.html":{
       "randomSeed":2,
-      "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\n\n<br>\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle 7 \\int \\left(-\\frac{1}{48}\\right) {\\text{d}} \\left(\\sin{}\\left(24 x\\right)\\right)+7 \\int \\frac{1}{2} {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n\n\n\\begin{array}{rcll|l}\\displaystyle \\int 7 {\\sin^{2}}{}\\left(12 x\\right) {\\text d} x&=&\\displaystyle  7  \\int \\sin^{2}(12 x) {\\text d} x   \\\\&=&\\displaystyle   7  \\int \\frac{{1}-\\cos({2} \\cdot 12 x)}{{2}} {\\text d} x&&\\displaystyle \\text{Set } \\sin^{2} w=\\frac{{1}-\\cos({2w})}{{2}}\\\\&=&\\displaystyle  7 \\left(  \\frac{ x}{{2}}-\\frac{\\sin(24 x)}{{4}}  \\right)+C \\\\&=&\\displaystyle  -\\frac{7}{4} \\sin{}\\left(24 x\\right)+\\frac{7}{2} x+C\\\\\\end{array}\n</span>\n",
+      "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\n\n<br>\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle \\int 7 {\\sin^{2}}{}\\left(12 x\\right) {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n",
       "head":""
     },
     "problems/Indefinite-integral-x-cubed-sqrt-quadratic-no-lin-term-1.html":{
@@ -6216,7 +6216,7 @@
     },
     "problems/Series-convergence-ratio-test-1.html":{
       "randomSeed":2,
-      "body":"\nDetermine whether the series is convergent or divergent. If convergent, write ``convergent'', else write ``divergent''.\n<br>\nIn your pen and paper solution, indicate clearly which convergence/divergence tests you used and how you used them.\n<br>\n\\( \\displaystyle \\sum _{n=12}^{\\infty}\\frac{-9 n^{5}}{12^{n+7}} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n<br>\n\\( \\displaystyle \\sum _{n=9}^{\\infty}-5 n\\cdot 2^{n+6} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n",
+      "body":"\nDetermine whether the series is convergent or divergent. If convergent, write ``convergent'', else write ``divergent''.\n<br>\nIn your pen and paper solution, indicate clearly which convergence/divergence tests you used and how you used them.\n<br>\n\\( \\displaystyle \\sum _{n=12}^{\\infty}\\frac{-9 n^{5}}{12^{n+7}} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n<br>\n\\( \\displaystyle \\sum _{n=9}^{\\infty}\\left(-5 n\\right)2^{n+6} \\)\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n",
       "head":""
     },
     "problems/LHospitalsRule-at-infinity-1.html":{

@@ -23,8 +23,8 @@ public:
   startsWithDigit(false),
   endsWithDigit(false),
   startsWithFraction(false),
-  needsParenthesesForMultiplicationOnTheRight(false),
-  needsParenthesesWhenLastAndMultipliedOnTheLeft(false) {}
+  needsParenthesesForMultiplicationOnTheRight(true),
+  needsParenthesesWhenLastAndMultipliedOnTheLeft(true) {}
   std::string toString() const;
 };
 

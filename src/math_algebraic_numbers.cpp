@@ -826,9 +826,7 @@ needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
   if (this->owner == nullptr) {
     Rational rationalValue;
     if (this->isRational(&rationalValue)) {
-      return
-      rationalValue.needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
-      );
+      return rationalValue.isNegative();
     }
     return false;
   }
@@ -837,9 +835,7 @@ needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
   if (additiveForm.size() != 1) {
     return true;
   }
-  return
-  additiveForm.coefficients[0].
-  needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  return additiveForm.coefficients[0].isNegative();
 }
 
 bool AlgebraicNumber::checkNonZeroOwner() const {

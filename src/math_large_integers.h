@@ -571,9 +571,6 @@ public:
     const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
-  bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
-    return this->isNegative();
-  }
   bool needsParenthesisForMultiplication(const FormatExpressions* unused) const {
     (void) unused;
     return false;

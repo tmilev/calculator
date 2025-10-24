@@ -279,12 +279,13 @@ public:
   bool isError(std::string* outputErrorMessage = nullptr) const;
   bool isContext() const;
   bool needsParenthesisForBaseOfExponent() const;
-  bool needsParenthesisForMultiplication(FormatExpressions* format = nullptr)
-  const;
   bool needsParenthesisForAddition() const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
     const Expression* leftNeighbor = nullptr
   ) const;
+  // bool needsParenthesisForMultiplication(FormatExpressions* format =
+  // nullptr)
+  //    const;
   int getExpressionTreeSize() const;
   template <class Type>
   bool isOfType() const {
@@ -490,6 +491,11 @@ public:
     this->setChild(childIndex, expression);
   }
   std::string lispify() const;
+  bool toStringAtom(
+    std::stringstream& out,
+    FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const;
   bool toStringData(
     std::stringstream& out,
     FormatExpressions* format = nullptr,
@@ -520,7 +526,9 @@ public:
     MathExpressionFormattingProperties* outputProperties = nullptr
   );
   bool toStringWithAtomHandler(
-    std::stringstream& out, FormatExpressions* format
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionFormattingProperties* outputProperties
   ) const;
   bool toMathMLWithAtomHandler(
     std::stringstream& out,
@@ -566,7 +574,10 @@ public:
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDifferential3(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionFormattingProperties* outputProperties
   );
   static bool toMathMLDifferential3(
     const Expression& input, std::stringstream& out, FormatExpressions* format
@@ -924,6 +935,13 @@ public:
     std::stringstream& out,
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties = nullptr
+  );
+  static bool toStringTimesInContext(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionFormattingProperties* outputProperties = nullptr,
+    bool outputMustStartMultiplicatively = false
   );
   static bool toMathMLTimes(
     const Expression& input,

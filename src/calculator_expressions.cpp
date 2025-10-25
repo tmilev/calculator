@@ -3458,18 +3458,19 @@ std::string Expression::toStringSemiFull() const {
   std::stringstream out;
   if (this->toStringData(out)) {
     out << " ";
-  } else {
-    if (this->children.size > 0) {
-      out << "(";
-      for (int i = 0; i < this->children.size; i ++) {
-        out << (*this)[i].toStringSemiFull();
-        if (i != this->children.size - 1) {
-          out << ", ";
-        }
-      }
-      out << ")";
+    return out.str();
+  }
+  if (this->children.size == 0) {
+    return "";
+  }
+  out << "(";
+  for (int i = 0; i < this->children.size; i ++) {
+    out << (*this)[i].toStringSemiFull();
+    if (i != this->children.size - 1) {
+      out << ", ";
     }
   }
+  out << ")";
   return out.str();
 }
 

@@ -22,8 +22,35 @@ bool Expression::toMathMLBuiltIn<Polynomial<Rational> >(
   FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
 ) {
-  (void) outputProperties;
-  out << input.getValue<Polynomial<Rational> >().toMathML(format, nullptr);
+  (void) format;
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
+  bool hidePolynomialCommand =
+  input.owner->flagHidePolynomialBuiltInTypeIndicator;
+  if (!hidePolynomialCommand) {
+    out << "<mrow><mi>Polynomial</mi>" << MathML::leftParenthesis;
+  }
+  MathExpressionFormattingProperties polynomialProperties;
+  out
+  << input.getValue<Polynomial<Rational> >().toMathML(
+    &formatLocal, &polynomialProperties
+  );
+  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
+    out << MathML::rightParenthesis;
+  }
+  if (showContext) {
+    out << "<ms>[" << input.getContext().toString() << "]</ms>";
+  }
+  if (outputProperties != nullptr) {
+    if (hidePolynomialCommand) {
+      *outputProperties = polynomialProperties;
+    } else {
+      outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+    }
+  }
   return true;
 }
 
@@ -1666,7 +1693,7 @@ bool Expression::toMathMLMinus3(
     << ". "
     << global.fatal;
   }
-  out << input[1].toMathML(format) << MathML::negativeSign;
+  out << "<mrow>" << input[1].toMathML(format) << MathML::negativeSign;
   if (
     input[2].startsWith(input.owner->opPlus()) ||
     input[2].startsWith(input.owner->opMinus())
@@ -1674,7 +1701,8 @@ bool Expression::toMathMLMinus3(
     out
     << MathML::leftParenthesis
     << input[2].toMathML(format)
-    << MathML::rightParenthesis;
+    << MathML::rightParenthesis
+    << "</mrow>";
   } else {
     out << input[2].toMathML(format);
   }
@@ -1692,12 +1720,18 @@ bool Expression::toMathMLMinus2(
     input[1].startsWith(input.owner->opMinus())
   ) {
     out
+    << "<mrow>"
     << MathML::negativeSign
     << MathML::leftParenthesis
     << input[1].toMathML(format)
-    << MathML::rightParenthesis;
+    << MathML::rightParenthesis
+    << "</mrow>";
   } else {
-    out << MathML::negativeSign << input[1].toMathML(format);
+    out
+    << "<mrow>"
+    << MathML::negativeSign
+    << input[1].toMathML(format)
+    << "</mrow>";
   }
   return true;
 }

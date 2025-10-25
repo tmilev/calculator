@@ -1046,7 +1046,9 @@ bool Calculator::Test::processResults() {
     << Logger::red
     << "There were "
     << this->inconsistencies
-    << " inconsistencies. "
+    << " latex inconsistencies and "
+    << this->inconsistenciesMathML
+    << " mathML inconsistencies."
     << Logger::endL;
     global << badCommandsConsole.str() << Logger::endL;
   }

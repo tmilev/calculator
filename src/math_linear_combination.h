@@ -1274,12 +1274,6 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::termToString(
   const FormatExpressions* format,
   const std::string& customCoefficientMonomialSeparator
 ) const {
-  bool fracSpecialDesired = false;
-  if (format != nullptr) {
-    if (format->flagUseFrac && format->flagSuppressOneIn1overXtimesY) {
-      fracSpecialDesired = true;
-    }
-  }
   std::string coefficientString;
   MathExpressionFormattingProperties coefficientProperties;
   coefficient.computeFormattingProperties(format, &coefficientProperties);
@@ -1293,7 +1287,11 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::termToString(
   if (monomialString == "") {
     return coefficientString;
   }
-  if (fracSpecialDesired) {
+  if (
+    format != nullptr &&
+    format->flagUseFrac &&
+    format->flagSuppressOneIn1overXtimesY
+  ) {
     int sign = 0;
     std::string denominatorString;
     if (
@@ -1345,12 +1343,34 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
     coefficientMathML =
     MathML::leftParenthesis + coefficientMathML + MathML::rightParenthesis;
   }
-  std::string monomialString = monomial.toMathML(format, &monomialProperties);
+  std::string monomialMathML = monomial.toMathML(format, &monomialProperties);
   if (customCoefficientMonomialSeparator != "") {
     rowOutputs.addOnTop(coefficientMathML);
     rowOutputs.addOnTop(customCoefficientMonomialSeparator);
-    rowOutputs.addOnTop(monomialString);
+    rowOutputs.addOnTop(monomialMathML);
     return;
+  }
+  if (
+    format != nullptr &&
+    format->flagUseFrac &&
+    format->flagSuppressOneIn1overXtimesY
+  ) {
+    int sign = 0;
+    std::string denominatorString;
+    if (
+      FormatExpressions::toMathMLIsFractionLikeWithUnitNumerator(
+        coefficient, format, sign, denominatorString
+      )
+    ) {
+      std::string element =
+      "<mfrac>" + monomialMathML + denominatorString + "</mfrac>";
+      if (sign != 1) {
+        element =
+        "<mrow>" + MathML::negativeSign + denominatorString + "</mrow>";
+      }
+      rowOutputs.addOnTop(element);
+      return;
+    }
   }
   if (monomialProperties.isOne) {
     rowOutputs.addOnTop(coefficientMathML);
@@ -1358,13 +1378,13 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
     return;
   }
   if (coefficientProperites.isOne) {
-    rowOutputs.addOnTop(monomialString);
+    rowOutputs.addOnTop(monomialMathML);
     outputProperties = monomialProperties;
     return;
   }
   if (coefficientProperites.isNegativeOne) {
     rowOutputs.addOnTop(MathML::negativeSign);
-    rowOutputs.addOnTop(monomialString);
+    rowOutputs.addOnTop(monomialMathML);
     outputProperties.startsWithMinus = true;
     if (monomialProperties.isOne) {
       outputProperties.isNegativeOne = true;
@@ -1372,7 +1392,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
     return;
   }
   rowOutputs.addOnTop(coefficientMathML);
-  rowOutputs.addOnTop(monomialString);
+  rowOutputs.addOnTop(monomialMathML);
   outputProperties.startsWithMinus = coefficientProperites.startsWithMinus;
 }
 

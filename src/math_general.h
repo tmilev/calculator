@@ -2035,12 +2035,31 @@ public:
   // `outputSign` will be modified to 1
   // if the input is of the form 1/A and to -1 if the input is of the form
   // -1/A.
-  // `outputDenominatorString` is the string representation of the denominator
-  // A.
+  // `outputDenominatorString` is the string representation
+  // of the denominator A.
   // This method may be overridden for a specific type, search for
   // its implementations please.
   template <typename Object>
   static bool toStringIsFractionLikeWithUnitNumerator(
+    const Object& input,
+    const FormatExpressions* format,
+    int& outputSign,
+    std::string& outputDenominatorString
+  ) {
+    (void) input;
+    (void) format;
+    (void) outputSign;
+    (void) outputDenominatorString;
+    return false;
+  }
+  // Returns true if a given object mathML representation is
+  // of the form 1/A or -1/A. Similar to
+  // toStringIsFractionLikeWithUnitNumerator
+  // but for mathML.
+  // Search for specializations of this method to override
+  // for particular classes.
+  template <typename Object>
+  static bool toMathMLIsFractionLikeWithUnitNumerator(
     const Object& input,
     const FormatExpressions* format,
     int& outputSign,

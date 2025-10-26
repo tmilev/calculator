@@ -939,7 +939,7 @@ bool Calculator::Test::processResults() {
     << "</td>"
     << "<td>"
     << HtmlRoutines::getCalculatorComputationAnchorThisServer(
-      "%UseMathML" + this->commands.keys[i], "mathML link", true
+      "%UseMathML\n" + this->commands.keys[i], "mathML link", true
     )
     << "</td>";
     bool isBad = false;

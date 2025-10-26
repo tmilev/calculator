@@ -2087,6 +2087,23 @@ bool FormatExpressions::toStringIsFractionLikeWithUnitNumerator(
 }
 
 template < >
+bool FormatExpressions::toMathMLIsFractionLikeWithUnitNumerator(
+  const AlgebraicNumber& input,
+  const FormatExpressions* format,
+  int& outputSign,
+  std::string& outputDenominatorString
+) {
+  Rational rational;
+  if (!input.isRational(&rational)) {
+    return false;
+  }
+  return
+  FormatExpressions::toMathMLIsFractionLikeWithUnitNumerator(
+    rational, format, outputSign, outputDenominatorString
+  );
+}
+
+template < >
 bool PolynomialSystem<AlgebraicNumber>::getOneVariablePolynomialSolution(
   const Polynomial<AlgebraicNumber>& polynomial,
   AlgebraicNumber& outputSolution

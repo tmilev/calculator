@@ -2797,3 +2797,21 @@ bool FormatExpressions::toStringIsFractionLikeWithUnitNumerator(
   outputDenominatorString = input.getDenominator().toString(format);
   return true;
 }
+
+template < >
+bool FormatExpressions::toMathMLIsFractionLikeWithUnitNumerator(
+  const Rational& input,
+  const FormatExpressions* format,
+  int& outputSign,
+  std::string& outputDenominatorString
+) {
+  if (input.isInteger()) {
+    return false;
+  }
+  if (!input.getNumerator().value.isEqualToOne()) {
+    return false;
+  }
+  outputSign = input.isNegative() ? - 1 : 1;
+  outputDenominatorString = input.getDenominator().toMathML(format);
+  return true;
+}

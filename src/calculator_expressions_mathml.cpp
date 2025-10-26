@@ -674,12 +674,13 @@ bool Expression::toMathMLBuiltIn<MatrixTensor<Rational> >(
     20
   ) {
     out
-    << "<mi>MatrixRationalsTensorForm{}</mi>"
+    << "<mrow><mi>MatrixRationalsTensorForm{}</mi>"
     << MathML::leftParenthesis
     << input.getValue<MatrixTensor<Rational> >().toMathMLMatrixForm(
       &formatLocal, outputProperties
     )
-    << MathML::rightParenthesis;
+    << MathML::rightParenthesis
+    << "</mrow>";
   } else {
     out
     << input.getValue<MatrixTensor<Rational> >().toMathML(

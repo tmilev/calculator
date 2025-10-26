@@ -442,10 +442,10 @@ private:
   bool computeState(int maximumElementsToProcess);
   bool addAndAccount(const std::string& incoming);
   bool decreaseStack(int numberToPop);
-  bool initializeFileNames(
-    const std::string& fileName,
-    const std::string& output,
-    const std::string& outputOnFail,
+  bool loadSourceFile(
+    const std::string& filenameOfFileToFormat,
+    const std::string& outputFilenameOfFormattedFile,
+    const std::string& outputFilenameOfFailedFile,
     std::stringstream* comments
   );
   bool parsingSucceeded() const;

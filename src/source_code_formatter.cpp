@@ -1870,14 +1870,14 @@ void CodeFormatter::Words::initialize(CodeFormatter& inputOwner) {
   this->owner = &inputOwner;
 }
 
-bool CodeFormatter::initializeFileNames(
-  const std::string& fileName,
-  const std::string& output,
-  const std::string& outputOnFail,
+bool CodeFormatter::loadSourceFile(
+  const std::string& filenameOfFileToFormat,
+  const std::string& outputFilenameOfFormattedFile,
+  const std::string& outputFilenameOfFailedFile,
   std::stringstream* comments
 ) {
-  STACK_TRACE("CodeFormatter::initializeFileNames");
-  this->inputFileName = fileName;
+  STACK_TRACE("CodeFormatter::loadSourceFile");
+  this->inputFileName = filenameOfFileToFormat;
   if (
     !FileOperations::loadFileToStringVirtual(
       this->inputFileName, this->inputCode, false, comments
@@ -1888,12 +1888,12 @@ bool CodeFormatter::initializeFileNames(
     }
     return false;
   }
-  if (output != "") {
-    this->outputFileName = output;
+  if (outputFilenameOfFormattedFile != "") {
+    this->outputFileName = outputFilenameOfFormattedFile;
   } else {
     this->outputFileName = this->inputFileName + ".new";
   }
-  this->outputOnFailFileName = outputOnFail;
+  this->outputOnFailFileName = outputFilenameOfFailedFile;
   if (this->outputOnFailFileName == "") {
     this->outputOnFailFileName = this->inputFileName + ".fail";
   }
@@ -2033,9 +2033,7 @@ bool CodeFormatter::formatCPPSourceCode(
   bool logDebugInfo
 ) {
   STACK_TRACE("CodeFormatter::formatCPPSourceCode");
-  if (
-    !this->initializeFileNames(inputFileName, output, outputOnFail, comments)
-  ) {
+  if (!this->loadSourceFile(inputFileName, output, outputOnFail, comments)) {
     return false;
   }
   this->words.initialize(*this);
@@ -4904,6 +4902,13 @@ bool CodeFormatter::writeFormattedCode(std::stringstream* comments) {
   std::string filenameOut = this->outputFileName;
   if (!this->parsingSucceeded()) {
     filenameOut = this->outputOnFailFileName;
+  }
+  if (
+    this->outputFileName == this->inputFileName &&
+    this->transformedContent == this->inputCode
+  ) {
+    // No changes were made to the source code.
+    return true;
   }
   if (
     !FileOperations::writeFileVirtual(

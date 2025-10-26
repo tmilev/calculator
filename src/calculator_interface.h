@@ -205,6 +205,11 @@ public:
     bool dontReduceTypes
   );
   bool divisionByMeShouldBeWrittenInExponentForm() const;
+  static void computeFormattingPropertiesPower(
+    const Expression& input,
+    FormatExpressions* format,
+    MathExpressionFormattingProperties& outputProperties
+  );
   bool isCalculatorStatusChanger() const;
   bool isCalculatorBuiltInStatusChanger() const;
   bool isList() const;

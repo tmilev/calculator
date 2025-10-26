@@ -1336,6 +1336,9 @@ bool Expression::toMathMLPower(
   if (!input.startsWith(commands.opPower(), 3)) {
     return false;
   }
+  Expression::computeFormattingPropertiesPower(
+    input, format, outputProperties
+  );
   bool involvesExponentsInterpretedAsFunctions = false;
   const Expression& firstE = input[1];
   const Expression& secondE = input[2];

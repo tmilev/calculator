@@ -4002,6 +4002,31 @@ bool Expression::toStringDivide(
   return true;
 }
 
+void Expression::computeFormattingPropertiesPower(
+  const Expression& input,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties& outputProperties
+) {
+  (void) format;
+  if (input.owner == nullptr) {
+    return;
+  }
+  if (!input.startsWith(input.owner->opPower(), 3)) {
+    return;
+  }
+  const Expression& firstE = input[1];
+  if (
+    firstE.children.size > 0 &&
+    firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction()
+  ) {
+    outputProperties.needsParenthesesForMultiplicationOnTheRight = true;
+    outputProperties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+  } else {
+    outputProperties.needsParenthesesForMultiplicationOnTheRight = false;
+    outputProperties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+  }
+}
+
 bool Expression::toStringPower(
   const Expression& input,
   std::stringstream& out,
@@ -4021,18 +4046,9 @@ bool Expression::toStringPower(
       isSuperScriptOfUnderscoredOperator = true;
     }
   }
-  if (outputProperties != nullptr) {
-    if (
-      firstE.children.size > 0 &&
-      firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction()
-    ) {
-      outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
-      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
-    } else {
-      outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
-      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
-    }
-  }
+  Expression::computeFormattingPropertiesPower(
+    input, format, outputProperties
+  );
   if (isSuperScriptOfUnderscoredOperator) {
     out
     << firstE[1].toString(format)

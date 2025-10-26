@@ -1935,14 +1935,6 @@ std::string AlgebraicNumber::toString(const FormatExpressions* format) const {
   return out.str();
 }
 
-std::string AlgebraicNumber::toMathMLFinal(const FormatExpressions* format)
-const {
-  return
-  MathML::toMathMLFinal(
-    this->toMathML(format), this->toString(format), format
-  );
-}
-
 std::string AlgebraicNumber::toMathML(
   const FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
@@ -1963,8 +1955,17 @@ std::string AlgebraicNumber::toMathML(
   currentFormat.flagUseHTML = false;
   VectorSparse<Rational> additiveVector;
   this->owner->getAdditionTo(*this, additiveVector);
-  out << additiveVector.toMathML(&currentFormat, outputProperties);
+  out << additiveVector.toMathML(&currentFormat, nullptr);
+  this->computeFormattingProperties(format, outputProperties);
   return out.str();
+}
+
+std::string AlgebraicNumber::toMathMLFinal(const FormatExpressions* format)
+const {
+  return
+  MathML::toMathMLFinal(
+    this->toMathML(format), this->toString(format), format
+  );
 }
 
 std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* format)

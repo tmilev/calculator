@@ -236,7 +236,10 @@ Calculator& MathMLConverter::converterCalculator() {
 std::string MathExpressionFormattingProperties::toString() const {
   std::stringstream out;
   out
-  << "{startsWithDigit: "
+  << "{"
+  << "needsParenthesesForMultiplicationOnTheRight: "
+  << this->needsParenthesesForMultiplicationOnTheRight
+  << ", startsWithDigit: "
   << this->startsWithDigit
   << ", endsWithDigit: "
   << this->endsWithDigit

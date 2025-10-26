@@ -1031,7 +1031,9 @@ bool Calculator::Test::processResults() {
     << "The test file results do not match the current results. </b>"
     << "There were "
     << this->inconsistencies
-    << " inconsistencies. "
+    << " latex inconsistencies and "
+    << this->inconsistenciesMathML
+    << " mathML inconsistencies. "
     << "If you think the current computations are correct, "
     << "say, the expected results have changed since the last test run, "
     << "erase file: "

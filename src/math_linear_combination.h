@@ -1340,24 +1340,21 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
   MathExpressionFormattingProperties coefficientProperites;
   MathExpressionFormattingProperties monomialProperties;
   rowOutputs.clear();
-  std::string coefficientString;
-  std::string monomialString;
-  if (coefficient.needsParenthesisForMultiplication(format)) {
-    std::string coefficientMathML = coefficient.toMathML(format);
-    coefficientString =
+  std::string coefficientMathML =
+  coefficient.toMathML(format, &coefficientProperites);
+  if (coefficientProperites.needsParenthesesForMultiplicationOnTheRight) {
+    coefficientMathML =
     MathML::leftParenthesis + coefficientMathML + MathML::rightParenthesis;
-  } else {
-    coefficientString = coefficient.toMathML(format, &coefficientProperites);
   }
-  monomialString = monomial.toMathML(format, &monomialProperties);
+  std::string monomialString = monomial.toMathML(format, &monomialProperties);
   if (customCoefficientMonomialSeparator != "") {
-    rowOutputs.addOnTop(coefficientString);
+    rowOutputs.addOnTop(coefficientMathML);
     rowOutputs.addOnTop(customCoefficientMonomialSeparator);
     rowOutputs.addOnTop(monomialString);
     return;
   }
   if (monomialProperties.isOne) {
-    rowOutputs.addOnTop(coefficientString);
+    rowOutputs.addOnTop(coefficientMathML);
     outputProperties = coefficientProperites;
     return;
   }
@@ -1375,7 +1372,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
     }
     return;
   }
-  rowOutputs.addOnTop(coefficientString);
+  rowOutputs.addOnTop(coefficientMathML);
   rowOutputs.addOnTop(monomialString);
   outputProperties.startsWithMinus = coefficientProperites.startsWithMinus;
 }
@@ -1470,6 +1467,10 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     }
   }
   out << "</mrow>";
+  if (outputProperties != nullptr && this->size() > 1) {
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
+    outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = true;
+  }
   return out.str();
 }
 

@@ -4002,31 +4002,6 @@ bool Expression::toStringDivide(
   return true;
 }
 
-void Expression::computeFormattingPropertiesPower(
-  const Expression& input,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties& outputProperties
-) {
-  (void) format;
-  if (input.owner == nullptr) {
-    return;
-  }
-  if (!input.startsWith(input.owner->opPower(), 3)) {
-    return;
-  }
-  const Expression& firstE = input[1];
-  if (
-    firstE.children.size > 0 &&
-    firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction()
-  ) {
-    outputProperties.needsParenthesesForMultiplicationOnTheRight = true;
-    outputProperties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
-  } else {
-    outputProperties.needsParenthesesForMultiplicationOnTheRight = false;
-    outputProperties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
-  }
-}
-
 bool Expression::toStringPower(
   const Expression& input,
   std::stringstream& out,
@@ -4038,65 +4013,80 @@ bool Expression::toStringPower(
   if (!input.startsWith(commands.opPower(), 3)) {
     return false;
   }
-  const Expression& firstE = input[1];
+  const Expression& baseExpression = input[1];
   const Expression& secondE = input[2];
   bool isSuperScriptOfUnderscoredOperator = false;
-  if (firstE.startsWith(commands.opUnderscore(), 3)) {
-    if (firstE[1].isOperationGiven(commands.opIntegral())) {
+  if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
+    if (baseExpression[1].isOperationGiven(commands.opIntegral())) {
       isSuperScriptOfUnderscoredOperator = true;
     }
   }
-  Expression::computeFormattingPropertiesPower(
-    input, format, outputProperties
-  );
+  if (outputProperties != nullptr) {
+    if (
+      baseExpression.children.size > 0 &&
+      baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction()
+    ) {
+      outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
+      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+    } else {
+      outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+    }
+  }
+  bool isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents = false;
+  if (baseExpression.startsWith(- 1, 2)) {
+    isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents =
+    baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
+    !secondE.isEqualToMOne() &&
+    secondE.isRational();
+    if (
+      isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents &&
+      baseExpression[0].isOperationGiven(commands.opLog()) &&
+      commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
+    ) {
+      isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents = false;
+    }
+  }
+  if (isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents) {
+    Expression newFunctionExpression;
+    newFunctionExpression.makeXOX(
+      *input.owner, commands.opPower(), baseExpression[0], input[2]
+    );
+    newFunctionExpression.checkConsistency();
+    out << "{" << newFunctionExpression.toString(format) << "}{}";
+    if (
+      baseExpression[1].
+      needsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
+      baseExpression[1].startsWith(commands.opTimes())
+    ) {
+      out << "\\left(" << baseExpression[1].toString(format) << "\\right)";
+    } else {
+      out << baseExpression[1].toString(format);
+    }
+    return true;
+  }
   if (isSuperScriptOfUnderscoredOperator) {
     out
-    << firstE[1].toString(format)
+    << baseExpression[1].toString(format)
     << "_{"
-    << firstE[2].toString(format)
+    << baseExpression[2].toString(format)
     << "}^{"
     << secondE.toString(format)
     << "}";
     return true;
   }
   int opLimit = commands.opLimitBoundary();
-  if (firstE.startsWith(opLimit) || firstE.isOperationGiven(opLimit)) {
+  if (
+    baseExpression.startsWith(opLimit) ||
+    baseExpression.isOperationGiven(opLimit)
+  ) {
     out
     << "(\\ "
-    << firstE.toString(format)
+    << baseExpression.toString(format)
     << ")^{"
     << secondE.toString(format)
     << "}";
     return true;
-  }
-  if (firstE.startsWith(- 1, 2)) {
-    bool shouldProceed =
-    firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
-    !secondE.isEqualToMOne() &&
-    secondE.isRational();
-    if (
-      shouldProceed &&
-      firstE[0].isOperationGiven(commands.opLog()) &&
-      commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
-    ) {
-      shouldProceed = false;
-    }
-    if (shouldProceed) {
-      Expression newFunE;
-      newFunE.makeXOX(*input.owner, commands.opPower(), firstE[0], input[2]);
-      newFunE.checkConsistency();
-      out << "{" << newFunE.toString(format) << "}{}";
-      if (
-        firstE[1].needsParenthesisForMultiplicationWhenSittingOnTheRightMost()
-        ||
-        firstE[1].startsWith(commands.opTimes())
-      ) {
-        out << "\\left(" << firstE[1].toString(format) << "\\right)";
-      } else {
-        out << firstE[1].toString(format);
-      }
-      return true;
-    }
   }
   bool isSqrt = false;
   if (input[2].isOfType<Rational>()) {
@@ -4105,14 +4095,16 @@ bool Expression::toStringPower(
     }
   }
   if (isSqrt) {
-    out << "\\sqrt{" << input[1].toString(format) << "}";
+    out << "\\sqrt{" << baseExpression.toString(format) << "}";
     return true;
   }
+  MathExpressionFormattingProperties baseProperties;
+  std::string baseString =
+  baseExpression.toString(format, nullptr, true, nullptr, &baseProperties);
   std::string secondExpressionString = input[2].toString(format);
-  std::string firstExpressionString = input[1].toString(format);
-  if (input[1].needsParenthesisForBaseOfExponent()) {
+  if (baseExpression.needsParenthesisForBaseOfExponent()) {
     bool useBigParenthesis = true;
-    if (input[1].startsWith(commands.opDivide())) {
+    if (baseExpression.startsWith(commands.opDivide())) {
       useBigParenthesis = true;
     }
     if (useBigParenthesis) {
@@ -4120,14 +4112,14 @@ bool Expression::toStringPower(
     } else {
       out << "(";
     }
-    out << firstExpressionString;
+    out << baseString;
     if (useBigParenthesis) {
       out << "\\right)";
     } else {
       out << ")";
     }
   } else {
-    out << firstExpressionString;
+    out << baseString;
   }
   out << "^{" << secondExpressionString << "}";
   return true;

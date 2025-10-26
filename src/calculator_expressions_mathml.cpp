@@ -2,6 +2,7 @@
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_general_implementation.h" // IWYU pragma: keep: breaks g++ 'make optimize=1' build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ 'make optimize=1' build.
+#include "math_mathml.h"
 
 template < >
 bool Expression::toMathMLBuiltIn<Rational>(
@@ -1336,9 +1337,6 @@ bool Expression::toMathMLPower(
   if (!input.startsWith(commands.opPower(), 3)) {
     return false;
   }
-  Expression::computeFormattingPropertiesPower(
-    input, format, outputProperties
-  );
   bool involvesExponentsInterpretedAsFunctions = false;
   const Expression& firstE = input[1];
   const Expression& secondE = input[2];
@@ -1346,6 +1344,24 @@ bool Expression::toMathMLPower(
   if (firstE.startsWith(commands.opUnderscore(), 3)) {
     if (firstE[1].isOperationGiven(commands.opIntegral())) {
       isSuperScriptOfUnderscoredOperator = true;
+    }
+  }
+  MathExpressionFormattingProperties leftProperties;
+  std::string firstMathML = firstE.toMathML(format, &leftProperties);
+  MathExpressionFormattingProperties properties;
+  if (outputProperties == nullptr) {
+    outputProperties = &properties;
+  }
+  if (outputProperties != nullptr) {
+    if (
+      firstE.children.size > 0 &&
+      firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction()
+    ) {
+      outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
+      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+    } else {
+      outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
     }
   }
   if (isSuperScriptOfUnderscoredOperator) {

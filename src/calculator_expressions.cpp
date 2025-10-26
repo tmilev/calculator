@@ -3610,9 +3610,6 @@ bool Expression::needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
     if (firstE.isOperationGiven(this->owner->opPower())) {
       return false;
     }
-    //    if (this->startsWith(this->owner->opBind())) {
-    //      return (*this)[1].needsParenthesisForMultiplication();
-    //    }
     return false;
   }
   return false;

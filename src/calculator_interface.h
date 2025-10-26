@@ -283,9 +283,6 @@ public:
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
     const Expression* leftNeighbor = nullptr
   ) const;
-  // bool needsParenthesisForMultiplication(FormatExpressions* format =
-  // nullptr)
-  //    const;
   int getExpressionTreeSize() const;
   template <class Type>
   bool isOfType() const {
@@ -502,6 +499,11 @@ public:
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
   bool toMathMLData(
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionFormattingProperties* outputProperties
+  ) const;
+  bool toMathMLAtom(
     std::stringstream& out,
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties

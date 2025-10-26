@@ -1182,6 +1182,42 @@ bool Expression::toMathMLEndStatementNested(
   return true;
 }
 
+bool Expression::toMathMLAtom(
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
+) const {
+  STACK_TRACE("Expression::toMathMLAtom");
+  (void) format;
+  if (this->isOperationGiven(this->owner->opDifferential())) {
+    out << "<mtext>d</mtext>";
+    return true;
+  }
+  if (this->isOperationGiven(this->owner->opPhantom())) {
+    out << "<mo>&empty;</mo>";
+    return true;
+  }
+  if (
+    this->owner->flagUseLnInsteadOfLog &&
+    this->isOperationGiven(this->owner->opLog())
+  ) {
+    out << "<ln/>";
+    return true;
+  }
+  if (this->data >= this->owner->getOperations().size || this->data < 0) {
+    out << "<ms>[unknown atom of value " << this->data << "]</ms>";
+    return true;
+  }
+  std::string latex = this->owner->getOperations()[this->data];
+  std::string mathML = MathML::latexCommandToMathMLEquivalent(latex);
+  out << mathML;
+  if (outputProperties != nullptr) {
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+    outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+  }
+  return true;
+}
+
 bool Expression::toMathMLData(
   std::stringstream& out,
   FormatExpressions* format,
@@ -1193,24 +1229,7 @@ bool Expression::toMathMLData(
     return true;
   }
   if (this->isAtom()) {
-    if (this->isOperationGiven(this->owner->opDifferential())) {
-      out << "<mtext>d</mtext>";
-    } else if (this->isOperationGiven(this->owner->opPhantom())) {
-      out << "";
-    } else if (
-      this->owner->flagUseLnInsteadOfLog &&
-      this->isOperationGiven(this->owner->opLog())
-    ) {
-      out << "<ln/>";
-    } else if (
-      this->data < this->owner->getOperations().size && this->data >= 0
-    ) {
-      std::string latex = this->owner->getOperations()[this->data];
-      out << MathML::latexCommandToMathMLEquivalent(latex);
-    } else {
-      out << "[unknown atom of value " << this->data << "]";
-    }
-    return true;
+    return this->toMathMLAtom(out, format, outputProperties);
   }
   if (this->isMatrixOfType<RationalFraction<Rational> >()) {
     FormatExpressions currentFormat;
@@ -1452,7 +1471,7 @@ bool Expression::toMathMLTimes(
   }
   std::string firstExpression =
   input[1].toMathML(format, &firstExpressionProperties);
-  bool firstNeedsBrackets =
+  bool firstNeedsParentheses =
   firstExpressionProperties.needsParenthesesForMultiplicationOnTheRight;
   bool secondNeedsBrackets =
   input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
@@ -1469,18 +1488,14 @@ bool Expression::toMathMLTimes(
   if (collapseUnits) {
     if (firstExpressionProperties.isNegativeOne) {
       firstExpression = MathML::negativeSign;
-      firstNeedsBrackets = false;
+      firstNeedsParentheses = false;
     }
     if (firstExpressionProperties.isOne) {
       firstExpression = "";
     }
   }
-  bool needsRow = !firstExpressionProperties.isOne &&
-  !secondExpressionProperties.isOne;
-  if (needsRow) {
-    out << "<mrow>";
-  }
-  if (firstNeedsBrackets) {
+  out << "<mrow>";
+  if (firstNeedsParentheses) {
     out
     << MathML::leftParenthesis
     << firstExpression
@@ -1488,7 +1503,7 @@ bool Expression::toMathMLTimes(
   } else {
     out << firstExpression;
   }
-  if (!firstNeedsBrackets && !secondNeedsBrackets && firstExpression != "") {
+  if (!firstNeedsParentheses && !secondNeedsBrackets && firstExpression != "") {
     if (secondExpressionProperties.startsWithDigit) {
       mustHaveTimes = true;
     }
@@ -1509,9 +1524,7 @@ bool Expression::toMathMLTimes(
   } else {
     out << secondExpressionMathML;
   }
-  if (needsRow) {
-    out << "</mrow>";
-  }
+  out << "</mrow>";
   return true;
 }
 

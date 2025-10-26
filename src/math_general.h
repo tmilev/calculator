@@ -2025,6 +2025,33 @@ public:
   );
   void makeAlphabetXYZUW();
   const MathMLAndLatex& fetchCustomPlusSign();
+  // Returns true if a given object string/latex representation is
+  // of the form 1/A or -1/A. Used to shorten an expressions such as
+  // (1/A * T) to T/A. To use this method, override it for your
+  // particular type.
+  // `input` is the object we are trying to convert to a string.
+  // `format` is the formatting options to use when computing the
+  // string representation of the object.
+  // `outputSign` will be modified to 1
+  // if the input is of the form 1/A and to -1 if the input is of the form
+  // -1/A.
+  // `outputDenominatorString` is the string representation of the denominator
+  // A.
+  // This method may be overridden for a specific type, search for
+  // its implementations please.
+  template <typename Object>
+  static bool toStringIsFractionLikeWithUnitNumerator(
+    const Object& input,
+    const FormatExpressions* format,
+    int& outputSign,
+    std::string& outputDenominatorString
+  ) {
+    (void) input;
+    (void) format;
+    (void) outputSign;
+    (void) outputDenominatorString;
+    return false;
+  }
 };
 
 template <class SourceCoefficient, class TargetCoefficient>

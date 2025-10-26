@@ -1294,19 +1294,18 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::termToString(
     return coefficientString;
   }
   if (fracSpecialDesired) {
+    int sign = 0;
     std::string denominatorString;
     if (
-      StringRoutines::stringBeginsWith(
-        coefficientString, "\\frac{1}", &denominatorString
+      FormatExpressions::toStringIsFractionLikeWithUnitNumerator(
+        coefficient, format, sign, denominatorString
       )
     ) {
-      return "\\frac{" + monomialString + "}" + denominatorString;
-    } else if (
-      StringRoutines::stringBeginsWith(
-        coefficientString, "-\\frac{1}", &denominatorString
-      )
-    ) {
-      return "-\\frac{" + monomialString + "}" + denominatorString;
+      if (sign == 1) {
+        return "\\frac{" + monomialString + "}{" + denominatorString + "}";
+      } else {
+        return "-\\frac{" + monomialString + "}{" + denominatorString + "}";
+      }
     }
   }
   if (customCoefficientMonomialSeparator != "") {

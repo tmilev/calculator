@@ -5060,31 +5060,32 @@ bool CalculatorConversions::expressionFromPolynomial(
     }
     bool found = false;
     for (int j = 0; j < input[i].minimalNumberOfVariables(); j ++) {
-      if (input[i](j) != 0) {
-        if (inputContext != nullptr) {
-          currentBase = inputContext->getVariable(j);
-        } else {
-          currentBase.reset(calculator);
-          currentBase.addChildAtomOnTop("x");
-          Expression element;
-          element.assignValue(calculator, Rational(j));
-          currentBase.addChildOnTop(element);
-        }
-        if (input[i](j) == 1) {
-          currentMultTermExpression = currentBase;
-        } else {
-          currentPower.assignValue(calculator, input[i](j));
-          currentMultTermExpression.makeXOX(
-            calculator, calculator.opPower(), currentBase, currentPower
-          );
-        }
-        if (!found) {
-          currentTerm = currentMultTermExpression;
-        } else {
-          currentTerm *= currentMultTermExpression;
-        }
-        found = true;
+      if (input[i](j) == 0) {
+        continue;
       }
+      if (inputContext != nullptr) {
+        currentBase = inputContext->getVariable(j);
+      } else {
+        currentBase.reset(calculator);
+        currentBase.addChildAtomOnTop("x");
+        Expression element;
+        element.assignValue(calculator, Rational(j));
+        currentBase.addChildOnTop(element);
+      }
+      if (input[i](j) == 1) {
+        currentMultTermExpression = currentBase;
+      } else {
+        currentPower.assignValue(calculator, input[i](j));
+        currentMultTermExpression.makeXOX(
+          calculator, calculator.opPower(), currentBase, currentPower
+        );
+      }
+      if (!found) {
+        currentTerm = currentMultTermExpression;
+      } else {
+        currentTerm *= currentMultTermExpression;
+      }
+      found = true;
     }
     terms.addMonomial(currentTerm, input.coefficients[i]);
   }
@@ -5147,7 +5148,8 @@ bool CalculatorConversions::expressionFromRationalFraction(
       calculator, numerator, output, inputContext
     );
   }
-  Expression numeratorExpression, denominatorExpression;
+  Expression numeratorExpression;
+  Expression denominatorExpression;
   input.getDenominator(denominator);
   Polynomial<Coefficient> numeratorRescaled = numerator;
   Polynomial<Coefficient> denominatorRescaled = denominator;

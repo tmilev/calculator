@@ -848,11 +848,13 @@ std::string TrigonometricReduction::toStringTrigonometry() {
     << this->arguments.keys[i].toString()
     << "&\\to& "
     << trigonometricFunction.toString();
-    out
-    << "&=&"
-    << trigonometricFunction.eulerFormExpression.toString()
-    << "&=&"
-    << trigonometricFunction.eulerForm.toString(&this->formatAlgebraic);
+    std::string eulerFormString1 =
+    trigonometricFunction.eulerFormExpression.toString(
+      &this->formatAlgebraic
+    );
+    std::string eulerFormString2 =
+    trigonometricFunction.eulerForm.toString(&this->formatAlgebraic);
+    out << "&=&" << eulerFormString1 << "&=&" << eulerFormString2;
     out << "\\\\\n";
   }
   out << "\\end{array}\\)";
@@ -971,6 +973,7 @@ void TrigonometricReduction::prepareFormatting() {
     this->formatAlgebraic.polynomialAlphabet.addOnTop(newAtom.toString());
   }
   this->formatAlgebraic.flagUseFrac = true;
+  this->formatAlgebraic.flagSuppressOneIn1overXtimesY = true;
   for (int i = 0; i < this->arguments.size(); i ++) {
     this->formatTrigonometric.polynomialAlphabet.addOnTop(
       this->arguments.keys[i].toString()

@@ -772,21 +772,25 @@ bool Expression::toMathMLBuiltIn<AlgebraicNumber>(
   MathExpressionFormattingProperties properties;
   std::string currentString =
   input.getValue<AlgebraicNumber>().toMathML(&formatLocal, &properties);
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  if (showContext) {
+    out << "<mrow>";
+  }
   bool useColors = input.owner ==
   nullptr ? false : input.owner->flagUseNumberColors;
   if (useColors) {
     out << "<mrow style='color:red'>";
-  } else {
-    out << "</mrow>";
   }
   out << currentString;
   if (useColors) {
     out << "</mrow>";
   }
-  bool showContext = input.owner ==
-  nullptr ? false : input.owner->flagDisplayContext;
   if (showContext) {
-    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo>";
+    out
+    << "<mo>[</mo>"
+    << input.getContext().toMathML()
+    << "<mo>]</mo></mrow>";
   }
   if (outputProperties != nullptr) {
     *outputProperties = properties;
@@ -1337,25 +1341,24 @@ bool Expression::toMathMLPower(
   if (!input.startsWith(commands.opPower(), 3)) {
     return false;
   }
-  bool involvesExponentsInterpretedAsFunctions = false;
-  const Expression& firstE = input[1];
-  const Expression& secondE = input[2];
+  const Expression& baseExpression = input[1];
+  const Expression& powerExpression = input[2];
   bool isSuperScriptOfUnderscoredOperator = false;
-  if (firstE.startsWith(commands.opUnderscore(), 3)) {
-    if (firstE[1].isOperationGiven(commands.opIntegral())) {
+  if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
+    if (baseExpression[1].isOperationGiven(commands.opIntegral())) {
       isSuperScriptOfUnderscoredOperator = true;
     }
   }
   MathExpressionFormattingProperties leftProperties;
-  std::string firstMathML = firstE.toMathML(format, &leftProperties);
+  std::string firstMathML = baseExpression.toMathML(format, &leftProperties);
   MathExpressionFormattingProperties properties;
   if (outputProperties == nullptr) {
     outputProperties = &properties;
   }
   if (outputProperties != nullptr) {
     if (
-      firstE.children.size > 0 &&
-      firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction()
+      baseExpression.children.size > 0 &&
+      baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction()
     ) {
       outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
       outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
@@ -1366,70 +1369,81 @@ bool Expression::toMathMLPower(
   }
   if (isSuperScriptOfUnderscoredOperator) {
     out << "<msubsup>";
-    firstE[1].toMathML(out, format, nullptr);
-    firstE[2].toMathML(out, format, nullptr);
-    secondE.toMathML(out, format, nullptr);
+    baseExpression[1].toMathML(out, format, nullptr);
+    baseExpression[2].toMathML(out, format, nullptr);
+    powerExpression.toMathML(out, format, nullptr);
     out << "</msubsup>";
     return true;
   }
-  if (firstE.startsWith(- 1, 2)) {
-    bool shouldProceed =
-    firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
-    !secondE.isEqualToMOne() &&
-    secondE.isRational();
+  bool involvesExponentsInterpretedAsFunctions = false;
+  if (baseExpression.startsWith(- 1, 2)) {
+    involvesExponentsInterpretedAsFunctions =
+    baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
+    !powerExpression.isEqualToMOne() &&
+    powerExpression.isRational();
     if (
-      shouldProceed &&
-      firstE[0].isOperationGiven(commands.opLog()) &&
+      involvesExponentsInterpretedAsFunctions &&
+      baseExpression[0].isOperationGiven(commands.opLog()) &&
       commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
     ) {
-      shouldProceed = false;
-    }
-    if (shouldProceed) {
-      involvesExponentsInterpretedAsFunctions = true;
-      Expression newFunE;
-      newFunE.makeXOX(*input.owner, commands.opPower(), firstE[0], input[2]);
-      newFunE.checkConsistency();
-      out << "<mrow>";
-      newFunE.toMathML(out, format, outputProperties);
-      if (
-        firstE[1].needsParenthesisForMultiplicationWhenSittingOnTheRightMost()
-        ||
-        firstE[1].startsWith(commands.opTimes())
-      ) {
-        out << "<mrow>";
-        out << MathML::leftParenthesis;
-        firstE[1].toMathML(out, format, outputProperties);
-        out << MathML::rightParenthesis;
-        out << "</mrow>";
-      } else {
-        firstE[1].toMathML(out, format, outputProperties);
-      }
+      involvesExponentsInterpretedAsFunctions = false;
     }
   }
-  if (!involvesExponentsInterpretedAsFunctions) {
-    bool isSqrt = false;
-    if (input[2].isOfType<Rational>()) {
-      if (input[2].getValue<Rational>().isEqualTo(Rational(1, 2))) {
-        isSqrt = true;
-      }
+  if (involvesExponentsInterpretedAsFunctions) {
+    std::string baseMathML =
+    baseExpression[0].toMathML(format, outputProperties);
+    std::string argumentMathML = baseExpression[1].toMathML(format, nullptr);
+    std::string exponentMathML = powerExpression.toMathML(format);
+    if (
+      baseExpression[1].
+      needsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
+      baseExpression[1].startsWith(commands.opTimes())
+    ) {
+      argumentMathML =
+      "<mrow>" +
+      MathML::leftParenthesis +
+      argumentMathML +
+      MathML::rightParenthesis +
+      "</mrow>";
     }
-    if (isSqrt) {
-      out << "<msqrt>";
-      input[1].toMathML(out, format, outputProperties);
-      out << "</msqrt>";
-    } else {
-      out << "<msup>";
-      bool needsParentheses = input[1].needsParenthesisForBaseOfExponent();
-      if (needsParentheses) {
-        out << "<mrow>" << MathML::leftParenthesis;
-      }
-      input[1].toMathML(out, format, nullptr);
-      if (needsParentheses) {
-        out << MathML::rightParenthesis << "</mrow>";
-      }
-      input[2].toMathML(out, format, nullptr);
-      out << "</msup>";
-    }
+    out
+    << "<mrow><msup>"
+    << baseMathML
+    << exponentMathML
+    << "</msup>"
+    << argumentMathML
+    << "</mrow>";
+    return true;
+  }
+  bool isSqrt = powerExpression.isOfType<Rational>() &&
+  powerExpression.getValue<Rational>().isEqualTo(Rational(1, 2));
+  if (isSqrt) {
+    out << "<msqrt>";
+    std::string baseMathML = baseExpression.toMathML(format, outputProperties);
+    out << baseMathML;
+    out << "</msqrt>";
+    return true;
+  }
+  out << "<msup>";
+  bool needsParentheses = baseExpression.needsParenthesisForBaseOfExponent();
+  if (needsParentheses) {
+    out << "<mrow>" << MathML::leftParenthesis;
+  }
+  MathExpressionFormattingProperties baseProperties;
+  std::string baseMathML = baseExpression.toMathML(format, &baseProperties);
+  std::string powerMathML = powerExpression.toMathML(format, nullptr);
+  out << baseMathML;
+  if (needsParentheses) {
+    out << MathML::rightParenthesis << "</mrow>";
+  }
+  out << powerMathML;
+  out << "</msup>";
+  if (
+    !needsParentheses &&
+    outputProperties != nullptr &&
+    baseProperties.startsWithDigit
+  ) {
+    outputProperties->startsWithDigit = true;
   }
   return true;
 }

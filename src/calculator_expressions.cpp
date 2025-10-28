@@ -4014,7 +4014,7 @@ bool Expression::toStringPower(
     return false;
   }
   const Expression& baseExpression = input[1];
-  const Expression& secondE = input[2];
+  const Expression& exponentExpression = input[2];
   bool isSuperScriptOfUnderscoredOperator = false;
   if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
     if (baseExpression[1].isOperationGiven(commands.opIntegral())) {
@@ -4033,21 +4033,21 @@ bool Expression::toStringPower(
       outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
     }
   }
-  bool isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents = false;
+  bool involvesExponentsInterpretedAsFunctions = false;
   if (baseExpression.startsWith(- 1, 2)) {
-    isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents =
+    involvesExponentsInterpretedAsFunctions =
     baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
-    !secondE.isEqualToMOne() &&
-    secondE.isRational();
+    !exponentExpression.isEqualToMOne() &&
+    exponentExpression.isRational();
     if (
-      isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents &&
+      involvesExponentsInterpretedAsFunctions &&
       baseExpression[0].isOperationGiven(commands.opLog()) &&
       commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
     ) {
-      isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents = false;
+      involvesExponentsInterpretedAsFunctions = false;
     }
   }
-  if (isFunctionWhoseExponentsAreInterpretedAsMultiplicativeExponents) {
+  if (involvesExponentsInterpretedAsFunctions) {
     Expression newFunctionExpression;
     newFunctionExpression.makeXOX(
       *input.owner, commands.opPower(), baseExpression[0], input[2]
@@ -4071,7 +4071,7 @@ bool Expression::toStringPower(
     << "_{"
     << baseExpression[2].toString(format)
     << "}^{"
-    << secondE.toString(format)
+    << exponentExpression.toString(format)
     << "}";
     return true;
   }
@@ -4084,13 +4084,13 @@ bool Expression::toStringPower(
     << "(\\ "
     << baseExpression.toString(format)
     << ")^{"
-    << secondE.toString(format)
+    << exponentExpression.toString(format)
     << "}";
     return true;
   }
   bool isSqrt = false;
-  if (input[2].isOfType<Rational>()) {
-    if (input[2].getValue<Rational>().isEqualTo(Rational(1, 2))) {
+  if (exponentExpression.isOfType<Rational>()) {
+    if (exponentExpression.getValue<Rational>().isEqualTo(Rational(1, 2))) {
       isSqrt = true;
     }
   }
@@ -4101,7 +4101,7 @@ bool Expression::toStringPower(
   MathExpressionFormattingProperties baseProperties;
   std::string baseString =
   baseExpression.toString(format, nullptr, true, nullptr, &baseProperties);
-  std::string secondExpressionString = input[2].toString(format);
+  std::string secondExpressionString = exponentExpression.toString(format);
   if (baseExpression.needsParenthesisForBaseOfExponent()) {
     bool useBigParenthesis = true;
     if (baseExpression.startsWith(commands.opDivide())) {

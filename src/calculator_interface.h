@@ -1218,8 +1218,11 @@ public:
     JSData* outputJS = nullptr
   ) const;
   std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
-  bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
-  const;
+  bool toStringGeneral(
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionFormattingProperties* outputProperties
+  ) const;
   bool toMathMLGeneral(
     std::stringstream& out,
     FormatExpressions* format,

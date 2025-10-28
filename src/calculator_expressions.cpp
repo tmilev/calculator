@@ -3799,7 +3799,7 @@ bool Expression::toStringTimesInContext(
     out << "\\sqrt{" << secondE << "}";
     return true;
   }
-  std::string firstE =
+  std::string firstString =
   input[1].toString(format, nullptr, true, nullptr, &leftProperties);
   bool firstNeedsParentheses =
   leftProperties.needsParenthesesForMultiplicationOnTheRight;
@@ -3818,21 +3818,21 @@ bool Expression::toStringTimesInContext(
     collapseUnits = !format->flagDontCollalpseProductsByUnits;
   }
   if (collapseUnits) {
-    if (firstE == "-1" || firstE == "- 1") {
-      firstE = "-";
+    if (firstString == "-1" || firstString == "- 1") {
+      firstString = "-";
       firstNeedsParentheses = false;
     }
-    if (firstE == "1") {
-      firstE = "";
+    if (firstString == "1") {
+      firstString = "";
     }
   }
   if (outputMustStartMultiplicatively && leftProperties.startsWithMinus) {
     firstNeedsParentheses = true;
   }
   if (firstNeedsParentheses) {
-    out << "\\left(" << firstE << "\\right)";
+    out << "\\left(" << firstString << "\\right)";
   } else {
-    out << firstE;
+    out << firstString;
   }
   if (!firstNeedsParentheses && outputProperties != nullptr) {
     outputProperties->startsWithMinus = leftProperties.startsWithMinus;
@@ -3843,19 +3843,24 @@ bool Expression::toStringTimesInContext(
   if (
     !firstNeedsParentheses &&
     !secondNeedsParentheses &&
-    firstE != "" &&
-    firstE != "-"
+    firstString != "" &&
+    firstString != "-"
   ) {
     if (MathRoutines::isDigit(secondE[0])) {
       mustHaveTimes = true;
     }
-    if (MathRoutines::isDigit(firstE[firstE.size() - 1])) {
+    if (MathRoutines::isDigit(firstString[firstString.size() - 1])) {
       if (StringRoutines::stringBeginsWith(secondE, "\\frac")) {
         mustHaveTimes = true;
       }
     }
   }
-  if (firstNeedsParentheses || mustHaveTimes || firstE == "" || firstE == "-") {
+  if (
+    firstNeedsParentheses ||
+    mustHaveTimes ||
+    firstString == "" ||
+    firstString == "-"
+  ) {
     mustHaveSpace = false;
   }
   if (mustHaveTimes) {
@@ -4126,7 +4131,9 @@ bool Expression::toStringPower(
 }
 
 bool Expression::toStringGeneral(
-  std::stringstream& out, FormatExpressions* format
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   if (this->size() < 2) {
     return false;
@@ -4153,6 +4160,9 @@ bool Expression::toStringGeneral(
   }
   if (needParenthesis) {
     out << "\\right)";
+  }
+  if (outputProperties != nullptr) {
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
   }
   return true;
 }
@@ -5772,7 +5782,8 @@ std::string Expression::toString(
     this->toStringEndStatement(out, startingExpression, outputJS, &formatCopy)
   ) {} else if (this->size() == 1) {
     out << (*this)[0].toString(&formatCopy);
-  } else if (this->toStringGeneral(out, &formatCopy)) {} else {
+  } else if (this->toStringGeneral(out, &formatCopy, outputProperties)) {} else
+  {
     // <-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)";
   }

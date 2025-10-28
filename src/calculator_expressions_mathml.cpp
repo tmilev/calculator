@@ -1277,7 +1277,7 @@ bool Expression::toMathMLGeneral(
     return false;
   }
   out << "<mrow>";
-  (*this)[0].toMathML(out, format, outputProperties, nullptr, false, nullptr);
+  (*this)[0].toMathML(out, format, nullptr, nullptr, false, nullptr);
   bool needParenthesis = true;
   if (this->size() == 2) {
     if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -1300,6 +1300,9 @@ bool Expression::toMathMLGeneral(
   }
   if (needParenthesis) {
     out << MathML::rightParenthesis;
+  }
+  if (outputProperties != nullptr) {
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
   }
   out << "</mrow>";
   return true;
@@ -1491,6 +1494,9 @@ bool Expression::toMathMLTimes(
   (void) outputProperties;
   if (!input.startsWith(input.owner->opTimes(), 3)) {
     return false;
+  }
+  if (outputProperties != nullptr) {
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
   }
   MathExpressionFormattingProperties secondExpressionProperties;
   MathExpressionFormattingProperties firstExpressionProperties;

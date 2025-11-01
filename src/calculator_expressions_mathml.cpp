@@ -398,7 +398,10 @@ bool Expression::toMathMLBuiltIn<InputBox>(
     return true;
   }
   if (isFinal) {
-    out << input.getValueNonConst<InputBox>().name;
+    out << "<ms>" << input.getValueNonConst<InputBox>().name << "</ms>";
+  }
+  if (outputProperties != nullptr) {
+    outputProperties->needsProductSignForMultiplication = true;
   }
   return true;
 }
@@ -1550,6 +1553,9 @@ bool Expression::toMathMLTimes(
       if (secondExpressionProperties.startsWithFraction) {
         mustHaveTimes = true;
       }
+    }
+    if (secondExpressionProperties.needsProductSignForMultiplication) {
+      mustHaveTimes = true;
     }
   }
   if (mustHaveTimes) {

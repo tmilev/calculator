@@ -2658,6 +2658,9 @@ bool Expression::toStringBuiltIn<InputBox>(
   if (isFinal) {
     out << input.getValueNonConst<InputBox>().name;
   }
+  if (outputProperties != nullptr) {
+    outputProperties->needsProductSignForMultiplication = true;
+  }
   return true;
 }
 
@@ -3791,12 +3794,12 @@ bool Expression::toStringTimesInContext(
   }
   MathExpressionFormattingProperties leftProperties;
   MathExpressionFormattingProperties rightProperties;
-  std::string secondE =
+  std::string secondString =
   input[2].toString(format, nullptr, true, nullptr, &rightProperties);
   if (input[1].isOperationGiven(input.owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
-    out << "\\sqrt{" << secondE << "}";
+    out << "\\sqrt{" << secondString << "}";
     return true;
   }
   std::string firstString =
@@ -3807,8 +3810,8 @@ bool Expression::toStringTimesInContext(
   input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
     &(input[1])
   );
-  if (secondE.size() > 0) {
-    if (secondE[0] == '-') {
+  if (secondString.size() > 0) {
+    if (secondString[0] == '-') {
       secondNeedsParentheses = true;
     }
   }
@@ -3846,13 +3849,16 @@ bool Expression::toStringTimesInContext(
     firstString != "" &&
     firstString != "-"
   ) {
-    if (MathRoutines::isDigit(secondE[0])) {
+    if (MathRoutines::isDigit(secondString[0])) {
       mustHaveTimes = true;
     }
     if (MathRoutines::isDigit(firstString[firstString.size() - 1])) {
-      if (StringRoutines::stringBeginsWith(secondE, "\\frac")) {
+      if (StringRoutines::stringBeginsWith(secondString, "\\frac")) {
         mustHaveTimes = true;
       }
+    }
+    if (rightProperties.needsProductSignForMultiplication) {
+      mustHaveTimes = true;
     }
   }
   if (
@@ -3869,9 +3875,9 @@ bool Expression::toStringTimesInContext(
     out << " ";
   }
   if (secondNeedsParentheses) {
-    out << "\\left(" << secondE << "\\right)";
+    out << "\\left(" << secondString << "\\right)";
   } else {
-    out << secondE;
+    out << secondString;
   }
   return true;
 }

@@ -16,6 +16,7 @@ public:
   bool startsWithFraction;
   bool needsParenthesesForMultiplicationOnTheRight;
   bool needsParenthesesWhenLastAndMultipliedOnTheLeft;
+  bool needsProductSignForMultiplication;
   MathExpressionFormattingProperties():
   startsWithMinus(false),
   isNegativeOne(false),
@@ -24,7 +25,8 @@ public:
   endsWithDigit(false),
   startsWithFraction(false),
   needsParenthesesForMultiplicationOnTheRight(true),
-  needsParenthesesWhenLastAndMultipliedOnTheLeft(true) {}
+  needsParenthesesWhenLastAndMultipliedOnTheLeft(true),
+  needsProductSignForMultiplication(false) {}
   std::string toString() const;
 };
 

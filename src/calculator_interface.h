@@ -1101,9 +1101,8 @@ public:
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties = nullptr
   );
-  static bool toMathMLMinus2(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
-  );
+  static bool toMathMLMinus2(const Expression& input, std::stringstream& out, FormatExpressions* format
+  , MathExpressionFormattingProperties* outputProperties);
   static bool toMathMLMinus3(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );

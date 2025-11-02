@@ -243,6 +243,7 @@ public:
   bool isBuiltInAtom(std::string* outputWhichOperation = nullptr) const;
   bool isGoodForChainRuleFunction(std::string* outputWhichOperation = nullptr)
   const;
+  bool isSumLikeOperatorAtom() const;
   bool isIntegralFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,

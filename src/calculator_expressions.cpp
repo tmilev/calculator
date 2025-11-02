@@ -6069,6 +6069,15 @@ bool Expression::isArithmeticOperation(std::string* outputWhichOperation) const 
   return this->owner->arithmeticOperations.contains(operationName);
 }
 
+bool Expression::isSumLikeOperatorAtom() const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  return
+  this->isOperationGiven(this->owner->opSum()) ||
+  this->isOperationGiven(this->owner->opIntegral());
+}
+
 bool Expression::isBuiltInAtom(std::string* outputWhichOperation) const {
   if (this->owner == nullptr) {
     return false;

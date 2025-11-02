@@ -173,10 +173,10 @@ class AtomHandler {
   /** @return {HTMLElement} */
   toHTML() {
     let result = document.createElement("div");
+    result.appendChild(this.makeExampleLinksContainer());
     this.panel = this.toHTMLInfo();
     result.appendChild(this.toHTMLInfoButton());
     result.appendChild(this.panel);
-    result.appendChild(this.makeExampleLinksContainer());
     return result;
   }
 

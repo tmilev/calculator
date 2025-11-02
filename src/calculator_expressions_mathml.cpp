@@ -1193,6 +1193,9 @@ bool Expression::toMathMLAtom(
   MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toMathMLAtom");
+  if (!this->isAtom()) {
+    return false;
+  }
   (void) format;
   if (this->isOperationGiven(this->owner->opDifferential())) {
     out << "<mtext>d</mtext>";
@@ -1233,8 +1236,8 @@ bool Expression::toMathMLData(
     out << "<ms>(non-initialized)</ms>";
     return true;
   }
-  if (this->isAtom()) {
-    return this->toMathMLAtom(out, format, outputProperties);
+  if (this->toMathMLAtom(out, format, outputProperties)) {
+    return true;
   }
   if (this->isMatrixOfType<RationalFraction<Rational> >()) {
     FormatExpressions currentFormat;
@@ -1291,9 +1294,8 @@ bool Expression::toMathMLGeneral(
     out << MathML::leftParenthesis;
   }
   for (int i = 1; i < this->children.size; i ++) {
-    (*this)[i].toMathML(
-      out, format, outputProperties, nullptr, false, nullptr
-    );
+    (*this)[i].toMathML(out, format, nullptr, nullptr, false, nullptr);
+    global.comments << "<hr>DEBUG: out at this point: " << out.str();
     if (i != this->children.size - 1) {
       out << "<mo>,</mo>";
     }
@@ -1535,7 +1537,8 @@ bool Expression::toMathMLTimes(
   if (outputProperties != nullptr) {
     outputProperties->startsWithMinus =
     firstExpressionProperties.startsWithMinus;
-    outputProperties->startsWithDigit = firstExpressionProperties.startsWithDigit;
+    outputProperties->startsWithDigit =
+    firstExpressionProperties.startsWithDigit;
   }
   out << "<mrow>";
   if (firstNeedsParentheses) {
@@ -1550,14 +1553,18 @@ bool Expression::toMathMLTimes(
     if (secondExpressionProperties.startsWithDigit) {
       mustHaveTimes = true;
     }
-    if (firstExpressionProperties.endsWithDigit) {
-      if (secondExpressionProperties.startsWithFraction) {
-        mustHaveTimes = true;
-      }
+    if (
+      firstExpressionProperties.endsWithDigit &&
+      secondExpressionProperties.startsWithFraction
+    ) {
+      mustHaveTimes = true;
     }
     if (secondExpressionProperties.needsProductSignForMultiplication) {
       mustHaveTimes = true;
     }
+  }
+  if (input[1].isSumLikeOperatorAtom()) {
+    mustHaveTimes = false;
   }
   if (mustHaveTimes) {
     out << "<mo>&sdot;</mo>";
@@ -2505,29 +2512,34 @@ bool Expression::toMathMLSumOrIntegral(
   }
   std::string opString = input[0].toMathML(format);
   int firstIndex = 2;
+  std::stringstream startStream;
   if (input.size() >= 2) {
     if (input[1].startsWith(input.owner->opLimitBoundary(), 3)) {
-      out << "<munderover>" << opString;
-      out
+      startStream << "<munderover>" << opString;
+      startStream
       << input[1][1].toMathML(format)
       << input[1][2].toMathML(format)
       << "</munderover>";
     } else if (
       input[1].isOperationGiven(input.owner->opIndefiniteIndicator())
     ) {
-      out << opString;
+      startStream << opString;
       firstIndex = 2;
     } else {
-      out << opString;
+      startStream << opString;
       firstIndex = 1;
     }
   }
-  if (input.size() <= firstIndex + 1) {
-    if (input.size() == firstIndex + 1) {
-      out << input[firstIndex].toMathML(format);
-    }
+  if (input.size() < firstIndex + 1) {
+    out << startStream.str();
+  } else if (input.size() == firstIndex + 1) {
+    out
+    << "<mrow>"
+    << startStream.str()
+    << input[firstIndex].toMathML(format)
+    << "</mrow>";
   } else {
-    out << "<mrow>" << MathML::leftParenthesis;
+    out << "<mrow>" << startStream.str() << MathML::leftParenthesis;
     for (int i = firstIndex; i < input.size(); i ++) {
       out << input[i].toMathML(format);
       if (i != input.size() - 1) {

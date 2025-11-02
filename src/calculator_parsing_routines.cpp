@@ -3374,7 +3374,7 @@ bool CalculatorParser::applyOneRule() {
   if (secondToLastS == "%" && lastS == "UseMathML") {
     this->owner->comments
     << "<b style='color:red'>WORK IN PROGRESS.</b> "
-    << "Using mathML for the output.";
+    << "Using mathML for the output.<br>";
     this->owner->flagUseMathML = true;
     return this->decreaseStack(2);
   }

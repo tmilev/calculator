@@ -1042,6 +1042,23 @@ a.linkLogoutActive {
   opacity: 1;
 }
 
+.exampleName {
+  font-weight: bold;
+  color: blue;
+}
+
+button.exampleCalculator {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  box-shadow: var(--box-shadow-buttonPreview);
+  padding: 3px;
+  margin: 3px;
+  border: none;
+  color: green;
+  cursor: pointer;
+}
+
 a.linkInfo {
   margin-left: 10px;
   margin-right: 10px;

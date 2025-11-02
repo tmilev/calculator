@@ -44,7 +44,7 @@ class ExampleBuiltIn {
 }
 
 class AtomHandler {
-  constructor() {
+  constructor(/** @type {boolean} */ useMathML) {
     this.description = "";
     this.atom = "";
     this.example = "";
@@ -57,8 +57,10 @@ class AtomHandler {
     /** @type {HTMLElement|null} */
     this.panel = null;
     /** @type {HTMLElement|null} */
-    this.button = null;
-    this.useMathML = true;
+    this.buttonExpandInfo = null;
+    /** @type {HTMLElement|null} */
+    this.buttonCarryOutExample = null;
+    this.useMathML = useMathML;
   }
 
   fromObject(
@@ -96,23 +98,23 @@ class AtomHandler {
   }
 
   toHTMLInfoButton() {
-    this.button = document.createElement("button");
-    this.button.textContent = 'info\u25C2';
-    this.button.className = 'accordionLikeIndividual';
-    this.button.addEventListener('click', () => {
+    this.buttonExpandInfo = document.createElement("button");
+    this.buttonExpandInfo.textContent = 'info\u25C2';
+    this.buttonExpandInfo.className = 'accordionLikeIndividual';
+    this.buttonExpandInfo.addEventListener('click', () => {
       this.togglePanel();
     });
-    return this.button;
+    return this.buttonExpandInfo;
   }
 
   togglePanel() {
     this.shown = !this.shown;
     if (this.shown) {
       this.panel.classList.remove("hiddenClass");
-      this.button.textContent = "info\u25BE";
+      this.buttonExpandInfo.textContent = "info\u25BE";
     } else {
       this.panel.classList.add("hiddenClass");
-      this.button.textContent = 'info\u25C2';
+      this.buttonExpandInfo.textContent = 'info\u25C2';
     }
   }
 
@@ -169,32 +171,181 @@ class AtomHandler {
   }
 
   /** @return {HTMLElement} */
-  toHTML(
-    /** @type {Calculator} */
-    calculator,
-  ) {
+  toHTML() {
     let result = document.createElement("div");
-    let anchor = document.createElement("a");
-    anchor.className = "linkInfo";
-    let exampleText = this.example;
-    if (this.useMathML) {
-      exampleText = "%UseMathML\n" + this.example;
-    }
-    let link = calculator.getComputationLink(exampleText);
-    anchor.href = "#" + link;
-    anchor.textContent = this.useMathML ? (this.atom + " mathML") : this.atom;
     this.panel = this.toHTMLInfo();
     result.appendChild(this.toHTMLInfoButton());
     result.appendChild(this.panel);
-    result.appendChild(anchor);
+    result.appendChild(this.makeExampleLinksContainer());
+    return result;
+  }
+
+  makeExampleLinksContainer() {
+    let anchorContainer = document.createElement("span");
+    anchorContainer.appendChild(this.makeNameContainer());
+
     if (this.totalRules > 1) {
       let countElement = document.createElement("span");
       countElement.textContent = `(${this.index + 1})`;
-      result.appendChild(countElement);
+      anchorContainer.appendChild(countElement);
+    }
+    this.buttonCarryOutExample = this.makeButton();
+    this.styleExampleButton();
+    anchorContainer.appendChild(this.buttonCarryOutExample);
+    anchorContainer.appendChild(this.makeAnchor());
+    return anchorContainer;
+  }
+
+  makeNameContainer() {
+    let name = document.createElement("b");
+    name.textContent = this.atom;
+    name.className = "exampleName";
+    return name;
+  }
+
+  /** @Return {HTMLElement} */
+  makeButton() {
+    let button = document.createElement("button");
+    button.addEventListener("click", () => {
+      this.clickExample();
+    })
+    button.textContent = "← Example";
+    button.className = "exampleCalculator";
+    return button;
+  }
+
+  styleExampleButton() {
+    if (this.example in examplesContainer.allVisitedExamples) {
+      this.buttonCarryOutExample.style.color = "purple";
+    } else {
+      this.buttonCarryOutExample.style.color = "";
+    }
+  }
+
+  /** @return {HTMLElement} */
+  makeAnchor() {
+    let anchor = document.createElement("a");
+    anchor.className = "linkInfo";
+    let exampleText = this.example;
+    let link = this.getComputationLink(exampleText);
+    anchor.href = "?" + link;
+    anchor.textContent = "↗";
+    anchor.target = "_blank";
+    return anchor;
+  }
+
+  clickExample() {
+    const mainInput = document.getElementById(
+      ids.domElements.pages.calculator.inputMain
+    );
+    mainInput.textContent = this.example;
+    calculator.submitComputationAndStore(true);
+    examplesContainer.allVisitedExamples[this.example] = true;
+    this.styleExampleButton();
+  }
+
+  /** @return {String} */
+  getComputationLink(input) {
+    let url = {
+      currentPage: "calculator",
+      calculatorInput: input,
+    };
+    let stringifiedHash = storage.objectToURL(url);
+    return stringifiedHash;
+  }
+}
+
+/** A container for all examples. Use through the provided singleton. */
+class ExamplesContainer {
+  constructor() {
+    /** 
+     * A set to contain all examples that were visited.
+     * @type{Object.<string, boolean>}
+     */
+    this.allVisitedExamples = {};
+    this.handlerDocumentation = null;
+    this.examples = null;
+    this.handlerDocumentation = null;
+    this.useMathML = true;
+  }
+
+  processExamles(/** @type {string} */ inputJSONtext) {
+    let examplesMessage = miscellaneousFrontend.jsonUnescapeParse(inputJSONtext);
+    this.handlerDocumentation = examplesMessage["calculatorHandlerDocumentation"];
+    this.examples = examplesMessage["calculatorExamples"];
+    let atomsSorted = Object.keys(this.handlerDocumentation).slice().sort();
+    let examplesSorted = Object.keys(this.examples).slice().sort();
+    let numberOfHandlers = 0;
+    let allElements = [];
+    for (let i = 0; i < examplesSorted.length; i++) {
+      let name = examplesSorted[i];
+      let example = this.examples[name];
+      let element = this.processOneBuiltInExample(name, example);
+      allElements.push(element);
+    }
+    for (let i = 0; i < atomsSorted.length; i++) {
+      let atom = atomsSorted[i];
+      let currentExamples = this.handlerDocumentation[atom];
+      allElements.push(this.processOneFunctionAtom(currentExamples.regular));
+      allElements.push(this.processOneFunctionAtom(currentExamples.composite));
+      numberOfHandlers += currentExamples.regular.length;
+      numberOfHandlers += currentExamples.composite.length;
+    }
+    let handlerReport = document.createElement("span");
+    handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numberOfHandlers} handlers. `;
+    let output = document.getElementById(ids.domElements.pages.calculator.examples);
+    output.textContent = "";
+    miscellaneousFrontend.writeHtmlFromCommentsAndErrors(examplesMessage, output);
+    output.appendChild(handlerReport);
+    if (this.useMathML) {
+      const usingMathMLIndicator = document.createElement("div");
+      usingMathMLIndicator.style.fontWeight = "bold";
+      usingMathMLIndicator.style.color = "purple";
+      usingMathMLIndicator.textContent = "Using mathML";
+      output.append(usingMathMLIndicator);
+    }
+    for (let i = 0; i < allElements.length; i++) {
+      output.appendChild(allElements[i]);
+    }
+  }
+
+  /** @return {HTMLElement} */
+  processOneFunctionAtom(handlers) {
+    if (handlers === undefined || handlers === null) {
+      throw new Error("Bad handlers");
+    }
+    let result = document.createElement("div");
+    for (let i = 0; i < handlers.length; i++) {
+      let handler = new AtomHandler(this.useMathML);
+      handler.fromObject(handlers[i], i, handlers.length);
+      if (handler.visible) {
+        result.appendChild(handler.toHTML());
+      }
     }
     return result;
   }
+
+  /** @return {HTMLElement} */
+  processOneBuiltInExample(
+    /** @type {string} */ name,
+    /** @type {string} */ example,
+  ) {
+    let element = new ExampleBuiltIn(name, example);
+    return element.toHTML();
+  }
+
+  processExamples(inputJSONtext) {
+    try {
+      this.processExamles(inputJSONtext);
+    } catch (e) {
+      console.log(`Bad json: ${e}\n Input JSON follows.`);
+      console.log(inputJSONtext);
+      throw e;
+    }
+  }
 }
+
+const examplesContainer = new ExamplesContainer();
 
 class Calculator {
   constructor() {
@@ -203,8 +354,6 @@ class Calculator {
     this.panels = [];
     /** @type {HTMLElement|null} */
     this.outputElement = null;
-    this.handlerDocumentation = null;
-    this.examples = null;
     this.submissionCalculatorCounter = 0;
     this.lastSubmittedInput = "";
     this.numberOfCalculatorPanels = 0;
@@ -236,75 +385,6 @@ class Calculator {
     this.progressOutput = document.getElementById(
       ids.domElements.pages.calculator.monitoring.progressOutput
     );
-  }
-
-  /** @return {HTMLElement} */
-  processOneFunctionAtom(handlers) {
-    if (handlers === undefined || handlers === null) {
-      throw new Error("Bad handlers");
-    }
-    let result = document.createElement("div");
-    for (let i = 0; i < handlers.length; i++) {
-      let handler = new AtomHandler();
-      handler.fromObject(handlers[i], i, handlers.length);
-      if (handler.visible) {
-        result.appendChild(handler.toHTML(this));
-      }
-    }
-    return result;
-  }
-
-  /** @return {HTMLElement} */
-  processOneBuiltInExample(
-    /** @type {string} */ name,
-    /** @type {string} */ example,
-  ) {
-    let element = new ExampleBuiltIn(name, example);
-    return element.toHTML();
-  }
-
-  doProcessExamples(inputJSONtext) {
-    let examplesMessage = miscellaneousFrontend.jsonUnescapeParse(inputJSONtext);
-    this.handlerDocumentation = examplesMessage["calculatorHandlerDocumentation"];
-    this.examples = examplesMessage["calculatorExamples"];
-    let atomsSorted = Object.keys(this.handlerDocumentation).slice().sort();
-    let examplesSorted = Object.keys(this.examples).slice().sort();
-    let numberOfHandlers = 0;
-    let allElements = [];
-    for (let i = 0; i < examplesSorted.length; i++) {
-      let name = examplesSorted[i];
-      let example = this.examples[name];
-      let element = this.processOneBuiltInExample(name, example);
-      allElements.push(element);
-    }
-    for (let i = 0; i < atomsSorted.length; i++) {
-      let atom = atomsSorted[i];
-      let currentExamples = this.handlerDocumentation[atom];
-      allElements.push(this.processOneFunctionAtom(currentExamples.regular));
-      allElements.push(this.processOneFunctionAtom(currentExamples.composite));
-      numberOfHandlers += currentExamples.regular.length;
-      numberOfHandlers += currentExamples.composite.length;
-    }
-    let handlerReport = document.createElement("span");
-    handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numberOfHandlers} handlers. `;
-    let output = document.getElementById(ids.domElements.pages.calculator.examples);
-    output.textContent = "";
-    miscellaneousFrontend.writeHtmlFromCommentsAndErrors(examplesMessage, output);
-    output.appendChild(handlerReport);
-    for (let i = 0; i < allElements.length; i++) {
-      output.appendChild(allElements[i]);
-    }
-  }
-
-  processExamples(inputJSONtext) {
-    try {
-      this.doProcessExamples(inputJSONtext)
-
-    } catch (e) {
-      console.log(`Bad json: ${e}\n Input JSON follows.`);
-      console.log(inputJSONtext);
-      throw e;
-    }
   }
 
   submitCalculatorInputOnEnter(event) {
@@ -374,7 +454,7 @@ class Calculator {
     submitRequests.submitGET({
       url: url,
       callback: (input) => {
-        this.processExamples(input);
+        examplesContainer.processExamles(input);
       },
       progress: "spanProgressCalculatorExamples"
     });
@@ -558,16 +638,6 @@ class Calculator {
     );
   }
 
-  /** @return {String} */
-  getComputationLink(input) {
-    let url = {
-      currentPage: "calculator",
-      calculatorInput: input,
-    };
-    let stringifiedHash = storage.objectToURL(url);
-    return stringifiedHash;
-  }
-
   /** Writes html input to an element on the page. */
   writeHTML(
     /** @type {HTMLElement} */
@@ -577,7 +647,6 @@ class Calculator {
   ) {
     panels.writeHTML(element, htmlContent);
   }
-
 
   /** @return {HTMLElement} */
   writeErrorsCrashesComments(

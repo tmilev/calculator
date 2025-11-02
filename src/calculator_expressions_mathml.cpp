@@ -675,7 +675,7 @@ bool Expression::toMathMLBuiltIn<MatrixTensor<Rational> >(
     20
   ) {
     out
-    << "<mrow><mi>MatrixRationalsTensorForm{}</mi>"
+    << "<mrow><mi>MatrixRationalsTensorForm</mi>"
     << MathML::leftParenthesis
     << input.getValue<MatrixTensor<Rational> >().toMathMLMatrixForm(
       &formatLocal, outputProperties
@@ -1535,6 +1535,7 @@ bool Expression::toMathMLTimes(
   if (outputProperties != nullptr) {
     outputProperties->startsWithMinus =
     firstExpressionProperties.startsWithMinus;
+    outputProperties->startsWithDigit = firstExpressionProperties.startsWithDigit;
   }
   out << "<mrow>";
   if (firstNeedsParentheses) {

@@ -272,16 +272,40 @@ class PanelExpandable {
     this.setCollapsed(startsCollapsed);
   }
 
+  /** 
+   * Returns the latex content of the panel or null if not found.
+   * @return {string|null} 
+   */
+  latexContentOrNull() {
+    /** @type {string} */
+    let textContent = this.panelContent.textContent;
+    if (textContent.startsWith("\\(") && textContent.endsWith("\\)")) {
+      return textContent.substring(2, textContent.length - 2);
+    }
+    const mathMLElements = this.panelContent.getElementsByTagName('annotation');
+    if (mathMLElements.length !== 1) {
+      // Found 0 math ml elements or more than one.
+      return null;
+    }
+
+    /** @type {HTMLElement} */
+    const container = mathMLElements[0];
+    const encoding = container.getAttribute("encoding");
+    if (encoding !== "application/x-tex") {
+      return null;
+    }
+    return container.textContent;
+  }
+
   addCopyButton() {
     if (this.panelContent === null || this.buttonFullExpand === null) {
       return;
     }
-    /** @type {string} */
-    let textContent = this.panelContent.textContent;
-    if (!textContent.startsWith("\\(") || !textContent.endsWith("\\)")) {
+    const content = this.latexContentOrNull();
+    if (content === null) {
       return;
     }
-    this.contentCopyButton = textContent.substring(2, textContent.length - 2);
+    this.contentCopyButton = content;
     this.buttonCopy = document.createElement("button");
     this.buttonCopy.title = "copy";
     this.buttonCopy.className = "buttonProgress";

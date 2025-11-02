@@ -4421,8 +4421,11 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Rule that commutes constants to the left-most positions. "
     "Provided that a is a constant number "
-    "(built in) and b is not, replaces b*a by a*b. ",
+    "(built in) and b is not, replaces b*a by a*b. "
+    "Also replaces a*(b*c) with b*(a*c) if b is "
+    "a constant and a is not.",
     "x 6^{1/3};\n"
+    "x (e*y);\n"
     "(x 10^{1/2})^{1/3}",
     "CalculatorFunctions::outerCommuteConstants",
     "CommuteConstants",

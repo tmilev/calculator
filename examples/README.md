@@ -946,12 +946,13 @@ x*1-x
 Rule 1*{{anything}} = anything.
 
 *\** [CommuteConstants] {CalculatorFunctions::outerCommuteConstants}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%206%5e%7b1%2f3%7d%3b%5cn%28x%2010%5e%7b1%2f2%7d%29%5e%7b1%2f3%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%206%5e%7b1%2f3%7d%3b%5cnx%20%28e%2ay%29%3b%5cn%28x%2010%5e%7b1%2f2%7d%29%5e%7b1%2f3%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x 6^{1/3};
+x (e*y);
 (x 10^{1/2})^{1/3}
 ```
-Rule that commutes constants to the left-most positions. Provided that a is a constant number (built in) and b is not, replaces b*a by a*b. 
+Rule that commutes constants to the left-most positions. Provided that a is a constant number (built in) and b is not, replaces b*a by a*b. Also replaces a*(b*c) with b*(a*c) if b is a constant and a is not.
 
 *\** [MergeConstantRadicals] {CalculatorFunctions::outerMergeConstantRadicals}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%7b%7d2%20%5c%5csqrt%7b%7d3%22%2c%22currentPage%22%3a%22calculator%22%7d)

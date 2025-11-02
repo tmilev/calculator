@@ -1535,8 +1535,9 @@ bool Expression::toMathMLTimes(
       firstExpression = "";
     }
   }
-  if (outputProperties!= nullptr) {
-    outputProperties->startsWithMinus=firstExpressionProperties.startsWithMinus;
+  if (outputProperties != nullptr) {
+    outputProperties->startsWithMinus =
+    firstExpressionProperties.startsWithMinus;
   }
   out << "<mrow>";
   if (firstNeedsParentheses) {
@@ -1771,15 +1772,18 @@ bool Expression::toMathMLMinus3(
 }
 
 bool Expression::toMathMLMinus2(
-  const Expression& input, std::stringstream& out, FormatExpressions* format, MathExpressionFormattingProperties* outputProperties
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) {
   if (!input.startsWith(input.owner->opMinus(), 2)) {
     return false;
   }
-  if (outputProperties!=nullptr){
-    outputProperties->needsParenthesesForMultiplicationOnTheRight=true;
-    outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft=true;
-    outputProperties->startsWithMinus=true;
+  if (outputProperties != nullptr) {
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
+    outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = true;
+    outputProperties->startsWithMinus = true;
   }
   if (
     input[1].startsWith(input.owner->opPlus()) ||

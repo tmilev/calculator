@@ -6536,15 +6536,39 @@ bool CalculatorFunctions::outerCommuteConstants(
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  if (!input[2].isConstantNumber()) {
+  const Expression& leftExpression = input[1];
+  if (leftExpression.isConstantNumber()) {
     return false;
   }
-  if (input[1].isConstantNumber()) {
+  const Expression& rightExpression = input[2];
+  // We have x*anything where x is non-constant.
+  if (rightExpression.isConstantNumber()) {
+    // Replace a*cosnt --> const*a.
+    output.makeProduct(calculator, rightExpression, leftExpression);
+    return true;
+  }
+  if (!rightExpression.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  output.makeProduct(calculator, input[2], input[1]);
-  output.checkInitializationRecursively();
-  return true;
+  // We have an expression of the form x*(a*b).
+  const Expression& middleExpression = rightExpression[1];
+  if (!middleExpression.isConstantNumber()) {
+    // We have x*(a*b) with a non-constant.
+    return false;
+  }
+  // We have x*(const*b).
+  const Expression rightRightExpression = rightExpression[2];
+  if (rightRightExpression.isConstantNumber()) {
+    // We have x*(constant1*constant2).
+    return false;
+  }
+  // We have x(const*y) where both x and y are non-constant.
+  // Replace x*(const*y) --> const*x*y.
+  return
+  output.makeProduct(
+    calculator,
+    List<Expression>({middleExpression, leftExpression, rightRightExpression})
+  );
 }
 
 bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(

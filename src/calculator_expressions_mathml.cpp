@@ -516,17 +516,16 @@ bool Expression::toMathMLBuiltIn<RationalFraction<Rational> >(
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   formatLocal.flagUseFrac = true;
-  if (showContext) {
-    out << "<mrow>";
-  }
+  out << "<mrow>";
   out
   << "<mi>MakeRationalFunction</mi>"
   << MathML::leftParenthesis
   << input.getValue<RationalFraction<Rational> >().toMathML(&formatLocal)
   << MathML::rightParenthesis;
   if (showContext) {
-    out << "<mo>[</mo>" << input.getContext().toMathML() << "</mo></mrow>";
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "</mo>";
   }
+  out << "</mrow>";
   return true;
 }
 
@@ -544,9 +543,7 @@ bool Expression::toMathMLBuiltIn<RationalFraction<AlgebraicNumber> >(
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   formatLocal.flagUseFrac = true;
-  if (showContext) {
-    out << "<mrow>";
-  }
+  out << "<mrow>";
   out
   << "<mi>MakeRationalFunction{}</mi>"
   << MathML::leftParenthesis
@@ -556,8 +553,8 @@ bool Expression::toMathMLBuiltIn<RationalFraction<AlgebraicNumber> >(
   << MathML::rightParenthesis;
   if (showContext) {
     out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo>";
-    out << "</mrow>";
   }
+  out << "</mrow>";
   return true;
 }
 

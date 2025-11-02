@@ -197,7 +197,7 @@ std::string ElementEllipticCurve<Coefficient>::toMathML(
   );
   rightHandSide += Rational(this->owner.constantTerm);
   out
-  << "<mrow><mi>ElementEllipticCurveNormalForm{}</mi>"
+  << "<mrow><mi>ElementEllipticCurveNormalForm</mi>"
   << MathML::leftParenthesis
   << leftHandSide.toMathML(format)
   << " <mo>=</mo> "

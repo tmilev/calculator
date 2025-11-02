@@ -1967,14 +1967,14 @@ public:
   std::string chevalleyGGeneratorLetter;
   std::string chevalleyHGeneratorLetter;
   MathMLAndLatex fundamentalWeightLetter;
-  std::string polynomialDefaultLetter;
-  std::string weylAlgebraDefaultLetter;
+  MathMLAndLatex polynomialDefaultLetter;
+  MathMLAndLatex weylAlgebraDefaultLetter;
   MathMLAndLatex customPlusSign;
   std::string customCoefficientMonomialSeparator;
   MathMLAndLatex finiteDimensionalRepresentationLetter;
   std::string simpleRootLetter;
   List<MathMLAndLatex> polynomialAlphabet;
-  List<std::string> weylAlgebraLetters;
+  List<MathMLAndLatex> weylAlgebraLetters;
   List<MathMLAndLatex> vectorSpaceEiBasisNames;
   Rational ambientCartanSymmetricInverseScale;
   int extraLinesCounterLatex;
@@ -3579,7 +3579,7 @@ std::string Vectors<Coefficient>::toLatexInequalities(
     Vector<Rational>& current = (*this)[i];
     polynomialPart =
     current.toStringLetterFormat(
-      format.polynomialDefaultLetter, &format, lastVariableIsConstant
+      format.polynomialDefaultLetter.latex, &format, lastVariableIsConstant
     );
     if (polynomialPart == "") {
       out << "(0";

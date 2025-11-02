@@ -793,8 +793,8 @@ bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
     << "<hr>Failed to get different one-variable polynomials from input. "
     << input.toString();
   }
-  ExpressionContext endContext(calculator);
-  endContext.makeOneVariableOneDifferentialOperator(
+  ExpressionContext resultContext(calculator);
+  resultContext.makeOneVariableOneDifferentialOperator(
     startContext.getVariable(letterPolynomial),
     startContext.getVariable(letterDifferential)
   );
@@ -806,7 +806,7 @@ bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
   }
   return
   output.assignValueWithContext(
-    calculator, outputElementWeylAlgebra, endContext
+    calculator, outputElementWeylAlgebra, resultContext
   );
 }
 

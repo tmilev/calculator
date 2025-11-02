@@ -608,7 +608,7 @@ bool Expression::toMathMLBuiltIn<ElementWeylAlgebra<Rational> >(
   formatLocal.flagUseHTML = false;
   formatLocal.flagUseLatex = true;
   out << "<mrow>";
-  out << "<mi>ElementWeylAlgebra{}</mi>" << MathML::leftParenthesis;
+  out << "<mi>ElementWeylAlgebra</mi>" << MathML::leftParenthesis;
   out
   << input.getValue<ElementWeylAlgebra<Rational> >().toMathML(&formatLocal);
   out << MathML::rightParenthesis;
@@ -1295,7 +1295,6 @@ bool Expression::toMathMLGeneral(
   }
   for (int i = 1; i < this->children.size; i ++) {
     (*this)[i].toMathML(out, format, nullptr, nullptr, false, nullptr);
-    global.comments << "<hr>DEBUG: out at this point: " << out.str();
     if (i != this->children.size - 1) {
       out << "<mo>,</mo>";
     }
@@ -2353,10 +2352,7 @@ bool Expression::toMathMLBind(
   if (!input.startsWith(input.owner->opBind(), 2)) {
     return false;
   }
-  out
-  << "<mrow><mo>{</mo><mo>{</mo>"
-  << input[1].toMathML(format)
-  << "<mo>}</mo><mo>}</mo></mrow>";
+  out << "<mrow>" << input[1].toMathML(format) << "</mrow>";
   return true;
 }
 

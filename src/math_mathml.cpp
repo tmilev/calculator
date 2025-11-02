@@ -57,6 +57,7 @@ MapList<std::string, std::string>& MathML::mapFromLatexToMathMLEquivalents() {
     result.setKeyValue("\\log", "<mo>log</mo>");
     result.setKeyValue("\\int", "<mo>&int;</mo>");
     result.setKeyValue("\\sum", "<mo>&sum;</mo>");
+    result.setKeyValue("\\partial", "<mo>&part;</mo>");
     result.setKeyValue("\\alpha", "<mi>&alpha;</mi>");
     result.setKeyValue("\\beta", "<mi>&beta;</mi>");
     result.setKeyValue("\\gamma", "<mi>&gamma;</mi>");

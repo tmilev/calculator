@@ -564,14 +564,23 @@ void ExpressionContext::getFormat(FormatExpressions& output) const {
   if (this->owner == nullptr) {
     return;
   }
-  output.polynomialAlphabet.setSize(this->variables.size);
-  for (int i = 0; i < this->variables.size; i ++) {
-    output.polynomialAlphabet[i] = this->variables[i].toString();
+  output.polynomialAlphabet.clear();
+  for (const Expression& variable : this->variables) {
+    output.polynomialAlphabet.addOnTop(
+      MathMLAndLatex(variable.toString(), variable.toMathML())
+    );
   }
-  output.weylAlgebraLetters.setSize(this->differentialOperatorVariables.size);
-  for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
-    output.weylAlgebraLetters[i] =
-    this->differentialOperatorVariables[i].toString();
+  output.weylAlgebraLetters.clear();
+  for (
+    const Expression& differentialOperatorLetter :
+    this->differentialOperatorVariables
+  ) {
+    output.weylAlgebraLetters.addOnTop(
+      MathMLAndLatex(
+        differentialOperatorLetter.toString(),
+        differentialOperatorLetter.toMathML()
+      )
+    );
   }
 }
 

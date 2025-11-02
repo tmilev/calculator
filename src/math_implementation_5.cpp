@@ -39,19 +39,23 @@ std::string MonomialWeylAlgebra::toMathML(
     return "<mn>1</mn>";
   }
   std::stringstream out;
-  FormatExpressions currentFormat;
+  FormatExpressions differentialFormat;
   if (format == nullptr) {
-    currentFormat.polynomialDefaultLetter = "<mi>&part;</mi>";
+    differentialFormat.polynomialDefaultLetter.mathML = "<mi>&part;</mi>";
+    differentialFormat.polynomialDefaultLetter.latex = "\\partial";
   } else {
-    currentFormat.polynomialDefaultLetter = format->weylAlgebraDefaultLetter;
-    currentFormat.polynomialAlphabet = format->weylAlgebraLetters;
+    differentialFormat.polynomialDefaultLetter =
+    format->weylAlgebraDefaultLetter;
+    differentialFormat.polynomialAlphabet = format->weylAlgebraLetters;
   }
   MathExpressionFormattingProperties polynomialPartProperties;
   MathExpressionFormattingProperties differentialPartProperties;
   std::string firstS =
   this->polynomialPart.toMathML(format, &polynomialPartProperties);
   std::string secondS =
-  this->differentialPart.toMathML(&currentFormat, &differentialPartProperties);
+  this->differentialPart.toMathML(
+    &differentialFormat, &differentialPartProperties
+  );
   out << "<mrow>";
   if (!polynomialPartProperties.isOne) {
     out << firstS;
@@ -59,7 +63,7 @@ std::string MonomialWeylAlgebra::toMathML(
   if (!differentialPartProperties.isOne) {
     out << secondS;
   }
-  out << "<mrow>";
+  out << "</mrow>";
   return out.str();
 }
 

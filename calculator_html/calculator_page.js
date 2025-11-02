@@ -47,7 +47,7 @@ class AtomHandler {
   constructor(/** @type {boolean} */ useMathML) {
     this.description = "";
     this.atom = "";
-    this.example = "";
+    this.rawExample = "";
     this.composite = false;
     this.index = - 1;
     this.totalRules = 0;
@@ -73,7 +73,7 @@ class AtomHandler {
     this.index = index;
     this.totalRules = totalRules;
     this.description = input.description;
-    this.example = input.example;
+    this.rawExample = input.example;
     this.atom = input.atom;
     this.ruleName = input.ruleName;
     this.visible = true;
@@ -156,7 +156,7 @@ class AtomHandler {
     result.append(example);
     result.append(document.createElement("br"));
     let exampleElement = document.createElement("span");
-    exampleElement.textContent = `${this.example}`;
+    exampleElement.textContent = `${this.example()}`;
     exampleElement.className = "calculatorExampleInfo";
     result.appendChild(exampleElement);
     let handlerLabel = document.createElement("b");
@@ -215,10 +215,18 @@ class AtomHandler {
   }
 
   styleExampleButton() {
-    if (this.example in examplesContainer.allVisitedExamples) {
+    if (this.example() in examplesContainer.allVisitedExamples) {
       this.buttonCarryOutExample.style.color = "purple";
     } else {
       this.buttonCarryOutExample.style.color = "";
+    }
+  }
+
+  example() {
+    if (examplesContainer.useMathML) {
+      return "%UseMathML\n" + this.rawExample;
+    } else {
+      return this.rawExample;
     }
   }
 
@@ -226,7 +234,7 @@ class AtomHandler {
   makeAnchor() {
     let anchor = document.createElement("a");
     anchor.className = "linkInfo";
-    let exampleText = this.example;
+    let exampleText = this.example();
     let link = this.getComputationLink(exampleText);
     anchor.href = "?" + link;
     anchor.textContent = "↗";
@@ -238,9 +246,10 @@ class AtomHandler {
     const mainInput = document.getElementById(
       ids.domElements.pages.calculator.inputMain
     );
-    mainInput.textContent = this.example;
+    const input = this.example();
+    mainInput.textContent = input;
     calculator.submitComputationAndStore(true);
-    examplesContainer.allVisitedExamples[this.example] = true;
+    examplesContainer.allVisitedExamples[input] = true;
     this.styleExampleButton();
   }
 

@@ -102,7 +102,7 @@ bool Expression::toMathMLBuiltIn<
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   out
-  << "<mrow><mi>UEE{}</mi>"
+  << "<mrow><mi>UEE</mi>"
   << MathML::leftParenthesis
   << input.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >()
   .toMathML(&formatLocal)
@@ -296,7 +296,7 @@ bool Expression::toMathMLBuiltIn<Lattice>(
   out
   << "<mrow><mi>"
   << Calculator::Functions::Names::lattice
-  << "{}</mi>"
+  << "</mi>"
   << lattice.toStringParentheses()
   << "</mrow>";
   return true;
@@ -545,7 +545,7 @@ bool Expression::toMathMLBuiltIn<RationalFraction<AlgebraicNumber> >(
   formatLocal.flagUseFrac = true;
   out << "<mrow>";
   out
-  << "<mi>MakeRationalFunction{}</mi>"
+  << "<mi>MakeRationalFunction</mi>"
   << MathML::leftParenthesis
   << input.getValue<RationalFraction<AlgebraicNumber> >().toMathML(
     &formatLocal
@@ -710,7 +710,7 @@ bool Expression::toMathMLBuiltIn<
   << input.owner->builtInName<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
   >()
-  << "{}</mi>"
+  << "</mi>"
   << MathML::leftParenthesis;
   out
   << input.getValue<
@@ -839,7 +839,7 @@ std::string ElementZmodP::toMathMLPolynomialCalculator(
 ) const {
   std::stringstream out;
   out << "<mrow>";
-  out << "<mi>PolynomialModP{}</mi>" << MathML::leftParenthesis;
+  out << "<mi>PolynomialModP</mi>" << MathML::leftParenthesis;
   out << input.toMathML(format);
   out
   << "<mo>,</mo><mn>"

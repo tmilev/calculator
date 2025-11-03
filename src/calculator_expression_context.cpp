@@ -559,8 +559,10 @@ FormatExpressions ExpressionContext::getFormat() const {
 
 void ExpressionContext::getFormat(FormatExpressions& output) const {
   output.polynomialAlphabet.setSize(0);
-  output.polynomialDefaultLetter = "x";
-  output.weylAlgebraDefaultLetter = "\\partial";
+  output.polynomialDefaultLetter.latex = "x";
+  output.polynomialDefaultLetter.mathML = "<mi>x</mi>";
+  output.weylAlgebraDefaultLetter.latex = "\\partial";
+  output.weylAlgebraDefaultLetter.mathML = "<mi>&part;</mi>";
   if (this->owner == nullptr) {
     return;
   }

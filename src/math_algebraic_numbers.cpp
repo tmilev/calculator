@@ -19,8 +19,9 @@ std::string MonomialVector::toMathML(
   ) {
     std::string result =
     format->vectorSpaceEiBasisNames[this->monomialIndex].mathML;
-    if (outputProperties != nullptr && (result == "" || result == "1")) {
+    if (outputProperties != nullptr && result == "<mn>1</mn>") {
       outputProperties->isOne = true;
+      outputProperties->startsWithDigit = true;
     }
     return result;
   }

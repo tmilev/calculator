@@ -3511,7 +3511,16 @@ void FormatExpressions::makePolynomialAlphabetLetters(
     } else {
       out << "{" << index << "}";
     }
-    this->polynomialAlphabet.addOnTop(out.str());
+    std::stringstream outMathML;
+    outMathML
+    << "<msub><mi>"
+    << inputDefaultLetter
+    << "</mi><mn>"
+    << index
+    << "</mn></msub>";
+    this->polynomialAlphabet.addOnTop(
+      MathMLAndLatex(out.str(), outMathML.str())
+    );
   }
 }
 
@@ -3521,14 +3530,16 @@ void FormatExpressions::makeAlphabetXYZUW() {
   }
   List<std::string> letters = List<std::string>({"x", "y", "z", "u", "w"});
   for (const std::string& letter : letters) {
-    this->polynomialAlphabet.addOnTop(MathMLAndLatex(letter, letter));
+    this->polynomialAlphabet.addOnTop(
+      MathMLAndLatex(letter, "<mi>" + letter + "</mi>")
+    );
   }
 }
 
 FormatExpressions* FormatExpressions::defaultFormat() {
   static FormatExpressions result;
   if (result.polynomialAlphabet.size == 0) {
-    result.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
+    result.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "<mi>x</mi>"));
   }
   return &result;
 }
@@ -3538,8 +3549,11 @@ FormatExpressions::FormatExpressions() {
   this->extraLinesCounterLatex = 0;
   this->chevalleyGGeneratorLetter = "g";
   this->chevalleyHGeneratorLetter = "h";
-  this->polynomialDefaultLetter = "x";
-  this->weylAlgebraDefaultLetter = "\\partial";
+  this->polynomialDefaultLetter = MathMLAndLatex("x", "<mi>x</mi>");
+  this->weylAlgebraDefaultLetter =
+  MathMLAndLatex("\\partial", "<mi>&part;</mi>");
+  this->fundamentalWeightLetter =
+  MathMLAndLatex("\\omega", "<mi>&omega;</mi>");
   this->finiteDimensionalRepresentationLetter.latex = "V";
   this->finiteDimensionalRepresentationLetter.mathML = "<mi>V</mi>";
   this->simpleRootLetter = "\\eta";
@@ -3584,7 +3598,7 @@ std::string FormatExpressions::polynomialLatexLetter(int index) const {
     return this->polynomialAlphabet[index].latex;
   }
   std::stringstream out;
-  out << this->polynomialDefaultLetter << "_{" << index + 1 << "}";
+  out << this->polynomialDefaultLetter.latex << "_{" << index + 1 << "}";
   return out.str();
 }
 
@@ -15678,4 +15692,15 @@ bool MathMLAndLatex::operator==(const MathMLAndLatex& other) const {
 void MathMLAndLatex::operator=(const std::string& other) {
   this->latex = other;
   this->mathML = other;
+}
+
+std::string MathMLAndLatex::toString() const {
+  std::stringstream out;
+  out
+  << "["
+  << this->latex
+  << ", "
+  << HtmlRoutines::convertStringToHtmlString(this->mathML, true)
+  << "]";
+  return out.str();
 }

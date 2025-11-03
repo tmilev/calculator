@@ -7,7 +7,7 @@
 
 class SelectionWithMultiplicities;
 class Selection;
-class MathMLAndLatex;
+struct MathMLAndLatex;
 
 template <class Coefficient>
 class Vector: public List<Coefficient> {

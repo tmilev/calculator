@@ -1941,7 +1941,7 @@ struct MathMLAndLatex {
   friend std::ostream& operator<<(
     std::ostream& output, const MathMLAndLatex& element
   ) {
-    return output << element.latex;
+    return output << element.toString();
   }
   std::string latex;
   std::string mathML;
@@ -1959,6 +1959,7 @@ struct MathMLAndLatex {
   }
   bool operator==(const MathMLAndLatex& other) const;
   void operator=(const std::string& other);
+  std::string toString() const;
 };
 
 class FormatExpressions {

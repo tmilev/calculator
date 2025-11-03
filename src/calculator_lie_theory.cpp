@@ -176,7 +176,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         std::stringstream currentStream3;
         std::stringstream currentStream4;
         currentStream
-        << universalEnvelopingFormat.polynomialDefaultLetter
+        << universalEnvelopingFormat.polynomialDefaultLetter.latex
         << "_{"
         << k - hwContext.numberOfVariables() + 1
         << "}";
@@ -6217,11 +6217,16 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
     "CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional"
   );
   Vector<Rational> highestWeight;
-  Selection parSel;
-  WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
+  Selection parabolicSelection;
+  WithContext<SemisimpleLieAlgebra*> ownserSemisimpleLieAlgebra;
   if (
     !calculator.getTypeHighestWeightParabolic(
-      calculator, input, output, highestWeight, parSel, ownerSSLiealg
+      calculator,
+      input,
+      output,
+      highestWeight,
+      parabolicSelection,
+      ownserSemisimpleLieAlgebra
     )
   ) {
     return false;
@@ -6229,7 +6234,7 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
   if (output.isError()) {
     return true;
   }
-  if (parSel.cardinalitySelection != 0) {
+  if (parabolicSelection.cardinalitySelection != 0) {
     return
     output.assignError(
       calculator,
@@ -6239,10 +6244,9 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
   }
   CharacterSemisimpleLieAlgebraModule<Rational> element;
   element.makeFromWeight(
-    ownerSSLiealg.content->weylGroup.getSimpleCoordinatesFromFundamental(
-      highestWeight
-    ),
-    ownerSSLiealg.content
+    ownserSemisimpleLieAlgebra.content->weylGroup.
+    getSimpleCoordinatesFromFundamental(highestWeight),
+    ownserSemisimpleLieAlgebra.content
   );
   return output.assignValue(calculator, element);
 }

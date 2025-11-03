@@ -2300,11 +2300,11 @@ void Vector<Coefficient>::makeVectorSpaceBasisFormat(
     std::stringstream currentMathML;
     std::stringstream currentLaTeX;
     currentMathML
-    << "<mrow><msub>"
+    << "<msub>"
     << inputLetter.mathML
     << "<mn>"
     << i + 1
-    << "</mn></mrow>";
+    << "</mn></msub>";
     currentLaTeX << inputLetter.latex << "_{" << i + 1 << "}";
     output.vectorSpaceEiBasisNames.addOnTop(
       MathMLAndLatex(currentLaTeX.str(), currentMathML.str())

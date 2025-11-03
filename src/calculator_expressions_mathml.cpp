@@ -247,9 +247,11 @@ bool Expression::toMathMLBuiltIn<
 ) {
   (void) format;
   (void) outputProperties;
+  FormatExpressions characterFormat;
+  input.getContext().getFormat(characterFormat);
   CharacterSemisimpleLieAlgebraModule<Rational> element =
   input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
-  out << element.toMathML(format, outputProperties);
+  out << element.toMathML(&characterFormat, outputProperties);
   return true;
 }
 

@@ -2779,55 +2779,6 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
 }
 
 template <class Coefficient>
-std::string Vector<Coefficient>::toMathMLLetterFormat(
-  const std::string& inputLetterWithMathMLTags, const FormatExpressions* format
-) const {
-  if (this->isEqualToZero()) {
-    return "<mn>0</mn>";
-  }
-  std::stringstream out;
-  std::string term;
-  bool found = false;
-  out << "<mrow>";
-  for (int i = 0; i < this->size; i ++) {
-    if ((*this)[i].isEqualToZero()) {
-      continue;
-    }
-    MathExpressionFormattingProperties properties;
-    term = (*this)[i].toMathML(format, &properties);
-    if ((*this)[i].needsParenthesisForMultiplication(format)) {
-      term = MathML::leftParenthesis + term + MathML::rightParenthesis;
-    }
-    if (properties.isOne) {
-      term = "";
-    }
-    if (properties.isNegativeOne) {
-      term = MathML::negativeSign;
-    }
-    if (found && !properties.startsWithMinus) {
-      out << "<mo>+</mo>";
-    }
-    found = true;
-    out << term;
-    if (format != nullptr) {
-      if (format->vectorSpaceEiBasisNames.size > i) {
-        out << format->vectorSpaceEiBasisNames[i].mathML;
-        continue;
-      }
-    }
-    out
-    << "<msub>"
-    << inputLetterWithMathMLTags
-    << "</mi>"
-    << "<mn>"
-    << i + 1
-    << "</mn></msub>";
-  }
-  out << "</mrow>";
-  return out.str();
-}
-
-template <class Coefficient>
 std::string Vector<Coefficient>::toStringLetterFormat(
   const std::string& inputLetter,
   const FormatExpressions* format,

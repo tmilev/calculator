@@ -1075,7 +1075,7 @@ std::string Weight<Coefficient>::toMathML(
     if (this->owner == nullptr) {
       return
       this->weightFundamentalCoordinates.toMathMLLetterFormat(
-        "<mi>&psi;</mi>", format
+        MathMLAndLatex("\\psi", "<mi>&psi;</mi>"), format
       );
     }
     Vector<Coefficient> weightEpsilonCoordinates;
@@ -1088,7 +1088,9 @@ std::string Weight<Coefficient>::toMathML(
       weightSimpleCoordinates, weightEpsilonCoordinates
     );
     return
-    weightEpsilonCoordinates.toMathMLLetterFormat("<mi>&epsiv;</mi>", format);
+    weightEpsilonCoordinates.toMathMLLetterFormat(
+      MathMLAndLatex("\\varepsilon", "<mi>&epsiv;</mi>"), format
+    );
   }
   std::string fundamentalWeightLetter = format ==
   nullptr ?

@@ -681,6 +681,7 @@ public:
     return
     this->::LinearCombination<MonomialVector, Coefficient>::operator>(other);
   }
+  void assignVector(const Vector<Coefficient>& other);
 };
 
 template <class TemplateMonomial, class Coefficient>
@@ -2276,6 +2277,53 @@ void MatrixTensor<Coefficient>::operator*=(
     }
   }
   *this = result;
+}
+
+template <class Coefficient>
+void VectorSparse<Coefficient>::assignVector(
+  const Vector<Coefficient>& other
+) {
+  this->makeZero();
+  for (int i = 0; i < other.size; i ++) {
+    VectorSparse<Coefficient> monomial;
+    monomial.makeEi(i, other[i]);
+    *this += monomial;
+  }
+}
+
+template <class Coefficient>
+void Vector<Coefficient>::makeVectorSpaceBasisFormat(
+  const MathMLAndLatex& inputLetter, FormatExpressions& output
+) const {
+  output.vectorSpaceEiBasisNames.clear();
+  for (int i = 0; i < this->size; i ++) {
+    std::stringstream currentMathML;
+    std::stringstream currentLaTeX;
+    currentMathML
+    << "<mrow><msub>"
+    << inputLetter.mathML
+    << "<mn>"
+    << i + 1
+    << "</mn></mrow>";
+    currentLaTeX << inputLetter.latex << "_{" << i + 1 << "}";
+    output.vectorSpaceEiBasisNames.addOnTop(
+      MathMLAndLatex(currentLaTeX.str(), currentMathML.str())
+    );
+  }
+}
+
+template <class Coefficient>
+std::string Vector<Coefficient>::toMathMLLetterFormat(
+  const MathMLAndLatex& inputLetter, const FormatExpressions* format
+) const {
+  VectorSparse<Coefficient> converted;
+  converted.assignVector(*this);
+  FormatExpressions sparseVectorFormat;
+  if (format != nullptr) {
+    sparseVectorFormat = *format;
+  }
+  this->makeVectorSpaceBasisFormat(inputLetter, sparseVectorFormat);
+  return converted.toMathML(&sparseVectorFormat);
 }
 
 #endif // header_math_linear_combination_ALREADY_INCLUDED

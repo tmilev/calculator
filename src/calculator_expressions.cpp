@@ -1073,7 +1073,7 @@ getValueNonConst() const {
   ) {
     global.fatal
     << "Expression not of "
-    << "required type ElementTGVM_RationalFunctionOld. The expression equals "
+    << "required type ElementTGVM_RationalFunction. The expression equals "
     << this->toString()
     << "."
     << global.fatal;

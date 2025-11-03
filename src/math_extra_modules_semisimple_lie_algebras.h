@@ -2952,7 +2952,7 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toMathML(
     }
     out << "</mrow>";
   } else {
-    out << this->monomials[0].toMathML(format);
+    out << this->monomials[0].toMathML(format, outputProperties);
   }
   return out.str();
 }

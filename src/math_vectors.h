@@ -7,6 +7,7 @@
 
 class SelectionWithMultiplicities;
 class Selection;
+class MathMLAndLatex;
 
 template <class Coefficient>
 class Vector: public List<Coefficient> {
@@ -112,8 +113,11 @@ public:
     out << "]";
     return out.str();
   }
+  void makeVectorSpaceBasisFormat(
+    const MathMLAndLatex& inputLetter, FormatExpressions& output
+  ) const;
   std::string toMathMLLetterFormat(
-    const std::string& inputLetterWithMathMLTags,
+    const MathMLAndLatex& inputLetter,
     const FormatExpressions* format = nullptr
   ) const;
   std::string toStringLetterFormat(

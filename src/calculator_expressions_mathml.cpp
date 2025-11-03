@@ -2,6 +2,7 @@
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_general_implementation.h" // IWYU pragma: keep: breaks g++ 'make optimize=1' build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ 'make optimize=1' build.
+#include "math_linear_combination.h"
 #include "math_mathml.h"
 
 template < >

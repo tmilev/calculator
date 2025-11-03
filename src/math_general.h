@@ -2780,7 +2780,7 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
 
 template <class Coefficient>
 std::string Vector<Coefficient>::toMathMLLetterFormat(
-  const std::string& inputLetter, const FormatExpressions* format
+  const std::string& inputLetterWithMathMLTags, const FormatExpressions* format
 ) const {
   if (this->isEqualToZero()) {
     return "<mn>0</mn>";
@@ -2798,11 +2798,11 @@ std::string Vector<Coefficient>::toMathMLLetterFormat(
     if ((*this)[i].needsParenthesisForMultiplication(format)) {
       term = MathML::leftParenthesis + term + MathML::rightParenthesis;
     }
-    if (term == "<mn>1</mn>") {
+    if (properties.isOne) {
       term = "";
     }
-    if (term == "<mo>-</mo><mn>1</mn>") {
-      term = "<mo>-</mo>";
+    if (properties.isNegativeOne) {
+      term = MathML::negativeSign;
     }
     if (found && !properties.startsWithMinus) {
       out << "<mo>+</mo>";
@@ -2816,8 +2816,8 @@ std::string Vector<Coefficient>::toMathMLLetterFormat(
       }
     }
     out
-    << "<msub><mi>"
-    << inputLetter
+    << "<msub>"
+    << inputLetterWithMathMLTags
     << "</mi>"
     << "<mn>"
     << i + 1

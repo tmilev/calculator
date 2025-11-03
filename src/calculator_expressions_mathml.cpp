@@ -67,10 +67,11 @@ bool Expression::toMathMLBuiltIn<Weight<Polynomial<Rational> > >(
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   formatLocal.flagFormatWeightAsVectorSpaceIndex = false;
-  out
-  << input.getValue<Weight<Polynomial<Rational> > >().toMathML(
+  std::string result =
+  input.getValue<Weight<Polynomial<Rational> > >().toMathML(
     &formatLocal, outputProperties
   );
+  out << result;
   return true;
 }
 

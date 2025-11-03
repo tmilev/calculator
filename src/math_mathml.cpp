@@ -63,7 +63,7 @@ MapList<std::string, std::string>& MathML::mapFromLatexToMathMLEquivalents() {
     result.setKeyValue("\\gamma", "<mi>&gamma;</mi>");
     result.setKeyValue("\\delta", "<mi>&delta;</mi>");
     result.setKeyValue("\\epsilon", "<mi>&epsilon;</mi>");
-    result.setKeyValue("\\varepsilon", "<mi>&varepsilon;</mi>");
+    result.setKeyValue("\\varepsilon", "<mi>&epsiv;</mi>");
     result.setKeyValue("\\zeta", "<mi>&zeta;</mi>");
     result.setKeyValue("\\eta", "<mi>&eta;</mi>");
     result.setKeyValue("\\theta", "<mi>&theta;</mi>");

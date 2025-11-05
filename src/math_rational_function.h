@@ -496,7 +496,9 @@ std::string RationalFraction<Coefficient>::toMathML(
     return "<mtext>[error]</mtext>";
   }
   if (this->expressionType == TypeExpression::typeConstant) {
-    return this->constantValue.toMathML(format, outputProperties);
+    std::string result =
+    this->constantValue.toMathML(format, outputProperties);
+    return result;
   }
   if (this->expressionType == TypeExpression::typePolynomial) {
     return

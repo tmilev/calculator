@@ -3009,7 +3009,6 @@ std::string MonomialGeneralizedVerma<Coefficient>::toMathML(
     << "Non-initialized generalized Verma monomial (owner is 0)."
     << global.fatal;
   }
-  (void) outputProperties;
   ModuleSSalgebra<Coefficient>& module = *this->owner;
   MathExpressionFormattingProperties coefficientProperties;
   std::string coefficientString =
@@ -3020,19 +3019,52 @@ std::string MonomialGeneralizedVerma<Coefficient>::toMathML(
   if (coefficientProperties.isNegativeOne) {
     coefficientString = MathML::negativeSign;
   }
+  if (outputProperties != nullptr) {
+    outputProperties->startsWithDigit = coefficientProperties.startsWithDigit;
+  }
   bool needsCdot = (
     !coefficientProperties.isOne && !coefficientProperties.isNegativeOne
   );
   std::stringstream out;
-  out << "<mrow>" << coefficientString;
   MathExpressionFormattingProperties monomialProperties;
   std::string monomialString =
   module.generatingWordsNonReduced[this->indexFDVector].toMathML(
     format, &monomialProperties
   );
-  out << monomialString;
+  out << "<mrow>";
+  if (coefficientProperties.isOne && monomialProperties.isOne) {
+    if (outputProperties != nullptr) {
+      outputProperties->startsWithDigit = false;
+    }
+  } else if (coefficientProperties.isOne && !monomialProperties.isOne) {
+    out << monomialString;
+    if (outputProperties != nullptr) {
+      outputProperties->startsWithDigit = monomialProperties.startsWithDigit;
+      outputProperties->startsWithMinus = monomialProperties.startsWithMinus;
+    }
+  } else if (!coefficientProperties.isOne && monomialProperties.isOne) {
+    out << coefficientString;
+    if (outputProperties != nullptr) {
+      outputProperties->startsWithDigit =
+      coefficientProperties.startsWithDigit;
+      outputProperties->startsWithMinus =
+      coefficientProperties.startsWithMinus;
+    }
+  } else {
+    out << coefficientString;
+    if (monomialProperties.startsWithDigit) {
+      out << MathML::centerDot;
+    }
+    out << monomialString;
+    if (outputProperties != nullptr) {
+      outputProperties->startsWithDigit =
+      coefficientProperties.startsWithDigit;
+      outputProperties->startsWithMinus =
+      coefficientProperties.startsWithMinus;
+    }
+  }
   if (needsCdot) {
-    out << "<mo>&sdot;</mo>";
+    out << MathML::centerDot;
   }
   out << module.elementToMathMLHighestWeightVector(format);
   out << "</mrow>";

@@ -73,6 +73,7 @@ public:
   static std::string rightAbsoluteValueDelimiter;
   static std::string negativeSign;
   static std::string positiveSign;
+  static std::string centerDot;
   static std::string mtableDefault;
   static MapList<std::string, std::string>& mapFromLatexToMathMLEquivalents();
 };

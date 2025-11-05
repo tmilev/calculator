@@ -1054,13 +1054,16 @@ std::string MonomialUniversalEnveloping<Coefficient>::toMathML(
   const FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
 ) const {
-  (void) outputProperties;
   std::stringstream out;
   std::string currentString;
   if (this->owner == nullptr) {
     return "<ms>(Error:Programming:NonInitializedMonomial)</ms>";
   }
   if (this->generatorsIndices.size == 0) {
+    if (outputProperties != nullptr) {
+      outputProperties->startsWithDigit = true;
+      outputProperties->isOne = true;
+    }
     return "<mn>1</mn>";
   }
   out << "<mrow>";

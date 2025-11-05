@@ -1472,7 +1472,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
       termStrings,
       termProperties
     );
-    if (i == 0 && outputProperties != nullptr) {
+    if (i == 0 && outputProperties != nullptr && this->size() == 1) {
       *outputProperties = termProperties;
     }
     if (i > 0) {

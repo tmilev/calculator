@@ -16,6 +16,7 @@ std::string MathML::rightAbsoluteValueDelimiter =
 std::string MathML::negativeSign = "<mo>&minus;</mo>";
 std::string MathML::positiveSign = "<mo>+</mo>";
 std::string MathML::mtableDefault = "<mtable>";
+std::string MathML::centerDot = "<mo>&sdot;</mo>";
 
 std::string MathML::toMathMLFinal(
   const std::string& mathMLContent,

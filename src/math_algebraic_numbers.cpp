@@ -11,7 +11,6 @@ std::string MonomialVector::toMathML(
   const FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
 ) const {
-  (void) outputProperties;
   if (
     format != nullptr &&
     this->monomialIndex < format->vectorSpaceEiBasisNames.size &&
@@ -19,9 +18,14 @@ std::string MonomialVector::toMathML(
   ) {
     std::string result =
     format->vectorSpaceEiBasisNames[this->monomialIndex].mathML;
-    if (outputProperties != nullptr && result == "<mn>1</mn>") {
-      outputProperties->isOne = true;
-      outputProperties->startsWithDigit = true;
+    if (outputProperties != nullptr) {
+      if (result == "<mn>1</mn>") {
+        outputProperties->isOne = true;
+        outputProperties->startsWithDigit = true;
+      } else {
+        outputProperties->isOne = false;
+        outputProperties->isNegativeOne = false;
+      }
     }
     return result;
   }
@@ -165,6 +169,9 @@ void AlgebraicClosureRationals::computeQuadraticRadicals() {
     if (radical != 1) {
       latexRadical << "\\sqrt{" << radical.toString() << "}";
       mathMLRadical << "<msqrt>" << radical.toMathML() << "</msqrt>";
+    } else {
+      latexRadical << "1";
+      mathMLRadical << "<mn>1</mn>";
     }
     int index = this->getIndexFromRadicalSelection(selection);
     this->quadraticRadicalsCorrespondingToBasisElements[index] = radical;

@@ -1366,8 +1366,8 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
       std::string element =
       "<mfrac>" + monomialMathML + denominatorString + "</mfrac>";
       if (sign != 1) {
-        element =
-        "<mrow>" + MathML::negativeSign + denominatorString + "</mrow>";
+        rowOutputs.addOnTop(MathML::negativeSign);
+        outputProperties.startsWithMinus = true;
       }
       rowOutputs.addOnTop(element);
       return;

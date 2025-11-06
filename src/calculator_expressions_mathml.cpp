@@ -1771,11 +1771,11 @@ bool Expression::toMathMLMinus3(
     out
     << MathML::leftParenthesis
     << input[2].toMathML(format)
-    << MathML::rightParenthesis
-    << "</mrow>";
+    << MathML::rightParenthesis;
   } else {
     out << input[2].toMathML(format);
   }
+  out << "</mrow>";
   return true;
 }
 

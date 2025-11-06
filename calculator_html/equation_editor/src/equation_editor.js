@@ -13397,13 +13397,22 @@ class MathTagConverter {
     let prerendered = false;
 
 
-    if (element.className.toLowerCase() === "mathcalculatorsvg" || element.tagName.toLowerCase() === "mathcalculatorsvg") {
+    if (
+      element.className.toLowerCase() === "mathcalculatorsvg" ||
+      element.tagName.toLowerCase() === "mathcalculatorsvg"
+    ) {
       useSVG = true;
     }
-    if (element.className.toLowerCase() === "mathcalculatormathml" || element.tagName.toLowerCase() === "mathcalculatormathml") {
+    if (
+      element.className.toLowerCase() === "mathcalculatormathml" ||
+      element.tagName.toLowerCase() === "mathcalculatormathml"
+    ) {
       useMathML = true;
     }
-    if (element.className.toLowerCase() === "mathcalculatorbackendrendered" || element.tagName.toLowerCase() === "mathcalculatorbackendrendered") {
+    if (
+      element.className.toLowerCase() === "mathcalculatorbackendrendered" ||
+      element.tagName.toLowerCase() === "mathcalculatorbackendrendered"
+    ) {
       prerendered = true;
     }
 
@@ -13466,7 +13475,7 @@ class MathTagConverter {
       return;
     }
     const equationEditorForCopyButton = new EquationEditorCopyInterface(
-      element, allAnnotations
+      element, annotation
     );
     element.style.position = "relative";
     const copyButton = new CopyButton(equationEditorForCopyButton);

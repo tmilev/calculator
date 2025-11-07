@@ -3586,6 +3586,7 @@ FormatExpressions::FormatExpressions() {
   this->flagUseQuotes = true;
   this->flagSuppressModP = false;
   this->flagIsInNumerator = false;
+  this->flagCanOmitHorizontalRowWrapper = false;
   this->bootstrapScriptType = MathBootstrapScriptType::backendRendering;
   this->maximumMatrixDisplayedRows = 20;
   this->maximumMatrixLineLength = 20;

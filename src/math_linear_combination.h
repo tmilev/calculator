@@ -1455,6 +1455,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
   if (format != nullptr) {
     *formatForTerm = *format;
     formatForTerm->customCoefficientMonomialSeparator = "";
+    formatForTerm->flagCanOmitHorizontalRowWrapper = true;
     useCustomPlus = (format->customPlusSign.mathML != "");
   }
   out << "<mrow>";
@@ -1472,9 +1473,6 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
       termStrings,
       termProperties
     );
-    if (i == 0 && outputProperties != nullptr && this->size() == 1) {
-      *outputProperties = termProperties;
-    }
     if (i > 0) {
       if (useCustomPlus) {
         out << format->customPlusSign.mathML;
@@ -1484,6 +1482,9 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     }
     for (const std::string& termString : termStrings) {
       out << termString;
+    }
+    if (i == 0 && outputProperties != nullptr && this->size() == 1) {
+      *outputProperties = termProperties;
     }
   }
   out << "</mrow>";

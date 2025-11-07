@@ -1662,17 +1662,21 @@ std::string LargeInteger::toMathML(
   const FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
 ) const {
-  (void) format;
   this->computeFormattingProperties(format, outputProperties);
   if (this->isEqualToZero()) {
     return "<mn>0</mn>";
   }
+  bool canOmitMRow = format ==
+  nullptr ? false : format->flagCanOmitHorizontalRowWrapper;
   std::stringstream out;
   if (this->sign == - 1) {
-    out << "<mrow>" << MathML::negativeSign;
+    if (!canOmitMRow) {
+      out << "<mrow>";
+    }
+    out << MathML::negativeSign;
   }
   out << this->value.toMathML();
-  if (this->sign == - 1) {
+  if (this->sign == - 1 && !canOmitMRow) {
     out << "</mrow>";
   }
   return out.str();
@@ -2550,16 +2554,18 @@ std::string Rational::toMathML(
     return numerator.toMathML(format, outputProperties);
   }
   LargeIntegerUnsigned denominator = this->getDenominator();
-  if (numerator.isNegative()) {
+  bool numeratorIsNegative = numerator.isNegative();
+  if (numeratorIsNegative) {
     out << MathML::negativeSign;
     numerator.negate();
-    if (outputProperties != nullptr) {
-      outputProperties->startsWithMinus = true;
-    }
   }
   if (outputProperties != nullptr) {
     outputProperties->isOne = this->isEqualToOne();
     outputProperties->isNegativeOne = ((*this) == - 1);
+    outputProperties->startsWithMinus = numeratorIsNegative;
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
+    outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft =
+    numeratorIsNegative;
   }
   out
   << "<mfrac>"

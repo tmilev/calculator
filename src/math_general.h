@@ -2011,6 +2011,7 @@ public:
   bool flagUseQuotes;
   bool flagSuppressModP;
   bool flagIsInNumerator;
+  bool flagCanOmitHorizontalRowWrapper;
   MathBootstrapScriptType bootstrapScriptType;
   std::string suffixLinearCombination;
   char ambientWeylLetter;

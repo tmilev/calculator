@@ -2650,7 +2650,8 @@ bool Expression::toStringBuiltIn<InputBox>(
 ) {
   (void) format;
   (void) outputProperties;
-  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
+  bool isFinal = format ==
+  nullptr ? true : format->flagExpressionIsInMainDisplay;
   if (!isFinal) {
     out << "(input box not shown)";
     return true;
@@ -4578,8 +4579,13 @@ bool Expression::toStringDefine(
   if (outputProperties != nullptr) {
     outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
   }
-  std::string firstE = input[1].toString(format);
-  std::string secondE = input[2].toString(format);
+  FormatExpressions formatForSubexpressions;
+  if (format != nullptr) {
+    formatForSubexpressions = *format;
+  }
+  formatForSubexpressions.flagExpressionIsTopLevel = false;
+  std::string firstString = input[1].toString(&formatForSubexpressions);
+  std::string secondString = input[2].toString(&formatForSubexpressions);
   if (
     input[1].isListStartingWithAtom(input.owner->opDefine()) ||
     input[1].isListStartingWithAtom(input.owner->opGreaterThan()) ||
@@ -4587,15 +4593,15 @@ bool Expression::toStringDefine(
     input[1].isListStartingWithAtom(input.owner->opLessThan()) ||
     input[1].isListStartingWithAtom(input.owner->opLessThanOrEqualTo())
   ) {
-    out << "\\left(" << firstE << "\\right)";
+    out << "\\left(" << firstString << "\\right)";
   } else {
-    out << firstE;
+    out << firstString;
   }
   out << "=";
   if (input[2].isListStartingWithAtom(input.owner->opDefine())) {
-    out << "\\left(" << secondE << "\\right)";
+    out << "\\left(" << secondString << "\\right)";
   } else {
-    out << secondE;
+    out << secondString;
   }
   return true;
 }
@@ -5053,6 +5059,7 @@ std::string Expression::toStringWithStartingExpression(
   if (format == nullptr) {
     format = &formatContainer.getElement();
     format->flagExpressionIsTopLevel = true;
+    format->flagExpressionIsInMainDisplay = true;
   }
   isFinal = format->flagExpressionIsTopLevel;
   outTrue << "<table class='tableCalculatorOutput'>";
@@ -5743,6 +5750,7 @@ std::string Expression::toString(
   if (format == nullptr) {
     format = &formatContainer.getElement();
     formatContainer.getElement().flagUseQuotes = false;
+    formatContainer.getElement().flagExpressionIsInMainDisplay = true;
   }
   if (this->owner != nullptr) {
     if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {

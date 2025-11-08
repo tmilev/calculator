@@ -1995,6 +1995,7 @@ public:
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
   bool flagExpressionIsTopLevel;
+  bool flagExpressionIsInMainDisplay;
   bool flagIncludeMutableInformation;
   bool flagExpressionNewLineAllowed;
   bool flagIncludeExtraHtmlDescriptionsInPlots;

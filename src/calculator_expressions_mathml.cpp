@@ -396,7 +396,8 @@ bool Expression::toMathMLBuiltIn<InputBox>(
 ) {
   (void) format;
   (void) outputProperties;
-  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
+  bool isFinal = format ==
+  nullptr ? true : format->flagExpressionIsInMainDisplay;
   if (!isFinal) {
     out << "<ms>(input box not shown)</ms>";
     return true;
@@ -936,8 +937,13 @@ bool Expression::toMathMLDefine(
   if (!input.startsWith(input.owner->opDefine(), 3)) {
     return false;
   }
-  std::string firstE = input[1].toMathML(format);
-  std::string secondE = input[2].toMathML(format);
+  FormatExpressions formatForSubexpressions;
+  if (format != nullptr) {
+    formatForSubexpressions = *format;
+  }
+  formatForSubexpressions.flagExpressionIsTopLevel = false;
+  std::string firstE = input[1].toMathML(&formatForSubexpressions);
+  std::string secondE = input[2].toMathML(&formatForSubexpressions);
   out << "<mrow>";
   if (
     input[1].isListStartingWithAtom(input.owner->opDefine()) ||

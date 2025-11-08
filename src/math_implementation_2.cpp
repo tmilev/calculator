@@ -2555,7 +2555,12 @@ std::string Rational::toMathML(
   }
   LargeIntegerUnsigned denominator = this->getDenominator();
   bool numeratorIsNegative = numerator.isNegative();
+  bool canOmitMrow = format ==
+  nullptr ? false : format->flagCanOmitHorizontalRowWrapper;
   if (numeratorIsNegative) {
+    if (!canOmitMrow) {
+      out << "<mrow>";
+    }
     out << MathML::negativeSign;
     numerator.negate();
   }
@@ -2572,6 +2577,9 @@ std::string Rational::toMathML(
   << numerator.toMathML()
   << denominator.toMathML()
   << "</mfrac>";
+  if (numeratorIsNegative && !canOmitMrow) {
+    out << "</mrow>";
+  }
   return out.str();
 }
 

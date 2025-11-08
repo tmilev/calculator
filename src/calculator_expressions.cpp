@@ -3869,6 +3869,9 @@ bool Expression::toStringTimesInContext(
   ) {
     mustHaveSpace = false;
   }
+  if (input[1].isSumLikeOperatorAtom()) {
+    mustHaveTimes = false;
+  }
   if (mustHaveTimes) {
     out << "\\cdot ";
   } else if (mustHaveSpace) {

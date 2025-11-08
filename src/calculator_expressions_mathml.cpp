@@ -30,8 +30,8 @@ bool Expression::toMathMLBuiltIn<Polynomial<Rational> >(
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   formatLocal.flagUseFrac = true;
-  bool hidePolynomialCommand =
-  input.owner->flagHidePolynomialBuiltInTypeIndicator;
+  bool hidePolynomialCommand = input.owner ==
+  nullptr ? false : input.owner->flagHidePolynomialBuiltInTypeIndicator;
   if (!hidePolynomialCommand) {
     out << "<mrow><mi>Polynomial</mi>" << MathML::leftParenthesis;
   }

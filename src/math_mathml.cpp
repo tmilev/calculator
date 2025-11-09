@@ -55,6 +55,12 @@ MapList<std::string, std::string>& MathML::mapFromLatexToMathMLEquivalents() {
     result.setKeyValue("\\cos", "<mo>cos</mo>");
     result.setKeyValue("\\cot", "<mo>cot</mo>");
     result.setKeyValue("\\tan", "<mo>tan</mo>");
+    result.setKeyValue("\\sec", "<mo>sec</mo>");
+    result.setKeyValue("\\csc", "<mo>csc</mo>");
+    result.setKeyValue("\\arctan", "<mo>arctan</mo>");
+    result.setKeyValue("\\arccot", "<mo>arccot</mo>");
+    result.setKeyValue("\\arcsec", "<mo>arcsec</mo>");
+    result.setKeyValue("\\arccsc", "<mo>arccsc</mo>");
     result.setKeyValue("\\log", "<mo>log</mo>");
     result.setKeyValue("\\int", "<mo>&int;</mo>");
     result.setKeyValue("\\sum", "<mo>&sum;</mo>");

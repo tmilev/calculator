@@ -1853,7 +1853,7 @@ const {
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals) {
-    return "\\("+ this->toStringQuadraticRadical(&currentFormat) + "\\)";
+    return "\\(" + this->toStringQuadraticRadical(&currentFormat) + "\\)";
   }
   return this->toStringFull(&currentFormat);
 }

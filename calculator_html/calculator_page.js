@@ -275,7 +275,7 @@ class ExamplesContainer {
     this.handlerDocumentation = null;
     this.examples = null;
     this.handlerDocumentation = null;
-    this.useMathML = true;
+    this.useMathML = false;
   }
 
   processExamles(/** @type {string} */ inputJSONtext) {

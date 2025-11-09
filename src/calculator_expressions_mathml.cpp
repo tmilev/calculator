@@ -1301,7 +1301,7 @@ bool Expression::toMathMLGeneral(
     }
   }
   if (needParenthesis) {
-    out << MathML::leftParenthesis;
+    out << MathML::leftParenthesis << "<mrow>";
   }
   for (int i = 1; i < this->children.size; i ++) {
     (*this)[i].toMathML(out, format, nullptr, nullptr, false, nullptr);
@@ -1310,7 +1310,7 @@ bool Expression::toMathMLGeneral(
     }
   }
   if (needParenthesis) {
-    out << MathML::rightParenthesis;
+    out << "</mrow>" << MathML::rightParenthesis;
   }
   if (outputProperties != nullptr) {
     outputProperties->needsParenthesesForMultiplicationOnTheRight = true;

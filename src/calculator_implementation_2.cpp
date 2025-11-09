@@ -1738,9 +1738,8 @@ void Calculator::evaluateCommands() {
   if (this->objectContainer.algebraicClosure.latestBasis.size > 1) {
     commentsStream
     << "<b>Algebraic closure status.</b><br>"
-    << "\\("
     << this->objectContainer.algebraicClosure.toString()
-    << "\\)";
+    ;
   }
   if (this->objectContainer.constraints.size > 0) {
     commentsStream << "<b>Constraints.</b><br>";

@@ -1849,11 +1849,11 @@ const {
   currentFormat.flagUseHTML = false;
   currentFormat.flagUseLatex = true;
   if (this->latestBasis.size == 1) {
-    out << "\\mathbb Q";
+    out << "\\(\\mathbb Q\\)";
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals) {
-    return this->toStringQuadraticRadical(&currentFormat);
+    return "\\("+ this->toStringQuadraticRadical(&currentFormat) + "\\)";
   }
   return this->toStringFull(&currentFormat);
 }

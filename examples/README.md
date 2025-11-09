@@ -2622,10 +2622,10 @@ SubList{}((1, 2, 3, 4), {{a}} > 2)
 Extracts a sub-list that contains all elements that satisfy a condition given by the second argument. Use the bound variable syntax {{a}} to address the current element of the list.
 
 *ApplyToList* [ApplyToList] {CalculatorFunctions::applyToList}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SolveForX%7b%7d%7b%7ba%7d%7d%20%3d%20SolveFor%28x%2c%20%7b%7ba%7d%7d%29%3b%5cnSolveForX%28x%5e2%20%2b%202%29%3b%5cnApplyToList%28SolveForX%2c%28x%5e2%20%2b%201%2c%20x%5e2%20-%20x%20-%202%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SolveForX%7b%7d%7b%7ba%7d%7d%20%3d%20SolveFor%28x%2c%20%7b%7ba%7d%7d%29%3b%5cnSolveForX%7b%7d%28x%5e2%20%2b%202%29%3b%5cnApplyToList%28SolveForX%2c%28x%5e2%20%2b%201%2c%20x%5e2%20-%20x%20-%202%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SolveForX{}{{a}} = SolveFor(x, {{a}});
-SolveForX(x^2 + 2);
+SolveForX{}(x^2 + 2);
 ApplyToList(SolveForX,(x^2 + 1, x^2 - x - 2))
 ```
 Applies a transformation to each element of a list. 

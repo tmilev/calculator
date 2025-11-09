@@ -557,7 +557,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Applies a transformation to each element of a list. ",
     "SolveForX{}{{a}} = SolveFor(x, {{a}});\n"
-    "SolveForX(x^2 + 2);\n"
+    "SolveForX{}(x^2 + 2);\n"
     "ApplyToList(SolveForX,(x^2 + 1, x^2 - x - 2))",
     "CalculatorFunctions::applyToList",
     "ApplyToList",

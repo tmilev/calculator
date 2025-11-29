@@ -6004,7 +6004,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals(
   );
 }
 
-bool CalculatorLieTheory::printSemisimpleSubalgebrasRecompute(
+bool CalculatorLieTheory::printSemisimpleSubalgebrasWithCentralizersRecompute(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   return
@@ -6022,7 +6022,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebrasNoSolutions(
   );
 }
 
-bool CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers(
+bool CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizersRecompute(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   return

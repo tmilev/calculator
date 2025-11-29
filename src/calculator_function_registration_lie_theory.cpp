@@ -1064,24 +1064,24 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasRecompute",
-    CalculatorLieTheory::printSemisimpleSubalgebrasRecompute,
+    CalculatorLieTheory::printSemisimpleSubalgebrasWithCentralizersRecompute,
     "",
     "This function is being developed and is not implemented fully yet. "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",
-    "CalculatorLieTheory::printSemisimpleSubalgebrasRecompute",
-    "PrintSemisimpleSubalgebrasRecompute",
+    "CalculatorLieTheory::printSemisimpleSubalgebrasWithCentralizersRecompute",
+    "PrintSemisimpleSubalgebrasWithCentralizersRecompute",
     adminNoTest
   );
   this->addOperationHandler(
-    "PrintSemisimpleSubalgebrasNoCentralizers",
-    CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers,
+    "PrintSemisimpleSubalgebrasRecompute",
+    CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizersRecompute,
     "",
     "This function is being developed and is not implemented fully yet. "
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
     "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
-    "CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers",
-    "PrintSemisimpleSubalgebrasNoCentralizers",
+    "CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizersRecompute",
+    "PrintSemisimpleSubalgebrasRecompute",
     adminNoTest
   );
   this->addOperationHandler(

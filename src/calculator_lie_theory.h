@@ -333,10 +333,10 @@ public:
   static bool printSemisimpleSubalgebrasNilradicals(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool printSemisimpleSubalgebrasRecompute(
+  static bool printSemisimpleSubalgebrasWithCentralizersRecompute(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool printSemisimpleSubalgebrasNoCentralizers(
+  static bool printSemisimpleSubalgebrasNoCentralizersRecompute(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool printSemisimpleSubalgebrasNoSolutions(

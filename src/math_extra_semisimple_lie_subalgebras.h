@@ -179,6 +179,10 @@ public:
   bool flagUsedInducingSubalgebraRealization;
   bool flagComputedPrimalDecomposition;
   bool flagComputedBasics;
+  // When this flag is set to true, there were
+  // hard-coded coefficients that were used to realize
+  // the generators of the subalgebra.
+  bool flagUsedBuiltInRealization;
   // Whether we have computed all internals from the given
   // subalgebra generators.
   bool flagInternalInitializationAndVerificationComplete;
@@ -518,6 +522,7 @@ public:
     int indexModule, const Vector<Rational>& weight
   ) const;
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
+  bool loadBuiltInPartialRealization();
 };
 
 class RealizedSemisimpleSubalgebra {
@@ -558,7 +563,7 @@ public:
   int numberOfLargerTypesExplored;
   int indexOfCurrentHCandidate;
   bool flagInitialized;
-  // state that is recomputed each load:
+  // State that is recomputed each load:
   List<DynkinType> possibleLargerDynkinTypes;
   List<List<int> > possibleRootInjections;
   List<Vector<Rational> > candidateHsScaledToActByTwo;

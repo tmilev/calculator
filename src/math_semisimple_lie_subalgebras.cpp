@@ -4027,6 +4027,26 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
     attemptToChooseCentalizer, allowNonPolynomialSystemFailure
   );
   this->computeAndVerifyFromKnownGeneratorsAndHs();
+  if (
+    this->flagUsedBuiltInRealization &&
+    this->status != CandidateSubalgebraStatus::realized
+  ) {
+    // A hard-coded hint was encountered.
+    // A hard-coded hints is when we override a default unknown generator
+    // which is of a form similar to:
+    // x_1 g_{-a_1} + ... + x_k g_{-a_k}
+    // with concrete number values for the variables x_1, ..., x_k.
+    // The hard-coded hints are intended to speed up computations and
+    // carried are out by class
+    // CandidateSemisimpleSubalgebraArbitraryContants.
+    // We have entered a hint, but we failed to solve for it, which means
+    // our hint is wrong.
+    global.fatal
+    << "Encountered a hard-coded hint for semisimple subalgebra "
+    << this->weylNonEmbedded->dynkinType.toString()
+    << " which I failed to solve for. "
+    << global.fatal;
+  }
 }
 
 void CandidateSemisimpleSubalgebra::computeInvolvedGeneratorsOfIndex(
@@ -4344,6 +4364,7 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
     << "differs from number of unknown positive ones. "
     << global.fatal;
   }
+  this->flagUsedBuiltInRealization = this->loadBuiltInPartialRealization();
   this->prepareSystemSerreRelations();
   return true;
 }
@@ -5370,6 +5391,7 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->flagComputedPrimalDecomposition = false;
   this->flagComputedBasics = false;
   this->flagInternalInitializationAndVerificationComplete = false;
+  this->flagUsedBuiltInRealization = false;
   this->totalUnknownsNoCentralizer = 0;
   this->totalUnknownsWithCentralizer = 0;
   this->totalArithmeticOperationsToSolveSystem = 0;

@@ -41,7 +41,13 @@ public:
   // Creates the Cartan generator h_i.
   // Here, i is the index of the i^th simple root.
   void makeCartanGeneratorHi(int index, SemisimpleLieAlgebra& owner);
+  // Makes the element into a Chevalley generator with the given internal
+  // index.
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
+  // Makes the element into a Chevalley generator with the given display index.
+  void makeGeneratorFromDisplayIndex(
+    int displayIndex, SemisimpleLieAlgebra& inputOwner
+  );
   void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void toVectorNegativeRootSpacesFirst(
     Vector<Coefficient>& output, SemisimpleLieAlgebra& owner
@@ -123,6 +129,14 @@ public:
     List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
     Matrix<Coefficient>& output
   );
+  ElementSemisimpleLieAlgebra<Coefficient> operator+(
+    const ElementSemisimpleLieAlgebra<Coefficient>& other
+  ) const {
+    ElementSemisimpleLieAlgebra<Coefficient> result;
+    result = *this;
+    result += other;
+    return result;
+  }
 };
 
 // Linear map from a semisimple lie algebra to itself.
@@ -1013,6 +1027,17 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(
   this->makeZero();
   ChevalleyGenerator resultGenerator;
   resultGenerator.makeGenerator(inputOwner, generatorIndex);
+  this->addMonomial(resultGenerator, 1);
+}
+
+template <class Coefficient>
+void ElementSemisimpleLieAlgebra<Coefficient>::makeGeneratorFromDisplayIndex(
+  int displayIndex, SemisimpleLieAlgebra& inputOwner
+) {
+  this->makeZero();
+  ChevalleyGenerator resultGenerator;
+  int internalIndex = inputOwner.getGeneratorFromDisplayIndex(displayIndex);
+  resultGenerator.makeGenerator(inputOwner, internalIndex);
   this->addMonomial(resultGenerator, 1);
 }
 

@@ -1554,7 +1554,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
       << "<hr>Failed to realize type "
       << candidate.weylNonEmbedded->dynkinType.toString()
       << " because I couldn't handle the polynomial system. "
-      << "One poly system that governs the embedding follows.<br>"
+      << "One polynomial system that governs the embedding follows.<br>"
       << candidate.toStringSystemPart2()
       << "<hr>";
       this->logComments(foundUnrealizedStream.str());
@@ -3087,6 +3087,17 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
   );
   this->candidateHsScaledToActByTwo.clear();
   DynkinType& candidateExtensionType = this->nextUnexploredDynkinType();
+  if (!this->owner->targetDynkinType.isEqualToZero()) {
+    // We have a target extension.
+    if (
+      !candidateExtensionType.canBeExtendedParabolicallyOrIsEqualTo(
+        this->owner->targetDynkinType
+      )
+    ) {
+      // Our current candidate cannot be extended to the target type.
+      return;
+    }
+  }
   List<int> candidateRootInjection = this->nextPossibleRootInjection();
   if (
     candidateExtensionType.getRootSystemSize() >
@@ -7203,62 +7214,6 @@ void SemisimpleSubalgebras::resetComputations() {
   this->subalgebras.clear();
 }
 
-void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
-  int maximumPolynomialDivisions = 1000;
-  int maximumMonomialOperations = 10000;
-  std::string ambientLieAlgebraName =
-  this->owner->owner->toStringLieAlgebraName();
-  if (ambientLieAlgebraName == "C^{1}_5") {
-    // Known to run slow in this type.
-    maximumPolynomialDivisions = 100;
-    maximumMonomialOperations = 2000;
-  }
-  DynkinType& embeddedType = this->weylNonEmbedded->dynkinType;
-  this->configuredSystemToSolve.substitutionsProvider.
-  oneIsFirstWhenRecursionDepthIsMultipleOf =
-  3;
-  if (embeddedType.getRank() == 1) {
-    maximumPolynomialDivisions = 2000;
-    maximumMonomialOperations = 10000;
-    this->configuredSystemToSolve.substitutionsProvider.
-    flagChooseSmallestIndexVariableFirst =
-    true;
-  }
-  std::string embeddingLieAlgebraName = embeddedType.toString();
-  if (embeddingLieAlgebraName == "A^{20}_1+A^{4}_1") {
-    // System known to be contradictory but takes extra computational time.
-    maximumPolynomialDivisions = 2000;
-    maximumMonomialOperations = 10000;
-  }
-  // Polynomial systems that were solved manually (with the help of computer):
-  // 1. A^{32}_1+A^{8}_1 in E_8.
-  // 2. A^24_1 in E_8.
-  // 3. A^{20}_1+A^{4}_1 in E_8
-  if (embeddingLieAlgebraName == "A^{16}_1+A^{8}_1") {
-    maximumPolynomialDivisions = 200;
-    maximumMonomialOperations = 400;
-  }
-  if (embeddingLieAlgebraName == "A^{15}_1") {
-    maximumPolynomialDivisions = 200;
-    maximumMonomialOperations = 1000;
-  }
-  if (embeddingLieAlgebraName == "A^{40}_1") {
-    // System known to require more computations than most.
-    maximumPolynomialDivisions = 4000;
-    maximumMonomialOperations = 20000;
-  }
-  if (embeddingLieAlgebraName == "A^{36}_1+A^{4}_1") {
-    this->configuredSystemToSolve.substitutionsProvider.
-    oneIsFirstWhenRecursionDepthIsMultipleOf =
-    2;
-  }
-  this->configuredSystemToSolve.groebner.maximumMonomialOperations =
-  maximumMonomialOperations;
-  this->configuredSystemToSolve.groebner.maximumPolynomialDivisions =
-  maximumPolynomialDivisions;
-  this->configuredSystemToSolve.algebraicClosure = this->owner->ownerField;
-}
-
 CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::
 attemptToSolveSystemFinal() {
   STACK_TRACE("CandidateSemisimpleSubalgebra::attemptToSolveSystemFinal");
@@ -7671,6 +7626,12 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs(
       "Verifying and computing from generators, type: " + this->toStringType()
     );
   }
+  if (
+    this->status ==
+    CandidateSubalgebraStatus::neitherRealizedNorProvedImpossible
+  ) {
+    return false;
+  }
   std::stringstream out;
   this->computeAndVerifyFromKnownGeneratorsAndHsPrepare(&out);
   if (!this->computeCharacter(true)) {
@@ -7682,9 +7643,9 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs(
   }
   if (!this->checkGeneratorsBracketToHs()) {
     out
-    << "<b>Corrput semisimple subalgebra: "
+    << "<b>Corrupt semisimple subalgebra: "
     << "Lie brackets of generators do not equal "
-    << "the desired elements of the Cartan. ";
+    << "the desired elements of the Cartan. </b>";
     this->status = CandidateSubalgebraStatus::corrupt;
   }
   this->comments = out.str();

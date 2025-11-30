@@ -1063,7 +1063,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     standardOptions
   );
   this->addOperationHandler(
-    "PrintSemisimpleSubalgebrasRecompute",
+    "PrintSemisimpleSubalgebrasWithCentralizersRecompute",
     CalculatorLieTheory::printSemisimpleSubalgebrasWithCentralizersRecompute,
     "",
     "This function is being developed and is not implemented fully yet. "

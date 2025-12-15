@@ -888,11 +888,17 @@ void SemisimpleSubalgebras::computeStatistics() {
     this->nonRealizedSubalgebras.values
   ) {
     switch (nonRealized.candidate.status) {
+    case CandidateSubalgebraStatus::unknown:
+    case CandidateSubalgebraStatus::corrupt:
     case CandidateSubalgebraStatus::neitherRealizedNorProvedImpossible:
       this->statistics.subalgebrasNeitherRealizedNorProvedImpossible ++;
       break;
+    case CandidateSubalgebraStatus::previouslyRealizedAsADirectSummand:
+      break;
+    case CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions:
+    case CandidateSubalgebraStatus::unrealizableNonFittingCharacter:
     default:
-      this->statistics.subalgebrasProvedImpossible ++;
+      this->statistics.subalgebrasNeitherRealizedNorProvedImpossible ++;
       break;
     }
   }
@@ -909,10 +915,10 @@ std::string SemisimpleSubalgebras::toStringCandidateStatistics(
   << " semisimple subalgebras (including the full subalgebra)";
   if (this->statistics.subalgebrasNeitherRealizedNorProvedImpossible != 0) {
     out
-    << " and "
+    << " and <b style='red'>"
     << this->statistics.subalgebrasNeitherRealizedNorProvedImpossible
     << " semisimple subalgebra candidate(s) "
-    << "which were not realized (but not proven impossible)";
+    << "which were not realized (but not proven impossible)</b>";
   }
   out << ". ";
   if (this->statistics.subalgebrasProvedImpossible != 0 && showInternals) {
@@ -1579,7 +1585,9 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << " subalgebras. Proceding to "
   << "adjust centralizers. ";
   report2.report(reportStream2.str());
-  if (this->targetDynkinType.isEqualToZero()) {
+  if (
+    this->targetDynkinType.isEqualToZero() && !this->flagLoadedFromUserInput
+  ) {
     this->hookUpCentralizers(false);
     if (this->flagComputeNilradicals) {
       this->computePairingTablesAndFKFTtypes();
@@ -4319,6 +4327,26 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
     indexNewRoot = *this->rootInjectionsFromInducer.lastObject();
   }
   bool foundInduction = false;
+  // If the current subalgebra is an sl(2), then
+  // the pointer below holds its preexisting realization
+  // computed when preparing for the large computation.
+  const SlTwoSubalgebra* slTwoRealization = nullptr;
+  if (
+    this->flagUseSlTwoRealization && this->cartanElementsSubalgebra.size == 1
+  ) {
+    int slTwoIndex =
+    this->owner->slTwoSubalgebras.allRealizedHs.getIndex(
+      this->cartanElementsSubalgebra[0]
+    );
+    if (slTwoIndex < 0) {
+      global.fatal
+      << "Could not find the realization of the sl(2)-subalgebra."
+      << global.fatal;
+    }
+    slTwoRealization =
+    &this->owner->slTwoSubalgebras.allSubalgebras[slTwoIndex];
+    this->flagUsedBuiltInRealization = true;
+  }
   for (int i = 0; i < this->involvedNegativeGenerators.size; i ++) {
     if (
       !attemptToChooseCentalizer &&
@@ -4328,6 +4356,11 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
       // Using the negative generator computed in the base subalgebra that we
       // are extending.
       foundInduction = true;
+      continue;
+    }
+    if (slTwoRealization != nullptr) {
+      this->unknownNegativeGenerators[i] = slTwoRealization->fElement;
+      this->unknownPositiveGenerators[i] = slTwoRealization->eElement;
       continue;
     }
     this->getGenericNegativeGeneratorLinearCombination(
@@ -5403,6 +5436,7 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->flagComputedBasics = false;
   this->flagInternalInitializationAndVerificationComplete = false;
   this->flagUsedBuiltInRealization = false;
+  this->flagUseSlTwoRealization = true;
   this->totalUnknownsNoCentralizer = 0;
   this->totalUnknownsWithCentralizer = 0;
   this->totalArithmeticOperationsToSolveSystem = 0;
@@ -7193,6 +7227,7 @@ void SemisimpleSubalgebras::resetPointers() {
   this->flagProduceLaTeXTables = false;
   this->flagAttemptToAdjustCentralizers = true;
   this->flagRealForms = false;
+  this->flagLoadedFromUserInput = false;
   this->millisecondsComputationStart = - 1;
   this->millisecondsComputationEnd = - 1;
   this->numberOfAdditions = 0;
@@ -9301,9 +9336,10 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
   ProgressReport report1;
   DynkinType centralizerTypeAlternative;
   if (this->indexMaximalSemisimpleContainer != - 1) {
-    centralizerTypeAlternative =
+    DynkinType ambientMaximalSemisimpleContainerType =
     this->owner->subalgebras.values[this->indexMaximalSemisimpleContainer].
     content.weylNonEmbedded->dynkinType;
+    centralizerTypeAlternative = ambientMaximalSemisimpleContainerType;
     centralizerTypeAlternative -= this->weylNonEmbedded->dynkinType;
     if (report1.tickAndWantReport()) {
       std::stringstream reportStream;
@@ -9334,6 +9370,10 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
       << this->centralizerRank
       << " of computed type: "
       << centralizerTypeAlternative.toStringPretty()
+      << " sitting inside "
+      << ambientMaximalSemisimpleContainerType.toStringPretty()
+      << " with index "
+      << this->indexMaximalSemisimpleContainer
       << " is larger than the rank of the ambient lie algebra: "
       << this->owner->owner->getRank()
       << ". "

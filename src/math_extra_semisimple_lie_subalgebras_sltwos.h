@@ -662,9 +662,9 @@ public:
   static std::string descriptionHRealization;
   static std::string descriptionMinimalContainingRegularSubalgebras;
   HashedList<SlTwoSubalgebra> allSubalgebras;
+  HashedList<Vector<Rational> > allRealizedHs;
   List<List<int> > sl2sPerRootSubalgebras;
   List<int> indicesSl2DecompositionFormulas;
-  HashedList<Vector<Rational> > allRealizedHs;
   // A map from each unsuitable H into all root subalgebras
   // for whom the H was an S-subalgebra candidate
   // but we couldn't realize it.

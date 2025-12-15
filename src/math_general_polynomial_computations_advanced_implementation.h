@@ -1745,6 +1745,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   this->groebner.format.flagSuppressModP = true;
   int numberOfVariables = 0;
   List<Polynomial<Coefficient> > workingSystem = inputSystem;
+  workingSystem.addListOnTop(this->hintEquations);
   for (int i = 0; i < workingSystem.size; i ++) {
     numberOfVariables =
     MathRoutines::maximum(
@@ -1788,6 +1789,12 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->solveSerreLikeSystemRecursively(workingSystem);
   }
   if (!this->flagSystemSolvedOverBaseField) {
+    if (this->hintEquations.size > 0) {
+      global.fatal
+      << "I got a non-empty set of hint equations but "
+      << "I couldn't solve the system. "
+      << global.fatal;
+    }
     return;
   }
   if (

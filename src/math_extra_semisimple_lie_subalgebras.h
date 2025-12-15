@@ -183,6 +183,9 @@ public:
   // hard-coded coefficients that were used to realize
   // the generators of the subalgebra.
   bool flagUsedBuiltInRealization;
+  // Whether to compute the realization of sl(2)'s from scratch
+  // or use the built-in ones.
+  bool flagUseSlTwoRealization;
   // Whether we have computed all internals from the given
   // subalgebra generators.
   bool flagInternalInitializationAndVerificationComplete;
@@ -665,6 +668,9 @@ public:
   bool flagComputeNilradicals;
   bool flagProduceLaTeXTables;
   bool flagAttemptToAdjustCentralizers;
+  // When this flag is true, the computation was loaded from
+  // end user input and may contain arbitrarily corrupt inputs.
+  bool flagLoadedFromUserInput;
   int64_t millisecondsComputationStart;
   int64_t millisecondsComputationEnd;
   unsigned long long int numberOfAdditions;

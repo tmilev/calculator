@@ -1215,10 +1215,22 @@ public:
   Coefficient sampleCoefficient;
   List<Polynomial<Coefficient> > gaussianEliminatedSystem;
   AlgebraicClosureRationals* algebraicClosure;
+  List<Polynomial<Coefficient> > hintEquations;
   GroebnerBasisComputation<Coefficient> groebner;
   MemorySaving<PolynomialSystem<Coefficient> > computationUsedInRecursiveCalls;
   List<Coefficient> systemSolution;
   Selection solutionsFound;
+  // Additional polynomial equations that were added to the system
+  // to help find a solution more quickly.
+  // The hints are not necessarily a consequence of the polynomial system.
+  // For example, if we want to solve the equation
+  // xy-1=0,
+  // a good hint could be the equation
+  // x-1=0
+  // which simplifies the starting equation to
+  // y-1=0.
+  // The hint equations may hide some solutions, but are expected
+  // to not turn the system into a contradictory one.
   List<PolynomialSubstitution<Coefficient> > impliedSubstitutions;
   ArbitrarySubstitutionsProvider<Coefficient> substitutionsProvider;
   PolynomialSystem();

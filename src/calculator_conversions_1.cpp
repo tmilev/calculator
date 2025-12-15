@@ -1685,6 +1685,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     return false;
   }
   subalgebras.flagAttemptToAdjustCentralizers = false;
+  subalgebras.flagLoadedFromUserInput = true;
   if (!subalgebras.findSemisimpleSubalgebrasContinue()) {
     std::stringstream out;
     out

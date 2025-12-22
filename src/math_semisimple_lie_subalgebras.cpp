@@ -1342,7 +1342,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
   );
   // Computing inclusions between sl(2)'s is slow and not really needed.
   this->slTwoSubalgebras.rootSubalgebras.flagComputeInclusions = false;
-  this->slTwoSubalgebras.findSl2Subalgebras(
+  this->slTwoSubalgebras.findSl2SubalgebrasWithoutCentralizers(
     this->getSemisimpleOwner(),
     this->slTwoSubalgebras,
     computeRealSlTwos,
@@ -1832,7 +1832,7 @@ bool SemisimpleSubalgebras::computeStructureRealForms(
     containerSl2Subalgebras
   );
   this->slTwoSubalgebras.checkMinimalContainingRootSubalgebras();
-  this->slTwoSubalgebras.findSl2Subalgebras(
+  this->slTwoSubalgebras.findSl2SubalgebrasWithoutCentralizers(
     newOwner,
     this->slTwoSubalgebras,
     true,
@@ -2725,8 +2725,8 @@ bool SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown(
       this->slTwoSubalgebras.rootSubalgebras.subalgebras[i].dynkinType == input
     ) {
       if (index != - 1) {
-        index = - 1;
-        break;
+        // More than one root subalgebras with the same type.
+        return false;
       }
       index = i;
     }
@@ -2742,7 +2742,7 @@ bool SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown(
 
 void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
   const DynkinSimpleType& desiredType,
-  List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+  List<List<Rational> >& precomputedDynkinIndicesSl2SubalgebrasSimpleTypes,
   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
   HashedList<Rational>& outputDynkinIndices,
   MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
@@ -2757,7 +2757,9 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
       typeDefaultScale.letter, typeDefaultScale.rank
     );
     simpleAlgebra.computeChevalleyConstants();
-    sl2s.findSl2Subalgebras(simpleAlgebra, sl2s, false, algebraicClosures);
+    sl2s.findSl2SubalgebrasWithoutCentralizers(
+      simpleAlgebra, sl2s, false, algebraicClosures
+    );
     dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(typeDefaultScale);
     outputIndicesDefaultScale.setExpectedSize(sl2s.allSubalgebras.size);
     for (int i = 0; i < sl2s.allSubalgebras.size; i ++) {
@@ -2765,12 +2767,12 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
         sl2s.allSubalgebras[i].lengthHSquared / 2
       );
     }
-    precomputedDynkinIndicesSl2subalgebrasSimpleTypes.addOnTop(
+    precomputedDynkinIndicesSl2SubalgebrasSimpleTypes.addOnTop(
       outputIndicesDefaultScale
     );
   }
   List<Rational>& outputIndicesDefaultScale =
-  precomputedDynkinIndicesSl2subalgebrasSimpleTypes[
+  precomputedDynkinIndicesSl2SubalgebrasSimpleTypes[
     dynkinSimpleTypesWithComputedSl2Subalgebras.getIndex(typeDefaultScale)
   ];
   outputDynkinIndices.setExpectedSize(outputIndicesDefaultScale.size);
@@ -2783,7 +2785,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
 }
 
 void DynkinType::getDynkinIndicesSl2Subalgebras(
-  List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+  List<List<Rational> >& precomputedDynkinIndicesSl2SubalgebrasSimpleTypes,
   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
   HashedList<Rational>& outputDynkinIndices,
   MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
@@ -2796,7 +2798,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
   for (int i = 0; i < dynkinTypes.size; i ++) {
     this->getDynkinIndicesSl2SubalgebrasSimpleType(
       dynkinTypes[i],
-      precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+      precomputedDynkinIndicesSl2SubalgebrasSimpleTypes,
       dynkinSimpleTypesWithComputedSl2Subalgebras,
       bufferIndices,
       algebraicClosures
@@ -2881,7 +2883,7 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
       ) {
         std::stringstream reportStream;
         reportStream
-        << "<hr>"
+        << "<hr>Function centralizersComputedToHaveUnsuitableNilpotentOrbits: "
         << "I have rejected type "
         << currentType.toString()
         << " as non-realizable for the following reasons. "
@@ -2955,14 +2957,10 @@ bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
     << "I can't find its H element in the list of sl(2) subalgebras. "
     << global.fatal;
   }
-  const SlTwoSubalgebra& sl2 =
-  this->owner->slTwoSubalgebras.allSubalgebras[indexSl2];
-  if (!sl2.centralizerComputer.flagTypeComputed) {
-    return false;
-  }
-  this->centralizerType = sl2.centralizerComputer.typeIfKnown;
-  this->flagCentralizerTypeIsComputed = true;
-  return true;
+  SlTwoSubalgebra& sl2 =
+  this->owner->slTwoSubalgebras.allSubalgebras.getElement(indexSl2);
+  this->flagCentralizerTypeIsComputed = sl2.attemptToComputeCentralizer(&this->centralizerType);
+  return this->flagCentralizerTypeIsComputed;
 }
 
 bool SemisimpleSubalgebras::
@@ -3004,7 +3002,7 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
   }
   std::stringstream reportStream;
   reportStream
-  << "<hr>"
+  << "<hr>Function centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits: "
   << "I have rejected type "
   << currentType.toString()
   << " as non-realizable for the following reasons. "

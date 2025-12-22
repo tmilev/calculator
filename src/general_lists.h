@@ -1543,6 +1543,11 @@ public:
     return
     this->::HashTemplate<Object, List<Object>, hashFunction>::contains(input);
   }
+  // Returns a non-const reference to an object.
+  // Modifying the so returned object is allowed, so long as the modification
+  // does not change its hash value.
+  // Using this function is dangerous/not recommended.
+  // If possible, use operator[] instead.
   Object& getElement(int objectIndex) const {
     return
     this->::HashTemplate<Object, List<Object>, hashFunction>::getElement(

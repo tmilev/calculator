@@ -324,13 +324,13 @@ public:
   std::string getWeylGroupName(FormatExpressions* format = nullptr) const;
   static void getDynkinIndicesSl2SubalgebrasSimpleType(
     const DynkinSimpleType& desiredType,
-    List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+    List<List<Rational> >& precomputedDynkinIndicesSl2SubalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
     HashedList<Rational>& outputDynkinIndices,
     MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
   );
   void getDynkinIndicesSl2Subalgebras(
-    List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+    List<List<Rational> >& precomputedDynkinIndicesSl2SubalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
     HashedList<Rational>& outputDynkinIndices,
     MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures

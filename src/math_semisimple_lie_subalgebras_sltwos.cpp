@@ -493,7 +493,6 @@ void SlTwoSubalgebra::initialize() {
   this->indexInContainer = - 1;
   this->flagCentralizerIsRegular = false;
   this->dimensionCentralizer = - 1;
-  this->flagTryToComputeCentralizerFully = true;
 }
 
 void SlTwoSubalgebra::computeDynkinTypeEmbedded(DynkinType& output) const {
@@ -1049,7 +1048,9 @@ void SlTwoSubalgebra::fromSlTwoSubalgebraCandidate(
   this->lengthHSquared = input.lengthHSquared;
 }
 
-bool SlTwoSubalgebra::attemptToComputeCentralizer() {
+bool SlTwoSubalgebra::attemptToComputeCentralizer(
+  DynkinType* whichCentralizer
+) {
   STACK_TRACE("SlTwoSubalgebra::attemptToComputeCentralizer");
   this->flagCentralizerIsRegular = false;
   Weight<Rational> zeroWeight;
@@ -1081,29 +1082,35 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
     Rational totalCentalizerCandidateDimension =
     dimensionSemisimplePartOfCentralizerRootSubalgebra +
     this->dimensionCentralizerToralPart;
-    if (totalCentalizerCandidateDimension == this->dimensionCentralizer) {
-      this->flagCentralizerIsRegular = true;
-      this->centralizerComputer.flagTypeComputed = true;
-      this->centralizerComputer.typeIfKnown =
-      currentMinimalContainer.centralizerDynkinType;
-      return true;
+    if (totalCentalizerCandidateDimension != this->dimensionCentralizer) {
+      continue;
     }
+    this->flagCentralizerIsRegular = true;
+    this->centralizerComputer.setCentralizerType(
+      currentMinimalContainer.centralizerDynkinType
+    );
+    if (whichCentralizer != nullptr) {
+      *whichCentralizer = currentMinimalContainer.centralizerDynkinType;
+    }
+    return true;
   }
-  this->centralizerComputer.generatorsToCentralize =
+  List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize =
   List<ElementSemisimpleLieAlgebra<Rational> >(
     {this->eElement, this->hElement, this->fElement}
   );
   Rational dynkinIndex = this->getDynkinIndex();
   this->centralizerComputer.initialize(
-    this->owner, this->algebraicClosure, &dynkinIndex
+    this->owner,
+    this->algebraicClosure,
+    generatorsToCentralize,
+    &dynkinIndex,
+    this->toStringDynkinType()
   );
-  this->centralizerComputer.label = this->toStringDynkinType();
-  if (!this->flagTryToComputeCentralizerFully) {
-    // Guard until the centralizer computation algorithm
-    // is properly implemented.
-    return false;
+  DynkinType buffer;
+  if (whichCentralizer == nullptr) {
+    whichCentralizer = &buffer;
   }
-  return this->centralizerComputer.compute();
+  return this->centralizerComputer.computeType(*whichCentralizer);
 }
 
 bool SlTwoSubalgebra::checkIndicesMinimalContainingRootSubalgebras() const {
@@ -1715,14 +1722,32 @@ bool SlTwoSubalgebras::checkConsistency() const {
   return true;
 }
 
-void SlTwoSubalgebras::findSl2Subalgebras(
+void SlTwoSubalgebras::findSl2SubalgebrasAndCentralizers(
   SemisimpleLieAlgebra& inputOwner,
   SlTwoSubalgebras& output,
   bool computeRealForm,
   MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures,
   DynkinSimpleType* restrictToThisSl2Triple
 ) {
-  STACK_TRACE("SlTwoSubalgebras::findSl2Subalgebras");
+  STACK_TRACE("SlTwoSubalgebras::findSl2SubalgebrasAndCentralizers");
+  SlTwoSubalgebras::findSl2SubalgebrasWithoutCentralizers(
+    inputOwner,
+    output,
+    computeRealForm,
+    algebraicClosures,
+    restrictToThisSl2Triple
+  );
+  output.computeCentralizers();
+}
+
+void SlTwoSubalgebras::findSl2SubalgebrasWithoutCentralizers(
+  SemisimpleLieAlgebra& inputOwner,
+  SlTwoSubalgebras& output,
+  bool computeRealForm,
+  MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures,
+  DynkinSimpleType* restrictToThisSl2Triple
+) {
+  STACK_TRACE("SlTwoSubalgebras::findSl2SubalgebrasWithoutCentralizers");
   ProgressReport report0;
   if (report0.tickAndWantReport()) {
     std::stringstream reportStream0;
@@ -1797,7 +1822,6 @@ void SlTwoSubalgebras::findSl2Subalgebras(
   output.computeRootSubalgebraContainersFromUnsuitableHs();
   output.checkMinimalContainingRootSubalgebras();
   output.computeRootSubalgebraContainers();
-  output.computeCentralizers();
 }
 
 void SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra(
@@ -2042,7 +2066,7 @@ void SlTwoSubalgebras::computeCentralizers() {
       << ").";
       centralizerReport.report();
     }
-    currentSubalgebra.attemptToComputeCentralizer();
+    currentSubalgebra.attemptToComputeCentralizer(nullptr);
   }
 }
 
@@ -2380,16 +2404,12 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "<td class='tableSummarySlTwoDefault'>"
     << currentSubalgebra.dimensionCentralizer
     << "</td>";
-    if (currentSubalgebra.centralizerComputer.flagTypeComputed) {
-      out
-      << "<td class='tableSummarySlTwoDefault'> "
-      << currentSubalgebra.centralizerComputer.typeIfKnown.toMathMLFinal(
-        &formatCharacterMathML
-      )
-      << "</td>";
-    } else {
-      out << "<td class='tableSummarySlTwoDefault'> not computed</td>";
-    }
+    out
+    << "<td class='tableSummarySlTwoDefault'> "
+    << currentSubalgebra.centralizerComputer.toStringType(
+      &formatCharacterMathML
+    )
+    << "</td>";
     out << "<td class='tableSummarySlTwoDefault'>";
     out << currentSubalgebra.lengthHSquared;
     out << "</td>" << "<td class='tableSummarySlTwoDefault'>";
@@ -2528,6 +2548,7 @@ void SlTwoSubalgebras::writeHTML() {
 
 CentralizerComputer::CentralizerComputer() {
   this->flagTypeComputed = false;
+  this->flagComputationAttempted = false;
   this->flagBasisComputed = false;
   this->flagCartanSelected = false;
   this->owner = nullptr;
@@ -2537,13 +2558,19 @@ CentralizerComputer::CentralizerComputer() {
 void CentralizerComputer::initialize(
   SemisimpleLieAlgebra* inputOwner,
   AlgebraicClosureRationals* inputAlgebraicClosure,
-  Rational* inputDynkinIndexOfCentralizedComponent
+  List<ElementSemisimpleLieAlgebra<Rational> >& inputGeneratorsToCentralize,
+  Rational* inputDynkinIndexOfCentralizedComponent,
+  const std::string& inputLabel
 ) {
   this->owner = inputOwner;
   this->algebraicClosureRationals = inputAlgebraicClosure;
   this->semisimpleElementAdjointEigenvalueFinder.initialize(
     inputAlgebraicClosure
   );
+  this->generatorsToCentralize = inputGeneratorsToCentralize;
+  this->label = inputLabel;
+  this->flagComputationAttempted = false;
+  this->flagTypeComputed = false;
   if (inputDynkinIndexOfCentralizedComponent == nullptr) {
     this->dynkinIndexOfCentralizedComponent = 0;
   } else {
@@ -2552,8 +2579,27 @@ void CentralizerComputer::initialize(
   }
 }
 
+void CentralizerComputer::setCentralizerType(const DynkinType& knownType) {
+  this->flagTypeComputed = true;
+  this->flagComputationAttempted = true;
+  this->typeIfKnown = knownType;
+}
+
+std::string CentralizerComputer::toStringType(FormatExpressions* format) const {
+  if (!this->flagComputationAttempted) {
+    return "(not computed)";
+  }
+  if (!this->flagTypeComputed) {
+    return "(failed to compute)";
+  }
+  return this->typeIfKnown.toMathMLFinal(format);
+}
+
 std::string CentralizerComputer::toString(FormatExpressions* format) const {
   STACK_TRACE("CentralizerComputer::toString");
+  if (!this->flagComputationAttempted) {
+    return "Centralizer type: (not attempted)";
+  }
   std::stringstream out;
   out << "Centralizer type: ";
   if (this->flagTypeComputed) {
@@ -2562,7 +2608,7 @@ std::string CentralizerComputer::toString(FormatExpressions* format) const {
       return out.str();
     }
   } else {
-    out << " not computed";
+    out << "(failed to compute)";
   }
   if (this->owner == nullptr) {
     return out.str();
@@ -2633,7 +2679,25 @@ std::string CentralizerComputer::toString(FormatExpressions* format) const {
   return out.str();
 }
 
+bool CentralizerComputer::computeType(DynkinType& outputType) {
+  if (!this->compute()) {
+    return false;
+  }
+  outputType = this->typeIfKnown;
+  return true;
+}
+
 bool CentralizerComputer::compute() {
+  STACK_TRACE("CentralizerComputer::compute");
+  if (this->flagComputationAttempted) {
+    return this->flagTypeComputed;
+  }
+  this->flagComputationAttempted = true;
+  this->flagTypeComputed = this->doCompute();
+  return this->flagTypeComputed;
+}
+
+bool CentralizerComputer::doCompute() {
   this->owner->getCommonCentralizer(
     this->generatorsToCentralize, this->centralizerBasis
   );

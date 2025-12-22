@@ -221,7 +221,6 @@ class CentralizerComputer {
   static List<int> onesAtPositions(
     const List<int>& positions, int desiredSize
   );
-public:
   std::string label;
   // The dynkin index of the simple subalgebra being centralized, if known.
   // If the subalgebra being centralized is not simple, this can be set to 0.
@@ -249,17 +248,11 @@ public:
   List<CartanElementCandidate> dualsOfRootSpaces;
   List<SimpleSubalgebraComponent> simpleComponents;
   DynkinType typeIfKnown;
-  bool flagTypeComputed;
   bool flagBasisComputed;
   bool flagCartanSelected;
   void getCentralizerElementFromCoordinates(
     const Vector<AlgebraicNumber>& vector,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& output
-  );
-  void initialize(
-    SemisimpleLieAlgebra* inputOwner,
-    AlgebraicClosureRationals* inputAlgebraicClosure,
-    Rational* inputDynkinIndexOfCentralizedComponent
   );
   bool makeCartanCandidate(
     const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
@@ -279,7 +272,21 @@ public:
     const ElementSemisimpleLieAlgebra<Rational>& inputF,
     CartanElementCandidate& output
   );
+  bool doCompute();
+public:
+  bool flagTypeComputed;
+  bool flagComputationAttempted;
   CentralizerComputer();
+  bool computeType(DynkinType& outputType);
+  void setCentralizerType(const DynkinType& knownType);
+  void initialize(
+    SemisimpleLieAlgebra* inputOwner,
+    AlgebraicClosureRationals* inputAlgebraicClosure,
+    List<ElementSemisimpleLieAlgebra<Rational> >& inputGeneratorsToCentralize,
+    Rational* inputDynkinIndexOfCentralizedComponent,
+    const std::string& inputLabel
+  );
+  std::string toStringType(FormatExpressions* format) const;
   std::string toString(FormatExpressions* format) const;
   bool compute();
 };
@@ -633,7 +640,7 @@ public:
   Rational getDynkinIndex() const;
   bool checkIndicesMinimalContainingRootSubalgebras() const;
   void computeModuleDecompositionsitionAmbientLieAlgebra();
-  bool attemptToComputeCentralizer();
+  bool attemptToComputeCentralizer(DynkinType* whichCentralizer);
   bool moduleDecompositionFitsInto(const SlTwoSubalgebra& other) const;
   static bool moduleDecompositionLeftFitsIntoRight(
     const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft,
@@ -733,7 +740,14 @@ public:
   // For computational reasons we are forced to operate with multiple
   // algebraic closures, despite algebraic closures being designed
   // as being shared by an entire computation.
-  static void findSl2Subalgebras(
+  static void findSl2SubalgebrasWithoutCentralizers(
+    SemisimpleLieAlgebra& inputOwner,
+    SlTwoSubalgebras& output,
+    bool computeRealForm,
+    MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures,
+    DynkinSimpleType* restrictToThisSl2Triple = nullptr
+  );
+  static void findSl2SubalgebrasAndCentralizers(
     SemisimpleLieAlgebra& inputOwner,
     SlTwoSubalgebras& output,
     bool computeRealForm,

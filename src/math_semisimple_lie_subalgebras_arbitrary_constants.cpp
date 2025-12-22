@@ -1,8 +1,8 @@
 #include "general_lists.h"
 #include "math_extra_semisimple_lie_subalgebras.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep; operator overloading requires this.
 
-class CandidateSemisimpleSubalgebraArbitraryContants {
+class CandidateSemisimpleSubalgebraArbitraryConstants {
 public:
   char dynkinType;
   int rank;
@@ -10,7 +10,7 @@ public:
   bool loadBuiltInGeneratorHintsE8();
   bool loadBuiltInGeneratorHintsE6();
   bool loadBuiltInGeneratorHints();
-  CandidateSemisimpleSubalgebraArbitraryContants(
+  CandidateSemisimpleSubalgebraArbitraryConstants(
     CandidateSemisimpleSubalgebra& outputSubalgebra
   ):
   output(outputSubalgebra) {
@@ -34,17 +34,17 @@ public:
 };
 
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
-  CandidateSemisimpleSubalgebraArbitraryContants constants(*this);
+  CandidateSemisimpleSubalgebraArbitraryConstants constants(*this);
   return constants.configurePolynomialSystem();
 }
 
 bool CandidateSemisimpleSubalgebra::loadBuiltInPartialRealization() {
-  CandidateSemisimpleSubalgebraArbitraryContants constants(*this);
+  CandidateSemisimpleSubalgebraArbitraryConstants constants(*this);
   return constants.loadBuiltInGeneratorHints();
 }
 
-void CandidateSemisimpleSubalgebraArbitraryContants::configurePolynomialSystem(
-) {
+void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
+() {
   int maximumPolynomialDivisions = 1000;
   int maximumMonomialOperations = 10000;
   std::string ambientLieAlgebraName =
@@ -100,11 +100,14 @@ void CandidateSemisimpleSubalgebraArbitraryContants::configurePolynomialSystem(
     maximumMonomialOperations = 20000;
   }
   if (
-    embeddingLieAlgebraName == "A^{84}_1+A^{1}_1" &&
+    embeddingLieAlgebraName == "A^{84}_1+A^{4}_1" &&
     ambientLieAlgebraName == "E^{1}_8"
   ) {
-    maximumPolynomialDivisions = 300;
-    maximumMonomialOperations = 5000;
+    maximumPolynomialDivisions = 1000;
+    maximumMonomialOperations = 10000;
+    this->output.configuredSystemToSolve.substitutionsProvider.
+    oneIsFirstWhenRecursionDepthIsMultipleOf =
+    0;
   }
   if (embeddingLieAlgebraName == "A^{36}_1+A^{4}_1") {
     this->output.configuredSystemToSolve.substitutionsProvider.
@@ -119,8 +122,8 @@ void CandidateSemisimpleSubalgebraArbitraryContants::configurePolynomialSystem(
   this->output.owner->ownerField;
 }
 
-bool CandidateSemisimpleSubalgebraArbitraryContants::loadBuiltInGeneratorHints(
-) {
+bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
+() {
   if (
     !this->output.getAmbientWeyl().dynkinType.isSimple(
       &this->dynkinType, &this->rank
@@ -130,32 +133,35 @@ bool CandidateSemisimpleSubalgebraArbitraryContants::loadBuiltInGeneratorHints(
   }
   if (dynkinType == 'E' && rank == 6) {
     return
-    CandidateSemisimpleSubalgebraArbitraryContants::loadBuiltInGeneratorHintsE6
-    ();
+    CandidateSemisimpleSubalgebraArbitraryConstants::
+    loadBuiltInGeneratorHintsE6();
   }
   if (dynkinType == 'E' && rank == 8) {
     return
-    CandidateSemisimpleSubalgebraArbitraryContants::loadBuiltInGeneratorHintsE8
-    ();
+    CandidateSemisimpleSubalgebraArbitraryConstants::
+    loadBuiltInGeneratorHintsE8();
   }
   return false;
 }
 
-bool CandidateSemisimpleSubalgebraArbitraryContants::
+bool CandidateSemisimpleSubalgebraArbitraryConstants::
 loadBuiltInGeneratorHintsE6() {
   std::string typeToBeRealized =
   this->output.weylNonEmbedded->dynkinType.toString();
   if (typeToBeRealized == "A^{36}_1") {
-    this->output.unknownNegativeGenerators.clear();
-    this->output.unknownNegativeGenerators.addOnTop(
-      g(- 6) + g(- 7) + g(- 8) + g(- 9) + g(- 10) + g(- 19)
-    );
+    this->output.unknownNegativeGenerators[0] =
+    g(- 6) + g(- 7) + g(- 8) + g(- 9) + g(- 10) + g(- 19);
     return true;
+  }
+  if (typeToBeRealized == "A^{8}_1+A^{4}_1") {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 12) + g(- 18) + g(- 20) + g(- 21) + g(- 22);
+    this->output.unknownNegativeGenerators[1] = g(- 10) + g(- 13) + g(- 19);
   }
   return false;
 }
 
-bool CandidateSemisimpleSubalgebraArbitraryContants::
+bool CandidateSemisimpleSubalgebraArbitraryConstants::
 loadBuiltInGeneratorHintsE8() {
   std::string typeToBeRealized =
   this->output.weylNonEmbedded->dynkinType.toString();
@@ -166,16 +172,11 @@ loadBuiltInGeneratorHintsE8() {
     );
     return true;
   }
-  if (typeToBeRealized == "A^{84}_1+A^{1}_1") {
-    this->output.unknownNegativeGenerators[1] = g(- 31);
-    this->output.unknownPositiveGenerators[1] = g(31);
-    return true;
-  }
   return false;
 }
 
 ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-CandidateSemisimpleSubalgebraArbitraryContants::g(int displayIndex) {
+CandidateSemisimpleSubalgebraArbitraryConstants::g(int displayIndex) {
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > result;
   result.makeGeneratorFromDisplayIndex(
     displayIndex, this->output.getAmbientSemisimpleLieAlgebra()

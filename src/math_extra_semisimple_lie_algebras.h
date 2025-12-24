@@ -129,12 +129,17 @@ public:
     List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
     Matrix<Coefficient>& output
   );
+  // Same as the underlying operator+ of LinearCombination but
+  // does some conversion gymnastics to return the correct type.
   ElementSemisimpleLieAlgebra<Coefficient> operator+(
-    const ElementSemisimpleLieAlgebra<Coefficient>& other
+    const LinearCombination<ChevalleyGenerator, Coefficient>& other
   ) const {
     ElementSemisimpleLieAlgebra<Coefficient> result;
-    result = *this;
-    result += other;
+    result = (
+      this->::LinearCombination<ChevalleyGenerator, Coefficient>::operator+(
+        other
+      )
+    );
     return result;
   }
 };

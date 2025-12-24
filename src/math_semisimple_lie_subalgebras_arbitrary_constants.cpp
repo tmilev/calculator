@@ -172,6 +172,81 @@ loadBuiltInGeneratorHintsE8() {
     );
     return true;
   }
+  if (
+    typeToBeRealized == "A^{84}_1+A^{4}_1" &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({24, 35, 47, 70, 57, 44, 30, 15})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 21) + g(- 22) + g(- 23) * 12 + g(- 24) + g(- 26) + g(- 27) + g(- 31);
+    return true;
+  }
+  if (
+    typeToBeRealized == "A^{62}_1+A^{2}_1" &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 0, 0, 1, 2, 1, 0, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 8) +
+    g(- 25) +
+    g(- 30) +
+    g(- 31) +
+    g(- 34) +
+    g(- 37) +
+    g(- 38) +
+    g(- 39) +
+    g(- 40) +
+    g(- 45);
+    this->output.unknownNegativeGenerators[1] = - g(- 5) + g(- 20);
+    return true;
+  }
+  if (
+    typeToBeRealized == "A^{62}_1+A^{1}_1" &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 1, 1, 2, 2, 1, 0, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 8) +
+    g(- 21) +
+    g(- 28) +
+    g(- 32) +
+    g(- 35) +
+    g(- 37) +
+    g(- 38) +
+    g(- 41) +
+    g(- 44) +
+    g(- 45) *(- 9);
+    this->output.unknownNegativeGenerators[1] = g(- 46);
+  }
+  if (
+    typeToBeRealized == "A^{60}_1+A^{1}_1" &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 1, 1, 2, 2, 1, 0, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 8) + g(- 34) + g(- 35) + g(- 37) + g(- 38);
+    this->output.unknownNegativeGenerators[1] = g(- 46);
+  }
+  if (
+    typeToBeRealized == "A^{38}_1+A^{1}_1" &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 0, 0, 1, 1, 1, 0, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 31) +
+    g(- 33) +
+    g(- 37) *(- 3) +
+    g(- 38) * 3 +
+    g(- 40) +
+    g(- 42) +
+    g(- 43);
+    this->output.unknownNegativeGenerators[1] = g(- 20);
+  }
   return false;
 }
 

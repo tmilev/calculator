@@ -2959,7 +2959,8 @@ bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
   }
   SlTwoSubalgebra& sl2 =
   this->owner->slTwoSubalgebras.allSubalgebras.getElement(indexSl2);
-  this->flagCentralizerTypeIsComputed = sl2.attemptToComputeCentralizer(&this->centralizerType);
+  this->flagCentralizerTypeIsComputed =
+  sl2.attemptToComputeCentralizer(&this->centralizerType);
   return this->flagCentralizerTypeIsComputed;
 }
 

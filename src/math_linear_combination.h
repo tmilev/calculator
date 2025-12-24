@@ -41,6 +41,19 @@ private:
     List<std::string>& rowOutputs,
     MathExpressionFormattingProperties& outputProperties
   ) const;
+  friend LinearCombination<TemplateMonomial, Coefficient> operator*(
+    const Coefficient& left,
+    const LinearCombination<TemplateMonomial, Coefficient>& right
+  ) {
+    LinearCombination<TemplateMonomial, Coefficient> result;
+    Coefficient productCoefficient;
+    for (int i = 0; i < right.monomials.size(); i ++) {
+      productCoefficient = left;
+      productCoefficient *= right.coefficients[i];
+      result.addMonomial(right.monomials[i], productCoefficient);
+    }
+    return result;
+  }
 public:
   HashedList<TemplateMonomial> monomials;
   List<Coefficient> coefficients;
@@ -50,7 +63,8 @@ public:
   }
   LinearCombination(const LinearCombination& other) {
     this->flagDeallocated = false;
-    this->operator=(other);
+    this->monomials = other.monomials;
+    this->coefficients = other.coefficients;
   }
   void operator=(const LinearCombination& other) {
     this->monomials = other.monomials;
@@ -558,6 +572,12 @@ public:
   ) const {
     LinearCombination<TemplateMonomial, Coefficient> output = *this;
     output -= other;
+    return output;
+  }
+  LinearCombination<TemplateMonomial, Coefficient> operator-() const {
+    LinearCombination<TemplateMonomial, Coefficient> output;
+    output.makeZero();
+    output -= *this;
     return output;
   }
   LinearCombination<TemplateMonomial, Coefficient> operator+(

@@ -247,6 +247,41 @@ loadBuiltInGeneratorHintsE8() {
     g(- 43);
     this->output.unknownNegativeGenerators[1] = g(- 20);
   }
+  if (
+    typeToBeRealized == "A^{37}_1+A^{3}_1" &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 1, 1, 2, 0, 1, 0, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 28) +
+    g(- 32) +
+    g(- 34) +
+    g(- 35) +
+    g(- 36) +
+    g(- 37) +
+    g(- 38) +
+    g(- 46) - g(- 50);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 4) + g(- 6) + g(- 11) + g(- 17);
+  }
+  if (
+    typeToBeRealized == "A^{36}_1+A^{28}_1" &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({16, 22, 30, 44, 36, 28, 20, 10})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 28) +
+    g(- 32) +
+    g(- 36) +
+    g(- 41) +
+    g(- 42) +
+    g(- 43) - g(- 44) +
+    g(- 50);
+    this->output.unknownNegativeGenerators[1] =
+    - g(- 4) + g(- 5) + g(- 6) + g(- 17);
+  }
   return false;
 }
 

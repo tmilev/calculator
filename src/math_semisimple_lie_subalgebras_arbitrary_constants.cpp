@@ -31,6 +31,8 @@ public:
     );
     return result;
   }
+  // Makes a dynkin type A.
+  DynkinType A(int dynkinIndex, int rank) const;
 };
 
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
@@ -163,9 +165,8 @@ loadBuiltInGeneratorHintsE6() {
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::
 loadBuiltInGeneratorHintsE8() {
-  std::string typeToBeRealized =
-  this->output.weylNonEmbedded->dynkinType.toString();
-  if (typeToBeRealized == "A^{14}_1") {
+  DynkinType& type = this->output.weylNonEmbedded->dynkinType;
+  if (type == A(14, 1)) {
     this->output.unknownNegativeGenerators.clear();
     this->output.unknownNegativeGenerators.addOnTop(
       g(- 45) + g(- 47) + g(- 49) + g(- 57) + g(- 60) + g(- 70) + g(- 82)
@@ -173,7 +174,7 @@ loadBuiltInGeneratorHintsE8() {
     return true;
   }
   if (
-    typeToBeRealized == "A^{84}_1+A^{4}_1" &&
+    type == A(84, 1) + A(4, 1) &&
     this->output.cartanElementsSubalgebra[0].isEqualTo(
       List<Rational>({24, 35, 47, 70, 57, 44, 30, 15})
     )
@@ -183,7 +184,7 @@ loadBuiltInGeneratorHintsE8() {
     return true;
   }
   if (
-    typeToBeRealized == "A^{62}_1+A^{2}_1" &&
+    type == A(62, 1) + A(2, 1) &&
     this->output.cartanElementsSubalgebra[1].isEqualTo(
       List<Rational>({0, 0, 0, 1, 2, 1, 0, 0})
     )
@@ -203,7 +204,7 @@ loadBuiltInGeneratorHintsE8() {
     return true;
   }
   if (
-    typeToBeRealized == "A^{62}_1+A^{1}_1" &&
+    type == A(62, 1) + A(1, 1) &&
     this->output.cartanElementsSubalgebra[1].isEqualTo(
       List<Rational>({0, 1, 1, 2, 2, 1, 0, 0})
     )
@@ -220,9 +221,10 @@ loadBuiltInGeneratorHintsE8() {
     g(- 44) +
     g(- 45) *(- 9);
     this->output.unknownNegativeGenerators[1] = g(- 46);
+    return true;
   }
   if (
-    typeToBeRealized == "A^{60}_1+A^{1}_1" &&
+    type == A(60, 1) + A(1, 1) &&
     this->output.cartanElementsSubalgebra[1].isEqualTo(
       List<Rational>({0, 1, 1, 2, 2, 1, 0, 0})
     )
@@ -230,9 +232,10 @@ loadBuiltInGeneratorHintsE8() {
     this->output.unknownNegativeGenerators[0] =
     g(- 8) + g(- 34) + g(- 35) + g(- 37) + g(- 38);
     this->output.unknownNegativeGenerators[1] = g(- 46);
+    return true;
   }
   if (
-    typeToBeRealized == "A^{38}_1+A^{1}_1" &&
+    type == A(38, 1) + A(1, 1) &&
     this->output.cartanElementsSubalgebra[1].isEqualTo(
       List<Rational>({0, 0, 0, 1, 1, 1, 0, 0})
     )
@@ -246,9 +249,10 @@ loadBuiltInGeneratorHintsE8() {
     g(- 42) +
     g(- 43);
     this->output.unknownNegativeGenerators[1] = g(- 20);
+    return true;
   }
   if (
-    typeToBeRealized == "A^{37}_1+A^{3}_1" &&
+    type == A(37, 1) + A(3, 1) &&
     this->output.cartanElementsSubalgebra[1].isEqualTo(
       List<Rational>({0, 1, 1, 2, 0, 1, 0, 0})
     )
@@ -264,9 +268,10 @@ loadBuiltInGeneratorHintsE8() {
     g(- 46) - g(- 50);
     this->output.unknownNegativeGenerators[1] =
     g(- 4) + g(- 6) + g(- 11) + g(- 17);
+    return true;
   }
   if (
-    typeToBeRealized == "A^{36}_1+A^{28}_1" &&
+    type == A(36, 1) + A(28, 1) &&
     this->output.cartanElementsSubalgebra[0].isEqualTo(
       List<Rational>({16, 22, 30, 44, 36, 28, 20, 10})
     )
@@ -281,6 +286,104 @@ loadBuiltInGeneratorHintsE8() {
     g(- 50);
     this->output.unknownNegativeGenerators[1] =
     - g(- 4) + g(- 5) + g(- 6) + g(- 17);
+    return true;
+  }
+  if (
+    type == A(36, 1) + A(4, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({16, 22, 30, 44, 36, 28, 20, 10})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 28) +
+    g(- 32) +
+    g(- 36) +
+    g(- 41) +
+    g(- 42) +
+    g(- 43) +
+    g(- 44) +
+    g(- 50);
+    this->output.unknownNegativeGenerators[1] =
+    - g(- 12) + g(- 13) + g(- 25) + g(- 39);
+    return true;
+  }
+  if (
+    type == A(36, 1) + A(3, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({16, 22, 30, 44, 36, 28, 20, 10})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 28) +
+    g(- 32) +
+    g(- 36) +
+    g(- 41) +
+    g(- 42) +
+    g(- 43) +
+    g(- 44) +
+    g(- 50);
+    this->output.unknownNegativeGenerators[1] = - g(- 20) - g(- 31) + g(- 33);
+    return true;
+  }
+  if (
+    type == A(34, 1) + A(6, 1) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({1, 2, 0, 2, 2, 0, 1, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 29) +
+    g(- 38) * 5 +
+    g(- 40) *(- 2) +
+    g(- 41) * 7 +
+    g(- 44) +
+    g(- 45) +
+    g(- 46) +
+    g(- 48);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 1) + g(- 2) + g(- 5) *(- 6) + g(- 7) - g(- 12);
+    return true;
+  }
+  if (
+    type == A(32, 1) + A(8, 1) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({2, 0, 4, 4, 4, 4, 2, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 36) + g(- 38) + g(- 41) + g(- 44) + g(- 46) + g(- 48) + g(- 59);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 6) + g(- 11) + g(- 21) * 2 + g(- 24) * 2 + g(- 28);
+    return true;
+  }
+  if (
+    type == A(30, 1) + A(10, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({14, 20, 27, 40, 33, 26, 18, 10})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 4, 3, 6, 3, 0, 0, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 8) + g(- 45) + g(- 57) + g(- 58) + g(- 59) + g(- 60);
+    this->output.unknownNegativeGenerators[1] = g(- 2) + g(- 11) + g(- 12);
+    return true;
+  }
+  if (
+    type == A(30, 1) + A(10, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({14, 20, 27, 40, 33, 26, 18, 9})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({2, 1, 2, 0, 2, 2, 0, 1})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 40) + g(- 41) + g(- 42) + g(- 43) + g(- 44) + g(- 45) + g(- 46);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 1) - g(- 2) + g(- 3) * 2 - g(- 5) + g(- 6) * 2 + g(- 8);
+    return true;
   }
   return false;
 }
@@ -291,5 +394,14 @@ CandidateSemisimpleSubalgebraArbitraryConstants::g(int displayIndex) {
   result.makeGeneratorFromDisplayIndex(
     displayIndex, this->output.getAmbientSemisimpleLieAlgebra()
   );
+  return result;
+}
+
+DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::A(
+  int dynkinIndex, int rank
+) const {
+  DynkinType result;
+  Rational dynkinIndexRational = dynkinIndex;
+  result.makeSimpleType('A', rank, &dynkinIndexRational);
   return result;
 }

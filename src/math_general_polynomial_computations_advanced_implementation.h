@@ -665,6 +665,7 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemProvenToHaveSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
+  this->flagUseSmallImpliedSubstitutions = false;
 }
 
 template <class Coefficient>
@@ -928,6 +929,11 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
     }
   }
   if (!found) {
+    return false;
+  }
+  if (
+    this->flagUseSmallImpliedSubstitutions && bestPolynomial.totalDegree() > 2
+  ) {
     return false;
   }
   outputSubstitution = bestSubstitution;

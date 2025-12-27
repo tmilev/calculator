@@ -1209,6 +1209,7 @@ public:
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosure;
+  bool flagUseSmallImpliedSubstitutions;
   // For fields that are dynamically generated such as modular arithmetic
   // elements (ElementZModP), use this element as factory to generate
   // contstants.

@@ -49,7 +49,7 @@ std::string SlTwoSubalgebra::toHTMLTripleVerification(
   }
   out
   << MathML::toMathMLFinal(
-    this->toMathMLTriple(format),
+    this->toMathMLTripleVerification(format),
     this->toStringTripleVerification(format),
     format
   );

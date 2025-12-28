@@ -684,6 +684,7 @@ public:
     int totalExtensionsTried;
     int subalgebrasNeitherRealizedNorProvedImpossible;
     int subalgebrasProvedImpossible;
+    int subalgebrasNotProcessed;
   };
 
   SemisimpleSubalgebras::Statistics statistics;

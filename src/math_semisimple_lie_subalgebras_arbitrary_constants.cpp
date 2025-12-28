@@ -111,6 +111,16 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
     oneIsFirstWhenRecursionDepthIsMultipleOf =
     0;
   }
+  if (
+    embeddingLieAlgebraName == "A^{28}_1+2A^{3}_1" &&
+    ambientLieAlgebraName == "E^{1}_8"
+  ) {
+    maximumPolynomialDivisions = 10000;
+    maximumMonomialOperations = 40000;
+    this->output.configuredSystemToSolve.substitutionsProvider.
+    oneIsFirstWhenRecursionDepthIsMultipleOf =
+    0;
+  }
   if (embeddingLieAlgebraName == "A^{36}_1+A^{4}_1") {
     this->output.configuredSystemToSolve.substitutionsProvider.
     oneIsFirstWhenRecursionDepthIsMultipleOf =
@@ -373,7 +383,7 @@ loadBuiltInGeneratorHintsE8() {
   if (
     type == A(30, 1) + A(10, 1) &&
     this->output.cartanElementsSubalgebra[0].isEqualTo(
-      List<Rational>({14, 20, 27, 40, 33, 26, 18, 9})
+      List<Rational>({14, 21, 28, 42, 34, 26, 18, 9})
     ) &&
     this->output.cartanElementsSubalgebra[1].isEqualTo(
       List<Rational>({2, 1, 2, 0, 2, 2, 0, 1})
@@ -383,6 +393,49 @@ loadBuiltInGeneratorHintsE8() {
     g(- 40) + g(- 41) + g(- 42) + g(- 43) + g(- 44) + g(- 45) + g(- 46);
     this->output.unknownNegativeGenerators[1] =
     g(- 1) - g(- 2) + g(- 3) * 2 - g(- 5) + g(- 6) * 2 + g(- 8);
+    return true;
+  }
+  if (
+    type == A(25, 1) + A(15, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({13, 19, 26, 38, 31, 24, 16, 8})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({1, 3, 0, 4, 3, 0, 2, 2})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 44) + g(- 45) + g(- 46) + g(- 47) + g(- 48) + g(- 49) + g(- 50);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 1) + g(- 2) *(- 3) + g(- 4) *(- 2) - g(- 5) - g(- 7) + g(- 8) *(- 2);
+    return true;
+  }
+  if (
+    type == A(24, 1) + A(16, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({12, 18, 24, 36, 30, 24, 16, 8})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({4, 4, 6, 8, 4, 0, 2, 2})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 36) +
+    g(- 40) +
+    g(- 42) +
+    g(- 43) +
+    g(- 45) +
+    g(- 47) +
+    g(- 54) * 2 - g(- 57);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 4) +
+    g(- 7) +
+    g(- 8) +
+    g(- 9) +
+    g(- 11) +
+    g(- 12) * 3 +
+    g(- 17) +
+    g(- 18) * 3 - g(- 19);
     return true;
   }
   return false;

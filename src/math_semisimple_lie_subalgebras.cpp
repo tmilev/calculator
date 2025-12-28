@@ -888,17 +888,19 @@ void SemisimpleSubalgebras::computeStatistics() {
     this->nonRealizedSubalgebras.values
   ) {
     switch (nonRealized.candidate.status) {
+    case CandidateSubalgebraStatus::previouslyRealizedAsADirectSummand:
+    case CandidateSubalgebraStatus::realized:
+      break;
     case CandidateSubalgebraStatus::unknown:
+      this->statistics.subalgebrasNotProcessed ++;
+      break;
     case CandidateSubalgebraStatus::corrupt:
     case CandidateSubalgebraStatus::neitherRealizedNorProvedImpossible:
       this->statistics.subalgebrasNeitherRealizedNorProvedImpossible ++;
       break;
-    case CandidateSubalgebraStatus::previouslyRealizedAsADirectSummand:
-      break;
     case CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions:
     case CandidateSubalgebraStatus::unrealizableNonFittingCharacter:
-    default:
-      this->statistics.subalgebrasNeitherRealizedNorProvedImpossible ++;
+      this->statistics.subalgebrasProvedImpossible ++;
       break;
     }
   }
@@ -915,7 +917,7 @@ std::string SemisimpleSubalgebras::toStringCandidateStatistics(
   << " semisimple subalgebras (including the full subalgebra)";
   if (this->statistics.subalgebrasNeitherRealizedNorProvedImpossible != 0) {
     out
-    << " and <b style='red'>"
+    << " and <b style='color:red'>"
     << this->statistics.subalgebrasNeitherRealizedNorProvedImpossible
     << " semisimple subalgebra candidate(s) "
     << "which were not realized (but not proven impossible)</b>";
@@ -1007,13 +1009,27 @@ std::string SemisimpleSubalgebras::toStringSubalgebrasNoHDWrite(
   FormatExpressions* format
 ) {
   std::stringstream out;
+  std::string nonRealized =
+  this->toStringNonRealizedSubalgebraCollection(format);
+  int maximumPrintoutSize = 1000000;
+  int printoutSize = nonRealized.size();
+  out << nonRealized << "<hr><hr>The realized subalgebras follow.<hr>";
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     out
     << this->toStringSubalgebraNumberWithAmbientLink(i, format)
     << "\n<br>\n";
-    out << this->subalgebras.values[i].toString(format) << "\n<hr>\n ";
+    std::string content = this->subalgebras.values[i].toString(format);
+    printoutSize += content.size();
+    if (printoutSize > maximumPrintoutSize) {
+      out
+      << "[omitting: more than "
+      << maximumPrintoutSize
+      << " bytes printed]";
+    } else {
+      out << content;
+    }
+    out << "\n<hr>\n ";
   }
-  out << this->toStringNonRealizedSubalgebraCollection(format);
   return out.str();
 }
 
@@ -1293,11 +1309,13 @@ std::string SemisimpleSubalgebras::toStringPart3(
   std::stringstream fileLoadContent;
   fileSl2Content
   << "<!DOCTYPE html>"
+  << "<html>"
   << "<body>"
   << this->toStringSl2s()
   << "</body></html>";
   fileLoadContent
   << "<!DOCTYPE html>"
+  << "<html>"
   << "<body>"
   << this->toStringProgressReport(format)
   << "</body></html>";
@@ -3368,6 +3386,7 @@ SemisimpleSubalgebras::Statistics::Statistics() {
   this->totalExtensionsTried = 0;
   this->subalgebrasNeitherRealizedNorProvedImpossible = 0;
   this->subalgebrasProvedImpossible = 0;
+  this->subalgebrasNotProcessed = 0;
 }
 
 PossibleExtensionsOfSemisimpleLieSubalgebra::

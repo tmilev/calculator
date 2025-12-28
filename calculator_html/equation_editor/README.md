@@ -22,7 +22,7 @@ Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/eq
 - Render static math to MathML, SVG and canvas.
 
 ```
-
+<!DOCTYPE html>
 <html>
 <script type="text/javascript" src="src/equation_editor.js"></script>
 <script>

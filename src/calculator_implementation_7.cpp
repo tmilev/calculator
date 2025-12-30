@@ -1256,10 +1256,6 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
   &computeArbitrarySubstitutionsModP;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
-  out << "<br>The context vars:<br>" << context.toString();
-  out
-  << "<br>The polynomials: "
-  << polynomials.toString(&system.groebner.format);
   out
   << "<br>Total number of polynomial computations: "
   << system.numberOfSerreSystemComputations
@@ -1282,6 +1278,11 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
       << "my heuristics are not good enough.";
     }
   }
+  out << "<br>The context vars:<br>" << context.toString();
+  out
+      << "<br>The polynomials: "
+      << polynomials.toString(&system.groebner.format);
+
   return output.assignValue(calculator, out.str());
 }
 
@@ -1313,14 +1314,6 @@ bool CalculatorFunctions::solvePolynomialSystem(
   system.flagUseMonomialBranchingOptimization = true;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
-  out << "<br>The context vars:<br>" << context.toString();
-  out
-  << "<br>The polynomials: "
-  << polynomials.toString(&system.groebner.format);
-  out
-  << "<br>Total number of polynomial computations: "
-  << system.numberOfSerreSystemComputations
-  << ". ";
   if (system.flagSystemProvenToHaveNoSolution) {
     out << "<br>The system does not have a solution. ";
   } else if (system.flagSystemProvenToHaveSolution) {
@@ -1337,6 +1330,14 @@ bool CalculatorFunctions::solvePolynomialSystem(
       << "my heuristics are not good enough.";
     }
   }
+  out << "<br>The context vars:<br>" << context.toString();
+  out
+      << "<br>The polynomials: "
+      << polynomials.toString(&system.groebner.format);
+  out
+      << "<br>Total number of polynomial computations: "
+      << system.numberOfSerreSystemComputations
+      << ". ";
   return output.assignValue(calculator, out.str());
 }
 

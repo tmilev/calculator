@@ -75,7 +75,7 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
   }
   this->output.configuredSystemToSolve.substitutionsProvider.
   oneIsFirstWhenRecursionDepthIsMultipleOf =
-  3;
+  1;
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
@@ -118,7 +118,7 @@ configurePolynomialSystemE8() {
   DynkinType& embeddedType = this->output.weylNonEmbedded->dynkinType;
   this->output.configuredSystemToSolve.substitutionsProvider.
   oneIsFirstWhenRecursionDepthIsMultipleOf =
-  3;
+  1;
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;

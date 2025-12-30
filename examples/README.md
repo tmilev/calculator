@@ -5602,14 +5602,14 @@ PrintSemisimpleSubalgebras(B_3)
 ```
 Prints the semisimple subalgebras of a semisimple Lie algebra. 
 
-*PrintSemisimpleSubalgebrasRecompute* [PrintSemisimpleSubalgebrasRecompute] {CalculatorLieTheory::printSemisimpleSubalgebrasRecompute}. (admin only) 
+*PrintSemisimpleSubalgebrasWithCentralizersRecompute* [PrintSemisimpleSubalgebrasWithCentralizersRecompute] {CalculatorLieTheory::printSemisimpleSubalgebrasWithCentralizersRecompute}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintSemisimpleSubalgebrasRecompute%28C_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintSemisimpleSubalgebrasRecompute(C_3)
 ```
 This function is being developed and is not implemented fully yet. Prints the semisimple subalgebras of a semisimple Lie algebra. 
 
-*PrintSemisimpleSubalgebrasNoCentralizers* [PrintSemisimpleSubalgebrasNoCentralizers] {CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers}. (admin only) 
+*PrintSemisimpleSubalgebrasRecompute* [PrintSemisimpleSubalgebrasRecompute] {CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizersRecompute}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintSemisimpleSubalgebrasNoCentralizers%28A_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintSemisimpleSubalgebrasNoCentralizers(A_3)

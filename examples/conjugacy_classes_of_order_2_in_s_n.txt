@@ -1,0 +1,12 @@
+%This workbook shows how to compute the number of conjugacy classes of order 2 elements in the symmetric group S_N;
+P{}({{N}}, {{K}}) :if(K==0)=1; P{}({{N}}, {{K}}) :if(K==1)= N\choose 2;
+%P{}(N,K) counts the number of ways to select K pairs of integers out of N;
+P{}({{N}}, {{K}}):if(IsInteger(K) and (K>1)) = P{}(N, K-1)* ((N-2K+2) \choose 2); 
+%R{}(N,K) counts the number of distinct order 2 permutations that have K disjoint swaps;
+R{}({{N}}, {{K}}) = P{}(N,K) / K!;
+%L is a helper function that immitates a for loop;
+L{}({{N}},{{K}}):if (K==0)= R{}( N,0); L{}({{N}},{{K}}):if (IsInteger(K) and K>0)= L{}(N,K-1)\cup R{}(N,K);
+%F{}N computes a list of the sizes of the order 2 permutation conjugacy classes;
+F{}{{N}} = L{}(N, Floor( N/2));
+%We list the number of order 2 conjugacy classes for all symmetric groups up to a point; 
+F{}1; F{}2; F{}3; F{}4; F{}5; F{}6; F{}7; F{}8; F{}9; F{}10; F{}11; F{}12; F{}13; F{}14; F{}15;

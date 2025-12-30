@@ -64,7 +64,9 @@ std::string SlTwoSubalgebra::toMathMLTripleVerification(
   << MathML::mtableDefault
   << "<mtr>"
   << "<mtd>"
-  << "<mtr><mo>[</mo><mi>e</mi> <mo>,</mo><mi> f</mi><mo>]</mo>"
+  << MathML::leftBracket
+  << "<mi>e</mi> <mo>,</mo><mi> f</mi>"
+  << MathML::rightBracket
   << "</mtd>"
   << "<mtd><mo>=</mo></mtd>"
   << "<mtd>"
@@ -73,7 +75,7 @@ std::string SlTwoSubalgebra::toMathMLTripleVerification(
   << "</mtr>"
   << "<mtr>"
   << "<mtd>"
-  << "<mtr><mo>[</mo><mi>h</mi> <mo>,</mo><mi> e</mi><mo>]</mo>"
+  << "<mo>[</mo><mi>h</mi> <mo>,</mo><mi> e</mi><mo>]</mo>"
   << "</mtd>"
   << "<mtd><mo>=</mo></mtd>"
   << "<mtd>"
@@ -82,7 +84,7 @@ std::string SlTwoSubalgebra::toMathMLTripleVerification(
   << "</mtr>"
   << "<mtr>"
   << "<mtd>"
-  << "<mtr><mo>[</mo><mi>h</mi> <mo>,</mo><mi> f</mi><mo>]</mo>"
+  << "<mo>[</mo><mi>h</mi> <mo>,</mo><mi> f</mi><mo>]</mo>"
   << "</mtd>"
   << "<mtd><mo>=</mo></mtd>"
   << "<mtd>"

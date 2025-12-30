@@ -3125,7 +3125,8 @@ void VirtualRepresentation<somegroup, Coefficient>::operator*=(
 ) {
   STACK_TRACE("VirtualRepresentation::operator*=");
   (void) other;
-  VirtualRepresentation<somegroup, Coefficient> output, currentContribution;
+  VirtualRepresentation<somegroup, Coefficient> output;
+  VirtualRepresentation<somegroup, Coefficient> currentContribution;
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < other.size(); j ++) {
@@ -3138,7 +3139,8 @@ void VirtualRepresentation<somegroup, Coefficient>::operator*=(
       global.fatal << "Must decompose representation" << global.fatal;
       // TODO(tmilev): make this work again.
       // productNonDecomposed.decomposeTodorsVersion(currentContribution, 0);
-      output += currentContribution * coefficient;
+      currentContribution *= coefficient;
+      output += currentContribution;
     }
   }
   *this = output;

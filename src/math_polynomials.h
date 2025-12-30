@@ -1320,6 +1320,7 @@ public:
   static bool isContradictoryReducedSystem(
     const List<Polynomial<Coefficient> >& input
   );
+  static bool isSolvedSystem(const List<Polynomial<Coefficient> >& input);
   std::string toStringImpliedSubstitutions();
   void initializeForSystemSolution();
   bool shouldReport();

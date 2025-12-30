@@ -142,6 +142,24 @@ public:
     );
     return result;
   }
+  ElementSemisimpleLieAlgebra<Coefficient> operator*(const std::string& other)
+  const {
+    ElementSemisimpleLieAlgebra<Coefficient> result;
+    result =
+    this->::LinearCombination<ChevalleyGenerator, Coefficient>::operator*(
+      other
+    );
+    return result;
+  }
+  ElementSemisimpleLieAlgebra<Coefficient> operator*(const Rational& other)
+  const {
+    ElementSemisimpleLieAlgebra<Coefficient> result;
+    result =
+    this->::LinearCombination<ChevalleyGenerator, Coefficient>::operator*(
+      other
+    );
+    return result;
+  }
 };
 
 // Linear map from a semisimple lie algebra to itself.

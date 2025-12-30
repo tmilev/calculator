@@ -1283,10 +1283,10 @@ void Tableau::youngSymmetrizerAction(
   for (; !cs.doneIterating(); ++ cs) {
     ElementMonomialAlgebra<
       MonomialTensor<int, HashFunctions::hashFunction>, Coefficient
-    > tmp;
+    > elementMonomialAlgebra;
     PermutationR2 csi = *cs;
-    csi.actOnTensor(tmp, rst);
-    out += tmp * csi.sign();
+    csi.actOnTensor(elementMonomialAlgebra, rst);
+    out += elementMonomialAlgebra * csi.sign();
   }
 }
 

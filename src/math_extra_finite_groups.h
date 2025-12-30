@@ -1906,6 +1906,10 @@ class VirtualRepresentation: public LinearCombination<
 > {
 public:
   void operator*=(const VirtualRepresentation<somegroup, Coefficient>& other);
+  void operator*=(const Coefficient& other) {
+    this->::LinearCombination<ClassFunction<somegroup, Coefficient>, Rational>
+    ::operator*=(other);
+  }
   void assignRepresentation(
     const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other
   );
@@ -1921,6 +1925,23 @@ public:
     return
     this->::LinearCombination<ClassFunction<somegroup, Coefficient>, Rational>
     ::hashFunction();
+  }
+  VirtualRepresentation<somegroup, Coefficient> operator*(
+    const VirtualRepresentation<somegroup, Coefficient>& other
+  ) const {
+    VirtualRepresentation<somegroup, Coefficient> result = *this;
+    result *= other;
+    return result;
+  }
+  template <typename OtherType>
+  VirtualRepresentation<somegroup, Coefficient> operator*(
+    const OtherType& other
+  ) const {
+    VirtualRepresentation<somegroup, Coefficient> result;
+    result *= other;
+    // result= this->::LinearCombination< ClassFunction<somegroup,
+    // Coefficient>, Rational>::operator*(other);
+    return result;
   }
 };
 

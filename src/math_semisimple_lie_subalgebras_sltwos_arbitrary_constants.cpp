@@ -279,7 +279,10 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
     }
   }
   if (type == 'C' && rank == 8) {
-    if (dynkinIndex == 40 && h == "(10, 16, 18, 20, 22, 24, 26, 14)") {
+    if (
+      dynkinIndex == 40 &&
+      targetH == List<Rational>({10, 16, 18, 20, 22, 24, 26, 14})
+    ) {
       return
       List<Rational>(
         {1, - 1, 2, - 2, 3, - 3, 4, - 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}

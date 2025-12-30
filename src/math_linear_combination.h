@@ -560,8 +560,9 @@ public:
   void operator+=(
     const LinearCombination<TemplateMonomial, Coefficient>& other
   );
+  template <typename OtherType>
   LinearCombination<TemplateMonomial, Coefficient> operator*(
-    const Coefficient& other
+    const OtherType& other
   ) const {
     LinearCombination<TemplateMonomial, Coefficient> result = *this;
     result *= other;
@@ -765,6 +766,14 @@ public:
     this->::LinearCombination<TemplateMonomial, Coefficient>::operator*=(
       other
     );
+  }
+  template <typename OtherType>
+  ElementMonomialAlgebra<TemplateMonomial, Coefficient> operator*(
+    const OtherType& other
+  ) const {
+    ElementMonomialAlgebra<TemplateMonomial, Coefficient> result = *this;
+    result *= other;
+    return result;
   }
   void raiseToPower(
     int d,
@@ -977,7 +986,8 @@ linearSpanContainsGetFirstLinearCombination(
     coefficientInRemainder = remainderFromInput.getCoefficientOf(monomial);
     outputFirstLinearCombination[i] = coefficientInRemainder;
     outputFirstLinearCombination[i] /= coefficientMinimialMonomial;
-    remainderFromInput -= listCopy[i] * outputFirstLinearCombination[i];
+    listCopy[i] *= outputFirstLinearCombination[i];
+    remainderFromInput -= listCopy[i];
   }
   if (!remainderFromInput.isEqualToZero()) {
     return false;

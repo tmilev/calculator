@@ -23,6 +23,7 @@ public:
     int displayIndex
   );
   void configurePolynomialSystem();
+  void configurePolynomialSystemE8();
   // Makes a polynomial of the form x_{display_index}.
   Polynomial<AlgebraicNumber> x(int displayIndex) {
     Polynomial<AlgebraicNumber> result;
@@ -33,6 +34,10 @@ public:
   }
   // Makes a dynkin type A.
   DynkinType A(int dynkinIndex, int rank) const;
+  // Makes a dynkin type B.
+  DynkinType B(int dynkinIndex, int rank) const;
+  // Makes dynkin type E.
+  DynkinType E(int dynkinIndex, int rank) const;
 };
 
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
@@ -47,8 +52,14 @@ bool CandidateSemisimpleSubalgebra::loadBuiltInPartialRealization() {
 
 void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
 () {
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebraArbitraryConstants::"
+    "configurePolynomialSystem"
+  );
   int maximumPolynomialDivisions = 1000;
   int maximumMonomialOperations = 10000;
+  this->output.configuredSystemToSolve.algebraicClosure =
+  this->output.owner->ownerField;
   std::string ambientLieAlgebraName =
   this->output.owner->owner->toStringLieAlgebraName();
   if (ambientLieAlgebraName == "C^{1}_5") {
@@ -57,6 +68,11 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
     maximumMonomialOperations = 2000;
   }
   DynkinType& embeddedType = this->output.weylNonEmbedded->dynkinType;
+  DynkinType& ambientType = this->output.owner->owner->weylGroup.dynkinType;
+  if (ambientType == E(1, 8)) {
+    this->configurePolynomialSystemE8();
+    return;
+  }
   this->output.configuredSystemToSolve.substitutionsProvider.
   oneIsFirstWhenRecursionDepthIsMultipleOf =
   3;
@@ -79,59 +95,82 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
     maximumPolynomialDivisions = 1000;
     maximumMonomialOperations = 20000;
   }
-  if (embeddingLieAlgebraName == "A^{20}_1+A^{4}_1") {
+  this->output.configuredSystemToSolve.groebner.maximumMonomialOperations =
+  maximumMonomialOperations;
+  this->output.configuredSystemToSolve.groebner.maximumPolynomialDivisions =
+  maximumPolynomialDivisions;
+}
+
+void CandidateSemisimpleSubalgebraArbitraryConstants::
+configurePolynomialSystemE8() {
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebraArbitraryConstants::"
+    "configurePolynomialSystemE8"
+  );
+  this->output.configuredSystemToSolve.algebraicClosure =
+  this->output.owner->ownerField;
+  int& maximumPolynomialDivisions =
+  this->output.configuredSystemToSolve.groebner.maximumPolynomialDivisions;
+  int& maximumMonomialOperations =
+  this->output.configuredSystemToSolve.groebner.maximumMonomialOperations;
+  maximumMonomialOperations = 10000;
+  maximumPolynomialDivisions = 1000;
+  DynkinType& embeddedType = this->output.weylNonEmbedded->dynkinType;
+  this->output.configuredSystemToSolve.substitutionsProvider.
+  oneIsFirstWhenRecursionDepthIsMultipleOf =
+  3;
+  if (embeddedType.getRank() == 1) {
+    maximumPolynomialDivisions = 2000;
+    maximumMonomialOperations = 10000;
+    this->output.configuredSystemToSolve.substitutionsProvider.
+    flagChooseSmallestIndexVariableFirst =
+    true;
+  }
+  std::string embeddingLieAlgebraName = embeddedType.toString();
+  if (embeddedType == A(20, 1) + A(4, 1)) {
     // System known to be contradictory but takes extra computational time.
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
   }
-  // Polynomial systems that were solved manually (with the help of computer):
-  // 1. A^{32}_1+A^{8}_1 in E_8.
-  // 2. A^24_1 in E_8.
-  // 3. A^{20}_1+A^{4}_1 in E_8
-  if (embeddingLieAlgebraName == "A^{16}_1+A^{8}_1") {
+  if (embeddedType == A(16, 1) + A(8, 1)) {
     maximumPolynomialDivisions = 200;
     maximumMonomialOperations = 400;
   }
-  if (embeddingLieAlgebraName == "A^{15}_1") {
-    maximumPolynomialDivisions = 200;
-    maximumMonomialOperations = 1000;
-  }
-  if (embeddingLieAlgebraName == "A^{40}_1") {
-    // System known to require more computations than most.
-    maximumPolynomialDivisions = 4000;
-    maximumMonomialOperations = 20000;
-  }
-  if (
-    embeddingLieAlgebraName == "A^{84}_1+A^{4}_1" &&
-    ambientLieAlgebraName == "E^{1}_8"
-  ) {
+  if (embeddedType == A(84, 1) + A(4, 1)) {
     maximumPolynomialDivisions = 1000;
     maximumMonomialOperations = 10000;
     this->output.configuredSystemToSolve.substitutionsProvider.
     oneIsFirstWhenRecursionDepthIsMultipleOf =
     0;
   }
-  if (
-    embeddingLieAlgebraName == "A^{28}_1+2A^{3}_1" &&
-    ambientLieAlgebraName == "E^{1}_8"
-  ) {
+  if (embeddedType == A(28, 1) + A(3, 1) + A(3, 1)) {
+    // System known to be contradictory.
     maximumPolynomialDivisions = 10000;
     maximumMonomialOperations = 40000;
     this->output.configuredSystemToSolve.substitutionsProvider.
     oneIsFirstWhenRecursionDepthIsMultipleOf =
     0;
   }
-  if (embeddingLieAlgebraName == "A^{36}_1+A^{4}_1") {
+  if (embeddedType == A(36, 1) + A(4, 1)) {
     this->output.configuredSystemToSolve.substitutionsProvider.
     oneIsFirstWhenRecursionDepthIsMultipleOf =
     2;
   }
-  this->output.configuredSystemToSolve.groebner.maximumMonomialOperations =
-  maximumMonomialOperations;
-  this->output.configuredSystemToSolve.groebner.maximumPolynomialDivisions =
-  maximumPolynomialDivisions;
-  this->output.configuredSystemToSolve.algebraicClosure =
-  this->output.owner->ownerField;
+  if (embeddedType == A(22, 1) + A(2, 1)) {
+    // Has multiple h candidates, some of them do not yield solutions.
+    maximumPolynomialDivisions = 10000;
+    maximumMonomialOperations = 40000;
+  }
+  if (
+    embeddedType == A(14, 1) + A(2, 1) &&
+    this->output.cartanElementsSubalgebra[1] == List<Rational>(
+      {0, 1, 1, 2, 1, 0, 1, 1}
+    )
+  ) {
+    // System known to be contradictory.
+    maximumPolynomialDivisions = 40000;
+    maximumMonomialOperations = 40000;
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
@@ -438,6 +477,102 @@ loadBuiltInGeneratorHintsE8() {
     g(- 18) * 3 - g(- 19);
     return true;
   }
+  if (
+    type == A(24, 1) + A(15, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({12, 18, 24, 36, 30, 24, 16, 8})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({4, 4, 6, 7, 4, 0, 2, 2})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 40) * 3 +
+    g(- 42) * 3 +
+    g(- 43) * 3 +
+    g(- 51) *(- 3) +
+    g(- 52) +
+    g(- 54) * 2;
+    this->output.unknownNegativeGenerators[1] =
+    g(- 1) * 3 + g(- 7) * 3 + g(- 8) * 3 + g(- 17) * 3 - g(- 18) + g(- 19) * 3;
+    return true;
+  }
+  if (
+    type == A(22, 1) + A(2, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({12, 18, 24, 36, 29, 22, 15, 8})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 0, 0, 0, 1, 2, 1, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 42) + g(- 43) + g(- 45) + g(- 46) + g(- 48) + g(- 59) + g(- 64);
+    this->output.unknownNegativeGenerators[1] = - g(- 13) + g(- 14);
+    return true;
+  }
+  if (
+    type == A(20, 1) + A(1, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({12, 16, 22, 32, 26, 20, 14, 8})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({0, 1, 1, 2, 2, 2, 1, 0})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 22) + g(- 40) + g(- 42) + g(- 43) + g(- 52) + g(- 58) *(- 6);
+    this->output.unknownNegativeGenerators[1] = g(- 60);
+    return true;
+  }
+  if (
+    type == A(16, 1) + A(6, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({10, 16, 20, 30, 24, 18, 12, 6})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({2, 0, 3, 4, 4, 4, 3, 2})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 45) - g(- 51) +
+    g(- 52) +
+    g(- 53) +
+    g(- 55) +
+    g(- 56) +
+    g(- 57) +
+    g(- 60) +
+    g(- 64);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 16) * 2 + g(- 20) - g(- 27) + g(- 28) - g(- 29);
+    return true;
+  }
+  if (
+    type == B(12, 2) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({9, 13, 18, 26, 21, 16, 11, 6})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({- 4, - 5, - 9, - 11, - 8, - 6, - 4, - 3})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 55) +
+    g(- 61) +
+    g(- 62) +
+    g(- 68) +
+    g(- 69) +
+    g(- 70) +
+    g(- 71) +
+    g(- 76);
+    this->output.unknownNegativeGenerators[1] =
+    g(39) * "89/36" - g(35) * "1/3" - g(33) * "7/3" +
+    g(32) +
+    g(31) * "11/36" - g(25) * "1/3" +
+    g(23) * 2 - g(22) +
+    g(15);
+    return true;
+  }
   return false;
 }
 
@@ -456,5 +591,23 @@ DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::A(
   DynkinType result;
   Rational dynkinIndexRational = dynkinIndex;
   result.makeSimpleType('A', rank, &dynkinIndexRational);
+  return result;
+}
+
+DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::B(
+  int dynkinIndex, int rank
+) const {
+  DynkinType result;
+  Rational dynkinIndexRational = dynkinIndex;
+  result.makeSimpleType('B', rank, &dynkinIndexRational);
+  return result;
+}
+
+DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::E(
+  int dynkinIndex, int rank
+) const {
+  DynkinType result;
+  Rational dynkinIndexRational = dynkinIndex;
+  result.makeSimpleType('E', rank, &dynkinIndexRational);
   return result;
 }

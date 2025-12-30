@@ -966,6 +966,7 @@ template <class Coefficient>
 int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
+  STACK_TRACE("PolynomialSystem::getPreferredSerreSystemSubstitutionIndex");
   Selection variableSelection;
   this->getVariablesToSolveFor(inputSystem, variableSelection);
   if (variableSelection.cardinalitySelection == 0) {
@@ -1118,6 +1119,18 @@ bool PolynomialSystem<Coefficient>::isContradictoryReducedSystem(
     }
   }
   return false;
+}
+
+template <class Coefficient>
+bool PolynomialSystem<Coefficient>::isSolvedSystem(
+  const List<Polynomial<Coefficient> >& input
+) {
+  for (const Polynomial<Coefficient>& equation : input) {
+    if (!equation.isEqualToZero()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 template <class Coefficient>
@@ -1631,11 +1644,15 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     << ".<br>";
   }
   for (int i = 0; i < arbitrarySubstitutions.size; i ++) {
+    if (this->isSolvedSystem(inputSystem)) {
+      this->flagSystemSolvedOverBaseField = true;
+      return;
+    }
     const Coefficient& arbitrarySubstitution = arbitrarySubstitutions[i];
+    int preferredSubstitutionIndex =
+    this->getPreferredSerreSystemSubstitutionIndex(inputSystem);
     if (this->groebner.flagDoProgressReport) {
-      MonomialPolynomial monomial(
-        this->getPreferredSerreSystemSubstitutionIndex(inputSystem)
-      );
+      MonomialPolynomial monomial(preferredSubstitutionIndex);
       reportStreamHeuristics
       << "Attempting arbitrary substitution "
       << monomial.toString(&this->format())
@@ -1655,9 +1672,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     }
     inputSystem = systemBeforeHeuristics;
     if (this->groebner.flagDoProgressReport) {
-      MonomialPolynomial monomial(
-        this->getPreferredSerreSystemSubstitutionIndex(inputSystem)
-      );
+      MonomialPolynomial monomial(preferredSubstitutionIndex);
       reportStreamHeuristics
       << "<br>The substitution  "
       << monomial.toString(&this->groebner.format)

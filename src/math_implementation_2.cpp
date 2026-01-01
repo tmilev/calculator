@@ -2445,6 +2445,26 @@ bool MathRoutines::isInteger(Rational x) {
   return x.isInteger();
 }
 
+template < >
+void Rational::toBuiltInType(char& output) const {
+  int integerValue = 0;
+  if (!this->isIntegerFittingInInt(&integerValue)) {
+    global.fatal
+    << "Rational::toBuiltInType char called on "
+    << this->toString()
+    << " is not allowed to fail. "
+    << global.fatal;
+  }
+  if (integerValue > 127 || integerValue < - 127) {
+    global.fatal
+    << "Rational::toBuiltInType char called on a value out of range: "
+    << integerValue
+    << ". "
+    << global.fatal;
+  }
+  output = static_cast<char>(integerValue);
+}
+
 double Rational::getDoubleValue() const {
   if (this->extended == nullptr) {
     return

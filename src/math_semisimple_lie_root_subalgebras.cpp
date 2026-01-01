@@ -2820,7 +2820,7 @@ computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators(
   basisMatrixInverted.invert();
   this->outerSAautos.generators.setSize(outerAutos.size);
   for (int i = 0; i < outerAutos.size; i ++) {
-    outerAutos[i].actOnVectorROWSOnTheLeft(
+    outerAutos[i].actOnVectorRowsOnTheLeft(
       this->simpleRootsReductiveSubalgebra, imagesWeightBasis
     );
     imagesWeightBasis.addListOnTop(basisOrthogonalRoots);

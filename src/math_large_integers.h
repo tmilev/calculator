@@ -800,6 +800,8 @@ public:
       this->negate();
     }
   }
+  template <typename BuiltInType>
+  void toBuiltInType(BuiltInType& output) const;
   static long long int totalAdditions() {
     return
     static_cast<long long int>(

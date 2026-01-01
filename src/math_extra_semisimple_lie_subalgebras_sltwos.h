@@ -277,7 +277,7 @@ public:
   bool flagTypeComputed;
   bool flagComputationAttempted;
   CentralizerComputer();
-  bool computeType(DynkinType& outputType);
+  bool computeType(DynkinType* outputType);
   void setCentralizerType(const DynkinType& knownType);
   void initialize(
     SemisimpleLieAlgebra* inputOwner,
@@ -451,7 +451,6 @@ public:
   int dimensionCentralizer;
   Rational dimensionCentralizerToralPart;
   bool flagCentralizerIsRegular;
-  bool flagTryToComputeCentralizerFully;
   HashedList<int> indicesContainingRootSubalgebras;
   List<int> indicesMinimalContainingRootSubalgebras;
   Vectors<Rational> participatingPositiveRoots;
@@ -726,6 +725,9 @@ public:
   void computeRootSubalgebraContainersFromUnsuitableHs();
   void computeRootSubalgebraContainersFromOneUnsuitableH(
     const Vector<Rational>& h
+  );
+  void getSlTwosOfGivenDynkinIndex(
+    const Rational& dynkinIndex, List<SlTwoSubalgebra*>& output
   );
   void computeRootSubalgebraContainers();
   void computeOneRootSubalgebraContainers(SlTwoSubalgebra& output);

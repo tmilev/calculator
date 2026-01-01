@@ -6216,13 +6216,13 @@ int DynkinType::getLieAlgebraDimension() const {
   for (int i = 0; i < this->size(); i ++) {
     result += this->coefficients[i] *(*this)[i].getLieAlgebraDimension();
   }
-  int intResult = 0;
-  if (!result.isSmallInteger(&intResult)) {
+  int integerResult = 0;
+  if (!result.isSmallInteger(&integerResult)) {
     global.fatal
     << "Multiplicity of simple type is not a small integer. "
     << global.fatal;
   }
-  return intResult;
+  return integerResult;
 }
 
 int DynkinType::getRootSystemSize() const {
@@ -7341,6 +7341,35 @@ unsigned int ElementWeylGroupAutomorphisms::hashFunction() const {
   return this->generatorsLastAppliedFirst.hashFunction();
 }
 
+bool ElementWeylGroupAutomorphisms::isOfOrderTwo() const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  int dimension = this->owner->weylGroup->getDimension();
+  // There should be a more computationally
+  // optimal way to check this.
+  // However let's compute it in the simplest way:
+  // check that the automorphism acts by id on all basis vectors.
+  Vector<Rational> basisVector;
+  Vector<Rational> basisVectorImage;
+  for (int i = 0; i < dimension; i ++) {
+    basisVector.makeEi(dimension, i);
+    basisVectorImage = basisVector;
+    // Act on the element twice:
+    this->actOnStandard(basisVectorImage);
+    this->actOnStandard(basisVectorImage);
+    if (basisVector != basisVectorImage) {
+      // The basis vector is not mapped
+      // to itself; the operator is not of
+      // order 2.
+      return false;
+    }
+  }
+  // The element squared acts as the identity
+  // on the entire vector space.
+  return true;
+}
+
 std::string ElementWeylGroupAutomorphisms::toString(FormatExpressions* format)
 const {
   STACK_TRACE("ElementWeylGroupAutomorphisms::toString");
@@ -7747,6 +7776,16 @@ void WeylGroupData::reflectSimple(
     }
   }
   root[index] += alphaShift;
+}
+
+template < >
+void WeylGroupData::reflectSimple(int index, Vector<char>& vector) const {
+  Vector<Rational> vectorRational;
+  vectorRational = vector;
+  this->reflectSimple(index, vectorRational);
+  for (int i = 0; i < vector.size; i ++) {
+    vectorRational[i].toBuiltInType(vector[i]);
+  }
 }
 
 void WeylGroupData::simpleReflectionRootPolynomial(

@@ -3620,8 +3620,8 @@ template <class Coefficient>
 void ArbitrarySubstitutionsProvider<Coefficient>::computeArbitrarySubstitutions
 (int recursionDepth) {
   STACK_TRACE(
-      "ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions"
-      );
+    "ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions"
+  );
   if (this->computeArbitrarySubstitutionsOverride != nullptr) {
     this->computeArbitrarySubstitutionsOverride(*this, recursionDepth);
     return;

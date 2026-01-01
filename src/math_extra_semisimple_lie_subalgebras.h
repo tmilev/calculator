@@ -785,6 +785,11 @@ public:
   bool combinatorialCriteriaAllowRealization();
   bool centralizersComputedToHaveUnsuitableNilpotentOrbits();
   bool centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits();
+  bool centralizersBanRealization(const DynkinType& inputType);
+  bool typeFitsInCentralizerOfSlTwo(
+    const DynkinType& toFitInsideACentralizer,
+    const Rational& dynkinIndexOfSlTwo
+  );
   void initHookUpPointers(
     SemisimpleLieAlgebra& inputOwner,
     AlgebraicClosureRationals* field,

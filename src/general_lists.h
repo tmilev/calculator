@@ -2000,7 +2000,10 @@ std::string List<Object>::toStringLimit(int limit) const {
     itemsToDisplay = limit;
   }
   for (int i = 0; i < itemsToDisplay; i ++) {
-    out << this->objects[i].toString() << "\n";
+    out << this->objects[i] << "\n";
+  }
+  if (this->size > limit) {
+    out << "...\n";
   }
   return out.str();
 }

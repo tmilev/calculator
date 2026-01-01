@@ -1054,6 +1054,9 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer(
   DynkinType* whichCentralizer
 ) {
   STACK_TRACE("SlTwoSubalgebra::attemptToComputeCentralizer");
+  if (this->centralizerComputer.flagComputationAttempted) {
+    return this->centralizerComputer.computeType(whichCentralizer);
+  }
   this->flagCentralizerIsRegular = false;
   Weight<Rational> zeroWeight;
   zeroWeight.weightFundamentalCoordinates.makeZero(1);
@@ -1108,11 +1111,7 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer(
     &dynkinIndex,
     this->toStringDynkinType()
   );
-  DynkinType buffer;
-  if (whichCentralizer == nullptr) {
-    whichCentralizer = &buffer;
-  }
-  return this->centralizerComputer.computeType(*whichCentralizer);
+  return this->centralizerComputer.computeType(whichCentralizer);
 }
 
 bool SlTwoSubalgebra::checkIndicesMinimalContainingRootSubalgebras() const {
@@ -2124,6 +2123,16 @@ void SlTwoSubalgebras::computeRootSubalgebraContainersFromOneUnsuitableH(
   }
 }
 
+void SlTwoSubalgebras::getSlTwosOfGivenDynkinIndex(
+  const Rational& dynkinIndex, List<SlTwoSubalgebra*>& output
+) {
+  for (SlTwoSubalgebra& slTwo : this->allSubalgebras) {
+    if (slTwo.lengthHSquared / 2 == dynkinIndex) {
+      output.addOnTop(&slTwo);
+    }
+  }
+}
+
 void SlTwoSubalgebras::computeRootSubalgebraContainers() {
   STACK_TRACE("SlTwoSubalgebras::computeRootSubalgebraContainers");
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
@@ -2681,11 +2690,13 @@ std::string CentralizerComputer::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-bool CentralizerComputer::computeType(DynkinType& outputType) {
+bool CentralizerComputer::computeType(DynkinType* outputType) {
   if (!this->compute()) {
     return false;
   }
-  outputType = this->typeIfKnown;
+  if (outputType != nullptr) {
+    *outputType = this->typeIfKnown;
+  }
   return true;
 }
 

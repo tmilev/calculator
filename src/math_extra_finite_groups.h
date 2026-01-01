@@ -631,6 +631,8 @@ public:
   );
   void multiplyOnTheRightByOuterAuto(int outerAutoIndex);
   unsigned int hashFunction() const;
+  // Returns whether the element is of order two.
+  bool isOfOrderTwo() const;
   static unsigned int hashFunction(const ElementWeylGroupAutomorphisms& input);
   std::string toString(FormatExpressions* format = nullptr) const;
 };
@@ -1990,53 +1992,68 @@ public:
   );
 };
 
+template <typename Coefficient>
 class WeylGroupAutomorphismAction: public GroupActionInterface<
-  ElementWeylGroupAutomorphisms, Vector<Rational>
+  ElementWeylGroupAutomorphisms, Vector<Coefficient>
 > {
 public:
   WeylGroupAutomorphisms* owner;
-  List<Vector<Rational> > generatorsSubgroupToQuotientOut;
   WeylGroupAutomorphismAction();
   bool checkInitialization() const;
   void actOn(
     const ElementWeylGroupAutomorphisms& actingElement,
-    const Vector<Rational>& inputElementActedUpon,
-    Vector<Rational>& output
+    const Vector<Coefficient>& inputElementActedUpon,
+    Vector<Coefficient>& output
   );
 };
 
+// Iterates over the elements of the orbit of the
+// root actions of Weyl group automorphisms.
 class IteratorRootActionWeylGroupAutomorphisms {
-  List<Vector<Rational> > orbitBuffer;
+  // Use char for elements to save on RAM memory.
+  // The largest orbit of E8 has ~ 600M elements
+  // so it is important to be conservative
+  // with our memory use.
+  // The orbits are considered to be computed mod 256.
+  List<Vector<char> > orbitBuffer;
   Vector<Rational> orbitDefiningElement;
-  int maxOrbitBufferSize;
+  int maximumOrbitBufferSize;
+  bool incrementInternal();
+  Vector<char> smallOrbitDefinitingElement() const;
 public:
   int orbitSize;
   LargeInteger computedSize;
   int currentIndexInBuffer;
   bool flagOrbitIsBuffered;
   bool flagOrbitEnumeratedOnce;
+  bool flagMinimizeRAM;
+  bool flagAllGeneratorsAreOfOrderTwo;
+  OrbitIterator<
+    ElementWeylGroupAutomorphisms,
+    Vector<char>,
+    WeylGroupAutomorphismAction<char>
+  > iteratorMinimizeRAM;
   OrbitIterator<
     ElementWeylGroupAutomorphisms,
     Vector<Rational>,
-    WeylGroupAutomorphismAction
-  > iterator;
+    WeylGroupAutomorphismAction<Rational>
+  > iteratorRational;
   IteratorRootActionWeylGroupAutomorphisms();
   void resetNoActionChange();
+  bool canUseBuffer() const;
   bool incrementReturnFalseIfPastLast();
-  const Vector<Rational>& getCurrentElement();
+  Vector<Rational> getCurrentElement();
   std::string toString() const;
   std::string toStringSize() const;
   bool checkConsistency();
-  void initializeFromOrbitWithCentralizerQuotient(
-    IteratorRootActionWeylGroupAutomorphisms& originalOrbit,
-    const List<Vector<Rational> >& generatorsSubgroupToQuotientOut
-  );
   void computeSize();
   void initialize(
     const List<ElementWeylGroupAutomorphisms>& inputGenerators,
     const Vector<Rational>& inputElement,
-    WeylGroupAutomorphismAction& action
+    WeylGroupAutomorphismAction<Rational>* actionRational,
+    WeylGroupAutomorphismAction<char>* actionMinizeRAM
   );
+  const List<ElementWeylGroupAutomorphisms>& getGenerators() const;
 };
 
 template <typename Coefficient>
@@ -3194,6 +3211,32 @@ bool FiniteGroup<elementSomeGroup>::checkInitializationConjugacyClasses() const 
     }
   }
   return true;
+}
+
+template <typename Coefficient>
+WeylGroupAutomorphismAction<Coefficient>::WeylGroupAutomorphismAction() {
+  this->name = "Weyl group automorphism action";
+  this->owner = nullptr;
+}
+
+template <typename Coefficient>
+bool WeylGroupAutomorphismAction<Coefficient>::checkInitialization() const {
+  if (this->owner == nullptr) {
+    global.fatal
+    << "WeylGroupAutomorphismQuotientOrbitAction owner not initialized. "
+    << global.fatal;
+  }
+  return true;
+}
+
+template <typename Coefficient>
+void WeylGroupAutomorphismAction<Coefficient>::actOn(
+  const ElementWeylGroupAutomorphisms& actingElement,
+  const Vector<Coefficient>& inputElementActedUpon,
+  Vector<Coefficient>& output
+) {
+  this->checkInitialization();
+  this->owner->actOnStandard(actingElement, inputElementActedUpon, output);
 }
 
 #endif // header_math_extra_finite_groups_ALREADY_INCLUDED

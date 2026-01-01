@@ -1237,6 +1237,9 @@ void WeylGroupData::reflectMinusRhoSimple(
   vector[index] += alphaShift;
 }
 
+template < >
+void WeylGroupData::reflectSimple(int index, Vector<char>& vector) const;
+
 template <class Coefficient>
 void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& vector) const {
   if (index < 0 || index >= this->cartanSymmetric.numberOfColumns) {

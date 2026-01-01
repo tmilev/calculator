@@ -1280,9 +1280,8 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
   }
   out << "<br>The context vars:<br>" << context.toString();
   out
-      << "<br>The polynomials: "
-      << polynomials.toString(&system.groebner.format);
-
+  << "<br>The polynomials: "
+  << polynomials.toString(&system.groebner.format);
   return output.assignValue(calculator, out.str());
 }
 
@@ -1332,12 +1331,12 @@ bool CalculatorFunctions::solvePolynomialSystem(
   }
   out << "<br>The context vars:<br>" << context.toString();
   out
-      << "<br>The polynomials: "
-      << polynomials.toString(&system.groebner.format);
+  << "<br>The polynomials: "
+  << polynomials.toString(&system.groebner.format);
   out
-      << "<br>Total number of polynomial computations: "
-      << system.numberOfSerreSystemComputations
-      << ". ";
+  << "<br>Total number of polynomial computations: "
+  << system.numberOfSerreSystemComputations
+  << ". ";
   return output.assignValue(calculator, out.str());
 }
 

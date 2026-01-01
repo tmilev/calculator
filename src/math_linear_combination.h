@@ -1948,36 +1948,41 @@ public:
   void gaussianEliminationByRowsMatrix(
     MatrixTensor<Coefficient>* carbonCopyMatrix = 0
   );
-  template <class otherType>
+  template <class OtherType>
   void actOnVectorColumn(
-    const Vector<otherType>& input, Vector<otherType>& output
+    const Vector<OtherType>& input, Vector<OtherType>& output
+  ) const;
+  template <typename BuiltInType>
+  void actOnVectorColumnBuiltIn(
+    const Vector<BuiltInType>& input, Vector<BuiltInType>& output
   ) const {
     if (&input == &output) {
-      Vector<otherType> inputCopy = input;
+      Vector<BuiltInType> inputCopy = input;
       this->actOnVectorColumn(inputCopy, output);
       return;
     }
     output.makeZero(this->getMinimalNumberOfRows());
-    otherType currentCoefficient;
+    BuiltInType currentCoefficient;
     for (int i = 0; i < this->size(); i ++) {
-      // note that, at the cost of one extra implicit conversion below, we
-      // pReserve the order of multiplication:
-      // first is matrix element, then vector coordinate. The code should work
-      // as-is for non-commutative fields.
-      // (think in the generality of quaternion matrix acting on
-      // quaternion-coefficient polynomials!)
-      currentCoefficient = this->coefficients[i];
+      // Note that, at the cost of one extra implicit conversion below, we
+      // preserve the order of multiplication:
+      // first is matrix element, then vector coordinate.
+      // The code should work
+      // as-is for non-commutative fields, such as
+      // quaternion matrix acting on
+      // quaternion-coefficient polynomials.
+      this->coefficients[i].toBuiltInType(currentCoefficient);
       currentCoefficient *= input[(*this)[i].dualIndex];
       output[(*this)[i].vIndex] += currentCoefficient;
     }
   }
-  void actOnVectorROWSOnTheLeft(
+  void actOnVectorRowsOnTheLeft(
     const List<Vector<Coefficient> >& inputStandToTheLeftAsVectorRows,
     List<Vector<Coefficient> >& output
   ) const {
     if (&inputStandToTheLeftAsVectorRows == &output) {
       List<Vector<Coefficient> > inputCopy = inputStandToTheLeftAsVectorRows;
-      this->actOnVectorROWSOnTheLeft(inputCopy, output);
+      this->actOnVectorRowsOnTheLeft(inputCopy, output);
       return;
     }
     output.setSize(this->getMinimalNumberOfRows());
@@ -2052,6 +2057,38 @@ public:
     return output;
   }
 };
+
+template < >
+template < >
+void MatrixTensor<Rational>::actOnVectorColumn(
+  const Vector<char>& input, Vector<char>& output
+) const;
+
+template <class Coefficient>
+template <class OtherType>
+void MatrixTensor<Coefficient>::actOnVectorColumn(
+  const Vector<OtherType>& input, Vector<OtherType>& output
+) const {
+  if (&input == &output) {
+    Vector<OtherType> inputCopy = input;
+    this->actOnVectorColumn(inputCopy, output);
+    return;
+  }
+  output.makeZero(this->getMinimalNumberOfRows());
+  OtherType currentCoefficient;
+  for (int i = 0; i < this->size(); i ++) {
+    // Note that, at the cost of one extra implicit conversion below, we
+    // preserve the order of multiplication:
+    // first is matrix element, then vector coordinate.
+    // The code should work
+    // as-is for non-commutative fields, such as
+    // quaternion matrix acting on
+    // quaternion-coefficient polynomials.
+    currentCoefficient = this->coefficients[i];
+    currentCoefficient *= input[(*this)[i].dualIndex];
+    output[(*this)[i].vIndex] += currentCoefficient;
+  }
+}
 
 template <class Coefficient>
 void MatrixTensor<Coefficient>::getVectorsSparseFromRowsIncludeZeroRows(

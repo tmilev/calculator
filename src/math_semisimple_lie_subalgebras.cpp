@@ -1401,7 +1401,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
         'A', 1, this->slTwoSubalgebras.allSubalgebras[i].lengthHSquared
       )
     );
-    WeylGroupAutomorphismAction<char> action;
+    WeylGroupAutomorphismAction<int16_t> action;
     action.owner = &weylAutomorphisms;
     this->orbits[i].initialize(
       generators,
@@ -2293,7 +2293,7 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize(
 template < >
 template < >
 void MatrixTensor<Rational>::actOnVectorColumn(
-  const Vector<char>& input, Vector<char>& output
+  const Vector<int16_t>& input, Vector<int16_t>& output
 ) const {
   return this->actOnVectorColumnBuiltIn(input, output);
 }
@@ -2477,7 +2477,7 @@ void IteratorRootActionWeylGroupAutomorphisms::initialize(
   const List<ElementWeylGroupAutomorphisms>& inputGenerators,
   const Vector<Rational>& inputElement,
   WeylGroupAutomorphismAction<Rational>* actionRational,
-  WeylGroupAutomorphismAction<char>* actionMinizeRAM
+  WeylGroupAutomorphismAction<int16_t>* actionMinizeRAM
 ) {
   STACK_TRACE(
     "IteratorRootActionWeylGroupAutomorphisms::"
@@ -2519,9 +2519,9 @@ IteratorRootActionWeylGroupAutomorphisms() {
   this->orbitBuffer.setSize(0);
 }
 
-Vector<char> IteratorRootActionWeylGroupAutomorphisms::
+Vector<int16_t> IteratorRootActionWeylGroupAutomorphisms::
 smallOrbitDefinitingElement() const {
-  Vector<char> result;
+  Vector<int16_t> result;
   result.setSize(this->orbitDefiningElement.size);
   for (int i = 0; i < this->orbitDefiningElement.size; i ++) {
     this->orbitDefiningElement[i].toBuiltInType(result[i]);

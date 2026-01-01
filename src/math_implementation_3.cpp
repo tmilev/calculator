@@ -7779,13 +7779,11 @@ void WeylGroupData::reflectSimple(
 }
 
 template < >
-void WeylGroupData::reflectSimple(int index, Vector<char>& vector) const {
+void WeylGroupData::reflectSimple(int index, Vector<int16_t>& vector) const {
   Vector<Rational> vectorRational;
   vectorRational = vector;
   this->reflectSimple(index, vectorRational);
-  for (int i = 0; i < vector.size; i ++) {
-    vectorRational[i].toBuiltInType(vector[i]);
-  }
+  vectorRational.toBuiltInVector(vector);
 }
 
 void WeylGroupData::simpleReflectionRootPolynomial(

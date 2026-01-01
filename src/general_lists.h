@@ -264,6 +264,8 @@ unsigned int HashFunctions::hashFunction(const unsigned int& input);
 template < >
 unsigned int HashFunctions::hashFunction(const unsigned char& input);
 template < >
+unsigned int HashFunctions::hashFunction(const int16_t& input);
+template < >
 unsigned int HashFunctions::hashFunction(const char& input);
 template < >
 unsigned int HashFunctions::hashFunction(const double& input);

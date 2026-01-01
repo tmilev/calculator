@@ -1238,7 +1238,7 @@ void WeylGroupData::reflectMinusRhoSimple(
 }
 
 template < >
-void WeylGroupData::reflectSimple(int index, Vector<char>& vector) const;
+void WeylGroupData::reflectSimple(int index, Vector<int16_t>& vector) const;
 
 template <class Coefficient>
 void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& vector) const {

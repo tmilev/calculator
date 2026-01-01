@@ -2014,12 +2014,16 @@ class IteratorRootActionWeylGroupAutomorphisms {
   // The largest orbit of E8 has ~ 600M elements
   // so it is important to be conservative
   // with our memory use.
-  // The orbits are considered to be computed mod 256.
-  List<Vector<char> > orbitBuffer;
+  // We therefore use int16_t.
+  // The operations are computed using large
+  // rational arithmetics and only then are converted back to
+  // int16_t, if the values are in range.
+  // If out of range, the code is set to crash.
+  List<Vector<int16_t> > orbitBuffer;
   Vector<Rational> orbitDefiningElement;
   int maximumOrbitBufferSize;
   bool incrementInternal();
-  Vector<char> smallOrbitDefinitingElement() const;
+  Vector<int16_t> smallOrbitDefinitingElement() const;
 public:
   int orbitSize;
   LargeInteger computedSize;
@@ -2030,8 +2034,8 @@ public:
   bool flagAllGeneratorsAreOfOrderTwo;
   OrbitIterator<
     ElementWeylGroupAutomorphisms,
-    Vector<char>,
-    WeylGroupAutomorphismAction<char>
+    Vector<int16_t>,
+    WeylGroupAutomorphismAction<int16_t>
   > iteratorMinimizeRAM;
   OrbitIterator<
     ElementWeylGroupAutomorphisms,
@@ -2051,7 +2055,7 @@ public:
     const List<ElementWeylGroupAutomorphisms>& inputGenerators,
     const Vector<Rational>& inputElement,
     WeylGroupAutomorphismAction<Rational>* actionRational,
-    WeylGroupAutomorphismAction<char>* actionMinizeRAM
+    WeylGroupAutomorphismAction<int16_t>* actionMinizeRAM
   );
   const List<ElementWeylGroupAutomorphisms>& getGenerators() const;
 };

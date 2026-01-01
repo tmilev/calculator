@@ -128,6 +128,13 @@ public:
   std::string toStringEpsilonFormat(FormatExpressions* format = nullptr) const {
     return this->toStringLetterFormat("\\varepsilon", format);
   }
+  template <typename BuiltInType>
+  void toBuiltInVector(Vector<BuiltInType>& output) const {
+    output.setSize(this->size);
+    for (int i = 0; i < this->size; i ++) {
+      (*this)[i].toBuiltInType(output[i]);
+    }
+  }
   template <class OtherType>
   static void scalarProduct(
     const Vector<Coefficient>& v1,

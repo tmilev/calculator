@@ -1956,24 +1956,14 @@ public:
   void actOnVectorColumnBuiltIn(
     const Vector<BuiltInType>& input, Vector<BuiltInType>& output
   ) const {
-    if (&input == &output) {
-      Vector<BuiltInType> inputCopy = input;
-      this->actOnVectorColumn(inputCopy, output);
-      return;
-    }
-    output.makeZero(this->getMinimalNumberOfRows());
-    BuiltInType currentCoefficient;
-    for (int i = 0; i < this->size(); i ++) {
-      // Note that, at the cost of one extra implicit conversion below, we
-      // preserve the order of multiplication:
-      // first is matrix element, then vector coordinate.
-      // The code should work
-      // as-is for non-commutative fields, such as
-      // quaternion matrix acting on
-      // quaternion-coefficient polynomials.
-      this->coefficients[i].toBuiltInType(currentCoefficient);
-      currentCoefficient *= input[(*this)[i].dualIndex];
-      output[(*this)[i].vIndex] += currentCoefficient;
+    Vector<Rational> inputRational;
+    Vector<Rational> outputRational;
+    inputRational = input;
+    int dimension = input.size;
+    this->actOnVectorColumn(inputRational, outputRational);
+    output.setSize(dimension);
+    for (int i = 0; i < outputRational.size; i ++) {
+      outputRational[i].toBuiltInType(output[i]);
     }
   }
   void actOnVectorRowsOnTheLeft(
@@ -2061,7 +2051,7 @@ public:
 template < >
 template < >
 void MatrixTensor<Rational>::actOnVectorColumn(
-  const Vector<char>& input, Vector<char>& output
+  const Vector<int16_t>& input, Vector<int16_t>& output
 ) const;
 
 template <class Coefficient>

@@ -1269,6 +1269,11 @@ unsigned int HashFunctions::hashFunction(const unsigned char& input) {
 }
 
 template < >
+unsigned int HashFunctions::hashFunction(const int16_t& input) {
+  return static_cast<int16_t>(input);
+}
+
+template < >
 unsigned int HashFunctions::hashFunction(const List<unsigned char>& input) {
   unsigned int result = 0;
   int j = 0;

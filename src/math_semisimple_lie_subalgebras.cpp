@@ -2547,7 +2547,7 @@ std::string IteratorRootActionWeylGroupAutomorphisms::toString() const {
   << this->orbitDefiningElement.toString()
   << ". ";
   if (this->flagMinimizeRAM) {
-    out << "Minimizing RAM by using 1 byte coordinates. ";
+    out << "Minimizing RAM by using int16_t coordinates. ";
   } else {
     out << "Computing using rationals. ";
   }

@@ -394,6 +394,18 @@ public:
       }
     }
   }
+  template <typename BuiltInType>
+  bool toBuiltInMatrixFailureAllowed(Matrix<BuiltInType>& output) const {
+    output.resize(this->numberOfRows, this->numberOfColumns, false);
+    for (int i = 0; i < this->numberOfRows; i ++) {
+      for (int j = 0; j < this->numberOfColumns; j ++) {
+        if (!(*this)(i, j).toBuiltInTypeFailureAllowed(output(i, j))) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
   bool checkConsistency() const {
     if (this->flagDeallocated) {
       global.fatal << "Use after free of Matrix. " << global.fatal;

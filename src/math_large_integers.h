@@ -801,6 +801,8 @@ public:
     }
   }
   template <typename BuiltInType>
+  bool toBuiltInTypeFailureAllowed(BuiltInType& output) const;
+  template <typename BuiltInType>
   void toBuiltInType(BuiltInType& output) const;
   static long long int totalAdditions() {
     return
@@ -841,6 +843,10 @@ public:
   Rational(int n) {
     this->extended = nullptr;
     this->assignNumeratorAndDenominator(n, 1);
+  }
+  Rational(int64_t n) {
+    this->extended = nullptr;
+    this->assignNumeratorAndDenominator(static_cast<int>(n), 1);
   }
   Rational(const Rational& right) {
     this->extended = nullptr;
@@ -937,6 +943,9 @@ public:
   }
   void operator=(int right) {
     this->assignInteger(right);
+  }
+  void operator=(int16_t other) {
+    this->assignInteger(static_cast<int>(other));
   }
   inline void operator=(const LargeInteger& other) {
     this->assignLargeInteger(other);

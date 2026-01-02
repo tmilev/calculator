@@ -2446,6 +2446,19 @@ bool MathRoutines::isInteger(Rational x) {
 }
 
 template < >
+bool Rational::toBuiltInTypeFailureAllowed(int16_t& output) const {
+  int integerValue = 0;
+  if (!this->isIntegerFittingInInt(&integerValue)) {
+    return false;
+  }
+  if (integerValue > 32767 || integerValue < - 32767) {
+    return false;
+  }
+  output = static_cast<int16_t>(integerValue);
+  return true;
+}
+
+template < >
 void Rational::toBuiltInType(int16_t& output) const {
   int integerValue = 0;
   if (!this->isIntegerFittingInInt(&integerValue)) {

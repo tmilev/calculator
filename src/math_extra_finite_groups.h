@@ -712,6 +712,8 @@ public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;
   DynkinType dynkinType;
+  // Used for enumerating large orbits.
+  Matrix<int16_t> cartanSymmetricSmall;
   Matrix<Rational> cartanSymmetric;
   Matrix<Rational> coCartanSymmetric;
   Vector<Rational> rho;
@@ -2015,10 +2017,6 @@ class IteratorRootActionWeylGroupAutomorphisms {
   // so it is important to be conservative
   // with our memory use.
   // We therefore use int16_t.
-  // The operations are computed using large
-  // rational arithmetics and only then are converted back to
-  // int16_t, if the values are in range.
-  // If out of range, the code is set to crash.
   List<Vector<int16_t> > orbitBuffer;
   Vector<Rational> orbitDefiningElement;
   int maximumOrbitBufferSize;

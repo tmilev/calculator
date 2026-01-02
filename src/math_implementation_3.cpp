@@ -7780,10 +7780,32 @@ void WeylGroupData::reflectSimple(
 
 template < >
 void WeylGroupData::reflectSimple(int index, Vector<int16_t>& vector) const {
-  Vector<Rational> vectorRational;
-  vectorRational = vector;
-  this->reflectSimple(index, vectorRational);
-  vectorRational.toBuiltInVector(vector);
+  int16_t alphaShift = 0;
+  int dimension = this->cartanSymmetricSmall.numberOfColumns;
+  int16_t* normalOfReflectionPlane =
+  this->cartanSymmetricSmall.elements[index];
+  for (int i = 0; i < dimension; i ++) {
+    alphaShift += vector[i] * normalOfReflectionPlane[i] *(- 2);
+  }
+  alphaShift /= normalOfReflectionPlane[index];
+  if (alphaShift > 10000 || alphaShift < - 10000) {
+    // This is not a mathematical or algorithmic error, but we want to
+    // avoid it as we risk overflowing out int16_t arithmetic.
+    // In a previous version we were computing this by using
+    // large rational arithmetic and checking that the end
+    // result fits in an int16_t, but, at least in the first
+    // implementation, that resulted in x10 slow down of
+    // orbit generation. So, use this imprecise safety check instead.
+    // In reality, we expect this code to only run for the
+    // sl(2)-orbits of Lie algebras of rank no larger than rank 20,
+    // for which the present check shouldn't ever trigger.
+    global.fatal
+    << "Dangerous use of fast reflection library: the "
+    << "coefficients are getting large. Your vector is being shifted by: "
+    << alphaShift
+    << global.fatal;
+  }
+  vector[index] += alphaShift;
 }
 
 void WeylGroupData::simpleReflectionRootPolynomial(
@@ -8528,6 +8550,13 @@ void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
   this->reset();
   this->dynkinType = inputType;
   this->dynkinType.getCartanSymmetric(this->cartanSymmetric);
+  if (
+    !this->cartanSymmetric.toBuiltInMatrixFailureAllowed(
+      this->cartanSymmetricSmall
+    )
+  ) {
+    this->cartanSymmetricSmall.resize(0, 0, false);
+  }
   this->dynkinType.getCoCartanSymmetric(this->coCartanSymmetric);
   this->makeFinalSteps();
   // eventually, there will be formulas for all classical types

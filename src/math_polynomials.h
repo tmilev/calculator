@@ -1210,6 +1210,7 @@ public:
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosure;
   bool flagUseSmallImpliedSubstitutions;
+  bool flagNeedAlgebraicClosure;
   // For fields that are dynamically generated such as modular arithmetic
   // elements (ElementZModP), use this element as factory to generate
   // contstants.
@@ -1266,7 +1267,7 @@ public:
     MonomialPolynomial& outputMonomial
   );
   void setUpRecursiveComputation(PolynomialSystem<Coefficient>& toBeModified);
-  void processSolvedSubcaseIfSolvedOrProvenToHaveSolution(
+  void processPossiblySolvedSubcase(
     PolynomialSystem<Coefficient>& potentiallySolvedCase
   );
   void solveWhenSystemHasSingleMonomial(

@@ -664,7 +664,7 @@ template <class ElementSomeGroup>
 void FiniteGroup<ElementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   ConjugacyClass& inputOutputClass, bool storeCC
 ) {
-  STACK_TRACE("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
+  STACK_TRACE("FiniteGroup::computeCCSizeOrCCFromRepresentative");
   OrbitIterator<
     ElementSomeGroup, ElementSomeGroup, ConjugationAction<ElementSomeGroup>
   > orbitIterator;

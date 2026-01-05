@@ -1401,14 +1401,25 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
         'A', 1, this->slTwoSubalgebras.allSubalgebras[i].lengthHSquared
       )
     );
-    WeylGroupAutomorphismAction<int16_t> action;
-    action.owner = &weylAutomorphisms;
-    this->orbits[i].initialize(
-      generators,
-      this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart(),
-      nullptr,
-      &action
-    );
+    if (weylAutomorphisms.weylGroup->cartanSymmetricSmall.numberOfColumns > 0) {
+      WeylGroupAutomorphismAction<int16_t> action;
+      action.owner = &weylAutomorphisms;
+      this->orbits[i].initialize(
+        generators,
+        this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart(),
+        nullptr,
+        &action
+      );
+    } else {
+      WeylGroupAutomorphismAction<Rational> action;
+      action.owner = &weylAutomorphisms;
+      this->orbits[i].initialize(
+        generators,
+        this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart(),
+        &action,
+        nullptr
+      );
+    }
     this->orbits[i].computeSize();
   }
 }
@@ -2379,7 +2390,7 @@ bool IteratorRootActionWeylGroupAutomorphisms::incrementInternal() {
     if (this->flagMinimizeRAM) {
       return this->iteratorMinimizeRAM.incrementReturnFalseIfPastLast();
     } else {
-      this->iteratorRational.incrementReturnFalseIfPastLast();
+      return this->iteratorRational.incrementReturnFalseIfPastLast();
     }
   }
   // Should be unreachable.
@@ -2443,7 +2454,15 @@ bool IteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast()
     this->orbitBuffer.size < this->maximumOrbitBufferSize &&
     !this->flagOrbitEnumeratedOnce
   ) {
-    this->orbitBuffer.addOnTop(this->iteratorMinimizeRAM.getCurrentElement());
+    if (this->flagMinimizeRAM) {
+      this->orbitBuffer.addOnTop(
+        this->iteratorMinimizeRAM.getCurrentElement()
+      );
+    } else {
+      Vector<int16_t> next;
+      this->iteratorRational.getCurrentElement().toBuiltInVector(next);
+      this->orbitBuffer.addOnTop(next);
+    }
   }
   if (this->getCurrentElement().size == 0) {
     global.fatal
@@ -2490,12 +2509,17 @@ void IteratorRootActionWeylGroupAutomorphisms::initialize(
       inputGenerators, this->orbitDefiningElement
     );
     this->flagMinimizeRAM = false;
-  } else {
+  } else if (actionMinizeRAM != nullptr) {
     this->iteratorMinimizeRAM.setGroupAction(*actionMinizeRAM);
     this->iteratorMinimizeRAM.initialize(
       inputGenerators, this->smallOrbitDefinitingElement()
     );
     this->flagMinimizeRAM = true;
+  } else {
+    global.fatal
+    << "actionRational and actionMinizeRAM are not allowed "
+    << "to be null simultaneously. "
+    << global.fatal;
   }
   for (const ElementWeylGroupAutomorphisms& generator : inputGenerators) {
     if (generator.isOfOrderTwo()) {
@@ -2510,8 +2534,8 @@ IteratorRootActionWeylGroupAutomorphisms() {
   this->flagOrbitIsBuffered = false;
   this->flagOrbitEnumeratedOnce = false;
   this->flagMinimizeRAM = false;
-  this->orbitSize = - 1;
   this->flagAllGeneratorsAreOfOrderTwo = false;
+  this->orbitSize = - 1;
   this->computedSize = - 1;
   this->currentIndexInBuffer = - 1;
   // Ten million.

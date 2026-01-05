@@ -665,7 +665,10 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemProvenToHaveSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
-  this->flagUseSmallImpliedSubstitutions = false;
+  int thisIsTemporary;
+  this->flagNeedAlgebraicClosure=false;
+
+  this->flagUseSmallImpliedSubstitutions =  false; //true;
 }
 
 template <class Coefficient>
@@ -774,6 +777,14 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
     return false;
   }
   if (!polynomial.totalDegree().isEqualToOne()) {
+    if (polynomial.size() > 1) {
+      // We have a polynomial equation of degree larger than 1.
+      // Unless the polynomial factors over the base field
+      // - for which we do not check here -
+      // we need to try solving this system
+      // using the algebraic closure.
+      this->flagNeedAlgebraicClosure=true;
+    }
     return false;
   }
   const Coefficient leadingCoefficient =
@@ -846,9 +857,6 @@ bool PolynomialSystem<Coefficient>::isSolutionToPolynomialInOneVariable(
 ) {
   int oneVariableIndex = 0;
   if (!polynomial.isOneVariableNonConstantPolynomial(&oneVariableIndex)) {
-    return false;
-  }
-  if (!this->flagUsingAlgebraicClosure || this->algebraicClosure == nullptr) {
     return false;
   }
   Coefficient coefficient;
@@ -1385,15 +1393,16 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   toBeModified.groebner.polynomialOrder = this->groebner.polynomialOrder;
   toBeModified.substitutionsProvider = this->substitutionsProvider;
   toBeModified.sampleCoefficient = this->sampleCoefficient;
+  toBeModified.flagNeedAlgebraicClosure = false;
 }
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::
-processSolvedSubcaseIfSolvedOrProvenToHaveSolution(
+    processPossiblySolvedSubcase(
   PolynomialSystem<Coefficient>& potentiallySolvedCase
 ) {
   STACK_TRACE(
-    "PolynomialSystem::processSolvedSubcaseIfSolvedOrProvenToHaveSolution"
+    "PolynomialSystem::processPossiblySolvedSubcase"
   );
   if (potentiallySolvedCase.flagSystemSolvedOverBaseField) {
     potentiallySolvedCase.numberOfSerreSystemComputations =
@@ -1410,6 +1419,9 @@ processSolvedSubcaseIfSolvedOrProvenToHaveSolution(
   }
   if (potentiallySolvedCase.flagSystemProvenToHaveSolution) {
     this->flagSystemProvenToHaveSolution = true;
+  }
+  if (!potentiallySolvedCase.flagSystemProvenToHaveNoSolution && potentiallySolvedCase.flagNeedAlgebraicClosure) {
+    this->flagNeedAlgebraicClosure=true;
   }
 }
 
@@ -1466,7 +1478,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   heuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
   this->numberOfSerreSystemComputations +=
   heuristicAttempt.numberOfSerreSystemComputations;
-  this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(heuristicAttempt);
+  this->processPossiblySolvedSubcase(heuristicAttempt);
 }
 
 template <class Coefficient>
@@ -1546,7 +1558,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
       );
     }
     oneCase.solveSerreLikeSystemRecursively(inputOutputSystem);
-    this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);
+    this->processPossiblySolvedSubcase(oneCase);
     if (!oneCase.flagSystemProvenToHaveNoSolution) {
       allProvenToHaveNoSolution = false;
     }
@@ -1785,9 +1797,10 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     << this->toStringCalculatorInputFromSystem(inputSystem);
     report.report(reportStream.str());
   }
-  if (this->algebraicClosure == 0) {
+  if (this->algebraicClosure == nullptr) {
     this->flagTryDirectlySolutionOverAlgebraicClosure = false;
   }
+  this->flagNeedAlgebraicClosure = this->flagTryDirectlySolutionOverAlgebraicClosure;
   if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {
     this->flagUsingAlgebraicClosure = false;
     this->solveSerreLikeSystemRecursively(workingSystem);
@@ -1795,7 +1808,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   if (
     this->algebraicClosure != nullptr &&
     !this->flagSystemSolvedOverBaseField &&
-    !this->flagSystemProvenToHaveNoSolution
+      !this->flagSystemProvenToHaveNoSolution && this->flagNeedAlgebraicClosure
   ) {
     if (this->groebner.flagDoProgressReport) {
       if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {

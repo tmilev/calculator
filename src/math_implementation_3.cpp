@@ -7780,6 +7780,9 @@ void WeylGroupData::reflectSimple(
 
 template < >
 void WeylGroupData::reflectSimple(int index, Vector<int16_t>& vector) const {
+  if (this->cartanSymmetricSmall.numberOfColumns == 0) {
+    global.fatal << "The symmetric cartan is not small. " << global.fatal;
+  }
   int16_t alphaShift = 0;
   int dimension = this->cartanSymmetricSmall.numberOfColumns;
   int16_t* normalOfReflectionPlane =

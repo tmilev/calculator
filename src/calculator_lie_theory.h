@@ -291,7 +291,15 @@ public:
   static bool elementsInSameLieAlgebra(
     Calculator& calculator,
     const Expression& input,
-    Expression& output,
+    Expression& outputOnError,
+    SemisimpleLieAlgebra*& outputOwner,
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
+  static bool elementsInLieAlgebra(
+    Calculator& calculator,
+    const Expression& inputAlgebra,
+    const List<Expression>& inputElements,
+    Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
   );
@@ -299,6 +307,9 @@ public:
     Calculator& calculator, const Expression& input, CartanInvolution& output
   );
   static bool cartanInvolution(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool exponentOfAdjointOf(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool adjointCommonEigenSpaces(

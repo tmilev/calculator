@@ -1628,7 +1628,7 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
     if (input.generatorsIndices[i] >= this->imagesAllChevalleyGenerators.size) {
       return false;
     }
-    element.assignElementLieAlgebra(
+    element.assignElementLieAlgebraRational(
       this->imagesAllChevalleyGenerators[input.generatorsIndices[i]],
       this->coDomainAlgebra(),
       polyOne

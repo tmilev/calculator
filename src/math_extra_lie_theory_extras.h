@@ -1125,7 +1125,7 @@ getElementUniversalEnveloping(
   accumulator.makeConstant(this->coefficient, inputOwner);
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     if (this->powers[i].isSmallInteger(&degree)) {
-      monomial.assignElementLieAlgebra(
+      monomial.assignElementLieAlgebraRational(
         this->owner->elementOrder[this->generatorsIndices[i]],
         inputOwner,
         this->coefficient.getOne(),

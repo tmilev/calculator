@@ -19,6 +19,14 @@ const List<Expression>::Comparator* FormatExpressions::getMonomialOrder<
   return nullptr;
 }
 
+template < >
+const List<MonomialUniversalEnveloping<AlgebraicNumber> >::Comparator*
+FormatExpressions::getMonomialOrder<
+  MonomialUniversalEnveloping<AlgebraicNumber>
+>() const {
+  return nullptr;
+}
+
 // Calculator::builtInName specializations follow
 template < >
 std::string Calculator::builtInName<ElementEllipticCurve<Rational> >() {
@@ -399,6 +407,17 @@ int Expression::addObjectReturnIndex(
   this->checkInitialization();
   return
   this->owner->objectContainer.universalEnvelopingAlgebraElements.
+  addNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::addObjectReturnIndex(
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputValue
+) const {
+  this->checkInitialization();
+  return
+  this->owner->objectContainer.
+  elementsOfSemisimpleLieAlgebrasWithAlgebraicCoefficients.
   addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -2971,10 +2990,30 @@ bool Expression::toStringBuiltIn<
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   out
-  << "UEE{}(" // << input.getContext().toString() << ", "
+  << "UEE{}("
   << input.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >()
   .toString(&formatLocal)
   << ")";
+  return true;
+}
+
+template < >
+bool Expression::toStringBuiltIn<
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  out
+  << input.getValue<ElementSemisimpleLieAlgebra<AlgebraicNumber> >().toString(
+    &formatLocal
+  );
   return true;
 }
 
@@ -3323,23 +3362,6 @@ bool Expression::toStringBuiltIn<Lattice>(
   << Calculator::Functions::Names::lattice
   << "{}"
   << lattice.toStringParentheses();
-  return true;
-}
-
-template < >
-bool Expression::toStringBuiltIn<
-  ElementSemisimpleLieAlgebra<AlgebraicNumber>
->(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  input.checkInitialization();
-  (void) format;
-  (void) outputProperties;
-  out
-  << input.owner->builtInName<ElementSemisimpleLieAlgebra<AlgebraicNumber> >();
   return true;
 }
 

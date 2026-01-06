@@ -665,10 +665,9 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemProvenToHaveSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
+  this->flagNeedAlgebraicClosure = false;
   int thisIsTemporary;
-  this->flagNeedAlgebraicClosure=false;
-
-  this->flagUseSmallImpliedSubstitutions =  false; //true;
+  this->flagUseSmallImpliedSubstitutions = true;
 }
 
 template <class Coefficient>
@@ -783,7 +782,7 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
       // - for which we do not check here -
       // we need to try solving this system
       // using the algebraic closure.
-      this->flagNeedAlgebraicClosure=true;
+      this->flagNeedAlgebraicClosure = true;
     }
     return false;
   }
@@ -1397,13 +1396,10 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
 }
 
 template <class Coefficient>
-void PolynomialSystem<Coefficient>::
-    processPossiblySolvedSubcase(
+void PolynomialSystem<Coefficient>::processPossiblySolvedSubcase(
   PolynomialSystem<Coefficient>& potentiallySolvedCase
 ) {
-  STACK_TRACE(
-    "PolynomialSystem::processPossiblySolvedSubcase"
-  );
+  STACK_TRACE("PolynomialSystem::processPossiblySolvedSubcase");
   if (potentiallySolvedCase.flagSystemSolvedOverBaseField) {
     potentiallySolvedCase.numberOfSerreSystemComputations =
     this->numberOfSerreSystemComputations;
@@ -1420,8 +1416,11 @@ void PolynomialSystem<Coefficient>::
   if (potentiallySolvedCase.flagSystemProvenToHaveSolution) {
     this->flagSystemProvenToHaveSolution = true;
   }
-  if (!potentiallySolvedCase.flagSystemProvenToHaveNoSolution && potentiallySolvedCase.flagNeedAlgebraicClosure) {
-    this->flagNeedAlgebraicClosure=true;
+  if (
+    !potentiallySolvedCase.flagSystemProvenToHaveNoSolution &&
+    potentiallySolvedCase.flagNeedAlgebraicClosure
+  ) {
+    this->flagNeedAlgebraicClosure = true;
   }
 }
 
@@ -1800,7 +1799,8 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   if (this->algebraicClosure == nullptr) {
     this->flagTryDirectlySolutionOverAlgebraicClosure = false;
   }
-  this->flagNeedAlgebraicClosure = this->flagTryDirectlySolutionOverAlgebraicClosure;
+  this->flagNeedAlgebraicClosure =
+  this->flagTryDirectlySolutionOverAlgebraicClosure;
   if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {
     this->flagUsingAlgebraicClosure = false;
     this->solveSerreLikeSystemRecursively(workingSystem);
@@ -1808,7 +1808,8 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   if (
     this->algebraicClosure != nullptr &&
     !this->flagSystemSolvedOverBaseField &&
-      !this->flagSystemProvenToHaveNoSolution && this->flagNeedAlgebraicClosure
+    !this->flagSystemProvenToHaveNoSolution &&
+    this->flagNeedAlgebraicClosure
   ) {
     if (this->groebner.flagDoProgressReport) {
       if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {

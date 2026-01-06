@@ -3793,6 +3793,7 @@ public:
   void initializeOperationsInterpretedAsFunctionsMultiplicatively();
   void initializeOperationsThatAreKnownFunctions();
   void initializeArithmeticOperations();
+  void initializeBuiltInTypes();
   void initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
   void initializeBuiltInAtomsNotInterpretedAsFunctions();
   void initializeAtomsNotGoodForChainRule();

@@ -219,8 +219,13 @@ public:
   void makeCartanGenerator(
     const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner
   );
-  void assignElementLieAlgebra(
+  void assignElementLieAlgebraRational(
     const ElementSemisimpleLieAlgebra<Rational>& input,
+    SemisimpleLieAlgebra& inputOwner,
+    const Coefficient& ringUnit = 1
+  );
+  void assignElementLieAlgebraArbitrary(
+    const ElementSemisimpleLieAlgebra<Coefficient>& input,
     SemisimpleLieAlgebra& inputOwner,
     const Coefficient& ringUnit = 1
   );
@@ -553,7 +558,7 @@ void ElementUniversalEnveloping<Coefficient>::lieBracketOnTheLeft(
     return;
   }
   ElementUniversalEnveloping<Coefficient> element1, element2;
-  element1.assignElementLieAlgebra(
+  element1.assignElementLieAlgebraRational(
     left, *this->owner, this->coefficients[0].one()
   );
   element2 = *this;
@@ -776,7 +781,7 @@ bool ElementUniversalEnveloping<Coefficient>::isLieAlgebraElementRational(
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::assignElementLieAlgebra(
+void ElementUniversalEnveloping<Coefficient>::assignElementLieAlgebraRational(
   const ElementSemisimpleLieAlgebra<Rational>& input,
   SemisimpleLieAlgebra& inputOwner,
   const Coefficient& ringUnit
@@ -787,16 +792,34 @@ void ElementUniversalEnveloping<Coefficient>::assignElementLieAlgebra(
   monomial.generatorsIndices.setSize(1);
   monomial.powers.setSize(1);
   monomial.powers[0] = ringUnit;
-  Coefficient tempCF;
+  Coefficient converter;
   for (int i = 0; i < input.size(); i ++) {
-    tempCF = ringUnit;
+    converter = ringUnit;
     // <- to facilitate implicit type conversion: ringUnit does not have to be
     // of type Rational
-    tempCF *= input.coefficients[i];
+    converter *= input.coefficients[i];
     // <- to facilitate implicit type conversion: ringUnit does not have to be
     // of type Rational
     monomial.generatorsIndices[0] = input[i].generatorIndex;
-    this->addMonomial(monomial, tempCF);
+    this->addMonomial(monomial, converter);
+  }
+}
+
+template <class Coefficient>
+void ElementUniversalEnveloping<Coefficient>::assignElementLieAlgebraArbitrary(
+  const ElementSemisimpleLieAlgebra<Coefficient>& input,
+  SemisimpleLieAlgebra& inputOwner,
+  const Coefficient& ringUnit
+) {
+  this->makeZero(inputOwner);
+  MonomialUniversalEnveloping<Coefficient> monomial;
+  monomial.makeOne(inputOwner);
+  monomial.generatorsIndices.setSize(1);
+  monomial.powers.setSize(1);
+  monomial.powers[0] = ringUnit;
+  for (int i = 0; i < input.size(); i ++) {
+    monomial.generatorsIndices[0] = input[i].generatorIndex;
+    this->addMonomial(monomial, input.coefficients[i]);
   }
 }
 
@@ -846,16 +869,16 @@ void ElementUniversalEnveloping<Coefficient>::makeCartanGenerator(
   int totalPositiveRoots = this->getOwner().weylGroup.rootsOfBorel.size;
   monomial.generatorsIndices.setSize(1);
   monomial.powers.setSize(1);
-  Coefficient tempCF;
+  Coefficient converter;
   for (int i = 0; i < dimension; i ++) {
     if (!input[i].isEqualToZero()) {
       (*monomial.generatorsIndices.lastObject()) = i + totalPositiveRoots;
       *monomial.powers.lastObject() = 1;
-      tempCF = 1;
+      converter = 1;
       // <- to facilitate type conversion
-      tempCF *= input[i];
+      converter *= input[i];
       // <- to facilitate type conversion we call extra assignment
-      this->addMonomial(monomial, tempCF);
+      this->addMonomial(monomial, converter);
     }
   }
 }

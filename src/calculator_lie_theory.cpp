@@ -254,7 +254,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       << genericElement.toString(&universalEnvelopingFormat)
       << "$";
       for (int j = 0; j < generatorsItry.size; j ++) {
-        actionOnGenericElement.assignElementLieAlgebra(
+        actionOnGenericElement.assignElementLieAlgebraRational(
           generatorsItry[j], semisimpleLieAlgebra, pOne
         );
         actionOnGenericElement *= genericElement;
@@ -2730,39 +2730,63 @@ bool CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand(
 bool CalculatorLieTheory::elementsInSameLieAlgebra(
   Calculator& calculator,
   const Expression& input,
-  Expression& output,
+  Expression& outputOnError,
   SemisimpleLieAlgebra*& outputOwner,
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
-  STACK_TRACE("CalculatorLieTheory::getElementsInSameLieAlgebra");
+  STACK_TRACE("CalculatorLieTheory::elementsInSameLieAlgebra");
   if (input.size() < 3) {
-    output.assignError(
+    outputOnError.assignError(
       calculator,
-      "Function ad common eigenspaces needs at least 2 arguments - "
+      "Function elementsInSameLieAlgebra requires at least two arguments: "
       "type and at least one element of the algebra."
     );
     return false;
   }
+  List<Expression> toBeConverted;
+  for (int i = 2; i < input.size(); i ++) {
+    toBeConverted.addOnTop(input[i]);
+  }
+  return
+  CalculatorLieTheory::elementsInLieAlgebra(
+    calculator,
+    input[1],
+    toBeConverted,
+    outputOnError,
+    outputOwner,
+    outputElements
+  );
+}
+
+bool CalculatorLieTheory::elementsInLieAlgebra(
+  Calculator& calculator,
+  const Expression& inputAlgebra,
+  const List<Expression>& inputElements,
+  Expression& outputOnError,
+  SemisimpleLieAlgebra*& outputOwner,
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+) {
+  STACK_TRACE("CalculatorLieTheory::elementsInSameLieAlgebra");
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!CalculatorConversions::convert(calculator, input[1], algebra)) {
-    output.assignError(calculator, "Error extracting Lie algebra.");
+  if (!CalculatorConversions::convert(calculator, inputAlgebra, algebra)) {
+    outputOnError.assignError(calculator, "Error extracting Lie algebra.");
     return false;
   }
   outputOwner = algebra.content;
-  outputElements.reserve(input.size() - 2);
+  outputElements.reserve(inputElements.size);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
-  for (int i = 2; i < input.size(); i ++) {
+  for (const Expression& currentElement : inputElements) {
     if (
       !CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, input[i], element, *outputOwner
+        calculator, currentElement, element, *outputOwner
       )
     ) {
       std::stringstream out;
       out
       << "Failed to extract element of semisimple Lie algebra from: "
-      << input[i]
+      << currentElement
       << ". ";
-      output.assignError(calculator, out.str());
+      outputOnError.assignError(calculator, out.str());
       return false;
     }
     outputElements.addOnTop(element);
@@ -2770,12 +2794,120 @@ bool CalculatorLieTheory::elementsInSameLieAlgebra(
   return true;
 }
 
+template <class Coefficient>
+bool SemisimpleLieAlgebra::exponentOfAdX(
+  const ElementSemisimpleLieAlgebra<Coefficient>& elementA,
+  const ElementSemisimpleLieAlgebra<Coefficient>& elementB,
+  ElementSemisimpleLieAlgebra<Coefficient>& output,
+  std::stringstream* commentsOnError
+) {
+  SemisimpleLieAlgebra* owner = elementA.getOwner();
+  SemisimpleLieAlgebra* ownerB = elementB.getOwner();
+  if (owner == nullptr) {
+    owner = ownerB;
+  }
+  if (ownerB != nullptr && owner != ownerB) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Different semisimple Lie algebras in exponentOfAdX";
+    }
+    return false;
+  }
+  if (owner == nullptr) {
+    // Both elementA and elementB are zero.
+    output = elementB;
+    return true;
+  }
+  ElementSemisimpleLieAlgebra<Coefficient> result;
+  ElementSemisimpleLieAlgebra<Coefficient> adAPowerNDividedByNFactorial;
+  adAPowerNDividedByNFactorial = elementB;
+  for (int i = 0; i < owner->getNumberOfPositiveRoots(); i ++) {
+    result += adAPowerNDividedByNFactorial;
+    elementA.lieBracketOnTheRight(
+      adAPowerNDividedByNFactorial, adAPowerNDividedByNFactorial
+    );
+    adAPowerNDividedByNFactorial *= Rational(1, i + 1);
+    if (adAPowerNDividedByNFactorial.isEqualToZero()) {
+      return true;
+    }
+  }
+  if (commentsOnError != nullptr) {
+    *commentsOnError
+    << "Element: "
+    << elementA.toStringPretty()
+    << " does not have nilpotent action on "
+    << elementB.toStringPretty()
+    << ". ";
+  }
+  return false;
+}
+
+bool CalculatorLieTheory::exponentOfAdjointOf(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  SemisimpleLieAlgebra* ownerSemisimple = nullptr;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > inputElements;
+  if (
+    !CalculatorLieTheory::elementsInSameLieAlgebra(
+      calculator, input, output, ownerSemisimple, inputElements
+    )
+  ) {
+    return true;
+  }
+  if (inputElements.size != 2 || ownerSemisimple == nullptr) {
+    return
+    output.assignError(
+      calculator,
+      "Function ExponentOfAdjointOf requires 3 arguments: "
+      "Lie algebra type, and two elements. "
+    );
+  }
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementA =
+  inputElements[0];
+  //  return output.assignValue(calculator, elementA);
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementB =
+  inputElements[1];
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> result;
+  std::stringstream commentsOnError;
+  if (
+    !ownerSemisimple->exponentOfAdX(
+      elementA, elementB, result, &commentsOnError
+    )
+  ) {
+    return output.assignError(calculator, commentsOnError.str());
+  }
+  Expression aExpression;
+  Expression bExpression;
+  Expression resultExpression;
+  aExpression.assignValue(calculator, elementA);
+  bExpression.assignValue(calculator, elementB);
+  resultExpression.assignValue(calculator, result);
+  Expression ad;
+  ad.makeAtom(calculator, "ad");
+  Expression adX(calculator);
+  adX.addChildOnTop(ad);
+  adX.addChildOnTop(aExpression);
+  Expression exponentOfAdX;
+  Expression e;
+  e.makeAtom(calculator, "e");
+  exponentOfAdX.makeXOX(calculator, calculator.opPower(), e, adX);
+  Expression exponentOfAdXOfB(calculator);
+  exponentOfAdXOfB.addChildOnTop(exponentOfAdX);
+  exponentOfAdXOfB.addChildOnTop(bExpression);
+  std::stringstream resultStream;
+  resultStream
+  << exponentOfAdXOfB.toMathMLFinal(nullptr)
+  << " equals:  "
+  << resultExpression.toMathMLFinal(nullptr);
+  return output.assignValue(calculator, resultStream.str());
+}
+
 bool CalculatorLieTheory::adjointCommonEigenSpaces(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorLieTheory::adjointCommonEigenSpaces");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > outputElements;
   if (
     !CalculatorLieTheory::elementsInSameLieAlgebra(
       calculator, input, output, ownerSemisimple, elements
@@ -6285,7 +6417,7 @@ bool CalculatorLieTheory::chevalleyGenerator(
   element.makeGenerator(generatorIndex, *semisimpleLieAlgebra.content);
   ElementUniversalEnveloping<RationalFraction<Rational> >
   elementOverRationalFunctions;
-  elementOverRationalFunctions.assignElementLieAlgebra(
+  elementOverRationalFunctions.assignElementLieAlgebraRational(
     element, *semisimpleLieAlgebra.content
   );
   ExpressionContext context(calculator);
@@ -6339,7 +6471,7 @@ bool CalculatorLieTheory::cartanGenerator(
   element.makeCartanGenerator(hElement, *semisimpleLieAlgebra.content);
   ElementUniversalEnveloping<RationalFraction<Rational> >
   elementUniversalEnveloping;
-  elementUniversalEnveloping.assignElementLieAlgebra(
+  elementUniversalEnveloping.assignElementLieAlgebraRational(
     element, *semisimpleLieAlgebra.content
   );
   ExpressionContext context(calculator);

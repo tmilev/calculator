@@ -291,6 +291,29 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     standardOptions
   );
   this->addOperationHandler(
+    "ExponentOfAdjointOf",
+    CalculatorLieTheory::exponentOfAdjointOf,
+    "",
+    "Computes e^(ad a)(b) where (ad a) "
+    "has nilpotent action and a and b are elements of a "
+    "semisimple Lie algebra. "
+    "The first element is the type of the semisimple Lie algebra, "
+    "the second argument is a and the third argument is b. "
+    "Here, (ad a) has nilpotent "
+    "action on b if there exists N for which  \\((ad a)^N (b) = 0\\)."
+    "We recall that (ad a)(b) stands for the Lie bracket [a,b]. "
+    "We also recall that \\(e^A = \\sum_{i=0}^\\infty A^n/n!\\), "
+    "where A stands for the linear operator (ad a). "
+    "The series is in fact a finite due to "
+    "the nilpotent action condition.",
+    "ExponentOfAdjointOf{}(F_4, "
+    "-5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), "
+    "g_{14}+g_{22}+g_{20})",
+    "CalculatorLieTheory::exponentOfAdjointOf",
+    "ExponentOfAdjointOf",
+    standardOptions
+  );
+  this->addOperationHandler(
     "AttemptExtendingEtoHEFwithHinCartan",
     CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan,
     "",

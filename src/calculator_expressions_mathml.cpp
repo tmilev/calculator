@@ -114,6 +114,27 @@ bool Expression::toMathMLBuiltIn<
 }
 
 template < >
+bool Expression::toMathMLBuiltIn<
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  std::string content =
+  input.getValue<ElementSemisimpleLieAlgebra<AlgebraicNumber> >().toMathML(
+    &formatLocal, outputProperties
+  );
+  out << content;
+  return true;
+}
+
+template < >
 bool Expression::toMathMLBuiltIn<SemisimpleLieAlgebra*>(
   const Expression& input,
   std::stringstream& out,

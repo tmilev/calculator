@@ -1318,8 +1318,9 @@ bool CalculatorFunctions::solvePolynomialSystem(
   } else if (system.flagSystemProvenToHaveSolution) {
     out << "<br>System proven to have solution. ";
   } else {
-    out << "System solution not reached. "
-        <<           "The system was neither proved solvable nor proved impossible. ";
+    out
+    << "System solution not reached. "
+    << "The system was neither proved solvable nor proved impossible. ";
   }
   if (!system.flagSystemProvenToHaveNoSolution) {
     if (system.flagSystemSolvedOverBaseField) {
@@ -1330,7 +1331,7 @@ bool CalculatorFunctions::solvePolynomialSystem(
       out
       << "No solution found: "
       << "my heuristics are not "
-             << "good enough or the system is too large to prove impossible. ";
+      << "good enough or the system is too large to prove impossible. ";
     }
   }
   out << "<br>The context vars:<br>" << context.toString();

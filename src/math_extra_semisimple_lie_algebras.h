@@ -414,6 +414,13 @@ public:
     this->fileNames.owner = nullptr;
     this->flagDeallocated = true;
   }
+  template <class Coefficient>
+  static bool exponentOfAdX(
+    const ElementSemisimpleLieAlgebra<Coefficient>& elementA,
+    const ElementSemisimpleLieAlgebra<Coefficient>& elementB,
+    ElementSemisimpleLieAlgebra<Coefficient>& output,
+    std::stringstream* commentsOnError
+  );
   bool checkConsistency() const;
   template <class Coefficient>
   void generateLieSubalgebra(

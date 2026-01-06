@@ -2588,7 +2588,7 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
   this->getGenericUnMinusElement(
     true, genericElement, useNilWeight, ascending
   );
-  result.assignElementLieAlgebra(inputElement, *this->owner, 1);
+  result.assignElementLieAlgebraRational(inputElement, *this->owner, 1);
   Polynomial<Rational> onePolynomial;
   onePolynomial.makeConstant(1);
   genericElement.simplify(onePolynomial);

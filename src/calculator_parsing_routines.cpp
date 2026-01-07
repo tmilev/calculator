@@ -3451,16 +3451,6 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
-  if (secondToLastS == "%" && lastS == "SequenceStatements") {
-    this->lastRuleName = "comment out command";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (thirdToLastS == "%" && secondToLastS == "SequenceStatements") {
-    this->lastRuleName = "comment out command below top";
-    this->popBelowStackTop();
-    return this->popBelowStackTop();
-  }
   if (secondToLastS == "%" && lastS == "LogCache") {
     this->owner->flagLogCache = true;
     this->popTopSyntacticStack();
@@ -3496,6 +3486,16 @@ bool CalculatorParser::applyOneRule() {
     this->owner->flagUseFracInRationalLaTeX = false;
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
+  }
+  if (thirdToLastS == "%" && lastS == ";") {
+    this->lastRuleName = "remove code comment terminated by semicolon";
+    this->popTopSyntacticStack();
+    this->popTopSyntacticStack();
+    return this->popTopSyntacticStack();
+  }
+  if (thirdToLastS == "%") {
+    this->lastRuleName = "remove code comment";
+    return this->popBelowStackTop();
   }
   if (
     secondToLastS == "\\\\" && (

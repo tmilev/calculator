@@ -1,0 +1,20 @@
+% This computation is used in ongoing scientific work;
+type = E_8;
+% g_k is the k^th Chevalley generator in E_8, likewise for h_k;
+g_{{k}} = ChevalleyGenerator(type, k);
+h_{{k}} = CartanGenerator(type,k);
+% This is the e-element of the f element of the sl(2) triple with Dynkin index 12;
+A= {g}_{-61}+{g}_{-62}+{g}_{-69}+{g}_{-70}+{g}_{-71};
+% This is the h-element of the sl(2)-triple;
+H= 9h_1+
+13h_2+
+18h_3+
+26h_4+
+21h_5+
+16h_6+
+11h_7+
+6h_8;
+
+index = 1;
+ExponentOfAdjointOf(g_{-index}, ExponentOfAdjointOf(g_index, A));
+ExponentOfAdjointOf(g_{-index}, ExponentOfAdjointOf(g_index, H))-H;

@@ -5269,6 +5269,13 @@ AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}
 ```
 Computes common eigenspace of the adjoint action of semisimple Lie algebra elements inside the semisimple Lie algebra. 
 
+*ExponentOfAdjointOf* [ExponentOfAdjointOf] {CalculatorLieTheory::exponentOfAdjointOf}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExponentOfAdjointOf%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+ExponentOfAdjointOf{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})
+```
+Computes e^(ad a)(b) where (ad a) has nilpotent action and a and b are elements of a semisimple Lie algebra. The first element is the type of the semisimple Lie algebra, the second argument is a and the third argument is b. The first element can be omitted if the remaining two arguments are created can be converted to a elements of a common semisimple Lie algebra - in this case, the two arguments would be linear elements without constant terms of a common Universal Enveloping Algebra. Here, (ad a) has nilpotent action on b if there exists N for which  \((ad a)^N (b) = 0\).We recall that (ad a)(b) stands for the Lie bracket [a,b]. We also recall that \(e^A = \sum_{i=0}^\infty A^n/n!\), where A stands for the linear operator (ad a). The series is in fact a finite due to the nilpotent action condition.
+
 *AttemptExtendingEtoHEFwithHinCartan* [AttemptExtendingEtoHEFwithHinCartan] {Calculator::attemptExtendingEtoHEFwithHinCartan}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AttemptExtendingEtoHEFwithHinCartan%7b%7d%28F_4%2c%20g_1%2b2g_2%2b3g_3%2b4g_4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

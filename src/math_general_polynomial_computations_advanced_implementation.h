@@ -666,8 +666,7 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
   this->flagNeedAlgebraicClosure = false;
-  int thisIsTemporary;
-  this->flagUseSmallImpliedSubstitutions = true;
+  this->flagUseSmallImpliedSubstitutions = false;
 }
 
 template <class Coefficient>
@@ -771,6 +770,7 @@ template <class Coefficient>
 bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
   const Polynomial<Coefficient>& polynomial, Coefficient& outputSolution
 ) {
+  STACK_TRACE("PolynomialSystem::getOneVariablePolynomialSolution");
   int variableIndex = 0;
   if (!polynomial.isOneVariablePolynomial(&variableIndex)) {
     return false;
@@ -788,7 +788,10 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
   }
   const Coefficient leadingCoefficient =
   polynomial.getCoefficientOf(MonomialPolynomial(variableIndex));
-  outputSolution = (polynomial.constantTerm() / leadingCoefficient);
+  // For modular computations, the modulus of the zero is not known and must
+  // be extracted from the leading coefficient.
+  const Coefficient sampleZero = leadingCoefficient.zero();
+  outputSolution = (polynomial.constantTerm(leadingCoefficient.zero()) / leadingCoefficient);
   outputSolution.negate();
   return true;
 }
@@ -797,6 +800,7 @@ template <class Coefficient>
 bool PolynomialSystem<Coefficient>::leftIsBetterSubstitutionThanRight(
   const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
 ) {
+  STACK_TRACE("PolynomialSystem::leftIsBetterSubstitutionThanRight");
   Rational leftDegree = left.totalDegree();
   Rational rightDegree = right.totalDegree();
   if (leftDegree > rightDegree) {
@@ -814,6 +818,7 @@ bool PolynomialSystem<Coefficient>::isImpliedLinearSubstitution(
   PolynomialSubstitution<Coefficient>& outputSubstitution,
   Polynomial<Coefficient>& outputPolynomial
 ) {
+  STACK_TRACE("PolynomialSystem::isImpliedLinearSubstitution");
   int numberOfVariables = this->systemSolution.size;
   MonomialPolynomial monomial;
   Coefficient coefficient;
@@ -854,6 +859,7 @@ bool PolynomialSystem<Coefficient>::isSolutionToPolynomialInOneVariable(
   Polynomial<Coefficient>& polynomial,
   PolynomialSubstitution<Coefficient>& outputSubstitution
 ) {
+  STACK_TRACE("PolynomialSystem::isSolutionToPolynomialInOneVariable");
   int oneVariableIndex = 0;
   if (!polynomial.isOneVariableNonConstantPolynomial(&oneVariableIndex)) {
     return false;

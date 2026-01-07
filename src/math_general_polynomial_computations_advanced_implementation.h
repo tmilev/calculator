@@ -791,7 +791,9 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
   // For modular computations, the modulus of the zero is not known and must
   // be extracted from the leading coefficient.
   const Coefficient sampleZero = leadingCoefficient.zero();
-  outputSolution = (polynomial.constantTerm(leadingCoefficient.zero()) / leadingCoefficient);
+  outputSolution = (
+    polynomial.constantTerm(leadingCoefficient.zero()) / leadingCoefficient
+  );
   outputSolution.negate();
   return true;
 }

@@ -288,6 +288,13 @@ public:
   static bool slTwoRealFormStructureForceRecompute(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool elementsInLieAlgebraImpliedLieAlgebra(
+    Calculator& calculator,
+    const List<Expression>& inputElements,
+    Expression& outputOnError,
+    SemisimpleLieAlgebra*& outputOwner,
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
   static bool elementsInSameLieAlgebra(
     Calculator& calculator,
     const Expression& input,
@@ -295,7 +302,7 @@ public:
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
   );
-  static bool elementsInLieAlgebra(
+  static bool elementsInLieAlgebraExplicitLieAlgebra(
     Calculator& calculator,
     const Expression& inputAlgebra,
     const List<Expression>& inputElements,

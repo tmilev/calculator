@@ -827,6 +827,10 @@ void AlgebraicNumber::computeFormattingProperties(
   this->needsParenthesisForMultiplication(format);
   outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft =
   this->needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  Rational element;
+  if (this->isRational(&element)) {
+    outputProperties->startsWithMinus = element.isNegative();
+  }
 }
 
 bool AlgebraicNumber::

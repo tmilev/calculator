@@ -1135,18 +1135,18 @@ Rational SemisimpleLieAlgebra::getConstant(
 bool SemisimpleLieAlgebra::getConstantOrHElement(
   const Vector<Rational>& root1,
   const Vector<Rational>& root2,
-  Rational& outputRat,
+  Rational& outputRational,
   Vector<Rational>& outputH
 ) {
   if (!(root1 + root2).isEqualToZero()) {
-    outputRat = this->getConstant(root1, root2);
+    outputRational = this->getConstant(root1, root2);
     return true;
   }
   if (
     this->weylGroup.rootSystem.getIndex(root1) == - 1 ||
     this->weylGroup.rootSystem.getIndex(root2) == - 1
   ) {
-    outputRat.makeZero();
+    outputRational.makeZero();
     return true;
   }
   outputH = (root1* 2) / Vector<Rational>::scalarProduct(

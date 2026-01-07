@@ -707,9 +707,6 @@ public:
     const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
-  void computeFormattingProperties(
-    MathExpressionFormattingProperties* outputProperties = nullptr
-  );
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;
   std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr)

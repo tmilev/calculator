@@ -575,8 +575,8 @@ public:
     const ElementSemisimpleLieAlgebra<Coefficient>& g2,
     ElementSemisimpleLieAlgebra<Coefficient>& output
   );
-  // Setup: \gamma +\delta =\epsilon +\zeta =\eta is a Vector<Rational> .
-  // then the below function computes n_{-\epsilon, -\zeta}
+  // Setup: \gamma +\delta =\epsilon +\zeta =\eta is a Vector<Rational>.
+  // Then the below function computes n_{-\epsilon, -\zeta}
   void computeOneChevalleyConstant(
     int indexGamma,
     int indexDelta,
@@ -594,11 +594,11 @@ public:
     const Vector<Rational>& root1, const Vector<Rational>& root2
   );
   Vector<Rational> getWeightOfGenerator(int index);
-  // returns true if returning constant, false if returning element of h
+  // Returns true if returning constant, false if returning element of h.
   bool getConstantOrHElement(
     const Vector<Rational>& root1,
     const Vector<Rational>& root2,
-    Rational& outputRat,
+    Rational& outputRational,
     Vector<Rational>& outputH
   );
   bool testForConsistency();
@@ -800,8 +800,8 @@ public:
     this->checkConsistency();
     if (this->getOwner() == 0) {
       global.fatal
-      <<
-      "CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "
+      << "CharacterSemisimpleLieAlgebraModule has no owner "
+      << "semisimple Lie algebra, "
       << "which is not allowed at by the calling function. "
       << global.fatal;
     }
@@ -1394,7 +1394,7 @@ freudenthalEvalMeDominantWeightsOnly(
   std::string* outputDetails
 ) {
   STACK_TRACE(
-    "charSSAlgMod_CoefficientType::freudenthalEvalMeDominantWeightsOnly"
+    "CharacterSemisimpleLieAlgebraModule::freudenthalEvalMeDominantWeightsOnly"
   );
   if (&outputCharOwnerSetToZero == this) {
     CharacterSemisimpleLieAlgebraModule<Coefficient> thisCopy = *this;

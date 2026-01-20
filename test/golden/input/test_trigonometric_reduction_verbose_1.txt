@@ -1,0 +1,7 @@
+TrigonometricReductionVerbose((sin x - 1 +cos x ) /(sin x + 1 - cos x));
+A = cos(2x)/(cos^3 x - sin^3 x);
+TrigonometricReductionVerbose A;
+TrigonometricReductionVerbose( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta));
+TrigonometricReductionVerbose(sin(5x));
+TrigonometricReductionVerbose(tan(5x));
+TrigonometricReductionVerbose(cos(2x)/(1-cos^2 x - sin^2 x))

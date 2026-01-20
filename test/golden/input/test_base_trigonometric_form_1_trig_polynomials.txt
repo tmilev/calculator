@@ -1,0 +1,4 @@
+BaseTrigonemetricForm(sin t) ;
+BaseTrigonemetricForm(sin (2t)) ;
+BaseTrigonemetricForm(sin (3t)) ;
+

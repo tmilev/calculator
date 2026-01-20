@@ -1,0 +1,1 @@
+(\sin{}t;2 \left(\cos{}t\right)\sin{}t;3 \left(\sin{}t\right){\cos^{2}}{}t-{\sin^{3}}{}t)

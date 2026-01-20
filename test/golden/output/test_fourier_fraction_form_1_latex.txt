@@ -1,0 +1,1 @@
+(A=\frac{\sin{}s+\cos{}s-1}{\sin{}s-\cos{}s+1};\frac{-\sin{}s+\cos{}s+1}{\sin{}s+\cos{}s+1})

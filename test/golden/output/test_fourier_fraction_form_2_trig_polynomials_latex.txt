@@ -1,0 +1,1 @@
+(\sin{}t;\sin{}\left(2 t\right);\sin{}\left(3 t\right))

@@ -10427,7 +10427,7 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
 
 void Calculator::Test::writeGoldenOutputFiles() {
   STACK_TRACE("Calculator::Test::writeGoldenOutputFiles");
-  std::string testCaseOutputLocation = "test/calculator/output/";
+  std::string testCaseOutputLocation = "test/golden/output/";
   for (int i = 0; i < this->commandsWithGoldenOutputFiles.size(); i ++) {
     const std::string& command = this->commandsWithGoldenOutputFiles.keys[i];
     const std::string& fileNameWithoutExtension =
@@ -10457,9 +10457,17 @@ void Calculator::Test::writeGoldenOutputFiles() {
 void Calculator::Test::initializeLoadTestCases() {
   STACK_TRACE("Calculator::Test::initializeLoadTestCases");
   List<std::string> fileNames;
-  std::string testCaseLocation = "test/calculator/input";
-  if (!FileOperations::getFolderFileNamesVirtual(testCaseLocation, fileNames)) {
-    global.fatal << "Couldn't find test examples. " << global.fatal;
+  std::string testCaseLocation = "test/golden/input/";
+  std::stringstream commentsOnFailure;
+  if (
+    !FileOperations::getFolderFileNamesVirtual(
+      testCaseLocation, fileNames, nullptr, false, false, &commentsOnFailure
+    )
+  ) {
+    global.fatal
+    << "Couldn't find test examples. "
+    << commentsOnFailure.str()
+    << global.fatal;
   }
   for (std::string& fileName : fileNames) {
     std::string fileNameWithoutExtension;
@@ -10473,7 +10481,7 @@ void Calculator::Test::initializeLoadTestCases() {
     std::stringstream errorStream;
     std::string content;
     FileOperations::loadFileToStringVirtual(
-      "test/calculator/input/" + fileName, content, false, &errorStream
+      "test/golden/input/" + fileName, content, false, &errorStream
     );
     OneTest testCase;
     testCase.requresAdminAccess = false;

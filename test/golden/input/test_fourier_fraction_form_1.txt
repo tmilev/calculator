@@ -1,0 +1,3 @@
+A= (sin s - 1 + cos s ) / (sin s + 1 - cos s) ;
+FourierFractionForm(A) ;
+

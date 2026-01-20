@@ -1,0 +1,4 @@
+FourierFractionForm(sin t) ;
+FourierFractionForm(sin (2t)) ;
+FourierFractionForm(sin (3t)) ;
+

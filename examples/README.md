@@ -2863,11 +2863,13 @@ FourierFractionForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta))
 Reduces a rational fraction of trigometric functions and expands the numerator and denominator to their fourier form.
 
 *BaseTrigonemetricForm* [BaseTrigonemetricForm] {CalculatorFunctionsTrigonometry::baseTrigonometricForm}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20cos%282x%29%2f%28cos%5e3%20x%20-%20sin%5e3%20x%29%3b%5cnBaseTrigonemetricForm%20A%3b%5cnBaseTrigonemetricForm%28%20%281%2btan%28theta%29%29%2f%281-tan%28theta%29%29-%20tan%20%282theta%29-%20sec%282theta%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20cos%282x%29%2f%28cos%5e3%20x%20-%20sin%5e3%20x%29%3b%5cnBaseTrigonemetricForm%20A%3b%5cnBaseTrigonemetricForm%28%20%281%2btan%28theta%29%29%2f%281-tan%28theta%29%29-%20tan%20%282theta%29-%20sec%282theta%29%29%3b%5cnBaseTrigonemetricForm%28sin%285x%29%29%3b%5cnBaseTrigonemetricForm%28tan%285x%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A = cos(2x)/(cos^3 x - sin^3 x);
 BaseTrigonemetricForm A;
-BaseTrigonemetricForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta))
+BaseTrigonemetricForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta));
+BaseTrigonemetricForm(sin(5x));
+BaseTrigonemetricForm(tan(5x))
 ```
 Reduces a rational fraction of trigometric functions and expands the numerator and denominator to their sin(x), cos(x) constituents, where x is chosen naturally.
 

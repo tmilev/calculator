@@ -949,8 +949,8 @@ void Calculator::initializeFunctionsStandard() {
     "A = cos(2x)/(cos^3 x - sin^3 x);\n"
     "BaseTrigonemetricForm A;\n"
     "BaseTrigonemetricForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta));\n"
-      "BaseTrigonemetricForm(sin(5x));\n"
-      "BaseTrigonemetricForm(tan(5x))"
+    "BaseTrigonemetricForm(sin(5x));\n"
+    "BaseTrigonemetricForm(tan(5x))"
     "",
     "CalculatorFunctionsTrigonometry::baseTrigonometricForm",
     "BaseTrigonemetricForm",

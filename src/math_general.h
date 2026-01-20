@@ -2088,6 +2088,13 @@ public:
   }
 };
 
+template < >
+bool FormatExpressions::toStringIsFractionLikeWithUnitNumerator(
+  const Rational& input,
+  const FormatExpressions* format,
+  int& outputSign,
+  std::string& outputDenominatorString
+);
 template <class SourceCoefficient, class TargetCoefficient>
 class CoefficientConverter {
 public:

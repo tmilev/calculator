@@ -43,13 +43,13 @@ HEADERS += \
     math_basics.h \
     math_conversions.h \
     math_extra_polynomial_factorization.h \
-  math_extra_semisimple_lie_subalgebras_sltwos.h \
+    math_extra_semisimple_lie_subalgebras_sltwos.h \
     math_lattices.h \
-  math_lie_theory.h \
-  math_linear_combination.h \
-  math_mathml.h \
+    math_lie_theory.h \
+    math_linear_combination.h \
+    math_mathml.h \
     math_modular_arithmetic.h \
-  math_polynomials.h \
+    math_polynomials.h \
     math_vector_partition_functions.h \
     math_weyl_algebras.h \
     network.h \
@@ -640,8 +640,8 @@ HEADERS += \
    #openssl/test/threadstest.h \
     progress_report.h \
     signals_infrastructure.h \
-  test.h \
-  user.h \
+    test.h \
+    user.h \
     web_api.h \
     json.h \
     math_extra_algebraic_numbers.h \
@@ -695,7 +695,7 @@ SOURCES += \
     calculator_conversions_1.cpp \
     calculator_educational_functions_1.cpp \
     calculator_expressions.cpp \
-  calculator_expressions_mathml.cpp \
+    calculator_expressions_mathml.cpp \
     calculator_finite_group_characters.cpp \
     calculator_function_registration.cpp \
     calculator_function_registration_extra.cpp \
@@ -742,7 +742,7 @@ SOURCES += \
     json_parsing.cpp \
     math_algebraic_numbers.cpp \
     math_algebraic_numbers_test.cpp \
-  math_basics.cpp \
+    math_basics.cpp \
     math_conversions.cpp \
     math_elliptic_curves.cpp \
     math_finite_group_characters.cpp \
@@ -760,14 +760,14 @@ SOURCES += \
     math_implementation_6_test.cpp \
     math_lattices.cpp \
     math_lie_theory_test.cpp \
-  math_mathml.cpp \
+    math_mathml.cpp \
     math_modular_arithmetic.cpp \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
-  math_semisimple_lie_subalgebras_arbitrary_constants.cpp \
+    math_semisimple_lie_subalgebras_arbitrary_constants.cpp \
     math_semisimple_lie_subalgebras_sltwos.cpp \
-  math_semisimple_lie_subalgebras_sltwos_arbitrary_constants.cpp \
+    math_semisimple_lie_subalgebras_sltwos_arbitrary_constants.cpp \
     math_vector_partition_functions.cpp \
     math_vectors_test.cpp \
     multiprocessing.cpp \

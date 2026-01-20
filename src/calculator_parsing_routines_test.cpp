@@ -226,7 +226,13 @@ bool Calculator::Test::builtInFunctionsABTest(
   Calculator::Test test(ownerInitialized);
   test.initialize();
   global.userInputStringIfAvailable = "";
-  if (!test.calculatorTestRun() && !updateABTestFile) {
+  // For verification, we only use the golden json.
+  // Therefore we can immediately write the golden output files.
+  // These are used so as to track via our repository the evolution of
+  // the test cases and are not used to verify AB behavior.
+  test.writeGoldenOutputFiles();
+  bool success = test.calculatorTestRun();
+  if (!success && !updateABTestFile) {
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;
     crashFile

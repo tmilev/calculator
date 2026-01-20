@@ -73,6 +73,7 @@ public:
   }
   bool hasPositiveOrZeroExponents() const;
   bool hasNonNegativeIntegralExponents() const;
+  bool hasIntegralExponents() const;
   // Warning: hashFunction must return the same result
   // for equal monomials represented by different monBodies.
   // Two such different representation may differ by extra entries filled in
@@ -279,6 +280,9 @@ public:
   void operator*=(const MonomialPolynomial& other);
   void operator/=(const MonomialPolynomial& other);
   bool operator==(const MonomialPolynomial& other) const;
+  bool operator!=(const MonomialPolynomial& other) const {
+    return !(*this == other);
+  }
   template <class Coefficient>
   void operator=(const Vector<Coefficient>& other) {
     this->monomialBody = other;
@@ -594,10 +598,10 @@ public:
   Matrix<Coefficient> evaluateUnivariatePolynomial(
     const Matrix<Coefficient>& input
   );
-  // <-for univariate polynomials only
   Coefficient evaluate(
     const Vector<Coefficient>& input, const Coefficient& zero = 0
-  );
+  ) const;
+  // Evaluates a univariate polynomial at a value.
   Coefficient evaluate(const Coefficient& input, const Coefficient& zero = 0) {
     Vector<Coefficient> vectorInput;
     vectorInput.addOnTop(input);

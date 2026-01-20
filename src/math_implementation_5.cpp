@@ -1302,6 +1302,15 @@ void MonomialPolynomial::trimTrailingZeroes() {
   }
 }
 
+bool MonomialPolynomial::hasIntegralExponents() const {
+  for (Rational& power : this->monomialBody) {
+    if (!power.isInteger()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool MonomialPolynomial::hasNonNegativeIntegralExponents() const {
   for (Rational& power : this->monomialBody) {
     if (!power.isInteger() || power.isNegative()) {

@@ -1,0 +1,8 @@
+% The substitution depends on the coefficient in front of the variable s;
+A= (sin s - 1 + cos s ) / (sin s + 1 - cos s) ;
+TrigonometricReductionVerbose(A) ;
+% Once we set s=2t, the reduction is with respect to t;
+s=2t;
+A;
+TrigonometricReductionVerbose(A) ;
+

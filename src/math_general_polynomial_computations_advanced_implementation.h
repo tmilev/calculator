@@ -2119,6 +2119,10 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   if (left.isEqualToZero() || right.isEqualToZero()) {
     global.fatal
     << "Greatest common divisor including zeroes not allowed. "
+    << "Your inputs: "
+    << left.toStringPretty()
+    << ", "
+    << right.toStringPretty()
     << global.fatal;
   }
   if (

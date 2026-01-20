@@ -286,7 +286,7 @@ public:
     const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
-  bool isIntegerFittingInInt(int* whichInt);
+  bool isIntegerFittingInInt(int* whichInt) const;
   bool isPositive() const {
     return this->sign == 1 && (this->value.isPositive());
   }

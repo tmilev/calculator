@@ -266,7 +266,7 @@ void Polynomial<Coefficient>::makeDegreeOne(
 template <class Coefficient>
 Coefficient Polynomial<Coefficient>::evaluate(
   const Vector<Coefficient>& input, const Coefficient& zero
-) {
+) const {
   STACK_TRACE("Polynomial::evaluate");
   Coefficient output = zero;
   for (int i = 0; i < this->size(); i ++) {

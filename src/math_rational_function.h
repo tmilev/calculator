@@ -99,6 +99,15 @@ public:
   bool operator!=(int other);
   bool operator==(const RationalFraction<Coefficient>& other) const;
   void simplify();
+  // Normalizes negative exponents such as:
+  // (xy^{-1}+x)/y --> (x+xy)/y^2
+  // (xy^{-1}+x) --> (x+xy)/y
+  void normalizeNegativeExponents();
+  static void normalizeNegativeExponentsInQuotient(
+    Polynomial<Coefficient>& numerator,
+    Polynomial<Coefficient>& denominator,
+    MonomialPolynomial& outputMultiplierOfNumeratorAndDenominator
+  );
   void reduceRationalFraction();
   // Scales the numerator and denominator simultaneously
   // so all coefficients are integers,
@@ -974,6 +983,50 @@ void RationalFraction<Coefficient>::operator+=(
 }
 
 template <class Coefficient>
+void RationalFraction<Coefficient>::normalizeNegativeExponents() {
+  STACK_TRACE("RationalFraction::normalizeNegativeExponents");
+  if (this->expressionType == TypeExpression::typeConstant) {
+    return;
+  }
+  if (this->expressionType == TypeExpression::typePolynomial) {
+    Polynomial<Coefficient>& simplifiedNumerator =
+    this->numerator.getElement();
+    MonomialPolynomial scale;
+    simplifiedNumerator.scaleToPositiveMonomialExponents(scale);
+    if (scale.isConstant()) {
+      return;
+    }
+    this->denominator.getElement().makeZero();
+    this->denominator.getElement().addMonomial(
+      scale, simplifiedNumerator.coefficients[0].one()
+    );
+    this->reduceMemory();
+    return;
+  }
+  MonomialPolynomial scale;
+  this->normalizeNegativeExponentsInQuotient(
+    this->numerator.getElement(), this->denominator.getElement(), scale
+  );
+  this->reduceMemory();
+}
+
+template <class Coefficient>
+void RationalFraction<Coefficient>::normalizeNegativeExponentsInQuotient(
+  Polynomial<Coefficient>& numerator,
+  Polynomial<Coefficient>& denominator,
+  MonomialPolynomial& outputMultiplierOfNumeratorAndDenominator
+) {
+  numerator.scaleToPositiveMonomialExponents(
+    outputMultiplierOfNumeratorAndDenominator
+  );
+  denominator *= outputMultiplierOfNumeratorAndDenominator;
+  MonomialPolynomial scaleDenominator;
+  denominator.scaleToPositiveMonomialExponents(scaleDenominator);
+  numerator *= scaleDenominator;
+  outputMultiplierOfNumeratorAndDenominator.multiplyBy(scaleDenominator);
+}
+
+template <class Coefficient>
 void RationalFraction<Coefficient>::reduceRationalFraction() {
   if (this->expressionType != TypeExpression::typeRationalFraction) {
     return;
@@ -984,11 +1037,6 @@ void RationalFraction<Coefficient>::reduceRationalFraction() {
   Polynomial<Coefficient>& simplifiedNumerator = this->numerator.getElement();
   Polynomial<Coefficient>& simplifiedDenominator =
   this->denominator.getElement();
-  MonomialPolynomial scale;
-  simplifiedNumerator.scaleToPositiveMonomialExponents(scale);
-  simplifiedDenominator *= scale;
-  simplifiedDenominator.scaleToPositiveMonomialExponents(scale);
-  simplifiedNumerator *= scale;
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderForGreatestCommonDivisor();
   Polynomial<Coefficient> greatestCommonDivisor;
@@ -1013,6 +1061,11 @@ void RationalFraction<Coefficient>::reduceRationalFraction() {
     remainderByGCD,
     monomialOrder
   );
+  if (!remainderByGCD.isEqualToZero()) {
+    global.fatal
+    << "The remainder after dividing by the gcd must be zero. "
+    << global.fatal;
+  }
   simplifiedNumerator = quotientByGreatestCommonDivisor;
   simplifiedDenominator.divideBy(
     greatestCommonDivisor,
@@ -1020,12 +1073,18 @@ void RationalFraction<Coefficient>::reduceRationalFraction() {
     remainderByGCD,
     monomialOrder
   );
+  if (!remainderByGCD.isEqualToZero()) {
+    global.fatal
+    << "The remainder after dividing by the gcd must be zero. "
+    << global.fatal;
+  }
   this->denominator.getElement() = quotientByGreatestCommonDivisor;
 }
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::simplify() {
   STACK_TRACE("RationalFraction::simplify");
+  this->normalizeNegativeExponents();
   this->reduceRationalFraction();
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
@@ -1386,6 +1445,7 @@ void RationalFraction<Coefficient>::operator=(
     // We therefore initialize a zero constant here.
     this->constantValue = other.coefficients[0].zero();
   }
+  this->normalizeNegativeExponents();
   this->reduceMemory();
 }
 

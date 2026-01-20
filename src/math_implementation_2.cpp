@@ -1559,7 +1559,7 @@ void LargeInteger::raiseToPower(int power) {
   MathRoutines::raiseToPower(*this, power, LargeInteger(1));
 }
 
-bool LargeInteger::isIntegerFittingInInt(int* whichInt) {
+bool LargeInteger::isIntegerFittingInInt(int* whichInt) const {
   if (!this->value.isIntegerFittingInInt(whichInt)) {
     return false;
   }

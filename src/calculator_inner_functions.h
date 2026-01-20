@@ -403,6 +403,12 @@ public:
   static bool fourierFractionForm(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool baseTrigonometricForm(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool trigonometricReductionVerbose(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool maximalCosineForm(
     Calculator& calculator, const Expression& input, Expression& output
   );

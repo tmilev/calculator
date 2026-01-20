@@ -909,17 +909,49 @@ void Calculator::initializeFunctionsStandard() {
     innerStandardOffByDefault
   );
   this->addOperationHandler(
+    "TrigonometricReductionVerbose",
+    CalculatorFunctionsTrigonometry::trigonometricReductionVerbose,
+    "",
+    "Reduces trigonometric rational fraction "
+    "in one variable to various equivalent forms. ",
+    "A = cos(2x)/(cos^3 x - sin^3 x);\n"
+    "TrigonometricReductionVerbose A;\n"
+    "TrigonometricReductionVerbose( "
+    "(1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta)"
+    ");\n"
+    "TrigonometricReductionVerbose(1/(sin^2 x + cos^2 x-1));\n"
+    "",
+    "CalculatorFunctionsTrigonometry::trigonometricReductionVerbose",
+    "TrigonometricReductionVerbose",
+    innerStandard
+  );
+  this->addOperationHandler(
     "FourierFractionForm",
     CalculatorFunctionsTrigonometry::fourierFractionForm,
     "",
-    "Converts a trigonometric expression "
-    "in one variable to fourier fraction form. ",
+    "Reduces a rational fraction of trigometric functions and expands "
+    "the numerator and denominator to their fourier form.",
     "A = cos(2x)/(cos^3 x - sin^3 x);\n"
     "FourierFractionForm A;\n"
     "FourierFractionForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta))"
     "",
     "CalculatorFunctionsTrigonometry::fourierFractionForm",
     "FourierFractionForm",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "BaseTrigonemetricForm",
+    CalculatorFunctionsTrigonometry::baseTrigonometricForm,
+    "",
+    "Reduces a rational fraction of trigometric functions and expands "
+    "the numerator and denominator to their sin(x), cos(x) constituents, "
+    "where x is chosen naturally.",
+    "A = cos(2x)/(cos^3 x - sin^3 x);\n"
+    "BaseTrigonemetricForm A;\n"
+    "BaseTrigonemetricForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta))"
+    "",
+    "CalculatorFunctionsTrigonometry::baseTrigonometricForm",
+    "BaseTrigonemetricForm",
     innerStandard
   );
   this->addOperationHandler(

@@ -10425,6 +10425,69 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
   return output.assignValue(calculator, std::string("Couldn't find solution"));
 }
 
+void Calculator::Test::writeGoldenOutputFiles() {
+  STACK_TRACE("Calculator::Test::writeGoldenOutputFiles");
+  std::string testCaseOutputLocation = "test/calculator/output/";
+  for (int i = 0; i < this->commandsWithGoldenOutputFiles.size(); i ++) {
+    const std::string& command = this->commandsWithGoldenOutputFiles.keys[i];
+    const std::string& fileNameWithoutExtension =
+    this->commandsWithGoldenOutputFiles.values[i];
+    Calculator::Test::OneTest oneCase =
+    this->commands.getValueNoFail(command);
+    std::stringstream commentsOnError;
+    if (
+      !FileOperations::writeFileVirtual(
+        testCaseOutputLocation + fileNameWithoutExtension + "_latex.txt",
+        oneCase.actualResult,
+        &commentsOnError
+      ) ||
+      !FileOperations::writeFileVirtual(
+        testCaseOutputLocation + fileNameWithoutExtension + "_mathml.txt",
+        oneCase.actualResultMathML,
+        &commentsOnError
+      )
+    ) {
+      global.fatal
+      << "Unexpected failure to write golden output files. "
+      << global.fatal;
+    }
+  }
+}
+
+void Calculator::Test::initializeLoadTestCases() {
+  STACK_TRACE("Calculator::Test::initializeLoadTestCases");
+  List<std::string> fileNames;
+  std::string testCaseLocation = "test/calculator/input";
+  if (!FileOperations::getFolderFileNamesVirtual(testCaseLocation, fileNames)) {
+    global.fatal << "Couldn't find test examples. " << global.fatal;
+  }
+  for (std::string& fileName : fileNames) {
+    std::string fileNameWithoutExtension;
+    if (
+      !StringRoutines::stringEndsWith(
+        fileName, ".txt", &fileNameWithoutExtension
+      )
+    ) {
+      continue;
+    }
+    std::stringstream errorStream;
+    std::string content;
+    FileOperations::loadFileToStringVirtual(
+      "test/calculator/input/" + fileName, content, false, &errorStream
+    );
+    OneTest testCase;
+    testCase.requresAdminAccess = false;
+    std::string name = fileNameWithoutExtension;
+    testCase.atom = name;
+    testCase.command = content;
+    testCase.functionAdditionalIdentifier = name;
+    this->commands.setKeyValue(testCase.command, testCase);
+    this->commandsWithGoldenOutputFiles.setKeyValue(
+      testCase.command, fileNameWithoutExtension
+    );
+  }
+}
+
 void Calculator::Test::initialize() {
   STACK_TRACE("Calculator::Test::initialize");
   if (this->owner == nullptr) {
@@ -10441,6 +10504,7 @@ void Calculator::Test::initialize() {
     oneTest.functionAdditionalIdentifier = name;
     this->commands.setKeyValue(oneTest.command, oneTest);
   }
+  this->initializeLoadTestCases();
   for (int i = 0; i < this->owner->numberOfPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& currentPointer =
     this->owner->operations.values[i];

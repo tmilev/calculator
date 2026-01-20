@@ -3510,20 +3510,6 @@ public:
   );
   class Test {
   public:
-    int64_t startTime;
-    int startIndex;
-    int numberOfTests;
-    int lastIndexNotTested;
-    int inconsistencies;
-    int inconsistenciesMathML;
-    int unknown;
-    int unknownMathML;
-    // see Function::Options
-    int noTestSkips;
-    Calculator* owner;
-    std::string reportHtml;
-    bool flagTestResultsExist;
-    std::string debugFlagAtStart;
     class OneTest {
     public:
       std::string atom;
@@ -3541,7 +3527,30 @@ public:
       bool fromJSON(JSData& input);
     };
 
+    int64_t startTime;
+    int startIndex;
+    int numberOfTests;
+    int lastIndexNotTested;
+    int inconsistencies;
+    int inconsistenciesMathML;
+    int unknown;
+    int unknownMathML;
+    // see Function::Options
+    int noTestSkips;
+    Calculator* owner;
+    std::string reportHtml;
+    bool flagTestResultsExist;
+    std::string debugFlagAtStart;
+    // In addition to the golden json, the following commands
+    // will have their outputs stored in a stand-alone text file.
+    // The json is the source of truth; we do this additional
+    // storage to take advantage of our source code repository
+    // to track the evolution of our test cases.
+    MapList<std::string, std::string> commandsWithGoldenOutputFiles;
+    // The commands to test. All outputs are to be matched against
+    // the storedResults.
     MapList<std::string, Calculator::Test::OneTest> commands;
+    // The goldens are all recorded in this glorious json.
     JSData storedResults;
     Test(Calculator& inputOwner);
     bool processResults();
@@ -3563,7 +3572,9 @@ public:
     );
     static bool checkBuiltInInitializations(Calculator& ownerInitialized);
     void initialize();
+    void initializeLoadTestCases();
     bool calculatorTestRun();
+    void writeGoldenOutputFiles();
   };
 
   static bool automatedTest(

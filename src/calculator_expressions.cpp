@@ -139,7 +139,7 @@ std::string Calculator::builtInName<Polynomial<Rational> >() {
 
 template < >
 std::string Calculator::builtInName<Polynomial<AlgebraicNumber> >() {
-  return "PolynomialOverANs";
+  return "PolynomialOverAlgebraicNumbers";
 }
 
 template < >

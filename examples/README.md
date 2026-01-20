@@ -2842,6 +2842,17 @@ TurnOnApproximations{}();
 ```
 Cosine function. Evaluates to a decimal approximation if the input is a double number. 
 
+*TrigonometricReductionVerbose* [TrigonometricReductionVerbose] {CalculatorFunctionsTrigonometry::trigonometricReductionVerbose}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20cos%282x%29%2f%28cos%5e3%20x%20-%20sin%5e3%20x%29%3b%5cnTrigonometricReductionVerbose%20A%3b%5cnTrigonometricReductionVerbose%28%20%281%2btan%28theta%29%29%2f%281-tan%28theta%29%29-%20tan%20%282theta%29-%20sec%282theta%29%29%3b%5cnTrigonometricReductionVerbose%281%2f%28sin%5e2%20x%20%2b%20cos%5e2%20x-1%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+A = cos(2x)/(cos^3 x - sin^3 x);
+TrigonometricReductionVerbose A;
+TrigonometricReductionVerbose( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta));
+TrigonometricReductionVerbose(1/(sin^2 x + cos^2 x-1));
+
+```
+Reduces trigonometric rational fraction in one variable to various equivalent forms. 
+
 *FourierFractionForm* [FourierFractionForm] {CalculatorFunctionsTrigonometry::fourierFractionForm}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20cos%282x%29%2f%28cos%5e3%20x%20-%20sin%5e3%20x%29%3b%5cnFourierFractionForm%20A%3b%5cnFourierFractionForm%28%20%281%2btan%28theta%29%29%2f%281-tan%28theta%29%29-%20tan%20%282theta%29-%20sec%282theta%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
@@ -2849,7 +2860,16 @@ A = cos(2x)/(cos^3 x - sin^3 x);
 FourierFractionForm A;
 FourierFractionForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta))
 ```
-Converts a trigonometric expression in one variable to fourier fraction form. 
+Reduces a rational fraction of trigometric functions and expands the numerator and denominator to their fourier form.
+
+*BaseTrigonemetricForm* [BaseTrigonemetricForm] {CalculatorFunctionsTrigonometry::baseTrigonometricForm}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20cos%282x%29%2f%28cos%5e3%20x%20-%20sin%5e3%20x%29%3b%5cnBaseTrigonemetricForm%20A%3b%5cnBaseTrigonemetricForm%28%20%281%2btan%28theta%29%29%2f%281-tan%28theta%29%29-%20tan%20%282theta%29-%20sec%282theta%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+A = cos(2x)/(cos^3 x - sin^3 x);
+BaseTrigonemetricForm A;
+BaseTrigonemetricForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta))
+```
+Reduces a rational fraction of trigometric functions and expands the numerator and denominator to their sin(x), cos(x) constituents, where x is chosen naturally.
 
 Operator or function Differentiate is overloaded with 11 total handlers.
 

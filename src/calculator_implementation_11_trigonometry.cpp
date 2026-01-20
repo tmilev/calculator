@@ -1259,7 +1259,6 @@ bool TrigonometricReduction::computeEulerFormReduced(
   }
   this->numeratorStartingNormalized = this->numeratorStarting;
   this->denominatorStartingNormalized = this->denominatorStarting;
-  global.comments << "DEBUG: numerator starting: " << this->numeratorStarting;
   RationalFraction<AlgebraicNumber>::normalizeNegativeExponentsInQuotient(
     this->numeratorStartingNormalized,
     this->denominatorStartingNormalized,
@@ -1316,7 +1315,6 @@ bool TrigonometricReduction::computeEulerFormReduced(
   this->numeratorFinal *= this->finalScaleEulerForm;
   this->denominatorFinal *= this->finalScaleEulerForm;
   this->computeErrorCheck(this->numeratorFinal, this->denominatorFinal, false);
-  global.comments << "DEBUG: Error check: " << this->errorCheck;
   return true;
 }
 

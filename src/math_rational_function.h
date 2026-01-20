@@ -1000,6 +1000,7 @@ void RationalFraction<Coefficient>::normalizeNegativeExponents() {
     this->denominator.getElement().addMonomial(
       scale, simplifiedNumerator.coefficients[0].one()
     );
+    this->expressionType = TypeExpression::typeRationalFraction;
     this->reduceMemory();
     return;
   }

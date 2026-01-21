@@ -6,6 +6,9 @@
 #include "progress_report.h"
 
 template <class Coefficient>
+class RationalSubstitution;
+
+template <class Coefficient>
 class RationalFraction {
 private:
   void addSameTypes(const RationalFraction<Coefficient>& other);
@@ -125,6 +128,13 @@ public:
   void operator*=(const MonomialPolynomial& other);
   void operator*=(const Coefficient& other);
   void operator*=(int other);
+  RationalFraction<Coefficient> operator*(
+    const RationalFraction<Coefficient>& other
+  ) {
+    RationalFraction<Coefficient> result = *this;
+    result *= other;
+    return result;
+  }
   bool operator<(const RationalFraction<Rational>& other) const;
   bool operator<=(const RationalFraction<Rational>& other) const;
   bool operator>(const RationalFraction<Rational>& other) const;
@@ -212,6 +222,34 @@ template < >
 bool RationalFraction<Rational>::Test::fromStringTest();
 template < >
 bool RationalFraction<Rational>::Test::scaleNormalizeIndex();
+template <class Coefficient>
+class RationalSubstitution {
+public:
+  // The images of the variables x_1, x_2, ...
+  List<RationalFraction<Coefficient> > imagesOfVariables;
+  // Carries out a substitution.
+  // Expected to fail in ordinary circumstances
+  // when the substitution yields division by zero,
+  // for example when substituting  t=0 in 1/t.
+  bool substitute(
+    const RationalFraction<Coefficient>& substituteIn,
+    RationalFraction<Coefficient>& output,
+    const Coefficient& one,
+    std::stringstream* commentsOnFailure
+  );
+  bool substituteInPolynomial(
+    const Polynomial<Coefficient>& substituteIn,
+    RationalFraction<Coefficient>& output,
+    const Coefficient& one,
+    std::stringstream* commentsOnFailure
+  );
+  bool substituteInMonomial(
+    const MonomialPolynomial& substituteIn,
+    RationalFraction<Coefficient>& output,
+    const Coefficient& one,
+    std::stringstream* commentsOnFailure
+  );
+};
 
 template <class Coefficient>
 bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
@@ -1782,6 +1820,115 @@ bool RationalFraction<Coefficient>::getRelations(
     if (!bad) {
       outputRelations.addOnTop(currentPolynomial);
     }
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool RationalSubstitution<Coefficient>::substitute(
+  const RationalFraction<Coefficient>& substituteIn,
+  RationalFraction<Coefficient>& output,
+  const Coefficient& one,
+  std::stringstream* commentsOnFailure
+) {
+  int totalVariables = substituteIn.minimalNumberOfVariables();
+  if (totalVariables > this->imagesOfVariables.size) {
+    global.fatal
+    << "Not enough variable images in substitution to substitute in: "
+    << substituteIn.toString()
+    << global.fatal;
+  }
+  Polynomial<Coefficient> startingNumerator;
+  Polynomial<Coefficient> startingDenominator;
+  substituteIn.getNumerator(startingNumerator);
+  substituteIn.getDenominator(startingDenominator);
+  RationalFraction<Coefficient> numeratorImage;
+  RationalFraction<Coefficient> denominatorImage;
+  if (
+    !this->substituteInPolynomial(
+      startingNumerator, numeratorImage, one, commentsOnFailure
+    ) ||
+    !this->substituteInPolynomial(
+      startingDenominator, denominatorImage, one, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (denominatorImage.isEqualToZero()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Substitution in "
+      << substituteIn.toString()
+      << " resulted in division by zero. ";
+    }
+    return false;
+  }
+  output = numeratorImage;
+  output /= denominatorImage;
+  return true;
+}
+
+template <class Coefficient>
+bool RationalSubstitution<Coefficient>::substituteInPolynomial(
+  const Polynomial<Coefficient>& substituteIn,
+  RationalFraction<Coefficient>& output,
+  const Coefficient& one,
+  std::stringstream* commentsOnFailure
+) {
+  int totalVariables = substituteIn.minimalNumberOfVariables();
+  if (totalVariables > this->imagesOfVariables.size) {
+    global.fatal
+    << "Not enough variable images in substitution to substitute in: "
+    << substituteIn.toString()
+    << global.fatal;
+  }
+  output.makeZero();
+  RationalFraction<Coefficient> contribution;
+  for (int i = 0; i < substituteIn.size(); i ++) {
+    const MonomialPolynomial& monomial = substituteIn[i];
+    if (
+      !this->substituteInMonomial(
+        monomial, contribution, one, commentsOnFailure
+      )
+    ) {
+      return false;
+    }
+    output += contribution * substituteIn.coefficients[i];
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool RationalSubstitution<Coefficient>::substituteInMonomial(
+  const MonomialPolynomial& substituteIn,
+  RationalFraction<Coefficient>& output,
+  const Coefficient& one,
+  std::stringstream* commentsOnFailure
+) {
+  int totalVariables = substituteIn.minimalNumberOfVariables();
+  if (totalVariables > this->imagesOfVariables.size) {
+    global.fatal
+    << "Not enough variable images in substitution to substitute in: "
+    << substituteIn.toString()
+    << global.fatal;
+  }
+  output = one;
+  RationalFraction<Coefficient> contribution;
+  for (int i = 0; i < totalVariables; i ++) {
+    Rational power = substituteIn(i);
+    contribution = this->imagesOfVariables[i];
+    int powerInteger = 0;
+    if (!power.isSmallInteger(&powerInteger)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Monomial: "
+        << substituteIn.toString()
+        << " contains power that's not a small integer. ";
+      }
+      return false;
+    }
+    contribution.raiseToPower(powerInteger);
+    output *= contribution;
   }
   return true;
 }

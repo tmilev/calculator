@@ -673,8 +673,18 @@ class TrigonometricReduction {
 public:
   class TrigonometricFunction {
   public:
+    // The arguments ofo the sine or cosine,
+    // i.e., the expressions x_1, ...
+    // and their coefficients b_1, ...
+    // for which our function equals
+    // sin (b_1 x_1+ ... + b_k x_k)
+    // or
+    // cos (b_1 x_1+ ... + b_k x_k)
     LinearCombination<Expression, Rational> arguments;
     bool isSine;
+    // The trigonometric function expressed in terms
+    // of the Euler form variables:
+    // a_1=e^{i x_1}, a_2 = e^{i x_2}, ...
     Polynomial<AlgebraicNumber> eulerForm;
     Expression eulerFormExpression;
     TrigonometricReduction* owner;
@@ -724,7 +734,7 @@ public:
   MapList<Expression, HashedList<Rational> >
   startingTrigonometricBaseMonomials;
   MapList<Expression, Rational> argumentScales;
-  //  MapList<Expression, Rational> argumentScalesBaseTrigonometric;
+  RationalFraction<AlgebraicNumber> tangentForm;
   FormatExpressions formatAlgebraic;
   FormatExpressions formatTrigonometric;
   LinearCombination<Expression, AlgebraicNumber> numeratorBaseTrigonometric;
@@ -750,6 +760,7 @@ public:
   );
   void computeFinalScaleEulerForm();
   void computeEulerFormArguments();
+  bool computeTangentForm(std::stringstream* commentsOnFailure);
   int numberOfVariables();
   bool computeEulerFormReduced(std::stringstream* commentsOnFailure);
   bool computeBaseTrigonometricForm(std::stringstream* commentsOnFailure);
@@ -1220,15 +1231,69 @@ void TrigonometricReduction::computeFinalScaleEulerForm() {
   );
 }
 
+bool TrigonometricReduction::computeTangentForm(
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("TrigonometricReduction::computeTangentForm");
+  if (!this->success) {
+    return false;
+  }
+  RationalSubstitution<AlgebraicNumber> substitution;
+  // General notes: we include various useful formulas,
+  // regardless of whether we use them.
+  // Let a = e^{iz}.
+  // Let t = tan (z/2).
+  // Recall that
+  // sin z = (2 sin (z/2) cos (z/2))/(cos^2(z/2)+sin^2(z/2))
+  // = 2 t/(1+t^2)
+  // cos z = (cos^2 (z/2)-sin^2(z/2))/(cos^2(z/2)+sin^2(z/2))
+  // = (t^2-1)(t^2+1)
+  // Then:
+  // a = cos z + i sin z
+  //   = (t^2+ 2it-1)/(t^2+1)
+  //   = (t+i)^2/((t-i)(t+i))
+  //   = (t+i)/(t-i)
+  int totalVariables = this->numberOfVariables();
+  AlgebraicNumber imaginaryUnit = this->algebraicClosure()->imaginaryUnit();
+  AlgebraicNumber one = this->algebraicClosure()->one();
+  for (int i = 0; i < totalVariables; i ++) {
+    RationalFraction<AlgebraicNumber> image;
+    Polynomial<AlgebraicNumber> tangentPlusI;
+    Polynomial<AlgebraicNumber> tangentMinusI;
+    tangentPlusI.makeMonomial(i, 1, one);
+    tangentMinusI.makeMonomial(i, 1, one);
+    tangentPlusI += imaginaryUnit;
+    tangentMinusI -= imaginaryUnit;
+    image = tangentPlusI;
+    image /= tangentMinusI;
+    substitution.imagesOfVariables.addOnTop(image);
+  }
+  if (this->denominatorStarting.isEqualToZero()) {
+    return false;
+  }
+  RationalFraction<AlgebraicNumber> reduced;
+  reduced = this->numeratorDividedByGCD;
+  reduced /= this->denominatorDividedByGCD;
+  if (
+    !substitution.substitute(
+      reduced, this->tangentForm, one, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
 bool TrigonometricReduction::computeEulerFormReduced(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("TrigonometricReduction::computeEulerFormReduced");
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  for (Expression& expression : this->arguments.keys) {
-    substitution.addOnTop(
-      this->arguments.getValueNoFail(expression).eulerForm
-    );
+  for (
+    TrigonometricReduction::TrigonometricFunction& trigonometricFunction :
+    this->arguments.values
+  ) {
+    substitution.addOnTop(trigonometricFunction.eulerForm);
   }
   this->inputFraction.content.getNumerator(this->numeratorStarting);
   this->inputFraction.content.getDenominator(this->denominatorStarting);
@@ -1600,7 +1665,7 @@ bool TrigonometricReduction::getSineCosineFormVariableOfPower(
 }
 
 bool TrigonometricReduction::computeFourierFractionForm() {
-  STACK_TRACE("TrigonometricReduction::computeEulerFormExpression");
+  STACK_TRACE("TrigonometricReduction::computeFourierFractionForm");
   if (this->numeratorStarting.isEqualToZero()) {
     this->fourierFractionForm = this->owner->expressionZero();
     return true;
@@ -1669,7 +1734,7 @@ bool TrigonometricReduction::eulerFormToFourierForm(
   const Polynomial<AlgebraicNumber>& input,
   LinearCombination<Expression, AlgebraicNumber>& output
 ) {
-  STACK_TRACE("TrigonometricReduction::eulerFormToTrigonometryFourierForm");
+  STACK_TRACE("TrigonometricReduction::eulerFormToFourierForm");
   output.makeZero();
   int numberOfVariables = input.minimalNumberOfVariables();
   AlgebraicNumber imaginaryUnit =

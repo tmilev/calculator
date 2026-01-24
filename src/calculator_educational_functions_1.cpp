@@ -400,6 +400,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     "AddTerms, "
     "DivideByNumber, "
     "ConvertShortDenominatorToNegativePower,"
+    "DivideExpressionsAsIfPolynomial,"
     "DivideRationalByRational,"
     "ConstantExtraction"
     ");\n"

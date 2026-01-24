@@ -1797,27 +1797,13 @@ const {
 AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
   List<AlgebraicNumber>& output, int indexNonZeroElement
 ) {
-  List<Rational> allCoefficients;
-  int indexNonZeroRational = - 1;
-  for (int i = 0; i < output.size; i ++) {
-    List<Rational>& current = output[i].element.coefficients;
-    if (i == indexNonZeroElement) {
-      indexNonZeroRational = allCoefficients.size - 1;
-      for (int j = 0; j < current.size; j ++) {
-        indexNonZeroRational ++;
-        if (!current[j].isEqualToZero()) {
-          break;
-        }
-      }
-    }
-    allCoefficients.addListOnTop(output[i].element.coefficients);
+  STACK_TRACE("AlgebraicNumber::scaleNormalizeIndex");
+  AlgebraicNumber inverted = output[indexNonZeroElement];
+  inverted.invert();
+  for (AlgebraicNumber& element : output) {
+    element *= inverted;
   }
-  Rational scale =
-  Rational::scaleNormalizeIndex(allCoefficients, indexNonZeroRational);
-  for (int i = 0; i < output.size; i ++) {
-    output[i] *= scale;
-  }
-  return scale;
+  return inverted;
 }
 
 AlgebraicNumber AlgebraicClosureRationals::one() {

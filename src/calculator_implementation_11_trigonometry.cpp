@@ -808,10 +808,10 @@ public:
     std::stringstream* commentsOnFailure
   );
   void computeEulerFormExpressionPresentation();
-  std::string toString()const;
-  std::string toStringTangentForm()const;
-  std::string toStringTrigonometry()const;
-  std::string toStringTrigonometricArguments()const;
+  std::string toString() const;
+  std::string toStringTangentForm() const;
+  std::string toStringTrigonometry() const;
+  std::string toStringTrigonometricArguments() const;
   AlgebraicClosureRationals* algebraicClosure();
   Expression argumentTermIndex(
     int index, const MapList<Expression, Rational>& baseScales
@@ -954,32 +954,28 @@ std::string TrigonometricReduction::toString() const {
     << this->denominatorFinal.toString(&this->formatAlgebraic)
     << "}"
     << "\\)";
-    out
-        << "<br><b>Tangent form:</b><br>"
-        << "\\("
-        << this->tangentForm.toString(&this->formatAlgebraic)
-        << "\\)";
-
+    out << this->toStringTangentForm();
   }
-  out << this->toStringTangentForm();
   out
   << "<br><b>Fourier fraction form:</b>"
   << "<br>\\("
   << this->fourierFractionForm.toString()
-  << "\\)<br>";
+  << "\\)";
   out
-      << "<br><b>Base trigonometric form:</b><br>"
-      << "\\("
-      << this->baseTrigonometricForm.toString()
-      << "\\)";
+  << "<br><b>Base trigonometric form:</b><br>"
+  << "\\("
+  << this->baseTrigonometricForm.toString()
+  << "\\)";
   return out.str();
 }
 
-std::string TrigonometricReduction::toStringTangentForm()const{
+std::string TrigonometricReduction::toStringTangentForm() const {
   std::stringstream out;
-  out << "<br>Tangent of half-angle form: <br>"
-      <<"\\(" <<  this->tangentForm.toString()
-      <<"\\)";
+  out
+  << "<br><b>Tangent of half-angle form:</b><br>"
+  << "\\("
+  << this->tangentForm.toString(&this->formatAlgebraic)
+  << "\\)";
   return out.str();
 }
 
@@ -1067,7 +1063,7 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
   if (!this->computeEulerFormReduced(commentsOnFailure)) {
     return false;
   }
-  if (!this->computeTangentForm(commentsOnFailure)){
+  if (!this->computeTangentForm(commentsOnFailure)) {
     return false;
   }
   if (!this->computeFourierFractionForm()) {
@@ -1255,12 +1251,12 @@ bool TrigonometricReduction::computeTangentForm(
 ) {
   STACK_TRACE("TrigonometricReduction::computeTangentForm");
   if (this->denominatorStarting.isEqualToZero()) {
-    if (commentsOnFailure != nullptr){
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Can't compute tangent form: denominator is zero.";
     }
     return false;
   }
-  if (this->numeratorStarting.isEqualToZero()){
+  if (this->numeratorStarting.isEqualToZero()) {
     this->tangentForm.makeZero();
     return true;
   }
@@ -1295,8 +1291,9 @@ bool TrigonometricReduction::computeTangentForm(
     substitution.imagesOfVariables.addOnTop(image);
   }
   if (this->denominatorDividedByGCD.isEqualToZero()) {
-    if (commentsOnFailure!= nullptr){
-      *commentsOnFailure << "Unexpected division by zero while computing tangent form.";
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Unexpected division by zero while computing tangent form.";
     }
     return false;
   }

@@ -1064,16 +1064,16 @@ bool GroebnerComputationCalculator::compute() {
     return false;
   }
   if (this->modulus.isEqualToZero()) {
-    List<Polynomial<AlgebraicNumber> > inputGroebner;
-    List<Polynomial<AlgebraicNumber> > outputGroebner;
-    GroebnerBasisComputation<AlgebraicNumber> groebnerComputation;
+    List<Polynomial<Rational> > inputGroebner;
+    List<Polynomial<Rational> > outputGroebner;
+    GroebnerBasisComputation<Rational> groebnerComputation;
     groebnerComputation.polynomialOrder = this->getOrder();
     inputGroebner = this->inputVector;
     outputGroebner = this->inputVector;
     bool success =
     groebnerComputation.transformToReducedGroebnerBasis(outputGroebner, true);
     return
-    this->prepareResultAndReport<AlgebraicNumber>(
+    this->prepareResultAndReport<Rational>(
       groebnerComputation, inputGroebner, outputGroebner, success
     );
   } else {
@@ -1231,8 +1231,8 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  WithContext<Polynomial<AlgebraicNumber> > numerator;
-  WithContext<Polynomial<AlgebraicNumber> > denominator;
+  WithContext<Polynomial<Rational> > numerator;
+  WithContext<Polynomial<Rational> > denominator;
   if (
     !CalculatorConversions::functionPolynomial(
       calculator, input[2], denominator, 1, 6, true
@@ -1253,7 +1253,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     return false;
   }
   if (
-    !WithContext<Polynomial<AlgebraicNumber> >::mergeContexts(
+    !WithContext<Polynomial<Rational> >::mergeContexts(
       numerator, denominator, nullptr
     )
   ) {
@@ -1276,16 +1276,16 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   ) {
     return false;
   }
-  RationalFraction<AlgebraicNumber> result;
+  RationalFraction<Rational> result;
   result = numerator.content;
   result /= denominator.content;
-  Polynomial<AlgebraicNumber> simplifiedNumerator;
+  Polynomial<Rational> simplifiedNumerator;
   result.getNumerator(simplifiedNumerator);
   if (numerator.content == simplifiedNumerator) {
     // Nothing was cancelled.
     return false;
   }
-  WithContext<RationalFraction<AlgebraicNumber> > simplified;
+  WithContext<RationalFraction<Rational> > simplified;
   simplified.context = numerator.context;
   simplified.content = result;
   Expression simplifiedExpression;
@@ -1303,11 +1303,11 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     << " to expression.";
   }
   output = outputCandidate;
-  Polynomial<AlgebraicNumber> simplifiedDenominator;
+  Polynomial<Rational> simplifiedDenominator;
   result.getDenominator(simplifiedDenominator);
   if (simplifiedDenominator.totalDegree() < denominatorDegree) {
-    Polynomial<AlgebraicNumber> quotient;
-    Polynomial<AlgebraicNumber> remainder;
+    Polynomial<Rational> quotient;
+    Polynomial<Rational> remainder;
     denominator.content.divideBy(
       simplifiedDenominator, quotient, remainder, nullptr
     );
@@ -1316,7 +1316,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
       << "Remainder of quotient must not be zero. "
       << global.fatal;
     }
-    WithContext<Polynomial<AlgebraicNumber> > quotientWithContext;
+    WithContext<Polynomial<Rational> > quotientWithContext;
     quotientWithContext.context = numerator.context;
     quotientWithContext.content = quotient;
     Expression quotientExpression;

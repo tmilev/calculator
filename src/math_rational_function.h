@@ -1844,8 +1844,10 @@ bool RationalSubstitution<Coefficient>::substitute(
   substituteIn.getDenominator(startingDenominator);
   RationalFraction<Coefficient> numeratorImage;
   RationalFraction<Coefficient> denominatorImage;
-  if (startingDenominator.isEqualToZero()){
-    global.fatal << "Zero denominator (non-initialized) rational fraction."<< global.fatal;
+  if (startingDenominator.isEqualToZero()) {
+    global.fatal
+    << "Zero denominator (non-initialized) rational fraction."
+    << global.fatal;
   }
   if (
     !this->substituteInPolynomial(

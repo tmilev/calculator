@@ -808,9 +808,10 @@ public:
     std::stringstream* commentsOnFailure
   );
   void computeEulerFormExpressionPresentation();
-  std::string toString();
-  std::string toStringTrigonometry();
-  std::string toStringTrigonometricArguments();
+  std::string toString()const;
+  std::string toStringTangentForm()const;
+  std::string toStringTrigonometry()const;
+  std::string toStringTrigonometricArguments()const;
   AlgebraicClosureRationals* algebraicClosure();
   Expression argumentTermIndex(
     int index, const MapList<Expression, Rational>& baseScales
@@ -866,7 +867,7 @@ bool CalculatorFunctionsTrigonometry::baseTrigonometricForm(
   return true;
 }
 
-std::string TrigonometricReduction::toString() {
+std::string TrigonometricReduction::toString() const {
   std::stringstream out;
   out << "<b>Starting expression.</b><br>";
   out
@@ -953,28 +954,43 @@ std::string TrigonometricReduction::toString() {
     << this->denominatorFinal.toString(&this->formatAlgebraic)
     << "}"
     << "\\)";
+    out
+        << "<br><b>Tangent form:</b><br>"
+        << "\\("
+        << this->tangentForm.toString(&this->formatAlgebraic)
+        << "\\)";
+
   }
+  out << this->toStringTangentForm();
   out
   << "<br><b>Fourier fraction form:</b>"
   << "<br>\\("
   << this->fourierFractionForm.toString()
   << "\\)<br>";
   out
-  << "<br>Base trigonometric form:<br>"
-  << "\\("
-  << this->baseTrigonometricForm.toString()
-  << "\\)";
+      << "<br><b>Base trigonometric form:</b><br>"
+      << "\\("
+      << this->baseTrigonometricForm.toString()
+      << "\\)";
   return out.str();
 }
 
-std::string TrigonometricReduction::toStringTrigonometricArguments() {
+std::string TrigonometricReduction::toStringTangentForm()const{
+  std::stringstream out;
+  out << "<br>Tangent of half-angle form: <br>"
+      <<"\\(" <<  this->tangentForm.toString()
+      <<"\\)";
+  return out.str();
+}
+
+std::string TrigonometricReduction::toStringTrigonometricArguments() const {
   std::stringstream out;
   out << "<b>Base arguments</b>: ";
   out << this->startingTrigonometricBaseMonomials.toStringHtml();
   return out.str();
 }
 
-std::string TrigonometricReduction::toStringTrigonometry() {
+std::string TrigonometricReduction::toStringTrigonometry() const {
   std::stringstream out;
   out << "\\(\\begin{array}{clclcl}\n";
   for (int i = 0; i < this->arguments.size(); i ++) {
@@ -1049,6 +1065,9 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
     return true;
   }
   if (!this->computeEulerFormReduced(commentsOnFailure)) {
+    return false;
+  }
+  if (!this->computeTangentForm(commentsOnFailure)){
     return false;
   }
   if (!this->computeFourierFractionForm()) {
@@ -1235,8 +1254,15 @@ bool TrigonometricReduction::computeTangentForm(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("TrigonometricReduction::computeTangentForm");
-  if (!this->success) {
+  if (this->denominatorStarting.isEqualToZero()) {
+    if (commentsOnFailure != nullptr){
+      *commentsOnFailure << "Can't compute tangent form: denominator is zero.";
+    }
     return false;
+  }
+  if (this->numeratorStarting.isEqualToZero()){
+    this->tangentForm.makeZero();
+    return true;
   }
   RationalSubstitution<AlgebraicNumber> substitution;
   // General notes: we include various useful formulas,
@@ -1268,7 +1294,10 @@ bool TrigonometricReduction::computeTangentForm(
     image /= tangentMinusI;
     substitution.imagesOfVariables.addOnTop(image);
   }
-  if (this->denominatorStarting.isEqualToZero()) {
+  if (this->denominatorDividedByGCD.isEqualToZero()) {
+    if (commentsOnFailure!= nullptr){
+      *commentsOnFailure << "Unexpected division by zero while computing tangent form.";
+    }
     return false;
   }
   RationalFraction<AlgebraicNumber> reduced;

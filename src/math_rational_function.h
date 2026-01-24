@@ -837,12 +837,11 @@ template <class Coefficient>
 void RationalFraction<Coefficient>::operator/=(
   const RationalFraction<Coefficient>& other
 ) {
+  STACK_TRACE("RationalFraction::operator/=");
   this->checkConsistency();
   RationalFraction inverted;
   inverted = other;
-  inverted.checkConsistency();
   inverted.invert();
-  inverted.checkConsistency();
   *this *= inverted;
   if (!this->checkConsistency()) {
     global.fatal << "Incosistent rational function. " << global.fatal;
@@ -1831,6 +1830,7 @@ bool RationalSubstitution<Coefficient>::substitute(
   const Coefficient& one,
   std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("RationalSubstitution::substitute");
   int totalVariables = substituteIn.minimalNumberOfVariables();
   if (totalVariables > this->imagesOfVariables.size) {
     global.fatal
@@ -1844,6 +1844,9 @@ bool RationalSubstitution<Coefficient>::substitute(
   substituteIn.getDenominator(startingDenominator);
   RationalFraction<Coefficient> numeratorImage;
   RationalFraction<Coefficient> denominatorImage;
+  if (startingDenominator.isEqualToZero()){
+    global.fatal << "Zero denominator (non-initialized) rational fraction."<< global.fatal;
+  }
   if (
     !this->substituteInPolynomial(
       startingNumerator, numeratorImage, one, commentsOnFailure

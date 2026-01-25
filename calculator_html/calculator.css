@@ -1344,6 +1344,7 @@ div.divVisible {
 div.divInvisible {
   transition: all 1s;
   opacity: 0;
+  pointer-events: none;
 }
 
 div.divSmall {

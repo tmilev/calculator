@@ -918,7 +918,7 @@ public:
       this->objects[i] = right.objects[i];
     }
   }
-  static void swap(List<Object>& l1, List<Object>& l2);
+  static void swap(List<Object>& list1, List<Object>& list2);
   void reverseElements();
   void reverseRange(int rangeBegin, int rangeEnd);
   bool isEqualTo(const List<Object>& other) const {
@@ -1756,10 +1756,10 @@ void List<Object>::swapTwoIndices(int index1, int index2) {
   if (index1 == index2) {
     return;
   }
-  Object tempO;
-  tempO = this->objects[index1];
+  Object buffer;
+  buffer = this->objects[index1];
   this->objects[index1] = this->objects[index2];
-  this->objects[index2] = tempO;
+  this->objects[index2] = buffer;
 }
 
 template <class Object>
@@ -1805,30 +1805,30 @@ int List<Object>::getIndex(const Object& o) const {
 }
 
 template <class Object>
-void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
-  List<Object>* bigL = nullptr;
-  List<Object>* smallL = nullptr;
+void List<Object>::swap(List<Object>& list1, List<Object>& list2) {
+  List<Object>* largeList = nullptr;
+  List<Object>* smallList = nullptr;
   int smallSize;
-  if (l1.size < l2.size) {
-    smallL = &l1;
-    bigL = &l2;
-    smallSize = l1.size;
+  if (list1.size < list2.size) {
+    smallList = &list1;
+    largeList = &list2;
+    smallSize = list1.size;
   } else {
-    bigL = &l1;
-    smallL = &l2;
-    smallSize = l2.size;
+    largeList = &list1;
+    smallList = &list2;
+    smallSize = list2.size;
   }
-  smallL->setSize(bigL->size);
-  Object tempO;
+  smallList->setSize(largeList->size);
+  Object buffer;
   for (int i = 0; i < smallSize; i ++) {
-    tempO = smallL->objects[i];
-    smallL->objects[i] = bigL->objects[i];
-    bigL->objects[i] = tempO;
+    buffer = smallList->objects[i];
+    smallList->objects[i] = largeList->objects[i];
+    largeList->objects[i] = buffer;
   }
-  for (int i = smallSize; i < bigL->size; i ++) {
-    smallL->objects[i] = bigL->objects[i];
+  for (int i = smallSize; i < largeList->size; i ++) {
+    smallList->objects[i] = largeList->objects[i];
   }
-  bigL->size = smallSize;
+  largeList->size = smallSize;
 }
 
 template <class Object>

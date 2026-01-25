@@ -150,6 +150,21 @@ class Authenticator {
     if (
       debugLogin === "true" || debugLogin === true
     ) {
+      // The server is running on localhost.
+      // The user must be a developer testing the system,
+      // or this has been a deployment error.
+      // Please note that when the backend sets debugLogin=true,
+      // the backend is using a debug database with test data,
+      // so even if you see this message in practice, likely no
+      // user data was leaked.
+      // However, when this is set, it can leak the private keys
+      // (https security) of your site.
+      // If you accidentally deployed this
+      // (hopefully will never happen), you should
+      // 1. Immediately reset the debugLogin entry in your
+      //    configuration.json and restart the server.
+      // 2. Change your ssl certificate located in the certificates/
+      //    folder.
       globalUser.debugLogin = true;
       loginInfo += "<b style='color:purple;'>debugLogin is set. </b> " +
         "<b style='color:red; font-size:30px' " +

@@ -2942,20 +2942,19 @@ bool CalculatorLieTheory::exponentOfAdjointOf(
 ) {
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > inputElements;
+  Expression outputOnError;
   if (
     !CalculatorLieTheory::elementsInSameLieAlgebra(
-      calculator, input, output, ownerSemisimple, inputElements
+      calculator, input, outputOnError, ownerSemisimple, inputElements
     )
   ) {
-    return true;
+    return calculator << outputOnError.toString();
   }
   if (inputElements.size != 2 || ownerSemisimple == nullptr) {
     return
-    output.assignError(
-      calculator,
-      "Function ExponentOfAdjointOf requires 3 arguments: "
-      "Lie algebra type, and two elements. "
-    );
+    calculator
+    << "Function ExponentOfAdjointOf requires 3 arguments: "
+    << "Lie algebra type, and two elements. ";
   }
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementA =
   inputElements[0];

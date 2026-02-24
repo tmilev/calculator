@@ -1019,7 +1019,7 @@ void SlTwoSubalgebraCandidate::computeLieBracketsUnknowns() {
 }
 
 void SlTwoSubalgebra::fromSlTwoSubalgebraCandidate(
-  SlTwoSubalgebraCandidate& input
+  const SlTwoSubalgebraCandidate& input
 ) {
   STACK_TRACE("SlTwoSubalgebraCandidate::fromSlTwoSubalgebraCandidate");
   this->owner = input.owner;
@@ -2040,6 +2040,7 @@ void SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra(
       }
       output.unsuitableHs.getValueNoFailNonConst(candidate.candidateH).addOnTop
       (indexRootSubalgebraInContainer);
+      output.rejectedCandidates.addOnTop(candidate);
     }
     std::stringstream out;
     out
@@ -2219,6 +2220,15 @@ const {
   return out.str();
 }
 
+bool SlTwoSubalgebras::constructionSuccessful() const {
+  for (const Vector<Rational>& h : this->unsuitableHs.keys) {
+    if (!this->isHOfConstructedSlTwo(h)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
   STACK_TRACE("SlTwoSubalgebras::toHTMLSummary");
   std::stringstream out;
@@ -2253,7 +2263,6 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
     out << MathML::processLatex(unsuitableStream.str(), format);
     return out.str();
   }
-  bool allGood = true;
   List<Rational> lengths;
   for (const Vector<Rational>& h : this->unsuitableHs.keys) {
     lengths.addOnTop(this->getOwnerWeyl().rootScalarCartanRoot(h, h));
@@ -2282,7 +2291,6 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
     << 1
     << "}\\)</b>. ";
     if (!wasConstructed) {
-      allGood = false;
       continue;
     }
     out
@@ -2295,7 +2303,7 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
     << "<b style='color:green'>However, it turns out that h "
     << "is indeed an S-subalgebra of a smaller root subalgebra P'.</b>";
   }
-  if (!allGood) {
+  if (!this->constructionSuccessful()) {
     out << "<br><b style='color:red'>Found bad characteristics!</b>";
   }
   return out.str();
@@ -2457,6 +2465,20 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   }
   if (useHtml) {
     out << "<br>";
+  }
+  if (!this->constructionSuccessful()) {
+    out
+    << "<hr><b style='color:red'>"
+    << this->rejectedCandidates.size
+    << " rejected candidates.</b><br>";
+    for (
+      const SlTwoSubalgebraCandidate& candidate : this->rejectedCandidates
+    ) {
+      SlTwoSubalgebra subalgebra;
+      subalgebra.fromSlTwoSubalgebraCandidate(candidate);
+      body << subalgebra.toString();
+      body << "<hr>";
+    }
   }
   out << this->toHTMLSummary(format);
   out << "<hr>";

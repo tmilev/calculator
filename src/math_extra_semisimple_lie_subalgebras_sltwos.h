@@ -513,7 +513,7 @@ public:
   involutionAppliedToEMinusF;
   Rational lengthHSquared;
   CentralizerComputer centralizerComputer;
-  void fromSlTwoSubalgebraCandidate(SlTwoSubalgebraCandidate& input);
+  void fromSlTwoSubalgebraCandidate(const SlTwoSubalgebraCandidate& input);
   void initialize();
   SlTwoSubalgebra() {
     this->flagDeallocated = false;
@@ -675,6 +675,10 @@ public:
   // for whom the H was an S-subalgebra candidate
   // but we couldn't realize it.
   MapList<Vector<Rational>, List<int> > unsuitableHs;
+  // Printing this out may be interesting for research purposes,
+  // when playing with the coefficients of
+  // the F-element in the sl(2)-triple.
+  List<SlTwoSubalgebraCandidate> rejectedCandidates;
   int indexZeroWeight;
   int millisecondsRootSubalgebraComputation;
   RootSubalgebras rootSubalgebras;
@@ -709,6 +713,7 @@ public:
   void writeHTML();
   std::string toHTML(FormatExpressions* format);
   bool isHOfConstructedSlTwo(const Vector<Rational>& h) const;
+  bool constructionSuccessful() const;
   std::string toString(FormatExpressions* format = nullptr);
   std::string toHTMLSummaryTable(FormatExpressions* format = nullptr);
   std::string toHTMLSummary(FormatExpressions* format = nullptr);

@@ -4746,6 +4746,9 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     SlTwoSubalgebras slTwoSubalgebras(*semisimpleLieAlgebra.content);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo =
     false;
+    if (restrictToThisSl2Triple != nullptr) {
+      slTwoSubalgebras.rootSubalgebras.flagComputeInclusions = false;
+    }
     slTwoSubalgebras.findSl2SubalgebrasAndCentralizers(
       *semisimpleLieAlgebra.content,
       slTwoSubalgebras,

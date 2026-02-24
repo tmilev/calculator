@@ -3557,9 +3557,11 @@ void RootSubalgebras::computeImmediateInclusions() {
       report.reportStream()
       << "Computing inclusions for subalgebra: "
       << rootSubalgebra.dynkinType.toString()
+      << " ("
       << i + 1
       << " out of "
-      << this->subalgebras.size;
+      << this->subalgebras.size
+      << ")";
       report.report();
     }
     this->computeImmediateInclusionsOnce(rootSubalgebra, i);

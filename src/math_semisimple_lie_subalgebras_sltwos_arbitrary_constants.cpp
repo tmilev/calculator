@@ -544,6 +544,9 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
       return
       List<Rational>({1, 0, 2, - 2, 3, - 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
     }
+    if (dynkinIndex == 12 && h == "(9, 13, 18, 26, 21, 16, 11, 6)") {
+      return List<Rational>({1, 1, 0, 1, 1, 1, 1, 1, 1, 1});
+    }
     if (dynkinIndex == 8) {
       return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
     }

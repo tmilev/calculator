@@ -587,7 +587,7 @@ public:
   bool isConstant(Coefficient* whichConstant = nullptr) const;
   bool isNegative() const;
   bool isLinearNoConstantTerm();
-  bool isLinear();
+  bool isLinear() const;
   bool isLinearGetRootConstantTermLastCoordinate(
     Vector<Coefficient>& outputRoot
   );
@@ -1251,7 +1251,7 @@ public:
     const Polynomial<Coefficient>& inputPolynomial,
     PolynomialSubstitution<Coefficient>& outputSubstitution,
     Polynomial<Coefficient>& outputPolynomial
-  );
+  ) const;
   static bool leftIsBetterSubstitutionThanRight(
     const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
   );
@@ -1290,6 +1290,12 @@ public:
   bool gaussianEliminationReturnFalseIfSystemIsContradictory(
     List<Polynomial<Coefficient> >& inputOutputSystem
   );
+  bool isTwoMonomialPolynomialWithSimpleCoefficients(
+    const Polynomial<Coefficient>& relation
+  ) const;
+  // Returns whether the equation given by the input polynomial
+  // constitutes is a desired improvement
+  bool isAGoodRelation(const Polynomial<Coefficient>& relation) const;
   // Carries out one polynomial system simplification step.
   bool oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
     List<Polynomial<Coefficient> >& inputOutputSystem,

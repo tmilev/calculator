@@ -9731,7 +9731,9 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   }
   std::stringstream out;
   out << " <br><br><b>sl(2)-subsystems:</b><br>";
+  HashedList<Polynomial<AlgebraicNumber> > allSubsystemEquations;
   for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
+    List<Polynomial<AlgebraicNumber> > subsystem;
     if (i >= this->unknownNegativeGenerators.size) {
       out
       << "Cartan element "
@@ -9745,16 +9747,31 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
     << "<br><b>Cartan element "
     << i + 1
     << ": </b><br>"
-    << this->toStringSubSystemOfRank(i, 1);
+    << this->toStringSubSystemOfRank(i, 1, subsystem);
+    allSubsystemEquations.addOnTopNoRepetition(subsystem);
+  }
+  List<Polynomial<AlgebraicNumber> > remainingEquations;
+  for (Polynomial<AlgebraicNumber>& equation : this->systemToSolve) {
+    if (!allSubsystemEquations.contains(equation)) {
+      remainingEquations.addOnTop(equation);
+    }
+  }
+  if (remainingEquations.size != 0) {
+    out
+    << "<br><b>Remaining equations:</b><br>"
+    << this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
+      remainingEquations
+    );
   }
   return out.str();
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringSubSystemOfRank(
-  int startCartanGeneratorIndex, int numberOfCartanGenerators
+  int startCartanGeneratorIndex,
+  int numberOfCartanGenerators,
+  List<Polynomial<AlgebraicNumber> >& outputEquations
 ) const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystemOfRank");
-  List<Polynomial<AlgebraicNumber> > system;
   int firstExcludedIndex =
   startCartanGeneratorIndex + numberOfCartanGenerators;
   for (int i = startCartanGeneratorIndex; i < firstExcludedIndex; i ++) {
@@ -9765,11 +9782,13 @@ std::string CandidateSemisimpleSubalgebra::toStringSubSystemOfRank(
       if (j >= this->unknownNegativeGenerators.size) {
         return "Unknown positive generators not computed. ";
       }
-      this->prepareSystemSerreRelationsForIndexPair(i, j, system);
+      this->prepareSystemSerreRelationsForIndexPair(i, j, outputEquations);
     }
   }
   return
-  this->configuredSystemToSolve.toStringCalculatorInputFromSystem(system);
+  this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
+    outputEquations
+  );
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringLoadUnknown(

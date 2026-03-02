@@ -617,6 +617,10 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
   if (this->remainderDivision.isEqualToZero()) {
     return true;
   }
+  if (this->remainderDivision.isConstant()) {
+    this->basisCandidates.clear();
+    this->basis.clear();
+  }
   this->flagFoundNewBasisElements = true;
   this->remainderDivision.scaleNormalizeLeadingMonomial(
     &this->polynomialOrder.monomialOrder
@@ -660,7 +664,7 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->numberOfVariablesToSolveForStart = - 1;
   this->numberOfVariablesToSolveForAfterReduction = 0;
   this->flagTryDirectlySolutionOverAlgebraicClosure = false;
-  this->flagUseMonomialBranchingOptimization = false;
+  this->flagUseMonomialBranchingOptimization = true;
   this->flagSystemProvenToHaveNoSolution = false;
   this->flagSystemProvenToHaveSolution = false;
   this->flagSystemSolvedOverBaseField = false;
@@ -820,7 +824,7 @@ bool PolynomialSystem<Coefficient>::isImpliedLinearSubstitution(
   const Polynomial<Coefficient>& inputPolynomial,
   PolynomialSubstitution<Coefficient>& outputSubstitution,
   Polynomial<Coefficient>& outputPolynomial
-) {
+) const {
   STACK_TRACE("PolynomialSystem::isImpliedLinearSubstitution");
   int numberOfVariables = this->systemSolution.size;
   MonomialPolynomial monomial;
@@ -1204,6 +1208,47 @@ gaussianEliminationReturnFalseIfSystemIsContradictory(
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::
+isTwoMonomialPolynomialWithSimpleCoefficients(
+  const Polynomial<Coefficient>& relation
+) const {
+  if (relation.size() != 2) {
+    return false;
+  }
+  Coefficient one;
+  one = this->sampleCoefficient.one();
+  Coefficient minusOne = one;
+  minusOne.negate();
+  for (const Coefficient& coefficient : relation.coefficients) {
+    if (coefficient != one && coefficient != minusOne) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool PolynomialSystem<Coefficient>::isAGoodRelation(
+  const Polynomial<Coefficient>& relation
+) const {
+  if (relation.isLinear()) {
+    return true;
+  }
+  if (relation.size() == 1) {
+    return true;
+  }
+  PolynomialSubstitution<Coefficient> unusedSubstitution;
+  Polynomial<Coefficient> unused;
+  if (this->isImpliedLinearSubstitution(relation, unusedSubstitution, unused)) {
+    return true;
+  }
+  if (this->isTwoMonomialPolynomialWithSimpleCoefficients(relation)) {
+    return true;
+  }
+  return false;
+}
+
+template <class Coefficient>
+bool PolynomialSystem<Coefficient>::
 oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
   List<Polynomial<Coefficient> >& inputOutputSystem,
   ProgressReport& simplificationProgressReport,
@@ -1228,7 +1273,8 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
   ) {
     return true;
   }
-  List<Polynomial<Coefficient> > oldSystem = inputOutputSystem;
+  List<Polynomial<Coefficient> > systemBeforeTransformation =
+  inputOutputSystem;
   bool success = this->groebner.transformToReducedBasis(inputOutputSystem);
   if (
     this->findAndApplyImpliedSubstitutions(
@@ -1236,11 +1282,6 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
     )
   ) {
     return true;
-  }
-  if (success) {
-    oldSystem = inputOutputSystem;
-  } else {
-    inputOutputSystem = oldSystem;
   }
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
@@ -1252,17 +1293,24 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
     success =
     this->groebner.transformToReducedGroebnerBasis(inputOutputSystem, false);
   }
+  if (!success) {
+    // The system is too large; we ran out of computational budget.
+    // Let's keep the best intermediately generated equations.
+    HashedList<Polynomial<Coefficient> > oldSystemWithExtension;
+    oldSystemWithExtension = systemBeforeTransformation;
+    for (Polynomial<Coefficient>& polynomial : inputOutputSystem) {
+      if (this->isAGoodRelation(polynomial)) {
+        oldSystemWithExtension.addOnTopNoRepetition(polynomial);
+      }
+    }
+    inputOutputSystem = oldSystemWithExtension;
+  }
   if (
     this->findAndApplyImpliedSubstitutions(
       inputOutputSystem, substitutionsProgressReport
     )
   ) {
     return true;
-  }
-  if (!success) {
-    inputOutputSystem = oldSystem;
-  } else {
-    oldSystem = inputOutputSystem;
   }
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
@@ -1541,12 +1589,12 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     }
     if (this->shouldReport()) {
       std::stringstream out;
-      MonomialPolynomial monomial(i);
+      MonomialPolynomial singleVariableMonoimal(i);
       out
       << "The system has the single monomial: "
       << monomial.toString(&this->format())
       << "<br>Trying case:<br>"
-      << monomial.toString(&this->format())
+      << singleVariableMonoimal.toString(&this->format())
       << "= 0;";
       report1.report(out.str());
     }
@@ -1642,13 +1690,14 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   }
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;
   MonomialPolynomial singleMonomialEquation;
-  if (this->flagUseMonomialBranchingOptimization) {
-    if (this->hasSingleMonomialEquation(inputSystem, singleMonomialEquation)) {
-      this->solveWhenSystemHasSingleMonomial(
-        inputSystem, singleMonomialEquation
-      );
-      return;
-    }
+  if (
+    this->flagUseMonomialBranchingOptimization &&
+    this->hasSingleMonomialEquation(inputSystem, singleMonomialEquation)
+  ) {
+    this->solveWhenSystemHasSingleMonomial(
+      inputSystem, singleMonomialEquation
+    );
+    return;
   }
   this->substitutionsProvider.sampleCoefficient = this->sampleCoefficient;
   this->substitutionsProvider.computeArbitrarySubstitutions(

@@ -946,6 +946,11 @@ std::string SlTwoSubalgebra::toHTMLTripleUnknownsPolynomialSystem(
     format
   )
   << "\n<br>\n";
+  PolynomialSystem<Rational> system;
+  out
+  << "Polynomial system, calculator input:<br>"
+  << system.toStringCalculatorInputFromSystem(this->systemToSolve)
+  << "<br>";
   return out.str();
 }
 

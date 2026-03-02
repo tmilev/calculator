@@ -557,7 +557,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrixMultiple(
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::isLinear() {
+bool Polynomial<Coefficient>::isLinear() const {
   for (int i = 0; i < this->size(); i ++) {
     if (!(*this)[i].isLinear()) {
       return false;

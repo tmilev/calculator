@@ -4564,6 +4564,7 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
   }
   this->flagUsedBuiltInRealization = this->loadBuiltInPartialRealization();
   this->prepareSystemSerreRelations();
+  this->computeSystemToSolveMixedRelationsFirst();
   return true;
 }
 
@@ -4669,6 +4670,47 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
     );
   }
   this->addToSystem(mustBeZero, outputSystem);
+}
+
+void CandidateSemisimpleSubalgebra::computeSystemToSolveMixedRelationsFirst() {
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::"
+    "computeSystemToSolveMixedRelationsFirst"
+  );
+  this->systemToSolveMixedRelationsFirst.clear();
+  this->subSystemsToSolve.clear();
+  std::stringstream out;
+  HashedList<Polynomial<AlgebraicNumber> > allSubsystemEquations;
+  for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
+    List<Polynomial<AlgebraicNumber> > subsystem;
+    if (i >= this->unknownNegativeGenerators.size) {
+      global.fatal
+      << "Cartan element "
+      << this->cartanElementsScaledToActByTwo[i].toString()
+      << ": "
+      << i + 1
+      << ": unknown generators not computed."
+      << global.fatal;
+    }
+    this->computeSubSystemOfIndex(i, 1, subsystem);
+    this->subSystemsToSolve.addOnTop(subsystem);
+    allSubsystemEquations.addOnTopNoRepetition(subsystem);
+  }
+  this->mixedRelationsToSolve.clear();
+  for (Polynomial<AlgebraicNumber>& equation : this->systemToSolve) {
+    if (!allSubsystemEquations.contains(equation)) {
+      this->mixedRelationsToSolve.addOnTop(equation);
+    }
+  }
+  this->systemToSolveMixedRelationsFirst.addListOnTop(
+    this->mixedRelationsToSolve
+  );
+  for (
+    const List<Polynomial<AlgebraicNumber> >& subSystem :
+    this->subSystemsToSolve
+  ) {
+    this->systemToSolveMixedRelationsFirst.addListOnTop(subSystem);
+  }
 }
 
 void CandidateSemisimpleSubalgebra::prepareSystemSerreRelations() {
@@ -7407,20 +7449,19 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::
 attemptToSolveSystemFinal() {
   STACK_TRACE("CandidateSemisimpleSubalgebra::attemptToSolveSystemFinal");
   this->checkFullInitialization();
-  this->transformedSystem = this->systemToSolve;
+  this->configurePolynomialSystem();
+  this->transformedSystem = this->systemToSolveMixedRelationsFirst;
+  this->configuredSystemToSolve.groebner.polynomialOrder.monomialOrder.
+  setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   ProgressReport report;
-  std::stringstream reportstream;
-  reportstream
+  report.reportStream()
   << "<hr>In order to realize type "
   << this->weylNonEmbedded->dynkinType.toString()
   << " in "
   << this->owner->owner->toStringLieAlgebraName()
   << " I need to solve the following system."
   << this->toStringSystemPart2();
-  report.report(reportstream.str());
-  this->configurePolynomialSystem();
-  this->configuredSystemToSolve.groebner.polynomialOrder.monomialOrder.
-  setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
+  report.report();
   this->configuredSystemToSolve.solveSerreLikeSystem(this->transformedSystem);
   if (this->configuredSystemToSolve.flagSystemSolvedOverBaseField) {
     this->status = CandidateSubalgebraStatus::realized;
@@ -9694,9 +9735,10 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
   (void) format;
   std::stringstream out;
   out
-  << "<br><b>For the calculator:</b><br>\n"
+  <<
+  "<br><b>For the calculator (equation order: mixed relations first):</b><br>\n"
   << this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
-    this->systemToSolve
+    this->systemToSolveMixedRelationsFirst
   )
   << ";"
   << "<br> "
@@ -9726,69 +9768,55 @@ const {
 
 std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystems");
-  if (this->cartanElementsSubalgebra.size == 1) {
+  if (this->cartanElementsSubalgebra.size <= 1) {
     return "";
   }
   std::stringstream out;
-  out << " <br><br><b>sl(2)-subsystems:</b><br>";
-  HashedList<Polynomial<AlgebraicNumber> > allSubsystemEquations;
-  for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
-    List<Polynomial<AlgebraicNumber> > subsystem;
-    if (i >= this->unknownNegativeGenerators.size) {
-      out
-      << "Cartan element "
-      << this->cartanElementsScaledToActByTwo[i].toString()
-      << ": "
-      << i + 1
-      << ": unknown generators not computed.";
-      return out.str();
-    }
+  out << " <br><br><b>Subsystems:</b><br>";
+  for (int i = 0; i < this->subSystemsToSolve.size; i ++) {
+    const List<Polynomial<AlgebraicNumber> >& subsystem =
+    this->subSystemsToSolve[i];
     out
     << "<br><b>Cartan element "
     << i + 1
     << ": </b><br>"
-    << this->toStringSubSystemOfRank(i, 1, subsystem);
-    allSubsystemEquations.addOnTopNoRepetition(subsystem);
+    << this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
+      subsystem
+    );
   }
-  List<Polynomial<AlgebraicNumber> > remainingEquations;
-  for (Polynomial<AlgebraicNumber>& equation : this->systemToSolve) {
-    if (!allSubsystemEquations.contains(equation)) {
-      remainingEquations.addOnTop(equation);
-    }
-  }
-  if (remainingEquations.size != 0) {
+  if (this->mixedRelationsToSolve.size > 0) {
     out
     << "<br><b>Remaining equations:</b><br>"
     << this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
-      remainingEquations
+      this->mixedRelationsToSolve
     );
   }
   return out.str();
 }
 
-std::string CandidateSemisimpleSubalgebra::toStringSubSystemOfRank(
+void CandidateSemisimpleSubalgebra::computeSubSystemOfIndex(
   int startCartanGeneratorIndex,
   int numberOfCartanGenerators,
   List<Polynomial<AlgebraicNumber> >& outputEquations
 ) const {
-  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystemOfRank");
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeSubSystemOfIndex");
   int firstExcludedIndex =
   startCartanGeneratorIndex + numberOfCartanGenerators;
   for (int i = startCartanGeneratorIndex; i < firstExcludedIndex; i ++) {
     if (i >= this->unknownNegativeGenerators.size) {
-      return "Unknown negative generators not computed. ";
+      global.fatal
+      << "Unknown negative generators not computed. "
+      << global.fatal;
     }
     for (int j = startCartanGeneratorIndex; j < firstExcludedIndex; j ++) {
       if (j >= this->unknownNegativeGenerators.size) {
-        return "Unknown positive generators not computed. ";
+        global.fatal
+        << "Unknown positive generators not computed. "
+        << global.fatal;
       }
       this->prepareSystemSerreRelationsForIndexPair(i, j, outputEquations);
     }
   }
-  return
-  this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
-    outputEquations
-  );
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringLoadUnknown(

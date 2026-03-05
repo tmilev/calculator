@@ -1260,24 +1260,7 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
   << "<br>Total number of polynomial computations: "
   << system.numberOfSerreSystemComputations
   << ". ";
-  if (system.flagSystemProvenToHaveNoSolution) {
-    out << "<br>The system does not have a solution. ";
-  } else if (system.flagSystemProvenToHaveSolution) {
-    out << "<br>System proven to have solution. ";
-  } else {
-    out << "<br>The system was neither solved nor proved contradictory. ";
-  }
-  if (!system.flagSystemProvenToHaveNoSolution) {
-    if (system.flagSystemSolvedOverBaseField) {
-      out
-      << "<br>One solution follows. "
-      << system.toStringSerreLikeSolution();
-    } else {
-      out
-      << "However, I was unable to find such a solution: "
-      << "my heuristics are not good enough.";
-    }
-  }
+  out << system.toStringSystemSolutionStatus();
   out << "<br>The context vars:<br>" << context.toString();
   out
   << "<br>The polynomials: "
@@ -1300,6 +1283,11 @@ bool CalculatorFunctions::solvePolynomialSystem(
   if (upperLimits == nullptr) {
     upperLimits = &defaultUpperLimits;
   }
+  ProgressReport report;
+  report.reportStream()
+  << "<br>The context variables:<br>"
+  << context.toString();
+  report.report();
   Vector<Polynomial<AlgebraicNumber> > polynomials;
   polynomials = input;
   system.groebner.maximumPolynomialDivisions = (*upperLimits)[0];
@@ -1334,7 +1322,7 @@ bool CalculatorFunctions::solvePolynomialSystem(
       << "good enough or the system is too large to prove impossible. ";
     }
   }
-  out << "<br>The context vars:<br>" << context.toString();
+  out << "<br>The context variables:<br>" << context.toString();
   out
   << "<br>The polynomials: "
   << polynomials.toString(&system.groebner.format);

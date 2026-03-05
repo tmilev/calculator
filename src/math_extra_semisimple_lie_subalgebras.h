@@ -156,7 +156,36 @@ public:
   CharacterSemisimpleLieAlgebraModule<Rational> primalCharacter;
   Vectors<Rational> posistiveRootsPerpendicularToPrecedingWeights;
   Vectors<Rational> cartanOfCentralizer;
+  // The polynomial equations needed to be solved to satisfy the
+  // Serre relations that determine the subalgebra.
   List<Polynomial<AlgebraicNumber> > systemToSolve;
+  // Same equations as above but given in an order by simply components.
+  // Suppose the subalglebra is of type X_1+X_2+...X_n
+  // Then, in the order below, we put the relations in the following order:
+  // The Serre relations between:
+  // X_1 and X_2
+  // X_1 and X_3
+  // ...
+  // X_1 and X_n
+  // X_2 and X_3
+  // ...
+  // X_2 and X_n
+  // ...
+  // X_{n-1} and X_n
+  // X_1 and X_1
+  // X_2 and X_2
+  // ...
+  // X_n and X_n.
+  // Reason to compute this order: empirical evidence suggest
+  // that on some examples this order gives a system that is
+  // solved faster by our particular Groebner basis computation algorithm.
+  List<Polynomial<AlgebraicNumber> > systemToSolveMixedRelationsFirst;
+  // The Serre relations between:
+  // X_1 and X_1, X_2 and X_2, ... in this order.
+  List<List<Polynomial<AlgebraicNumber> > > subSystemsToSolve;
+  // The Serre relations between X_1 and X_2, ..., X_{n-1} and X_n
+  // in the order described above.
+  List<Polynomial<AlgebraicNumber> > mixedRelationsToSolve;
   List<Polynomial<AlgebraicNumber> > transformedSystem;
   PolynomialSystem<AlgebraicNumber> configuredSystemToSolve;
   SemisimpleSubalgebras* owner;
@@ -473,6 +502,7 @@ public:
   void prepareSystemSerreRelations();
   bool computeCharacter(bool allowBadCharacter);
   void configurePolynomialSystem();
+  void computeSystemToSolveMixedRelationsFirst();
   bool verifySolution(PolynomialSystem<AlgebraicNumber>& system);
   void computeCentralizerOfOldHs(List<Vector<Rational> >& output);
   bool centralizesOldHs(const Vector<Rational>& candidate);
@@ -500,7 +530,7 @@ public:
   // Prints the Serre relations that only involve some of the generators.
   // Ignores the generators that match the cartan elements whose
   // weights match cartan generators whose index is out of the given range.
-  std::string toStringSubSystemOfRank(
+  void computeSubSystemOfIndex(
     int startCartanGeneratorIndex,
     int numberOfCartanGenerators,
     List<Polynomial<AlgebraicNumber> >& outputEquations

@@ -1389,6 +1389,28 @@ FormatExpressions&PolynomialSystem<Coefficient>::format() {
 }
 
 template <class Coefficient>
+std::string PolynomialSystem<Coefficient>::toStringSystemSolutionStatus() const {
+  std::stringstream out;
+  if (this->flagSystemProvenToHaveNoSolution) {
+    out << "<br>The system does not have a solution. ";
+  } else if (this->flagSystemProvenToHaveSolution) {
+    out << "<br>System proven to have solution. ";
+  } else {
+    out << "<br>The system was neither solved nor proved contradictory. ";
+  }
+  if (!this->flagSystemProvenToHaveNoSolution) {
+    if (this->flagSystemSolvedOverBaseField) {
+      out << "<br>One solution follows. " << this->toStringSerreLikeSolution();
+    } else {
+      out
+      << "However, I was unable to find a solution. "
+      << "My heuristics are not good enough.";
+    }
+  }
+  return out.str();
+}
+
+template <class Coefficient>
 std::string PolynomialSystem<Coefficient>::toStringImpliedSubstitutions() {
   STACK_TRACE("PolynomialSystem::toStringImpliedSubstitutions");
   if (this->impliedSubstitutions.size == 0) {
@@ -1583,16 +1605,20 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     this->flagSystemProvenToHaveNoSolution = true;
     return;
   }
+  std::stringstream caseSummary;
+  caseSummary
+  << "The system has the single monomial equation: "
+  << monomial.toString(&this->format())
+  << " = 0. ";
   for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
     if (monomial(i) == 0) {
       continue;
     }
+    MonomialPolynomial singleVariableMonoimal(i);
     if (this->shouldReport()) {
       std::stringstream out;
-      MonomialPolynomial singleVariableMonoimal(i);
       out
-      << "The system has the single monomial: "
-      << monomial.toString(&this->format())
+      << caseSummary.str()
       << "<br>Trying case:<br>"
       << singleVariableMonoimal.toString(&this->format())
       << "= 0;";
@@ -1621,6 +1647,12 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     if (this->flagSystemSolvedOverBaseField) {
       return;
     }
+    caseSummary
+    << "<br> "
+    << "The case of "
+    << singleVariableMonoimal.toString(&this->format())
+    << "= 0; yields: "
+    << oneCase.toStringSystemSolutionStatus();
   }
   if (allProvenToHaveNoSolution) {
     this->flagSystemProvenToHaveNoSolution = true;
@@ -1850,7 +1882,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   std::stringstream reportStream;
   if (this->groebner.flagDoProgressReport) {
     reportStream
-    << "Solving system "
+    << "Solving system:<br>"
     << this->toStringCalculatorInputFromSystem(inputSystem);
     report.report(reportStream.str());
   }
@@ -1928,7 +1960,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
 }
 
 template <class Coefficient>
-std::string PolynomialSystem<Coefficient>::toStringSerreLikeSolution() {
+std::string PolynomialSystem<Coefficient>::toStringSerreLikeSolution() const {
   STACK_TRACE("PolynomialSystem::toStringSerreLikeSolution");
   std::stringstream out;
   Polynomial<Rational> monomial;

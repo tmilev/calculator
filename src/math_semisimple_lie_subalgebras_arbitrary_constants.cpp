@@ -173,6 +173,10 @@ configurePolynomialSystemE8() {
     maximumPolynomialDivisions = 40000;
     maximumMonomialOperations = 40000;
   }
+  if (embeddedType == A(12, 1) + A(4, 1)) {
+    maximumPolynomialDivisions = 20000;
+    maximumMonomialOperations = 20000;
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints

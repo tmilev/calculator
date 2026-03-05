@@ -1241,12 +1241,6 @@ public:
   ArbitrarySubstitutionsProvider<Coefficient> substitutionsProvider;
   PolynomialSystem();
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
-  std::string toStringPolynomialSystemSummary(
-    const List<Polynomial<Coefficient> >& inputSystem
-  ) const;
-  std::string toStringCalculatorInputFromSystem(
-    const List<Polynomial<Coefficient> >& inputSystem
-  ) const;
   bool isImpliedLinearSubstitution(
     const Polynomial<Coefficient>& inputPolynomial,
     PolynomialSubstitution<Coefficient>& outputSubstitution,
@@ -1317,7 +1311,15 @@ public:
   void getSubstitutionFromPartialSolutionSerreLikeSystem(
     PolynomialSubstitution<Coefficient>& outputSubstitution
   );
-  std::string toStringSerreLikeSolution();
+  std::string toStringPolynomialSystemSummary(
+    const List<Polynomial<Coefficient> >& inputSystem
+  ) const;
+  std::string toStringCalculatorInputFromSystem(
+    const List<Polynomial<Coefficient> >& inputSystem
+  ) const;
+  std::string toStringSerreLikeSolution() const;
+  std::string toStringImpliedSubstitutions();
+  std::string toStringSystemSolutionStatus() const;
   static int getNumberOfVariablesToSolveFor(
     const List<Polynomial<Coefficient> >& input
   );
@@ -1332,7 +1334,6 @@ public:
     const List<Polynomial<Coefficient> >& input
   );
   static bool isSolvedSystem(const List<Polynomial<Coefficient> >& input);
-  std::string toStringImpliedSubstitutions();
   void initializeForSystemSolution();
   bool shouldReport();
   FormatExpressions& format();

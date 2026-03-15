@@ -242,7 +242,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(84, 1) + A(4, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({24, 35, 47, 70, 57, 44, 30, 15})
     )
   ) {
@@ -252,7 +252,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(62, 1) + A(2, 1) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 0, 0, 1, 2, 1, 0, 0})
     )
   ) {
@@ -272,7 +272,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(62, 1) + A(1, 1) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 1, 1, 2, 2, 1, 0, 0})
     )
   ) {
@@ -292,7 +292,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(60, 1) + A(1, 1) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 1, 1, 2, 2, 1, 0, 0})
     )
   ) {
@@ -303,7 +303,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(38, 1) + A(1, 1) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 0, 0, 1, 1, 1, 0, 0})
     )
   ) {
@@ -320,7 +320,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(37, 1) + A(3, 1) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 1, 1, 2, 0, 1, 0, 0})
     )
   ) {
@@ -339,7 +339,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(36, 1) + A(28, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({16, 22, 30, 44, 36, 28, 20, 10})
     )
   ) {
@@ -357,7 +357,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(36, 1) + A(4, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({16, 22, 30, 44, 36, 28, 20, 10})
     )
   ) {
@@ -376,7 +376,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(36, 1) + A(3, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({16, 22, 30, 44, 36, 28, 20, 10})
     )
   ) {
@@ -394,7 +394,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(34, 1) + A(6, 1) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({1, 2, 0, 2, 2, 0, 1, 0})
     )
   ) {
@@ -413,7 +413,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(32, 1) + A(8, 1) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({2, 0, 4, 4, 4, 4, 2, 0})
     )
   ) {
@@ -425,10 +425,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(30, 1) + A(10, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({14, 20, 27, 40, 33, 26, 18, 10})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 4, 3, 6, 3, 0, 0, 0})
     )
   ) {
@@ -439,10 +439,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(30, 1) + A(10, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({14, 21, 28, 42, 34, 26, 18, 9})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({2, 1, 2, 0, 2, 2, 0, 1})
     )
   ) {
@@ -454,10 +454,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(25, 1) + A(15, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({13, 19, 26, 38, 31, 24, 16, 8})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({1, 3, 0, 4, 3, 0, 2, 2})
     )
   ) {
@@ -469,10 +469,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(24, 1) + A(16, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({12, 18, 24, 36, 30, 24, 16, 8})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({4, 4, 6, 8, 4, 0, 2, 2})
     )
   ) {
@@ -497,10 +497,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(24, 1) + A(15, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({12, 18, 24, 36, 30, 24, 16, 8})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({4, 4, 6, 7, 4, 0, 2, 2})
     )
   ) {
@@ -517,10 +517,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(22, 1) + A(2, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({12, 18, 24, 36, 29, 22, 15, 8})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 0, 0, 0, 1, 2, 1, 0})
     )
   ) {
@@ -531,10 +531,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(20, 1) + A(1, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({12, 16, 22, 32, 26, 20, 14, 8})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({0, 1, 1, 2, 2, 2, 1, 0})
     )
   ) {
@@ -545,10 +545,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(16, 1) + A(6, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({10, 16, 20, 30, 24, 18, 12, 6})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({2, 0, 3, 4, 4, 4, 3, 2})
     )
   ) {
@@ -567,10 +567,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == B(12, 2) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({9, 13, 18, 26, 21, 16, 11, 6})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({- 4, - 5, - 9, - 11, - 8, - 6, - 4, - 3})
     )
   ) {
@@ -593,7 +593,7 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == G(4, 2) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({
           3,
           Rational(13, 3),
@@ -605,7 +605,7 @@ loadBuiltInGeneratorHintsE8() {
           2
         })
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({- 4, - 6, - 9, - 12, - 9, - 7, - 5, - 3})
     )
   ) {
@@ -617,10 +617,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(12, 1) + A(4, 1) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({8, 12, 16, 24, 20, 16, 12, 6})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({2, 4, 4, 6, 4, 2, 0, 0})
     )
   ) {
@@ -645,10 +645,10 @@ loadBuiltInGeneratorHintsE8() {
   }
   if (
     type == A(9, 2) &&
-    this->output.cartanElementsSubalgebra[0].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
       List<Rational>({8, 11, 15, 22, 18, 14, 10, 5})
     ) &&
-    this->output.cartanElementsSubalgebra[1].isEqualTo(
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
       List<Rational>({- 4, - 4, - 6, - 8, - 6, - 4, - 5, - 1})
     )
   ) {

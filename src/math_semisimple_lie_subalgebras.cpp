@@ -1464,7 +1464,7 @@ bool SemisimpleSubalgebras::loadState(
     }
     bool isGood = true;
     if (
-      !currentSubalgebra.cartanElementsSubalgebra.containsAtLeastOneCopyOfEach(
+      !currentSubalgebra.cartanElementsScaledToActByTwo.containsAtLeastOneCopyOfEach(
         this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation
       )
     ) {
@@ -1473,19 +1473,19 @@ bool SemisimpleSubalgebras::loadState(
       currentSubalgebra.hsScaledToActByTwoInOrderOfCreation =
       this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation;
       for (
-        int j = 0; j < currentSubalgebra.cartanElementsSubalgebra.size; j ++
+        int j = 0; j < currentSubalgebra.cartanElementsScaledToActByTwo.size; j ++
       ) {
         if (
           !this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.contains(
-            currentSubalgebra.cartanElementsSubalgebra[j]
+            currentSubalgebra.cartanElementsScaledToActByTwo[j]
           )
         ) {
           currentSubalgebra.hsScaledToActByTwoInOrderOfCreation.addOnTop(
-            currentSubalgebra.cartanElementsSubalgebra[j]
+            currentSubalgebra.cartanElementsScaledToActByTwo[j]
           );
           if (
             currentSubalgebra.hsScaledToActByTwoInOrderOfCreation.size >
-            currentSubalgebra.cartanElementsSubalgebra.size
+            currentSubalgebra.cartanElementsScaledToActByTwo.size
           ) {
             isGood = false;
             break;
@@ -1494,8 +1494,8 @@ bool SemisimpleSubalgebras::loadState(
       }
     }
     if (
-      currentSubalgebra.cartanElementsSubalgebra.size !=
-      this->baseSubalgebra().cartanElementsSubalgebra.size + 1
+      currentSubalgebra.cartanElementsScaledToActByTwo.size !=
+      this->baseSubalgebra().cartanElementsScaledToActByTwo.size + 1
     ) {
       isGood = false;
     }
@@ -1508,13 +1508,11 @@ bool SemisimpleSubalgebras::loadState(
       << ". More precisely, "
       << currentSubalgebra.weylNonEmbedded->dynkinType.toString()
       << " has h-elements "
-      << currentSubalgebra.cartanElementsSubalgebra.toString()
+      << currentSubalgebra.cartanElementsScaledToActByTwo.toString()
       << " however "
       << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
       << " has h-elements in order of creation: "
-      << this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.toString()
-      << " and h-elements in order induced by the type: "
-      << this->baseSubalgebra().cartanElementsSubalgebra.toString();
+      << this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.toString();
       return false;
     }
     this->addSubalgebraToStack(realized);
@@ -1877,7 +1875,6 @@ void SemisimpleSubalgebras::makeCandidateFromSlTwo(
   );
   Vector<Rational> hElement = input.hElement.getCartanPart();
   candidate.cartanElementsScaledToActByTwo.addOnTop(hElement);
-  candidate.cartanElementsSubalgebra.addOnTop(hElement);
   candidate.hsScaledToActByTwoInOrderOfCreation.addOnTop(hElement);
   candidate.cartanSubalgebrasByComponentScaledToActByTwo.setSize(1);
   candidate.cartanSubalgebrasByComponentScaledToActByTwo[0].setSize(1);
@@ -2159,9 +2156,6 @@ computeHsAndHsScaledToActByTwoFromComponents() {
   this->cartanElementsScaledToActByTwo.assignListList(
     this->cartanSubalgebrasByComponentScaledToActByTwo
   );
-  this->cartanElementsSubalgebra.setSize(
-    this->cartanElementsScaledToActByTwo.size
-  );
   Matrix<Rational> cartanInComponentOrder;
   this->weylNonEmbedded->dynkinType.
   getCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
@@ -2178,25 +2172,7 @@ computeHsAndHsScaledToActByTwoFromComponents() {
   this->owner->subalgebrasNonDefaultCartanAndScale.getIndex(
     cartanInComponentOrder
   );
-  int counter = - 1;
-  List<DynkinSimpleType> dynkinTypes;
-  this->weylNonEmbedded->dynkinType.getTypesWithMults(dynkinTypes);
-  for (
-    int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i
-    ++
-  ) {
-    for (
-      int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].
-      size; j ++
-    ) {
-      counter ++;
-      this->cartanElementsSubalgebra[counter] = (
-        this->cartanElementsScaledToActByTwo[counter] *
-        dynkinTypes[i].getDefaultRootLengthSquared(j)
-      ) /
-      2;
-    }
-  }
+
 }
 
 CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize(
@@ -3296,12 +3272,12 @@ RealizedSemisimpleSubalgebra& SemisimpleSubalgebras::addRealizedSubalgebraIfNew
     << global.fatal;
   }
   int indexInOwner =
-  this->subalgebras.getIndex(input.cartanElementsSubalgebra);
+  this->subalgebras.getIndex(input.cartanElementsScaledToActByTwo);
   if (indexInOwner == - 1) {
     indexInOwner = this->subalgebras.values.size;
     RealizedSemisimpleSubalgebra realized;
     realized.content = input;
-    this->subalgebras.setKeyValue(input.cartanElementsSubalgebra, realized);
+    this->subalgebras.setKeyValue(input.cartanElementsScaledToActByTwo, realized);
   }
   RealizedSemisimpleSubalgebra& result =
   this->subalgebras.values[indexInOwner];
@@ -3320,13 +3296,13 @@ addNonRealizedSubalgebraIfNew(CandidateSemisimpleSubalgebra& input) {
     << global.fatal;
   }
   int indexInOwner =
-  this->nonRealizedSubalgebras.getIndex(input.cartanElementsSubalgebra);
+  this->nonRealizedSubalgebras.getIndex(input.cartanElementsScaledToActByTwo);
   if (indexInOwner == - 1) {
     indexInOwner = this->nonRealizedSubalgebras.values.size;
     NonRealizedSemisimpleSubalgebra nonRealized;
     nonRealized.candidate = input;
     this->nonRealizedSubalgebras.setKeyValue(
-      input.cartanElementsSubalgebra, nonRealized
+      input.cartanElementsScaledToActByTwo, nonRealized
     );
   }
   NonRealizedSemisimpleSubalgebra& result =
@@ -3360,7 +3336,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
     << global.fatal;
   }
   if (
-    subalgebra.cartanElementsSubalgebra.size !=
+    subalgebra.cartanElementsScaledToActByTwo.size !=
     subalgebra.hsScaledToActByTwoInOrderOfCreation.size
   ) {
     global.fatal
@@ -3676,7 +3652,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
   this->checkConsistency();
   CandidateSemisimpleSubalgebra& base = this->realizedBase->content;
   if (
-    base.cartanElementsSubalgebra.size !=
+    base.cartanElementsScaledToActByTwo.size !=
     base.hsScaledToActByTwoInOrderOfCreation.size
   ) {
     global.fatal
@@ -3693,7 +3669,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
     this->nextPossibleRootInjection(),
     &this->nextCandidateHScaledToActByTwo()
   );
-  if (newCandidate.cartanElementsSubalgebra.size == 0) {
+  if (newCandidate.cartanElementsScaledToActByTwo.size == 0) {
     global.fatal
     << "The Cartan elements should not be empty here. "
     << global.fatal;
@@ -3707,12 +3683,12 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
   << newCandidate.weylNonEmbedded->dynkinType.toString();
   report.report(reportStream.str());
   if (
-    this->owner->subalgebras.contains(newCandidate.cartanElementsSubalgebra)
+    this->owner->subalgebras.contains(newCandidate.cartanElementsScaledToActByTwo)
   ) {
     // The subalgebra was precomputed.
     CandidateSemisimpleSubalgebra & precomputedCandidate =
     this->owner->subalgebras.getValueNoFailNonConst(
-      newCandidate.cartanElementsSubalgebra
+      newCandidate.cartanElementsScaledToActByTwo
     ).content;
     precomputedCandidate.hsScaledToActByTwoInOrderOfCreation =
     newCandidate.hsScaledToActByTwoInOrderOfCreation;
@@ -4139,21 +4115,23 @@ bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(
 ) {
   STACK_TRACE("CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex");
   if (
-    this->cartanElementsSubalgebra.size !=
+    this->cartanElementsScaledToActByTwo.size !=
     this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric.
     numberOfColumns
   ) {
     global.fatal << "Unexpected number of cartan elements. " << global.fatal;
   }
-  for (int k = 0; k < this->cartanElementsSubalgebra.size; k ++) {
-    Rational desiredScalarProduct =
-    this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(
+
+  Matrix<Rational> &cartanSymmetric= this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric;
+  for (int k = 0; k < this->cartanElementsScaledToActByTwo.size; k ++) {
+    Rational desiredScalarProduct =cartanSymmetric
+   (
       index, k
-    );
+                                        ) *2 / cartanSymmetric(k,k);
     Rational actualScalar =
     this->getAmbientWeyl().rootScalarCartanRoot(
-      this->cartanElementsSubalgebra[k], ambientRootTestedForWeightSpace
-    );
+      this->cartanElementsScaledToActByTwo[k], ambientRootTestedForWeightSpace
+    ) ;
     if (desiredScalarProduct != actualScalar) {
       return false;
     }
@@ -4387,20 +4365,20 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
   this->systemToSolve.setSize(0);
   this->checkFullInitialization();
   this->totalUnknownsNoCentralizer = 0;
-  if (this->cartanElementsSubalgebra.size == 0) {
+  if (this->cartanElementsScaledToActByTwo.size == 0) {
     global.fatal
     << "The number of involved H's cannot be zero. "
     << global.fatal;
   }
   if (
     this->involvedNegativeGenerators.size !=
-    this->cartanElementsSubalgebra.size
+    this->cartanElementsScaledToActByTwo.size
   ) {
     global.fatal
     << "The number of involved negative generators: "
     << this->involvedNegativeGenerators.size
     << " is not equal to the subalgebra rank: "
-    << this->cartanElementsSubalgebra.size
+    << this->cartanElementsScaledToActByTwo.size
     << ". "
     << global.fatal;
   }
@@ -4482,11 +4460,11 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
   // computed when preparing for the large computation.
   const SlTwoSubalgebra* slTwoRealization = nullptr;
   if (
-    this->flagUseSlTwoRealization && this->cartanElementsSubalgebra.size == 1
+    this->flagUseSlTwoRealization && this->cartanElementsScaledToActByTwo.size == 1
   ) {
     int slTwoIndex =
     this->owner->slTwoSubalgebras.allRealizedHs.getIndex(
-      this->cartanElementsSubalgebra[0]
+      this->cartanElementsScaledToActByTwo[0]
     );
     if (slTwoIndex < 0) {
       global.fatal
@@ -4677,7 +4655,7 @@ void CandidateSemisimpleSubalgebra::computeSystemToSolveMixedRelationsFirst() {
   this->subSystemsToSolve.clear();
   std::stringstream out;
   HashedList<Polynomial<AlgebraicNumber> > allSubsystemEquations;
-  for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
+  for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
     List<Polynomial<AlgebraicNumber> > subsystem;
     if (i >= this->unknownNegativeGenerators.size) {
       global.fatal
@@ -6908,16 +6886,16 @@ computePrimalModuleDecompositionHighestWeights(
         currentVector[j].generatorIndex
       );
       currentWeight.setSize(
-        this->cartanElementsSubalgebra.size + this->cartanOfCentralizer.size
+        this->cartanElementsScaledToActByTwo.size + this->cartanOfCentralizer.size
       );
-      for (int k = 0; k < this->cartanElementsSubalgebra.size; k ++) {
+      for (int k = 0; k < this->cartanElementsScaledToActByTwo.size; k ++) {
         currentWeight[k] =
         this->getAmbientWeyl().rootScalarCartanRoot(
-          currentRootSpace, this->cartanElementsSubalgebra[k]
+          currentRootSpace, this->cartanElementsScaledToActByTwo[k]
         );
       }
       for (int k = 0; k < this->cartanOfCentralizer.size; k ++) {
-        currentWeight[k + this->cartanElementsSubalgebra.size] =
+        currentWeight[k + this->cartanElementsScaledToActByTwo.size] =
         this->getAmbientWeyl().rootScalarCartanRoot(
           currentRootSpace, this->cartanOfCentralizer[k]
         );
@@ -6960,8 +6938,8 @@ bool CandidateSemisimpleSubalgebra::compareLeftGreaterThanRight(
 ) {
   Vector<Rational> leftSemisimplePart = left;
   Vector<Rational> rightSemisimplePart = right;
-  leftSemisimplePart.setSize(this->cartanElementsSubalgebra.size);
-  rightSemisimplePart.setSize(this->cartanElementsSubalgebra.size);
+  leftSemisimplePart.setSize(this->cartanElementsScaledToActByTwo.size);
+  rightSemisimplePart.setSize(this->cartanElementsScaledToActByTwo.size);
   if (leftSemisimplePart > rightSemisimplePart) {
     return true;
   }
@@ -6970,8 +6948,8 @@ bool CandidateSemisimpleSubalgebra::compareLeftGreaterThanRight(
   }
   Vector<Rational> leftCartanPart = left;
   Vector<Rational> rightCartanPart = right;
-  leftCartanPart.shiftToTheLeft(this->cartanElementsSubalgebra.size);
-  rightCartanPart.shiftToTheLeft(this->cartanElementsSubalgebra.size);
+  leftCartanPart.shiftToTheLeft(this->cartanElementsScaledToActByTwo.size);
+  rightCartanPart.shiftToTheLeft(this->cartanElementsScaledToActByTwo.size);
   return leftCartanPart > rightCartanPart;
 }
 
@@ -6983,14 +6961,12 @@ void CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates(
     "getWeightProjectionFundamentalCoordinates"
   );
   this->checkFullInitialization();
-  output.setSize(this->cartanElementsSubalgebra.size);
-  for (int j = 0; j < this->cartanElementsSubalgebra.size; j ++) {
+  output.setSize(this->cartanElementsScaledToActByTwo.size);
+  for (int j = 0; j < this->cartanElementsScaledToActByTwo.size; j ++) {
     output[j] =
     this->getAmbientWeyl().rootScalarCartanRoot(
-      inputAmbientWeight, this->cartanElementsSubalgebra[j]
-    ) *
-    2 /
-    this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(j, j);
+      inputAmbientWeight, this->cartanElementsScaledToActByTwo [j]
+    );
   }
 }
 
@@ -7004,18 +6980,16 @@ getPrimalWeightProjectionFundamentalCoordinates(
   );
   this->checkFullInitialization();
   output.setSize(
-    this->cartanElementsSubalgebra.size + this->cartanOfCentralizer.size
+    this->cartanElementsScaledToActByTwo.size + this->cartanOfCentralizer.size
   );
-  for (int j = 0; j < this->cartanElementsSubalgebra.size; j ++) {
+  for (int j = 0; j < this->cartanElementsScaledToActByTwo.size; j ++) {
     output[j] =
     this->getAmbientWeyl().rootScalarCartanRoot(
-      inputAmbientWeight, this->cartanElementsSubalgebra[j]
-    ) *
-    2 /
-    this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(j, j);
+      inputAmbientWeight, this->cartanElementsScaledToActByTwo[j]
+    ) ;
   }
   for (int j = 0; j < this->cartanOfCentralizer.size; j ++) {
-    output[j + this->cartanElementsSubalgebra.size] =
+    output[j + this->cartanElementsScaledToActByTwo.size] =
     this->getAmbientWeyl().rootScalarCartanRoot(
       inputAmbientWeight, this->cartanOfCentralizer[j]
     ) *
@@ -7259,7 +7233,7 @@ computePrimalModuleDecompositionHighestWeightVectors(
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
   Vectors<Rational> allHs;
-  allHs.addListOnTop(this->cartanElementsSubalgebra);
+  allHs.addListOnTop(this->cartanElementsScaledToActByTwo);
   allHs.addListOnTop(this->cartanOfCentralizer);
   adjointActionsOfHs.setSize(allHs.size);
   ProgressReport report;
@@ -7339,11 +7313,10 @@ bool SemisimpleSubalgebras::checkConsistencyHs() const {
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (
       this->subalgebras.keys[i] !=
-      this->subalgebras.values[i].content.cartanElementsSubalgebra
+      this->subalgebras.values[i].content.cartanElementsScaledToActByTwo
     ) {
       global.fatal
-      << "List this->hElementsOfSubalgebras "
-      << "does not match this->theSubalgebras. "
+      << "The subalgebra keys don't match the subalgebras. "
       << global.fatal;
     }
   }
@@ -8075,7 +8048,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
     }
   }
   int primalRank = - 1;
-  (this->centralizerRank + this->cartanElementsSubalgebra.size).isSmallInteger(
+  (this->centralizerRank + this->cartanElementsScaledToActByTwo.size).isSmallInteger(
     &primalRank
   );
   if (primalRank < 2) {
@@ -9357,7 +9330,7 @@ bool CandidateSemisimpleSubalgebra::isRealized() const {
 }
 
 bool CandidateSemisimpleSubalgebra::isZero() const {
-  return this->cartanElementsSubalgebra.size == 0;
+  return this->cartanElementsScaledToActByTwo.size == 0;
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringCentralizer(
@@ -9513,7 +9486,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
   Weight<Rational> zeroWeight;
   zeroWeight.owner = nullptr;
   zeroWeight.weightFundamentalCoordinates.makeZero(
-    this->cartanElementsSubalgebra.size
+    this->cartanElementsScaledToActByTwo.size
   );
   this->centralizerDimension =
   this->characterNonPrimalFundamentalCoordinates.getCoefficientOf(zeroWeight);
@@ -9665,8 +9638,8 @@ std::string CandidateSemisimpleSubalgebra::toStringSystem(
     }
     out << "<br>";
   }
-  for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
-    out << "h: " << this->cartanElementsSubalgebra[i];
+  for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
+    out << "h: " << this->cartanElementsScaledToActByTwo[i];
     if (i < this->involvedPositiveGenerators.size) {
       out
       << ", e = combination of "
@@ -9766,7 +9739,7 @@ const {
 
 std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystems");
-  if (this->cartanElementsSubalgebra.size <= 1) {
+  if (this->cartanElementsScaledToActByTwo.size <= 1) {
     return "";
   }
   std::stringstream out;
@@ -9829,9 +9802,9 @@ std::string CandidateSemisimpleSubalgebra::toStringLoadUnknown(
   << this->weylNonEmbedded->dynkinType.toString()
   << "; ElementsCartan =";
   out << "(";
-  for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
-    out << this->cartanElementsSubalgebra[i].toString();
-    if (i != this->cartanElementsSubalgebra.size - 1) {
+  for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
+    out << this->cartanElementsScaledToActByTwo[i].toString();
+    if (i != this->cartanElementsScaledToActByTwo.size - 1) {
       out << ", ";
     }
   }
@@ -9885,7 +9858,7 @@ std::string CandidateSemisimpleSubalgebra::toStringTypeAndHs(
   out
   << this->weylNonEmbedded->dynkinType.toString(format)
   << ", Cartan: "
-  << this->cartanElementsSubalgebra.toString(format);
+  << this->cartanElementsScaledToActByTwo.toString(format);
   return out.str();
 }
 
@@ -10689,7 +10662,7 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   diagonalMatrix.makeZero();
   diagonalMatrix2.makeZero();
   for (int i = 0; i < this->bilinearFormSimplePrimal.numberOfRows; i ++) {
-    if (i < this->cartanElementsSubalgebra.size) {
+    if (i < this->cartanElementsScaledToActByTwo.size) {
       diagonalMatrix(i, i) =
       this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(i, i)
       /

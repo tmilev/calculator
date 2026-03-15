@@ -120,12 +120,11 @@ public:
   SemisimpleLieAlgebra* subalgebraNonEmbeddedDefaultScale;
   List<Vectors<Rational> > cartanSubalgebrasByComponentScaledToActByTwo;
   List<AlgebraicNumber> ratiosKillingsByComponent;
-  Vectors<Rational> cartanElementsScaledToActByTwo;
   // The cartan elements of the subalgebra h_1, ..., h_k.
-  // These identify uniquely-up-to-conjugation identify the subalgebra.
+  // Up to conjugation, these identify the subalgebra uniquely.
   // These are used as keys to identify the subalgebra in the owner
   // subalgebra collection.
-  Vectors<Rational> cartanElementsSubalgebra;
+  Vectors<Rational> cartanElementsScaledToActByTwo;
   Vectors<Rational> hsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> bilinearFormSimplePrimal;
   Matrix<Rational> bilinearFormFundamentalPrimal;

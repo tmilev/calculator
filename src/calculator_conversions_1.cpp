@@ -7,6 +7,13 @@
 #include "math_rational_function.h"
 #include "math_weyl_algebras.h"
 
+std::string CalculatorConversions::SerializationKeys::
+    possibleExtensionsSemisimpleSubalgebra =
+    "PossibleExtensionsSemisimpleSubalgebra";
+std::string CalculatorConversions::SerializationKeys::
+    possibleExtensionTypeCollection=
+    "PossibleExtensionTypeCollection";
+std::string CalculatorConversions::SerializationKeys::elementsCartan="ElementsCartan";
 // Start WithContext specializations.
 template < >
 bool WithContext<Polynomial<Rational> >::toExpression(
@@ -1268,7 +1275,7 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   Matrix<Rational> conversionMatrix;
   conversionMatrix.assignVectorsToRows(input.cartanElementsScaledToActByTwo);
   currentExpression.makeMatrix(calculator, conversionMatrix, nullptr, false);
-  keys.addOnTop("ElementsCartan");
+  keys.addOnTop(CalculatorConversions::SerializationKeys::elementsCartan);
   values.addOnTop(currentExpression);
   input.checkAll();
   if (input.status == CandidateSubalgebraStatus::realized) {
@@ -1482,10 +1489,8 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   STACK_TRACE("CalculatorConversions::loadSemisimpleSubalgebras");
   Expression inputArguments = input[1];
   Expression ambientTypeExpression;
-  Expression numberOfExploredHsExpression(calculator);
-  Expression numberOfExploredTypesExpression(calculator);
   Expression subalgebrasElement;
-  Expression currentChainExpression(calculator);
+  Expression statesExpressionContainer;
   if (
     !CalculatorConversions::loadKey(
       calculator, inputArguments, "AmbientDynkinType", ambientTypeExpression
@@ -1496,27 +1501,30 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     << "<hr>Failed to load Dynkin type from: "
     << inputArguments.toString();
   }
+  List<PossibleExtensionsOfSemisimpleLieSubalgebraState> possibleExtensions;
   if (
-    !CalculatorConversions::loadKey(
+    CalculatorConversions::loadKey(
       calculator,
       inputArguments,
-      "NumberOfExploredHs",
-      numberOfExploredHsExpression
+      CalculatorConversions::SerializationKeys::
+      possibleExtensionsSemisimpleSubalgebra,
+      statesExpressionContainer
     )
   ) {
-    calculator
-    << "<hr>Failed to load NumberOfExploredHs list from the input. ";
-  }
-  if (
-    !CalculatorConversions::loadKey(
-      calculator,
-      inputArguments,
-      "NumberOfExploredTypes",
-      numberOfExploredTypesExpression
-    )
-  ) {
-    calculator
-    << "<hr>Failed to load NumberOfExploredTypes list from the input. ";
+    for (int i = 1; i < statesExpressionContainer.size(); i ++) {
+      PossibleExtensionsOfSemisimpleLieSubalgebraState state;
+      if (
+        !CalculatorConversions::loadPossibleExtensionsOfSemisimpleLieAlgebra(
+          calculator, statesExpressionContainer[i], state
+        )
+      ) {
+        return
+        calculator
+        << "<hr>Failed to load Possible extensions from: "
+        << statesExpressionContainer[i].toString();
+      }
+      possibleExtensions.addOnTop(state);
+    }
   }
   if (
     !CalculatorConversions::loadKey(
@@ -1527,42 +1535,6 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     calculator
     << "<hr>Failed to load Subalgebras list from: "
     << inputArguments.toString();
-  }
-  if (
-    !CalculatorConversions::loadKey(
-      calculator, inputArguments, "CurrentChain", currentChainExpression
-    )
-  ) {
-    calculator
-    << "<hr>Failed to load CurrentChain from: "
-    << inputArguments.toString();
-  }
-  List<int> currentChainInt;
-  List<int> numberOfExploredTypes;
-  List<int> numberOfExploredHs;
-  if (!calculator.getVectorInt(currentChainExpression, currentChainInt)) {
-    calculator
-    << "Failed to load currentChain of Expressions; using empty list. ";
-    currentChainInt.clear();
-    currentChainInt.addOnTop(- 1);
-  }
-  if (
-    !calculator.getVectorInt(numberOfExploredHsExpression, numberOfExploredHs)
-  ) {
-    calculator
-    << "Failed to load the indices of the explored H's; using empty list. ";
-    numberOfExploredHs.clear();
-    numberOfExploredHs.addOnTop(0);
-  }
-  if (
-    !calculator.getVectorInt(
-      numberOfExploredTypesExpression, numberOfExploredTypes
-    )
-  ) {
-    calculator
-    << "Failed to load the number of explored types; using empty list. ";
-    numberOfExploredTypes.clear();
-    numberOfExploredTypes.addOnTop(0);
   }
   WithContext<SemisimpleLieAlgebra*> ownerSemisimple;
   ownerSemisimple.content = nullptr;
@@ -1649,7 +1621,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     currentCandidate.checkFullInitialization();
     if (
       subalgebras.subalgebras.contains(
-        currentCandidate.cartanElementsSubalgebra
+        currentCandidate.cartanElementsScaledToActByTwo
       )
     ) {
       calculator
@@ -1674,14 +1646,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   report.report(reportStream.str());
   subalgebras.toStringExpressionString =
   CalculatorConversions::stringFromSemisimpleSubalgebras;
-  if (
-    !subalgebras.loadState(
-      currentChainInt,
-      numberOfExploredTypes,
-      numberOfExploredHs,
-      calculator.comments
-    )
-  ) {
+  if (!subalgebras.loadState(possibleExtensions, calculator.comments)) {
     return false;
   }
   subalgebras.flagAttemptToAdjustCentralizers = false;
@@ -1714,6 +1679,74 @@ std::string CalculatorConversions::stringFromSemisimpleSubalgebras(
   return expression.toString(&format);
 }
 
+bool CalculatorConversions::loadPossibleExtensionsOfSemisimpleLieAlgebra(
+  Calculator& calculator,
+  const Expression& input,
+  PossibleExtensionsOfSemisimpleLieSubalgebraState& output
+) {
+  return false;
+}
+
+bool CalculatorConversions::expressionFromListInt(  Calculator& calculator, const List<int>& input, Expression& output){
+  output.makeSequence(calculator);
+  for (int element: input){
+    output.addChildOnTop(calculator.expressionRational(element));
+
+  }
+  return true;
+}
+
+bool CalculatorConversions::expressionFromDynkinTypeExtension(  Calculator& calculator,
+                                                     DynkinTypeExtension& extension,
+                                                     Expression& output
+)
+{
+  STACK_TRACE("CalculatorConversions::expressionFromDynkinTypeExtension");
+  output.makeSequence(calculator);
+
+  Expression dynkinType;
+  CalculatorConversions::expressionFromDynkinType(calculator, extension.dynkinType,dynkinType);
+  output.addChildOnTop(dynkinType);
+  for (int content : extension.rootInjection){
+    output.addChildOnTop(calculator.expressionRational(content));
+  }
+
+  return true;
+}
+
+bool CalculatorConversions::storePossibleExtensionsOfSemisimpleLieAlgebra(
+  Calculator& calculator,
+  PossibleExtensionsOfSemisimpleLieSubalgebraState& state,
+  Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorConversions::storePossibleExtensionsOfSemisimpleLieAlgebra"
+  );
+  List<std::string> keys;
+  List<Expression> values;
+
+
+  List<Expression> possibleExtensions;
+  for (DynkinTypeExtension& extension: state.possibleExtensionTypes){
+    Expression oneExtension;
+    CalculatorConversions::expressionFromDynkinTypeExtension(calculator, extension, oneExtension);
+    possibleExtensions.addOnTop(oneExtension);
+
+  }
+  Expression possibleExtensionSequence;
+  possibleExtensionSequence.makeSequence(calculator, &possibleExtensions);
+  keys.addOnTop(CalculatorConversions::SerializationKeys::possibleExtensionTypeCollection);
+  values.addOnTop(possibleExtensionSequence);
+  Expression cartanElementsSubalgebra;
+  Matrix<Rational> conversionMatrix;
+  conversionMatrix.assignVectorsToRows(state.cartanElementsSubalgebra);
+  cartanElementsSubalgebra.makeMatrix(calculator, conversionMatrix, nullptr, false);
+
+  output.makeSequenceCommands(calculator, keys, values);
+
+  return true;
+}
+
 bool CalculatorConversions::storeSemisimpleSubalgebras(
   Calculator& calculator,
   const SemisimpleSubalgebras& input,
@@ -1732,30 +1765,24 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   }
   keys.addOnTop("AmbientDynkinType");
   values.addOnTop(dynkinTypeExpression);
-  Expression currentChainExpression;
+  Expression possibleExtensionsChain;
+  possibleExtensionsChain.makeSequence(calculator);
   Expression numericalConverterExpression(calculator);
-  currentChainExpression.makeSequence(calculator);
-  Expression totalTypesExploredExpression;
-  totalTypesExploredExpression.makeSequence(calculator);
-  Expression totalHsExploredExpression;
-  totalHsExploredExpression.makeSequence(calculator);
   for (
     PossibleExtensionsOfSemisimpleLieSubalgebra& current :
     input.currentSubalgebraChain
   ) {
-    numericalConverterExpression = current.realizedBase->indexInOwner;
-    currentChainExpression.addChildOnTop(numericalConverterExpression);
-    numericalConverterExpression = current.numberOfLargerTypesExplored;
-    totalTypesExploredExpression.addChildOnTop(numericalConverterExpression);
-    numericalConverterExpression = current.indexOfCurrentHCandidate;
-    totalHsExploredExpression.addChildOnTop(numericalConverterExpression);
+    Expression currentChain;
+    CalculatorConversions::storePossibleExtensionsOfSemisimpleLieAlgebra(
+      calculator, current.state, currentChain
+    );
+    possibleExtensionsChain.addChildOnTop(currentChain);
   }
-  keys.addOnTop("NumberOfExploredTypes");
-  values.addOnTop(totalTypesExploredExpression);
-  keys.addOnTop("NumberOfExploredHs");
-  values.addOnTop(totalHsExploredExpression);
-  keys.addOnTop("CurrentChain");
-  values.addOnTop(currentChainExpression);
+  keys.addOnTop(
+    CalculatorConversions::SerializationKeys::
+    possibleExtensionsSemisimpleSubalgebra
+  );
+  values.addOnTop(possibleExtensionsChain);
   Expression subalgebrasListExpression;
   Expression candidateExpression;
   subalgebrasListExpression.makeSequence(calculator);

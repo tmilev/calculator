@@ -706,8 +706,7 @@ class WeylGroupData {
     return output;
   }
   // <- once created, WeylGroupData can't be moved: a pointer to it is stored
-  // in
-  // FiniteGroup
+  // in FiniteGroup
 public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;

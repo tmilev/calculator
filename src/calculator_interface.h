@@ -4281,6 +4281,20 @@ public:
     List<Expression>* outputNotAKeyValuePair,
     std::stringstream* commentsOnFailure
   );
+  static bool loadPossibleExtensionsOfSemisimpleLieAlgebra(
+    Calculator& calculator,
+    const Expression& input,
+    PossibleExtensionsOfSemisimpleLieSubalgebraState& output
+  );
+  static bool expressionFromDynkinTypeExtension(Calculator& calculator,
+      DynkinTypeExtension& extension,
+      Expression& output
+      );
+  static bool storePossibleExtensionsOfSemisimpleLieAlgebra(
+    Calculator& calculator,
+    PossibleExtensionsOfSemisimpleLieSubalgebraState& state,
+    Expression& output
+  );
   static bool storeSemisimpleSubalgebras(
     Calculator& calculator,
     const SemisimpleSubalgebras& input,
@@ -4305,6 +4319,9 @@ public:
     const CandidateSemisimpleSubalgebra& input,
     Expression& output
   );
+  static bool expressionFromListInt(
+      Calculator& calculator, const List<int>& input, Expression& output
+      );
   static bool expressionFromDynkinType(
     Calculator& calculator, const DynkinType& input, Expression& output
   );
@@ -4340,9 +4357,6 @@ public:
     SemisimpleSubalgebras& owner
   );
   static bool loadWeylGroup(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool storeSemisimpleSubalgebras(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool slTwoSubalgebraPrecomputed(
@@ -4430,6 +4444,11 @@ public:
     Vector<Polynomial<Type> >& output,
     ExpressionContext& outputContext
   );
+  struct SerializationKeys {
+    static std::string possibleExtensionsSemisimpleSubalgebra;
+    static std::string possibleExtensionTypeCollection;
+    static std::string elementsCartan;
+  };
 };
 
 template <class Type>

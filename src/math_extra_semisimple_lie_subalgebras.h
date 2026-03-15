@@ -121,6 +121,10 @@ public:
   List<Vectors<Rational> > cartanSubalgebrasByComponentScaledToActByTwo;
   List<AlgebraicNumber> ratiosKillingsByComponent;
   Vectors<Rational> cartanElementsScaledToActByTwo;
+  // The cartan elements of the subalgebra h_1, ..., h_k.
+  // These identify uniquely-up-to-conjugation identify the subalgebra.
+  // These are used as keys to identify the subalgebra in the owner
+  // subalgebra collection.
   Vectors<Rational> cartanElementsSubalgebra;
   Vectors<Rational> hsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> bilinearFormSimplePrimal;
@@ -218,6 +222,10 @@ public:
   // Whether we have computed all internals from the given
   // subalgebra generators.
   bool flagInternalInitializationAndVerificationComplete;
+  // Notes on the candidate subalgebra, to be
+  // non-empty when hard-coded values were used to compute
+  // the subalgebra.
+  std::string notesOnHardCoding;
   int recursionDepthCounterForNilradicalGeneration;
   int totalUnknownsNoCentralizer;
   int totalUnknownsWithCentralizer;
@@ -588,6 +596,33 @@ public:
   bool checkAll() const;
 };
 
+struct DynkinTypeExtension {
+public:
+  DynkinType dynkinType;
+  List<int> rootInjection;
+};
+
+// Encodes the save state of a possible extension of a
+// semisimple Lie subaglebra to a larger semisimple Lie subalgebra.
+struct PossibleExtensionsOfSemisimpleLieSubalgebraState {
+  // The `cartanElementsSubalgebra` that define the subalgebra up to conjugation.
+  // These are copied from the realizedBase pointer.
+  // Conversely, when loading a computation, the elements here can
+  // be used to lookup an already realized based subalgebra.
+  Vectors<Rational> cartanElementsSubalgebra;
+  // All possible extensions of the base Dynkin type.
+  List<DynkinTypeExtension> possibleExtensionTypes;
+  // All candidates for the h element that extends the subalgebra.
+  List<Vector<Rational> > extensionHCandidates;
+  // The number of possible extension types that have been
+  // fully explored.
+  int numberOfExtensionTypesExplored;
+  // The index of the h element of the currently active extension type
+  // that determines the equations needed to realize the extension.
+  int indexOfCurrentHCandidate;
+  PossibleExtensionsOfSemisimpleLieSubalgebraState();
+};
+
 // Encodes a possible extension of a base subalgebra
 // to a larger Semisimple Lie algebra.
 // The base is an already realized semisimple subalagebra or zero.
@@ -595,13 +630,8 @@ class PossibleExtensionsOfSemisimpleLieSubalgebra {
 public:
   RealizedSemisimpleSubalgebra* realizedBase;
   SemisimpleSubalgebras* owner;
-  int numberOfLargerTypesExplored;
-  int indexOfCurrentHCandidate;
   bool flagInitialized;
-  // State that is recomputed each load:
-  List<DynkinType> possibleLargerDynkinTypes;
-  List<List<int> > possibleRootInjections;
-  List<Vector<Rational> > candidateHsScaledToActByTwo;
+  PossibleExtensionsOfSemisimpleLieSubalgebraState state;
   PossibleExtensionsOfSemisimpleLieSubalgebra();
   // Returns true if all possible extensions have been explored.
   bool isExhausted() const;
@@ -681,7 +711,11 @@ public:
   slTwoSubalgebrasRealForm;
   RealizedSemisimpleSubalgebra zeroSubalgebra;
   // All found subalgebras are here.
-  // The keys are their embedded symmetric Cartan matrices.
+  // The keys are the `cartanElementsSubalgebra`
+  // vectors, i.e., the h elements of the subalgebra rescaled as follows.
+  // The i^th element h_{\alpha_i} acts on the root space g_\alpha_i
+  // via ad(h_{\alpha_i})(g_{\alpha_i}) = <\alpha_i, \alpha_i> =
+  // the i^th element in the symmetric Cartan matrix of the subalgebra.
   MapReferences<Vectors<Rational>, RealizedSemisimpleSubalgebra> subalgebras;
   // Subalgebras not realized.
   // Non-realized subalgebras include:
@@ -752,9 +786,7 @@ public:
   // 2. CalculatorConversions::stringFromSemisimpleSubalgebras.
   std::string(*toStringExpressionString)(SemisimpleSubalgebras& input);
   bool loadState(
-    List<int>& currentChainIntegers,
-    List<int>& numberOfExploredTypes,
-    List<int>& numberOfExploredHs,
+    List<PossibleExtensionsOfSemisimpleLieSubalgebraState>& states,
     std::stringstream& reportStream
   );
   int getDisplayIndexFromActual(int actualindexSubalgebra) const;
@@ -961,7 +993,7 @@ public:
   void writeHCandidates(
     List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,
-    DynkinType& currentType,
+    DynkinType& targetType,
     List<int>& currentRootInjection
   );
   void writeHCandidatesForOneOrbit(
@@ -969,13 +1001,13 @@ public:
     const Rational& desiredHScaledToActByTwoLengthSquared,
     int baseRank,
     List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
-    CandidateSemisimpleSubalgebra& newCandidate,
+    CandidateSemisimpleSubalgebra& targetSubalgebraWithLastHMissing,
     List<int>& currentRootInjection
   );
   void writeOneHCandidate(
     const Vector<Rational>& currentCandidate,
     List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
-    CandidateSemisimpleSubalgebra& newCandidate,
+    CandidateSemisimpleSubalgebra& targetSubalgebraWithLastHMissing,
     const List<int>& currentRootInjection,
     const List<Vector<Rational> >& centralizerOfOldHs
   );

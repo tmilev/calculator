@@ -1425,62 +1425,34 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
 }
 
 bool SemisimpleSubalgebras::loadState(
-  List<int>& currentChainIntegers,
-  List<int>& numberOfExploredTypes,
-  List<int>& numberOfExploredHs,
+  List<PossibleExtensionsOfSemisimpleLieSubalgebraState>& states,
   std::stringstream& reportStream
 ) {
   STACK_TRACE("SemisimpleSubalgebras::loadState");
   this->findSemisimpleSubalgebrasInitialize();
-  if (
-    currentChainIntegers.size != numberOfExploredTypes.size ||
-    currentChainIntegers.size != numberOfExploredHs.size
-  ) {
-    reportStream
-    << "<hr>Input state is corrupt: currentChainInt.size: "
-    << currentChainIntegers.size
-    << ", numExploredTypes.size: "
-    << numberOfExploredTypes.size
-    << ", numExploredHs.size: "
-    << numberOfExploredHs.size;
-    return false;
-  }
   this->currentSubalgebraChain.clear();
   ProgressReport report;
-  for (int i = 0; i < currentChainIntegers.size; i ++) {
+  for (int i = 0; i < states.size; i ++) {
     if (report.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream
       << "Loading current subalgebra chain index: "
-      << currentChainIntegers[i]
       << i + 1
       << " out of "
-      << currentChainIntegers.size
+      << states.size
       << ". ";
       report.report(reportStream.str());
     }
-    if (currentChainIntegers[i] == - 1 && i == 0) {
-      this->addSubalgebraToStack(this->emptyCandidateSubalgebra());
-      PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
-      *this->currentSubalgebraChain.lastObject();
-      lastExtension.indexOfCurrentHCandidate = numberOfExploredHs[i];
-      if (lastExtension.indexOfCurrentHCandidate < - 1) {
-        lastExtension.indexOfCurrentHCandidate = - 1;
-      }
-      lastExtension.numberOfLargerTypesExplored = numberOfExploredTypes[i];
-      continue;
-    }
-    if (
-      currentChainIntegers[i] < 0 ||
-      currentChainIntegers[i] >= this->subalgebras.values.size
-    ) {
+    PossibleExtensionsOfSemisimpleLieSubalgebraState & state = states[i];
+    if (!this->subalgebras.contains(state.cartanElementsSubalgebra)) {
       reportStream
-      << "<hr>Corrupt subalgebra index: "
-      << currentChainIntegers[i];
+      << "Base subalgebra with base h elements: "
+      << state.cartanElementsSubalgebra.toString()
+      << " not found. ";
       return false;
     }
     RealizedSemisimpleSubalgebra& realized =
-    this->subalgebras.values[currentChainIntegers[i]];
+    this->subalgebras.getValueNoFailNonConst(state.cartanElementsSubalgebra);
     CandidateSemisimpleSubalgebra& currentSubalgebra = realized.content;
     if (!currentSubalgebra.computeAndVerifyFromKnownGeneratorsAndHs()) {
       reportStream
@@ -1548,11 +1520,7 @@ bool SemisimpleSubalgebras::loadState(
     this->addSubalgebraToStack(realized);
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
     *this->currentSubalgebraChain.lastObject();
-    lastExtension.indexOfCurrentHCandidate = numberOfExploredHs[i] - 1;
-    if (lastExtension.indexOfCurrentHCandidate < - 1) {
-      lastExtension.indexOfCurrentHCandidate = - 1;
-    }
-    lastExtension.numberOfLargerTypesExplored = numberOfExploredTypes[i];
+    lastExtension.state = state;
   }
   return true;
 }
@@ -2640,16 +2608,16 @@ std::string IteratorRootActionWeylGroupAutomorphisms::toStringSize() const {
 void SemisimpleSubalgebras::writeHCandidates(
   List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
   CandidateSemisimpleSubalgebra& newCandidate,
-  DynkinType& currentType,
+  DynkinType& targetType,
   List<int>& currentRootInjection
 ) {
   STACK_TRACE("SemisimpleSubalgebras::writeHCandidates");
   ProgressReport targetHeader;
-  int baseRank = currentType.getRank() - 1;
-  DynkinSimpleType smallType = currentType.getSmallestSimpleType();
+  int baseRank = targetType.getRank() - 1;
+  DynkinSimpleType smallType = targetType.getSmallestSimpleType();
   int indexNewRoot = *currentRootInjection.lastObject();
   int indexNewRootInSmallType =
-  indexNewRoot - currentType.getRank() + smallType.rank;
+  indexNewRoot - targetType.getRank() + smallType.rank;
   Rational desiredHScaledToActByTwoLengthSquared =
   smallType.cartanSymmetricInverseScale * 4 /
   smallType.getDefaultRootLengthSquared(indexNewRootInSmallType);
@@ -2681,7 +2649,7 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   const Rational& desiredHScaledToActByTwoLengthSquared,
   int baseRank,
   List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
-  CandidateSemisimpleSubalgebra& newCandidate,
+  CandidateSemisimpleSubalgebra& targetSubalgebraWithLastHMissing,
   List<int>& currentRootInjection
 ) {
   STACK_TRACE("SemisimpleSubalgebras::writeHCandidatesForOneOrbit");
@@ -2709,7 +2677,9 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   orbitHeader.report(orbitBodyStream.str());
   int totalHCandidates = 0;
   List<Vector<Rational> > centralizerOfOldHs;
-  newCandidate.computeCentralizerOfOldHs(centralizerOfOldHs);
+  targetSubalgebraWithLastHMissing.computeCentralizerOfOldHs(
+    centralizerOfOldHs
+  );
   orbitBodyStream
   << "sl(2) orbit "
   << currentSubalgebra.indexInContainer + 1
@@ -2719,7 +2689,7 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   << "Centralizer of old h's size: "
   << centralizerOfOldHs.size
   << " out of "
-  << newCandidate.getAmbientWeyl().rootsOfBorel.size
+  << targetSubalgebraWithLastHMissing.getAmbientWeyl().rootsOfBorel.size
   << ". ";
   orbitHeader.report(orbitBodyStream.str());
   int64_t startingTime = global.getElapsedMilliseconds();
@@ -2727,7 +2697,7 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
     this->writeOneHCandidate(
       currentOrbit.getCurrentElement(),
       outputHCandidatesScaledToActByTwo,
-      newCandidate,
+      targetSubalgebraWithLastHMissing,
       currentRootInjection,
       centralizerOfOldHs
     );
@@ -2758,7 +2728,7 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
 void SemisimpleSubalgebras::writeOneHCandidate(
   const Vector<Rational>& currentCandidate,
   List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
-  CandidateSemisimpleSubalgebra& newCandidate,
+  CandidateSemisimpleSubalgebra& targetSubalgebraWithLastHMissing,
   const List<int>& currentRootInjection,
   const List<Vector<Rational> >& centralizerOfOldHs
 ) {
@@ -2767,7 +2737,7 @@ void SemisimpleSubalgebras::writeOneHCandidate(
     global.fatal << "Empty vector not expected here" << global.fatal;
   }
   if (
-    !newCandidate.isGoodHNewActingByTwo(
+    !targetSubalgebraWithLastHMissing.isGoodHNewActingByTwo(
       currentCandidate, currentRootInjection, centralizerOfOldHs
     )
   ) {
@@ -3246,7 +3216,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
   STACK_TRACE(
     "PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates"
   );
-  this->candidateHsScaledToActByTwo.clear();
+  this->state.extensionHCandidates.clear();
   DynkinType& candidateExtensionType = this->nextUnexploredDynkinType();
   if (!this->owner->targetDynkinType.isEqualToZero()) {
     // We have a target extension.
@@ -3280,9 +3250,9 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     << " to "
     << candidateExtensionType.toString()
     << ": "
-    << this->numberOfLargerTypesExplored + 1
+    << this->state.numberOfExtensionTypesExplored + 1
     << " out of "
-    << this->possibleLargerDynkinTypes.size
+    << this->state.possibleExtensionTypes.size
     << " possibilities. ";
     report0.report(reportStream.str());
   }
@@ -3307,7 +3277,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     base, candidateExtensionType, candidateRootInjection
   );
   this->owner->writeHCandidates(
-    this->candidateHsScaledToActByTwo,
+    this->state.extensionHCandidates,
     newCandidate,
     candidateExtensionType,
     candidateRootInjection
@@ -3424,6 +3394,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   *this->currentSubalgebraChain.lastObject();
   nextExtension.owner = this;
   nextExtension.realizedBase = &realized;
+  nextExtension.state.cartanElementsSubalgebra = subalgebra.cartanElementsScaledToActByTwo;
   this->writeProgressFile();
 }
 
@@ -3525,10 +3496,14 @@ SemisimpleSubalgebras::Statistics::Statistics() {
   this->subalgebrasNotProcessed = 0;
 }
 
+PossibleExtensionsOfSemisimpleLieSubalgebraState::
+PossibleExtensionsOfSemisimpleLieSubalgebraState() {
+  this->indexOfCurrentHCandidate = - 1;
+  this->numberOfExtensionTypesExplored = 0;
+}
+
 PossibleExtensionsOfSemisimpleLieSubalgebra::
 PossibleExtensionsOfSemisimpleLieSubalgebra() {
-  this->indexOfCurrentHCandidate = - 1;
-  this->numberOfLargerTypesExplored = 0;
   this->flagInitialized = false;
   this->owner = nullptr;
   this->realizedBase = nullptr;
@@ -3547,11 +3522,20 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::initializeIfNeeded() {
   if (this->owner == nullptr) {
     global.fatal << "No owner subalgebras. " << global.fatal;
   }
+  List<DynkinType> dynkinTypes;
+  List<List<int> > injections;
   this->owner->growDynkinType(
     this->realizedBase->content.weylNonEmbedded->dynkinType,
-    this->possibleLargerDynkinTypes,
-    &this->possibleRootInjections
+    dynkinTypes,
+    &injections
   );
+  this->state.possibleExtensionTypes.clear();
+  for (int i = 0; i < dynkinTypes.size; i ++) {
+    DynkinTypeExtension extension;
+    extension.dynkinType = dynkinTypes[i];
+    extension.rootInjection = injections[i];
+    this->state.possibleExtensionTypes.addOnTop(extension);
+  }
   this->computeCurrentHCandidates();
 }
 
@@ -3567,16 +3551,18 @@ incrementReturnFalseIfPastLast(ProgressReport* report) {
     if (report != nullptr && report->tickAndWantReport()) {
       report->report(this->owner->toStringCurrentChain());
     }
-    this->indexOfCurrentHCandidate ++;
+    this->state.indexOfCurrentHCandidate ++;
     if (
-      this->indexOfCurrentHCandidate < this->candidateHsScaledToActByTwo.size
+      this->state.indexOfCurrentHCandidate < this->state.
+      extensionHCandidates.size
     ) {
       return true;
     }
-    this->indexOfCurrentHCandidate = - 1;
-    this->numberOfLargerTypesExplored ++;
+    this->state.indexOfCurrentHCandidate = - 1;
+    this->state.numberOfExtensionTypesExplored ++;
     if (
-      this->numberOfLargerTypesExplored >= this->possibleLargerDynkinTypes.size
+      this->state.numberOfExtensionTypesExplored >=
+      this->state.possibleExtensionTypes.size
     ) {
       return false;
     }
@@ -3593,7 +3579,10 @@ nextUnexploredDynkinType() {
     "PossibleExtensionsOfSemisimpleLieSubalgebra::"
     "nextUnexploredDynkinType"
   );
-  return this->possibleLargerDynkinTypes[this->numberOfLargerTypesExplored];
+  return
+  this->state.possibleExtensionTypes[
+    this->state.numberOfExtensionTypesExplored
+  ].dynkinType;
 }
 
 List<int>& PossibleExtensionsOfSemisimpleLieSubalgebra::
@@ -3602,7 +3591,10 @@ nextPossibleRootInjection() {
     "PossibleExtensionsOfSemisimpleLieSubalgebra::"
     "nextPossibleRootInjection"
   );
-  return this->possibleRootInjections[this->numberOfLargerTypesExplored];
+  return
+  this->state.possibleExtensionTypes[
+    this->state.numberOfExtensionTypesExplored
+  ].rootInjection;
 }
 
 Vector<Rational>& PossibleExtensionsOfSemisimpleLieSubalgebra::
@@ -3611,7 +3603,10 @@ nextCandidateHScaledToActByTwo() {
     "PossibleExtensionsOfSemisimpleLieSubalgebra::"
     "nextCandidateHScaledToActByTwo"
   );
-  return this->candidateHsScaledToActByTwo[this->indexOfCurrentHCandidate];
+  return
+  this->state.extensionHCandidates[
+    this->state.indexOfCurrentHCandidate
+  ];
 }
 
 bool PossibleExtensionsOfSemisimpleLieSubalgebra::checkConsistency() {
@@ -3635,26 +3630,27 @@ std::string PossibleExtensionsOfSemisimpleLieSubalgebra::toString() {
   << "<br>Extensions of "
   << this->realizedBase->content.weylNonEmbedded->dynkinType.toString()
   << ": &nbsp;&nbsp;&nbsp;&nbsp;";
-  for (int j = 0; j < this->possibleLargerDynkinTypes.size; j ++) {
-    if (j == this->numberOfLargerTypesExplored) {
+  for (int j = 0; j < this->state.possibleExtensionTypes.size; j ++) {
+    if (j == this->state.numberOfExtensionTypesExplored) {
       out << "<b>";
     }
-    out << this->possibleLargerDynkinTypes[j].toString();
-    if (j == this->numberOfLargerTypesExplored) {
+    out << this->state.possibleExtensionTypes[j].dynkinType.toString();
+    if (j == this->state.numberOfExtensionTypesExplored) {
       out << "</b>";
     }
-    if (j != this->possibleLargerDynkinTypes.size - 1) {
+    if (j != this->state.possibleExtensionTypes.size - 1) {
       out << ", ";
     }
   }
   out
   << "<br> "
-  << this->numberOfLargerTypesExplored
+  << this->state.numberOfExtensionTypesExplored
   << " out of "
-  << this->possibleLargerDynkinTypes.size
+  << this->state.possibleExtensionTypes.size
   << " types explored, current type: ";
   if (
-    this->numberOfLargerTypesExplored < this->possibleLargerDynkinTypes.size
+    this->state.numberOfExtensionTypesExplored < this->state.
+    possibleExtensionTypes.size
   ) {
     out << "<b>" << this->nextUnexploredDynkinType().toString() << "</b>";
   } else {
@@ -3662,9 +3658,9 @@ std::string PossibleExtensionsOfSemisimpleLieSubalgebra::toString() {
   }
   out
   << "<br>Exploring "
-  << this->indexOfCurrentHCandidate + 1
+  << this->state.indexOfCurrentHCandidate + 1
   << " out of "
-  << this->candidateHsScaledToActByTwo.size
+  << this->state.extensionHCandidates.size
   << " h-candidates. ";
   return out.str();
 }
@@ -7451,8 +7447,6 @@ attemptToSolveSystemFinal() {
   this->checkFullInitialization();
   this->configurePolynomialSystem();
   this->transformedSystem = this->systemToSolveMixedRelationsFirst;
-  this->configuredSystemToSolve.groebner.polynomialOrder.monomialOrder.
-  setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   ProgressReport report;
   report.reportStream()
   << "<hr>In order to realize type "
@@ -9735,14 +9729,18 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
   (void) format;
   std::stringstream out;
   out
-  <<
-  "<br><b>For the calculator (equation order: mixed relations first):</b><br>\n"
+  << "<br><b>For the calculator "
+  << "(equation order: mixed relations first):</b><br>\n"
   << this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
     this->systemToSolveMixedRelationsFirst
   )
   << ";"
-  << "<br> "
-  << this->toStringLoadUnknown();
+  << "<br> ";
+  out << this->toStringLoadUnknown();
+  if (this->flagUsedBuiltInRealization) {
+    out
+    << "<br> <b style='color:green'>Using built-in realization hints.</b> ";
+  }
   out << this->toStringSubSystems();
   out << this->toStringInvolvedPositiveRoots() << "<br>";
   return out.str();

@@ -62,6 +62,10 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
   int maximumMonomialOperations = 10000;
   this->output.configuredSystemToSolve.algebraicClosure =
   this->output.owner->ownerField;
+  this->output.configuredSystemToSolve.groebner.
+  initializeForGroebnerComputation();
+  this->output.configuredSystemToSolve.groebner.polynomialOrder.monomialOrder.
+  setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   std::string ambientLieAlgebraName =
   this->output.owner->owner->toStringLieAlgebraName();
   if (ambientLieAlgebraName == "C^{1}_5") {
@@ -165,7 +169,7 @@ configurePolynomialSystemE8() {
   }
   if (
     embeddedType == A(14, 1) + A(2, 1) &&
-    this->output.cartanElementsSubalgebra[1] == List<Rational>(
+    this->output.cartanElementsScaledToActByTwo[1] == List<Rational>(
       {0, 1, 1, 2, 1, 0, 1, 1}
     )
   ) {
@@ -176,6 +180,14 @@ configurePolynomialSystemE8() {
   if (embeddedType == A(12, 1) + A(4, 1)) {
     maximumPolynomialDivisions = 20000;
     maximumMonomialOperations = 20000;
+    this->output.configuredSystemToSolve.groebner.polynomialOrder.monomialOrder
+    =
+    MonomialPolynomial::orderDegreeThenLeftLargerWins();
+  }
+  if (embeddedType == A(9, 1) + A(9, 1)) {
+    this->output.configuredSystemToSolve.groebner.polynomialOrder.monomialOrder
+    =
+    MonomialPolynomial::orderDegreeThenLeftLargerWins();
   }
 }
 
@@ -601,6 +613,67 @@ loadBuiltInGeneratorHintsE8() {
     g(- 55) + g(- 57) + g(- 62) + g(- 69) + g(- 75) + g(- 76);
     this->output.unknownNegativeGenerators[1] =
     g(93) + g(91) + g(86) + g(78) *(- 3) + g(77);
+    return true;
+  }
+  if (
+    type == A(12, 1) + A(4, 1) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({8, 12, 16, 24, 20, 16, 12, 6})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({2, 4, 4, 6, 4, 2, 0, 0})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "1. Computation was running very slow (12 hours +), "
+    "hence decided to solve manually.\n"
+    "2. Solved the subsystem for A^12_1 with the "
+    "polynomial solver, randomly seeding by hand "
+    "x_1=0; x_2=1; x_3=1; x_4=1; x_5=0; x_6=0;\n"
+    "3. The resulting solution for A^12_1 resulted in a contradictory "
+    "system.\n"
+    "4. Removed all positive generator coefficients from the solution "
+    "and plugged in the values for x_1, ... , x_30 as hints for the full "
+    "system.\n"
+    "5. The polynomial solver quickly solved for the remaining variables "
+    "resulting in the solution below.";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 41) + g(- 42) + g(- 47) + g(- 70) + g(- 73) + g(- 78);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 10) + g(- 30) + g(- 46) + g(- 51) + g(- 52);
+    return true;
+  }
+  if (
+    type == A(9, 2) &&
+    this->output.cartanElementsSubalgebra[0].isEqualTo(
+      List<Rational>({8, 11, 15, 22, 18, 14, 10, 5})
+    ) &&
+    this->output.cartanElementsSubalgebra[1].isEqualTo(
+      List<Rational>({- 4, - 4, - 6, - 8, - 6, - 4, - 5, - 1})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "1. Computation was running very slow and "
+    "generating very large coefficients (thousands of digits), "
+    "and taking up 10Gb+ of RAM."
+    "2. Solved manually as follows."
+    "3. Seeding with the first negative generator by the f element of "
+    "the default A^9_1 yields contradictory system."
+    "4. Seeded the coefficients of the g_-49, g_-65, g_-74 "
+    "as the coefficients of the default A_1^9 by specifying the coefficients"
+    "x_1, ..., x_12 as 0's and 1's. "
+    "5. Left the remaining coefficients unspecified. "
+    "6. Exercised the polynomial solver which produced the solution below.";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 49) + g(- 65) + g(- 74) + g(- 76) + g(- 82) + g(- 93) * 2;
+    this->output.unknownNegativeGenerators[1] =
+    g(48) * "-1/2" - g(44) +
+    g(34) * "5/2" +
+    g(30) *(- 5) +
+    g(21) * 2 +
+    g(16) +
+    g(15) +
+    g(1) * - 3;
     return true;
   }
   return false;

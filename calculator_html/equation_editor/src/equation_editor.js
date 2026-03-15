@@ -1148,6 +1148,12 @@ class MathNodeFactory {
     matrixEnvironment,
   ) {
     const matrixTable = new MathNodeMatrixTable(equationEditor);
+    if (rows <= 0) {
+      rows = 1;
+    }
+    if (columns <= 0) {
+      columns = 1;
+    }
     for (let i = 0; i < rows; i++) {
       matrixTable.appendChild(this.matrixRow(equationEditor, columns));
     }

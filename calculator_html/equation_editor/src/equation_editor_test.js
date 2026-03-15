@@ -51,6 +51,8 @@ const allLatexSnippets = [
   `2\ or \ 3`,
   // Make sure we don't die on large input!
   `123456789`.repeat(10_000),
+  // 0x0 matrix shouldn't break us.
+  `\\begin{pmatrix}\\end{pmatrix}`,
 ];
 
 /** @type {Object.<string, string>} */

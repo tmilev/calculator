@@ -125,7 +125,7 @@ public:
   // These are used as keys to identify the subalgebra in the owner
   // subalgebra collection.
   Vectors<Rational> cartanElementsScaledToActByTwo;
-  Vectors<Rational> hsScaledToActByTwoInOrderOfCreation;
+  Vectors<Rational> cartanElementsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> bilinearFormSimplePrimal;
   Matrix<Rational> bilinearFormFundamentalPrimal;
   Matrix<Rational>
@@ -604,11 +604,12 @@ public:
 // Encodes the save state of a possible extension of a
 // semisimple Lie subaglebra to a larger semisimple Lie subalgebra.
 struct PossibleExtensionsOfSemisimpleLieSubalgebraState {
-  // The `cartanElementsSubalgebra` that define the subalgebra up to conjugation.
+  // The `cartanElementsSubalgebra` that define the subalgebra up to
+  // conjugation.
   // These are copied from the realizedBase pointer.
   // Conversely, when loading a computation, the elements here can
   // be used to lookup an already realized based subalgebra.
-  Vectors<Rational> cartanElementsSubalgebra;
+  Vectors<Rational> cartanElementsBaseSubalgebra;
   // All possible extensions of the base Dynkin type.
   List<DynkinTypeExtension> possibleExtensionTypes;
   // All candidates for the h element that extends the subalgebra.
@@ -618,8 +619,9 @@ struct PossibleExtensionsOfSemisimpleLieSubalgebraState {
   int numberOfExtensionTypesExplored;
   // The index of the h element of the currently active extension type
   // that determines the equations needed to realize the extension.
-  int indexOfCurrentHCandidate;
+  int numberOfExtensionHsExplored;
   PossibleExtensionsOfSemisimpleLieSubalgebraState();
+  std::string toString() const;
 };
 
 // Encodes a possible extension of a base subalgebra
@@ -636,7 +638,7 @@ public:
   bool isExhausted() const;
   // Increments to the next possible extension, or
   // returns last if all extensions have been explored.
-  bool incrementReturnFalseIfPastLast(ProgressReport* report);
+  bool incrementIfNeededReturnFalseIfPastLast(ProgressReport* report);
   void initializeIfNeeded();
   // Attempts to realize the extension currently being explored.
   void attemptExtension(
@@ -701,9 +703,11 @@ public:
   std::string comments;
   std::string fileNameToLogComments;
   std::string fileNamePrefix;
-  // current computation state:
-  // state that gets stored to hd:
-  List<PossibleExtensionsOfSemisimpleLieSubalgebra> currentSubalgebraChain;
+  // Current computation state.
+  // This state can be stored to hard-disk
+  // to resume computation later.
+  ListReferences<PossibleExtensionsOfSemisimpleLieSubalgebra>
+  currentSubalgebraChain;
   // End current computation state variables.
   // The map keys are used to search for subalgebras quickly.
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
@@ -784,6 +788,9 @@ public:
   // 1. nulltpr.
   // 2. CalculatorConversions::stringFromSemisimpleSubalgebras.
   std::string(*toStringExpressionString)(SemisimpleSubalgebras& input);
+  bool computeCartanElementsScaledToActByTwoInOrderOfCreation(
+    CandidateSemisimpleSubalgebra& incoming, std::stringstream& commentsOnError
+  );
   bool loadState(
     List<PossibleExtensionsOfSemisimpleLieSubalgebraState>& states,
     std::stringstream& reportStream
@@ -840,7 +847,7 @@ public:
   void makeCandidateFromSlTwo(
     SlTwoSubalgebra& candidate, CandidateSemisimpleSubalgebra& output
   );
-  bool incrementReturnFalseIfPastLast();
+  bool incrementIfNeededReturnFalseIfPastLast();
   bool getCentralizerTypeIfComputableAndKnown(
     const DynkinType& input, DynkinType& output
   );

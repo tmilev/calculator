@@ -4250,6 +4250,11 @@ public:
   static bool expressionFromRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool expressionFromVectorsRational(
+    Calculator& calculator,
+    const List<Vector<Rational> >& input,
+    Expression& output
+  );
   static bool loadKey(
     Calculator& calculator,
     const Expression& inputStatementList,
@@ -4281,15 +4286,24 @@ public:
     List<Expression>* outputNotAKeyValuePair,
     std::stringstream* commentsOnFailure
   );
+  static bool loadVectorsRational(
+    Calculator& calculator,
+    const Expression& input,
+    List<Vector<Rational> >& output
+  );
   static bool loadPossibleExtensionsOfSemisimpleLieAlgebra(
     Calculator& calculator,
     const Expression& input,
     PossibleExtensionsOfSemisimpleLieSubalgebraState& output
   );
-  static bool expressionFromDynkinTypeExtension(Calculator& calculator,
-      DynkinTypeExtension& extension,
-      Expression& output
-      );
+  static bool loadDynkinExtension(
+    Calculator& calculator,
+    const Expression& input,
+    DynkinTypeExtension& output
+  );
+  static bool expressionFromDynkinTypeExtension(
+    Calculator& calculator, DynkinTypeExtension& extension, Expression& output
+  );
   static bool storePossibleExtensionsOfSemisimpleLieAlgebra(
     Calculator& calculator,
     PossibleExtensionsOfSemisimpleLieSubalgebraState& state,
@@ -4320,8 +4334,8 @@ public:
     Expression& output
   );
   static bool expressionFromListInt(
-      Calculator& calculator, const List<int>& input, Expression& output
-      );
+    Calculator& calculator, const List<int>& input, Expression& output
+  );
   static bool expressionFromDynkinType(
     Calculator& calculator, const DynkinType& input, Expression& output
   );
@@ -4448,6 +4462,9 @@ public:
     static std::string possibleExtensionsSemisimpleSubalgebra;
     static std::string possibleExtensionTypeCollection;
     static std::string elementsCartan;
+    static std::string indexCurrentCartanExtension;
+    static std::string numberOfExtensionTypesExplored;
+    static std::string cartanExtensionCandidates;
   };
 };
 

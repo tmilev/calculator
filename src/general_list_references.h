@@ -89,7 +89,7 @@ public:
       << " elements. ";
       fatalCrash(commentsOnCrash.str());
     }
-    if (this->references[i] == 0) {
+    if (this->references[i] == nullptr) {
       std::stringstream commentsOnCrash;
       commentsOnCrash
       << "Element of index "
@@ -117,6 +117,12 @@ public:
     }
     return false;
   }
+  void removeLastObject() {
+    if (this->size == 0) {
+      return;
+    }
+    this->removeIndexSwapWithLast(this->size - 1);
+  }
   void removeIndexSwapWithLast(int index) {
     // This is not thread-safe
     if (index >= this->size) {
@@ -131,7 +137,7 @@ public:
     }
     this->killElementIndex(index);
     this->references[index] = this->references[this->size - 1];
-    this->references[this->size - 1] = 0;
+    this->references[this->size - 1] = nullptr;
     this->size --;
   }
   void addListOnTop(const List<Object>& input) {
@@ -175,7 +181,7 @@ public:
   void killElementIndex(int i) {
     delete this->references[i];
     // <- NOT thread safe!
-    this->references[i] = 0;
+    this->references[i] = nullptr;
   }
   void addOnTop(const Object& o);
   int getIndex(const Object& o) const;
@@ -218,10 +224,10 @@ public:
   Object& lastObject() const {
     return (*this)[this->size - 1];
   }
-  template <class otherList = List<Object> >
+  template <class OtherList = List<Object> >
   void quickSortAscending(
     const typename List<Object>::Comparator* order = nullptr,
-    otherList* carbonCopy = nullptr
+    OtherList* carbonCopy = nullptr
   ) {
     List<Object>::quickSortAscending(*this, order, carbonCopy);
   }
@@ -253,16 +259,38 @@ void ListReferences<Object>::allocateElements(int newSize) {
     commentsOnCrash
     << "Requested to set negative size "
     << newSize
-    << " of List of References. If a "
-    << "List is to be set empty, then one should call setSize(0), "
+    << " of List of References. "
+    << "If a List is to be set empty, then one should call setSize(0), "
     << "rather than provide a negative argument to setSize.";
     fatalCrash(commentsOnCrash.str());
   }
+  int oldSize = this->size;
+  int ensureNonZeroPointerUpTo = newSize;
+  if (ensureNonZeroPointerUpTo > this->references.size) {
+    ensureNonZeroPointerUpTo = this->references.size;
+  }
+  // The pointers from oldSize to ensureNonZeroPointerUpTo
+  // were previously unused, and could have been deleted and set to
+  // nullptr.
+  // Ensure all pointers in said range are allocated.
+  for (int i = oldSize; i < ensureNonZeroPointerUpTo; i ++) {
+    if (this->references[i] == nullptr) {
+      this->references[i] = (new Object);
+    }
+  }
   if (newSize <= this->references.size) {
+    // We already have enough internal pointers, all allocated,
+    // to handle the newly requested size.
     return;
   }
+  // We need to add new objects.
   int oldReferencesSize = this->references.size;
   this->references.setSize(newSize);
+  // The pointers in the range below
+  // are in a newly allocated list.
+  // These are not null by default.
+  // By allocated new Objects below, we ensure all
+  // pointers in the references array are valid.
   for (int i = oldReferencesSize; i < newSize; i ++) {
     this->references[i] = (new Object);
   }
@@ -280,7 +308,7 @@ void ListReferences<Object>::killAllElements() {
     GlobalStatistics::globalPointerCounter --;
     GlobalStatistics::checkPointerCounters();
 #endif
-    this->references[i] = 0;
+    this->references[i] = nullptr;
   }
   this->references.size = 0;
   this->size = 0;

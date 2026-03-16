@@ -8,12 +8,22 @@
 #include "math_weyl_algebras.h"
 
 std::string CalculatorConversions::SerializationKeys::
-    possibleExtensionsSemisimpleSubalgebra =
-    "PossibleExtensionsSemisimpleSubalgebra";
+possibleExtensionsSemisimpleSubalgebra =
+"PossibleExtensionsSemisimpleSubalgebra";
 std::string CalculatorConversions::SerializationKeys::
-    possibleExtensionTypeCollection=
-    "PossibleExtensionTypeCollection";
-std::string CalculatorConversions::SerializationKeys::elementsCartan="ElementsCartan";
+possibleExtensionTypeCollection =
+"PossibleExtensionTypeCollection";
+std::string CalculatorConversions::SerializationKeys::elementsCartan =
+"ElementsCartan";
+std::string CalculatorConversions::SerializationKeys::
+indexCurrentCartanExtension =
+"IndexCurrentCartanExtension";
+std::string CalculatorConversions::SerializationKeys::
+numberOfExtensionTypesExplored =
+"NumberOfExtensionTypesExplored";
+std::string CalculatorConversions::SerializationKeys::
+cartanExtensionCandidates =
+"CartanExtensionCandidates";
 // Start WithContext specializations.
 template < >
 bool WithContext<Polynomial<Rational> >::toExpression(
@@ -1502,6 +1512,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     << inputArguments.toString();
   }
   List<PossibleExtensionsOfSemisimpleLieSubalgebraState> possibleExtensions;
+  bool hasPossibleExtensions = false;
   if (
     CalculatorConversions::loadKey(
       calculator,
@@ -1511,6 +1522,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
       statesExpressionContainer
     )
   ) {
+    hasPossibleExtensions = true;
     for (int i = 1; i < statesExpressionContainer.size(); i ++) {
       PossibleExtensionsOfSemisimpleLieSubalgebraState state;
       if (
@@ -1647,10 +1659,25 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   subalgebras.toStringExpressionString =
   CalculatorConversions::stringFromSemisimpleSubalgebras;
   if (!subalgebras.loadState(possibleExtensions, calculator.comments)) {
-    return false;
+    return calculator << "Failed to load the possible extensions. ";
   }
   subalgebras.flagAttemptToAdjustCentralizers = false;
   subalgebras.flagLoadedFromUserInput = true;
+  if (!hasPossibleExtensions) {
+    // No possible extensions key found.
+    // This was used during initial development.
+    // Due to bad code, we would sometimes obtain untrustworthy
+    // `currentSubalgebraChain`.
+    // However, the subalgebra realizations would be trustworthy
+    // (and verified).
+    // To make sure the currentSubalgebraChain is recomputed
+    // correctly from the start, we simply wiped the key:
+    // CalculatorConversions::
+    // SerializationKeys::
+    // possibleExtensionsSemisimpleSubalgebra.
+    // from the storage computation.
+    subalgebras.addSubalgebraToStack(subalgebras.emptyCandidateSubalgebra());
+  }
   if (!subalgebras.findSemisimpleSubalgebrasContinue()) {
     std::stringstream out;
     out
@@ -1679,38 +1706,220 @@ std::string CalculatorConversions::stringFromSemisimpleSubalgebras(
   return expression.toString(&format);
 }
 
+bool CalculatorConversions::loadDynkinExtension(
+  Calculator& calculator, const Expression& input, DynkinTypeExtension& output
+) {
+  STACK_TRACE("CalculatorConversions::loadDynkinExtension");
+  if (input.size() < 2) {
+    return
+    calculator
+    << "Function loadDynkinExtension needs at least two arguments, got: "
+    << input.toString()
+    << ". ";
+  }
+  if (
+    !CalculatorConversions::functionDynkinType(
+      calculator, input[1], output.dynkinType
+    )
+  ) {
+    return
+    calculator
+    << "Failed to load Dynkin type from "
+    << input[1].toString();
+  }
+  output.rootInjection.clear();
+  for (int i = 2; i < input.size(); i ++) {
+    int index = 0;
+    if (!input[i].isSmallInteger(&index)) {
+      return
+      calculator
+      << "Failed to extract root injections from "
+      << input.toString();
+    }
+    output.rootInjection.addOnTop(index);
+  }
+  return true;
+}
+
+bool CalculatorConversions::loadVectorsRational(
+  Calculator& calculator,
+  const Expression& input,
+  List<Vector<Rational> >& output
+) {
+  STACK_TRACE("CalculatorConversions::loadVectorsRational");
+  output.clear();
+  Vector<Rational> element;
+  for (int i = 1; i < input.size(); i ++) {
+    if (!calculator.getVector(input[i], element)) {
+      return calculator << "Failed to extract vector from: " << input[i];
+    }
+    output.addOnTop(element);
+  }
+  for (int i = 1; i < output.size; i ++) {
+    if (output[i].size != output[0].size) {
+      return
+      calculator
+      << "Vectors from "
+      << input.toString()
+      << " have different dimensions. ";
+    }
+  }
+  return true;
+}
+
 bool CalculatorConversions::loadPossibleExtensionsOfSemisimpleLieAlgebra(
   Calculator& calculator,
   const Expression& input,
   PossibleExtensionsOfSemisimpleLieSubalgebraState& output
 ) {
-  return false;
-}
-
-bool CalculatorConversions::expressionFromListInt(  Calculator& calculator, const List<int>& input, Expression& output){
-  output.makeSequence(calculator);
-  for (int element: input){
-    output.addChildOnTop(calculator.expressionRational(element));
-
+  STACK_TRACE(
+    "CalculatorConversions::"
+    "loadPossibleExtensionsOfSemisimpleLieAlgebra"
+  );
+  Expression baseElementsCartan;
+  if (
+    !CalculatorConversions::loadKey(
+      calculator,
+      input,
+      CalculatorConversions::SerializationKeys::elementsCartan,
+      baseElementsCartan
+    )
+  ) {
+    return calculator << "Missing key for base elements Cartan.";
+  }
+  if (
+    !CalculatorConversions::loadVectorsRational(
+      calculator, baseElementsCartan, output.cartanElementsBaseSubalgebra
+    )
+  ) {
+    return
+    calculator
+    << "Failed to load elements of the base Cartan from "
+    << baseElementsCartan.toString();
+  }
+  Expression possibleExtensions;
+  CalculatorConversions::loadKey(
+    calculator,
+    input,
+    CalculatorConversions::SerializationKeys::possibleExtensionTypeCollection,
+    possibleExtensions
+  );
+  for (int i = 1; i < possibleExtensions.size(); i ++) {
+    const Expression& oneExtension = possibleExtensions[i];
+    DynkinTypeExtension extension;
+    if (
+      !CalculatorConversions::loadDynkinExtension(
+        calculator, oneExtension, extension
+      )
+    ) {
+      return
+      calculator
+      << "Failed to load dynkin extension from: "
+      << oneExtension;
+    }
+    output.possibleExtensionTypes.addOnTop(extension);
+  }
+  Expression indexCurrentCartanExtension;
+  if (
+    CalculatorConversions::loadKey(
+      calculator,
+      input,
+      CalculatorConversions::SerializationKeys::indexCurrentCartanExtension,
+      indexCurrentCartanExtension
+    )
+  ) {
+    if (
+      !indexCurrentCartanExtension.isSmallInteger(
+        &output.numberOfExtensionHsExplored
+      )
+    ) {
+      return
+      calculator
+      << "The index of the current cartan extension is not a small integer";
+    }
+  }
+  Expression numberOfExtensionTypesExplored;
+  if (
+    CalculatorConversions::loadKey(
+      calculator,
+      input,
+      CalculatorConversions::SerializationKeys::numberOfExtensionTypesExplored,
+      numberOfExtensionTypesExplored
+    )
+  ) {
+    if (
+      !numberOfExtensionTypesExplored.isSmallInteger(
+        &output.numberOfExtensionTypesExplored
+      )
+    ) {
+      return
+      calculator
+      << "Value of numberOfExtensionTypesExplored is not a small integer";
+    }
+  }
+  Expression candidateExtensionHs;
+  if (
+    CalculatorConversions::loadKey(
+      calculator,
+      input,
+      CalculatorConversions::SerializationKeys::cartanExtensionCandidates,
+      candidateExtensionHs
+    )
+  ) {
+    if (
+      !CalculatorConversions::loadVectorsRational(
+        calculator, candidateExtensionHs, output.extensionHCandidates
+      )
+    ) {
+      return
+      calculator
+      << "Failed to load candidate extensions from "
+      << candidateExtensionHs.toString();
+    }
   }
   return true;
 }
 
-bool CalculatorConversions::expressionFromDynkinTypeExtension(  Calculator& calculator,
-                                                     DynkinTypeExtension& extension,
-                                                     Expression& output
-)
-{
+bool CalculatorConversions::expressionFromListInt(
+  Calculator& calculator, const List<int>& input, Expression& output
+) {
+  output.makeSequence(calculator);
+  for (int element : input) {
+    output.addChildOnTop(calculator.expressionRational(element));
+  }
+  return true;
+}
+
+bool CalculatorConversions::expressionFromDynkinTypeExtension(
+  Calculator& calculator, DynkinTypeExtension& extension, Expression& output
+) {
   STACK_TRACE("CalculatorConversions::expressionFromDynkinTypeExtension");
   output.makeSequence(calculator);
-
   Expression dynkinType;
-  CalculatorConversions::expressionFromDynkinType(calculator, extension.dynkinType,dynkinType);
+  CalculatorConversions::expressionFromDynkinType(
+    calculator, extension.dynkinType, dynkinType
+  );
   output.addChildOnTop(dynkinType);
-  for (int content : extension.rootInjection){
+  for (int content : extension.rootInjection) {
     output.addChildOnTop(calculator.expressionRational(content));
   }
+  return true;
+}
 
+bool CalculatorConversions::expressionFromVectorsRational(
+  Calculator& calculator,
+  const List<Vector<Rational> >& input,
+  Expression& output
+) {
+  STACK_TRACE("CalculatorConversions::expressionFromVectorsRational");
+  output.makeSequence(calculator);
+  for (Vector<Rational>& element : input) {
+    Expression vectorExpression;
+    CalculatorConversions::expressionFromVectorRational(
+      calculator, element, vectorExpression
+    );
+    output.addChildOnTop(vectorExpression);
+  }
   return true;
 }
 
@@ -1724,26 +1933,47 @@ bool CalculatorConversions::storePossibleExtensionsOfSemisimpleLieAlgebra(
   );
   List<std::string> keys;
   List<Expression> values;
-
-
+  Expression elementsBaseCartan;
+  CalculatorConversions::expressionFromVectorsRational(
+    calculator, state.cartanElementsBaseSubalgebra, elementsBaseCartan
+  );
+  keys.addOnTop(CalculatorConversions::SerializationKeys::elementsCartan);
+  values.addOnTop(elementsBaseCartan);
   List<Expression> possibleExtensions;
-  for (DynkinTypeExtension& extension: state.possibleExtensionTypes){
+  for (DynkinTypeExtension& extension : state.possibleExtensionTypes) {
     Expression oneExtension;
-    CalculatorConversions::expressionFromDynkinTypeExtension(calculator, extension, oneExtension);
+    CalculatorConversions::expressionFromDynkinTypeExtension(
+      calculator, extension, oneExtension
+    );
     possibleExtensions.addOnTop(oneExtension);
-
   }
   Expression possibleExtensionSequence;
   possibleExtensionSequence.makeSequence(calculator, &possibleExtensions);
-  keys.addOnTop(CalculatorConversions::SerializationKeys::possibleExtensionTypeCollection);
+  keys.addOnTop(
+    CalculatorConversions::SerializationKeys::possibleExtensionTypeCollection
+  );
   values.addOnTop(possibleExtensionSequence);
-  Expression cartanElementsSubalgebra;
-  Matrix<Rational> conversionMatrix;
-  conversionMatrix.assignVectorsToRows(state.cartanElementsSubalgebra);
-  cartanElementsSubalgebra.makeMatrix(calculator, conversionMatrix, nullptr, false);
-
+  keys.addOnTop(
+    CalculatorConversions::SerializationKeys::indexCurrentCartanExtension
+  );
+  values.addOnTop(
+    calculator.expressionRational(state.numberOfExtensionHsExplored)
+  );
+  keys.addOnTop(
+    CalculatorConversions::SerializationKeys::numberOfExtensionTypesExplored
+  );
+  values.addOnTop(
+    calculator.expressionRational(state.numberOfExtensionTypesExplored)
+  );
+  Expression candidateExtensionHs;
+  CalculatorConversions::expressionFromVectorsRational(
+    calculator, state.extensionHCandidates, candidateExtensionHs
+  );
+  keys.addOnTop(
+    CalculatorConversions::SerializationKeys::cartanExtensionCandidates
+  );
+  values.addOnTop(candidateExtensionHs);
   output.makeSequenceCommands(calculator, keys, values);
-
   return true;
 }
 

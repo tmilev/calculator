@@ -1424,6 +1424,58 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
   }
 }
 
+bool SemisimpleSubalgebras::
+computeCartanElementsScaledToActByTwoInOrderOfCreation(
+  CandidateSemisimpleSubalgebra& incoming, std::stringstream& commentsOnError
+) {
+  STACK_TRACE("SemisimpleSubalgebras::checkIncomingSubalgebraChainElement");
+  incoming.cartanElementsScaledToActByTwoInOrderOfCreation.clear();
+  if (incoming.cartanElementsScaledToActByTwo.size == 0) {
+    // The zero subalgebra is skipped.
+    return true;
+  }
+  const CandidateSemisimpleSubalgebra& base = this->baseSubalgebra();
+  if (
+    !incoming.cartanElementsScaledToActByTwo.containsAtLeastOneCopyOfEach(
+      base.cartanElementsScaledToActByTwoInOrderOfCreation
+    )
+  ) {
+    commentsOnError
+    << "The incoming subalgebra does not contain "
+    << "the Cartan elements of the base subalgebra. ";
+    return false;
+  }
+  incoming.cartanElementsScaledToActByTwoInOrderOfCreation =
+  base.cartanElementsScaledToActByTwoInOrderOfCreation;
+  Vectors<Rational> newCartanElements;
+  for (
+    const Vector<Rational>& currentCartanElement :
+    incoming.cartanElementsScaledToActByTwo
+  ) {
+    if (
+      !base.cartanElementsScaledToActByTwoInOrderOfCreation.contains(
+        currentCartanElement
+      )
+    ) {
+      newCartanElements.addOnTop(currentCartanElement);
+    }
+  }
+  if (newCartanElements.size != 1) {
+    commentsOnError
+    << "The incoming subalgebra "
+    << "does not introduce 1 new Cartan element. "
+    << "Instead, it introduces: "
+    << newCartanElements.toString()
+    << ". ";
+    return false;
+  }
+  Vector<Rational> newCartanElement = newCartanElements[0];
+  incoming.cartanElementsScaledToActByTwoInOrderOfCreation.addOnTop(
+    newCartanElement
+  );
+  return true;
+}
+
 bool SemisimpleSubalgebras::loadState(
   List<PossibleExtensionsOfSemisimpleLieSubalgebraState>& states,
   std::stringstream& reportStream
@@ -1444,16 +1496,24 @@ bool SemisimpleSubalgebras::loadState(
       report.report(reportStream.str());
     }
     PossibleExtensionsOfSemisimpleLieSubalgebraState & state = states[i];
-    if (!this->subalgebras.contains(state.cartanElementsSubalgebra)) {
+    if (
+      state.cartanElementsBaseSubalgebra.size > 0 &&
+      !this->subalgebras.contains(state.cartanElementsBaseSubalgebra)
+    ) {
       reportStream
       << "Base subalgebra with base h elements: "
-      << state.cartanElementsSubalgebra.toString()
+      << state.cartanElementsBaseSubalgebra.toString()
       << " not found. ";
       return false;
     }
-    RealizedSemisimpleSubalgebra& realized =
-    this->subalgebras.getValueNoFailNonConst(state.cartanElementsSubalgebra);
-    CandidateSemisimpleSubalgebra& currentSubalgebra = realized.content;
+    RealizedSemisimpleSubalgebra& realizedBase =
+    state.cartanElementsBaseSubalgebra.size >
+    0 ?
+    this->subalgebras.getValueNoFailNonConst(
+      state.cartanElementsBaseSubalgebra
+    ) :
+    this->emptyCandidateSubalgebra();
+    CandidateSemisimpleSubalgebra& currentSubalgebra = realizedBase.content;
     if (!currentSubalgebra.computeAndVerifyFromKnownGeneratorsAndHs()) {
       reportStream
       << "<hr>Subalgebra "
@@ -1462,62 +1522,17 @@ bool SemisimpleSubalgebras::loadState(
       << currentSubalgebra.comments;
       return false;
     }
-    bool isGood = true;
     if (
-      !currentSubalgebra.cartanElementsScaledToActByTwo.containsAtLeastOneCopyOfEach(
-        this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation
+      !this->computeCartanElementsScaledToActByTwoInOrderOfCreation(
+        currentSubalgebra, reportStream
       )
     ) {
-      isGood = false;
-    } else {
-      currentSubalgebra.hsScaledToActByTwoInOrderOfCreation =
-      this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation;
-      for (
-        int j = 0; j < currentSubalgebra.cartanElementsScaledToActByTwo.size; j ++
-      ) {
-        if (
-          !this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.contains(
-            currentSubalgebra.cartanElementsScaledToActByTwo[j]
-          )
-        ) {
-          currentSubalgebra.hsScaledToActByTwoInOrderOfCreation.addOnTop(
-            currentSubalgebra.cartanElementsScaledToActByTwo[j]
-          );
-          if (
-            currentSubalgebra.hsScaledToActByTwoInOrderOfCreation.size >
-            currentSubalgebra.cartanElementsScaledToActByTwo.size
-          ) {
-            isGood = false;
-            break;
-          }
-        }
-      }
-    }
-    if (
-      currentSubalgebra.cartanElementsScaledToActByTwo.size !=
-      this->baseSubalgebra().cartanElementsScaledToActByTwo.size + 1
-    ) {
-      isGood = false;
-    }
-    if (!isGood) {
-      reportStream
-      << "<hr>Subalgebra "
-      << currentSubalgebra.weylNonEmbedded->dynkinType.toString()
-      << " does not appear to be parabolically induced by "
-      << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
-      << ". More precisely, "
-      << currentSubalgebra.weylNonEmbedded->dynkinType.toString()
-      << " has h-elements "
-      << currentSubalgebra.cartanElementsScaledToActByTwo.toString()
-      << " however "
-      << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
-      << " has h-elements in order of creation: "
-      << this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.toString();
       return false;
     }
-    this->addSubalgebraToStack(realized);
+    this->addSubalgebraToStack(realizedBase);
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
-    *this->currentSubalgebraChain.lastObject();
+    this->currentSubalgebraChain.lastObject();
+    lastExtension.flagInitialized = true;
     lastExtension.state = state;
   }
   return true;
@@ -1532,17 +1547,13 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << "State at beginning of computation: "
   << this->toStringProgressReport();
   reportHeader.report(reportHeaderStream.str());
-  while (this->incrementReturnFalseIfPastLast()) {
+  while (this->incrementIfNeededReturnFalseIfPastLast()) {
     reportHeader.report(this->toStringProgressReport());
     CandidateSemisimpleSubalgebra candidate;
-    PossibleExtensionsOfSemisimpleLieSubalgebra* subalgebraBeingExtended =
-    nullptr;
-    if (this->currentSubalgebraChain.size > 0) {
-      subalgebraBeingExtended = this->currentSubalgebraChain.lastObject();
-    }
-    this->currentSubalgebraChain.lastObject()->attemptExtension(
-      candidate, subalgebraBeingExtended
-    );
+    PossibleExtensionsOfSemisimpleLieSubalgebra& beingExtended =
+    this->currentSubalgebraChain.lastObject();
+    this->statistics.totalExtensionsTried ++;
+    beingExtended.attemptExtension(candidate, &beingExtended);
     if (candidate.status != CandidateSubalgebraStatus::realized) {
       this->addNonRealizedSubalgebraIfNew(candidate);
     }
@@ -1565,6 +1576,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
     if (candidate.status == CandidateSubalgebraStatus::realized) {
       this->addSubalgebraIfNewSetToStackTop(candidate);
     }
+    beingExtended.state.numberOfExtensionHsExplored ++;
     this->checkAll();
     if (this->flagHasPossibleSubalgebrasWeCouldntSolveFor) {
       this->comments +=
@@ -1875,7 +1887,9 @@ void SemisimpleSubalgebras::makeCandidateFromSlTwo(
   );
   Vector<Rational> hElement = input.hElement.getCartanPart();
   candidate.cartanElementsScaledToActByTwo.addOnTop(hElement);
-  candidate.hsScaledToActByTwoInOrderOfCreation.addOnTop(hElement);
+  candidate.cartanElementsScaledToActByTwoInOrderOfCreation.addOnTop(
+    hElement
+  );
   candidate.cartanSubalgebrasByComponentScaledToActByTwo.setSize(1);
   candidate.cartanSubalgebrasByComponentScaledToActByTwo[0].setSize(1);
   candidate.cartanSubalgebrasByComponentScaledToActByTwo[0][0] = hElement;
@@ -2097,13 +2111,15 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
   this->rootInjectionsFromInducer = rootInjection;
   this->owner->makeCandidateSubalgebra(newType, *this);
   this->checkCandidateInitialization();
-  this->hsScaledToActByTwoInOrderOfCreation.reserve(
-    baseSubalgebra.hsScaledToActByTwoInOrderOfCreation.size + 1
+  this->cartanElementsScaledToActByTwoInOrderOfCreation.reserve(
+    baseSubalgebra.cartanElementsScaledToActByTwoInOrderOfCreation.size + 1
   );
-  this->hsScaledToActByTwoInOrderOfCreation =
-  baseSubalgebra.hsScaledToActByTwoInOrderOfCreation;
+  this->cartanElementsScaledToActByTwoInOrderOfCreation =
+  baseSubalgebra.cartanElementsScaledToActByTwoInOrderOfCreation;
   if (newHScaledToActByTwo != nullptr) {
-    this->hsScaledToActByTwoInOrderOfCreation.addOnTop(*newHScaledToActByTwo);
+    this->cartanElementsScaledToActByTwoInOrderOfCreation.addOnTop(
+      *newHScaledToActByTwo
+    );
   }
   DynkinSimpleType newComponent =
   this->weylNonEmbedded->dynkinType.getSmallestSimpleType();
@@ -2172,7 +2188,6 @@ computeHsAndHsScaledToActByTwoFromComponents() {
   this->owner->subalgebrasNonDefaultCartanAndScale.getIndex(
     cartanInComponentOrder
   );
-
 }
 
 CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize(
@@ -2727,7 +2742,7 @@ const CandidateSemisimpleSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
     global.fatal << "Empty current subalgebra chain." << global.fatal;
   }
   PossibleExtensionsOfSemisimpleLieSubalgebra & current =
-  *this->currentSubalgebraChain.lastObject();
+  this->currentSubalgebraChain.lastObject();
   if (current.realizedBase == nullptr) {
     global.fatal << "No base subalgebra. " << global.fatal;
   }
@@ -2874,7 +2889,7 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
     "centralizersComputedToHaveUnsuitableNilpotentOrbits"
   );
   PossibleExtensionsOfSemisimpleLieSubalgebra& extension =
-  *this->currentSubalgebraChain.lastObject();
+  this->currentSubalgebraChain.lastObject();
   DynkinType& currentType = extension.nextUnexploredDynkinType();
   SelectionWithDifferentMaxMultiplicities simpleSummandSelection;
   List<int> multiplicities;
@@ -3071,7 +3086,7 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
     return false;
   }
   PossibleExtensionsOfSemisimpleLieSubalgebra& possibleExtension =
-  *this->currentSubalgebraChain.lastObject();
+  this->currentSubalgebraChain.lastObject();
   DynkinType& currentType = possibleExtension.nextUnexploredDynkinType();
   DynkinType complementNewSummandType =
   this->baseSubalgebra().weylNonEmbedded->dynkinType;
@@ -3133,7 +3148,7 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
 bool SemisimpleSubalgebras::combinatorialCriteriaAllowRealization() {
   STACK_TRACE("SemisimpleSubalgebras::combinatorialCriteriaAllowRealization");
   PossibleExtensionsOfSemisimpleLieSubalgebra& possibleExtension =
-  *this->currentSubalgebraChain.lastObject();
+  this->currentSubalgebraChain.lastObject();
   DynkinType& currentType = possibleExtension.nextUnexploredDynkinType();
   Rational candidatePrincipalLength =
   currentType.getPrincipalSlTwoCartanSymmetricInverseScale() * 2;
@@ -3193,6 +3208,12 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     "PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates"
   );
   this->state.extensionHCandidates.clear();
+  if (
+    this->state.numberOfExtensionTypesExplored >=
+    this->state.possibleExtensionTypes.size
+  ) {
+    return;
+  }
   DynkinType& candidateExtensionType = this->nextUnexploredDynkinType();
   if (!this->owner->targetDynkinType.isEqualToZero()) {
     // We have a target extension.
@@ -3277,7 +3298,9 @@ RealizedSemisimpleSubalgebra& SemisimpleSubalgebras::addRealizedSubalgebraIfNew
     indexInOwner = this->subalgebras.values.size;
     RealizedSemisimpleSubalgebra realized;
     realized.content = input;
-    this->subalgebras.setKeyValue(input.cartanElementsScaledToActByTwo, realized);
+    this->subalgebras.setKeyValue(
+      input.cartanElementsScaledToActByTwo, realized
+    );
   }
   RealizedSemisimpleSubalgebra& result =
   this->subalgebras.values[indexInOwner];
@@ -3337,7 +3360,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   }
   if (
     subalgebra.cartanElementsScaledToActByTwo.size !=
-    subalgebra.hsScaledToActByTwoInOrderOfCreation.size
+    subalgebra.cartanElementsScaledToActByTwoInOrderOfCreation.size
   ) {
     global.fatal
     << "In order to add subalgebra "
@@ -3367,10 +3390,11 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   PossibleExtensionsOfSemisimpleLieSubalgebra emptyExtension;
   this->currentSubalgebraChain.addOnTop(emptyExtension);
   PossibleExtensionsOfSemisimpleLieSubalgebra& nextExtension =
-  *this->currentSubalgebraChain.lastObject();
+  this->currentSubalgebraChain.lastObject();
   nextExtension.owner = this;
   nextExtension.realizedBase = &realized;
-  nextExtension.state.cartanElementsSubalgebra = subalgebra.cartanElementsScaledToActByTwo;
+  nextExtension.state.cartanElementsBaseSubalgebra =
+  subalgebra.cartanElementsScaledToActByTwo;
   this->writeProgressFile();
 }
 
@@ -3416,7 +3440,7 @@ std::string SemisimpleSubalgebras::toStringCurrentChain(
   }
   if (this->currentSubalgebraChain.size > 0) {
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
-    *this->currentSubalgebraChain.lastObject();
+    this->currentSubalgebraChain.lastObject();
     out << "<br>Last extension: " << lastExtension.toString();
   }
   return out.str();
@@ -3472,9 +3496,17 @@ SemisimpleSubalgebras::Statistics::Statistics() {
   this->subalgebrasNotProcessed = 0;
 }
 
+std::string PossibleExtensionsOfSemisimpleLieSubalgebraState::toString() const {
+  std::stringstream out;
+  out
+  << "PossibleExtension: cartanElementsBaseSubalgebra:"
+  << this->cartanElementsBaseSubalgebra.toString();
+  return out.str();
+}
+
 PossibleExtensionsOfSemisimpleLieSubalgebraState::
 PossibleExtensionsOfSemisimpleLieSubalgebraState() {
-  this->indexOfCurrentHCandidate = - 1;
+  this->numberOfExtensionHsExplored = 0;
   this->numberOfExtensionTypesExplored = 0;
 }
 
@@ -3516,25 +3548,23 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::initializeIfNeeded() {
 }
 
 bool PossibleExtensionsOfSemisimpleLieSubalgebra::
-incrementReturnFalseIfPastLast(ProgressReport* report) {
+incrementIfNeededReturnFalseIfPastLast(ProgressReport* report) {
   STACK_TRACE(
     "PossibleExtensionsOfSemisimpleLieSubalgebra::"
-    "incrementReturnFalseIfPastLast"
+    "incrementIfNeededReturnFalseIfPastLast"
   );
   this->initializeIfNeeded();
   while (true) {
-    this->owner->statistics.totalExtensionsTried ++;
     if (report != nullptr && report->tickAndWantReport()) {
       report->report(this->owner->toStringCurrentChain());
     }
-    this->state.indexOfCurrentHCandidate ++;
     if (
-      this->state.indexOfCurrentHCandidate < this->state.
+      this->state.numberOfExtensionHsExplored < this->state.
       extensionHCandidates.size
     ) {
       return true;
     }
-    this->state.indexOfCurrentHCandidate = - 1;
+    this->state.numberOfExtensionHsExplored = 0;
     this->state.numberOfExtensionTypesExplored ++;
     if (
       this->state.numberOfExtensionTypesExplored >=
@@ -3544,9 +3574,8 @@ incrementReturnFalseIfPastLast(ProgressReport* report) {
     }
     this->computeCurrentHCandidates();
   }
-  // Should be unreachable.
-  global.fatal << "This piece of code should be unreachable. " << global.fatal;
-  return false;
+  global.fatal << "This code should be unreachable. " << global.fatal;
+  return true;
 }
 
 DynkinType& PossibleExtensionsOfSemisimpleLieSubalgebra::
@@ -3580,9 +3609,7 @@ nextCandidateHScaledToActByTwo() {
     "nextCandidateHScaledToActByTwo"
   );
   return
-  this->state.extensionHCandidates[
-    this->state.indexOfCurrentHCandidate
-  ];
+  this->state.extensionHCandidates[this->state.numberOfExtensionHsExplored];
 }
 
 bool PossibleExtensionsOfSemisimpleLieSubalgebra::checkConsistency() {
@@ -3634,7 +3661,7 @@ std::string PossibleExtensionsOfSemisimpleLieSubalgebra::toString() {
   }
   out
   << "<br>Exploring "
-  << this->state.indexOfCurrentHCandidate + 1
+  << this->state.numberOfExtensionHsExplored + 1
   << " out of "
   << this->state.extensionHCandidates.size
   << " h-candidates. ";
@@ -3653,7 +3680,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
   CandidateSemisimpleSubalgebra& base = this->realizedBase->content;
   if (
     base.cartanElementsScaledToActByTwo.size !=
-    base.hsScaledToActByTwoInOrderOfCreation.size
+    base.cartanElementsScaledToActByTwoInOrderOfCreation.size
   ) {
     global.fatal
     << "The order of creation of the elements "
@@ -3683,15 +3710,17 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
   << newCandidate.weylNonEmbedded->dynkinType.toString();
   report.report(reportStream.str());
   if (
-    this->owner->subalgebras.contains(newCandidate.cartanElementsScaledToActByTwo)
+    this->owner->subalgebras.contains(
+      newCandidate.cartanElementsScaledToActByTwo
+    )
   ) {
     // The subalgebra was precomputed.
     CandidateSemisimpleSubalgebra & precomputedCandidate =
     this->owner->subalgebras.getValueNoFailNonConst(
       newCandidate.cartanElementsScaledToActByTwo
     ).content;
-    precomputedCandidate.hsScaledToActByTwoInOrderOfCreation =
-    newCandidate.hsScaledToActByTwoInOrderOfCreation;
+    precomputedCandidate.cartanElementsScaledToActByTwoInOrderOfCreation =
+    newCandidate.cartanElementsScaledToActByTwoInOrderOfCreation;
     precomputedCandidate.indexInducedFrom = newCandidate.indexInducedFrom;
     precomputedCandidate.rootInjectionsFromInducer =
     newCandidate.rootInjectionsFromInducer;
@@ -3706,19 +3735,22 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
   newCandidate.attemptToRealize(currentExtension);
 }
 
-bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
-  STACK_TRACE("SemisimpleSubalgebras::incrementReturnFalseIfPastLast");
+bool SemisimpleSubalgebras::incrementIfNeededReturnFalseIfPastLast() {
+  STACK_TRACE(
+    "SemisimpleSubalgebras::incrementIfNeededReturnFalseIfPastLast"
+  );
   ProgressReport report;
   while (this->currentSubalgebraChain.size > 0) {
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
-    *this->currentSubalgebraChain.lastObject();
+    this->currentSubalgebraChain.lastObject();
+    lastExtension.initializeIfNeeded();
     if (
       lastExtension.realizedBase->content.getRank() >= this->owner->getRank()
     ) {
       this->currentSubalgebraChain.removeLastObject();
       continue;
     }
-    if (!lastExtension.incrementReturnFalseIfPastLast(&report)) {
+    if (!lastExtension.incrementIfNeededReturnFalseIfPastLast(&report)) {
       this->currentSubalgebraChain.removeLastObject();
       continue;
     }
@@ -4027,7 +4059,7 @@ bool CandidateSemisimpleSubalgebra::centralizesOldHs(
   Rational scalarProduct;
   for (
     const Vector<Rational>& hElement :
-    this->hsScaledToActByTwoInOrderOfCreation
+    this->cartanElementsScaledToActByTwoInOrderOfCreation
   ) {
     scalarProduct =
     this->getAmbientWeyl().rootScalarCartanRoot(candidate, hElement);
@@ -4121,17 +4153,15 @@ bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(
   ) {
     global.fatal << "Unexpected number of cartan elements. " << global.fatal;
   }
-
-  Matrix<Rational> &cartanSymmetric= this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric;
+  Matrix<Rational>& cartanSymmetric =
+  this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric;
   for (int k = 0; k < this->cartanElementsScaledToActByTwo.size; k ++) {
-    Rational desiredScalarProduct =cartanSymmetric
-   (
-      index, k
-                                        ) *2 / cartanSymmetric(k,k);
+    Rational desiredScalarProduct = cartanSymmetric(index, k) * 2 /
+    cartanSymmetric(k, k);
     Rational actualScalar =
     this->getAmbientWeyl().rootScalarCartanRoot(
       this->cartanElementsScaledToActByTwo[k], ambientRootTestedForWeightSpace
-    ) ;
+    );
     if (desiredScalarProduct != actualScalar) {
       return false;
     }
@@ -4460,7 +4490,8 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
   // computed when preparing for the large computation.
   const SlTwoSubalgebra* slTwoRealization = nullptr;
   if (
-    this->flagUseSlTwoRealization && this->cartanElementsScaledToActByTwo.size == 1
+    this->flagUseSlTwoRealization &&
+    this->cartanElementsScaledToActByTwo.size == 1
   ) {
     int slTwoIndex =
     this->owner->slTwoSubalgebras.allRealizedHs.getIndex(
@@ -6886,7 +6917,8 @@ computePrimalModuleDecompositionHighestWeights(
         currentVector[j].generatorIndex
       );
       currentWeight.setSize(
-        this->cartanElementsScaledToActByTwo.size + this->cartanOfCentralizer.size
+        this->cartanElementsScaledToActByTwo.size +
+        this->cartanOfCentralizer.size
       );
       for (int k = 0; k < this->cartanElementsScaledToActByTwo.size; k ++) {
         currentWeight[k] =
@@ -6965,7 +6997,7 @@ void CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates(
   for (int j = 0; j < this->cartanElementsScaledToActByTwo.size; j ++) {
     output[j] =
     this->getAmbientWeyl().rootScalarCartanRoot(
-      inputAmbientWeight, this->cartanElementsScaledToActByTwo [j]
+      inputAmbientWeight, this->cartanElementsScaledToActByTwo[j]
     );
   }
 }
@@ -6986,7 +7018,7 @@ getPrimalWeightProjectionFundamentalCoordinates(
     output[j] =
     this->getAmbientWeyl().rootScalarCartanRoot(
       inputAmbientWeight, this->cartanElementsScaledToActByTwo[j]
-    ) ;
+    );
   }
   for (int j = 0; j < this->cartanOfCentralizer.size; j ++) {
     output[j + this->cartanElementsScaledToActByTwo.size] =
@@ -7817,6 +7849,9 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs(
     return this->status == CandidateSubalgebraStatus::realized;
   }
   this->flagInternalInitializationAndVerificationComplete = true;
+  if (this->isZero()) {
+    return true;
+  }
   ProgressReport report;
   if (report.tickAndWantReport()) {
     report.report(
@@ -8048,9 +8083,8 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
     }
   }
   int primalRank = - 1;
-  (this->centralizerRank + this->cartanElementsScaledToActByTwo.size).isSmallInteger(
-    &primalRank
-  );
+  (this->centralizerRank + this->cartanElementsScaledToActByTwo.size).
+  isSmallInteger(&primalRank);
   if (primalRank < 2) {
     return "";
   }

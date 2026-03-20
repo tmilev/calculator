@@ -676,6 +676,26 @@ loadBuiltInGeneratorHintsE8() {
     g(1) * - 3;
     return true;
   }
+  if (
+    type == G(3, 2) &&
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
+      List<Rational>({8, 11, 15, 22, 18, 14, 10, 5})
+    ) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({- 4, - 5, - 7, - 10, - 8, - 6, - 5, - 2})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "1. Computation was running out of RAM with standard polynomial solver. \n"
+    "2. Solved the subsystem of the sl(2)-subalgebra "
+    "corresponding to the first root of G_2. \n"
+    "3. Seeded the computation with the coefficients "
+    "of the negative root spaces obtained in point 2. "
+    "This resulted in a system that is easy to solve "
+    "with the standard polynomial solver.";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 66) + g(- 67) + g(- 74) + g(- 80) + g(- 81);
+  }
   return false;
 }
 

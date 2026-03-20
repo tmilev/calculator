@@ -144,6 +144,47 @@ class ElementWithScripts {
     this.bootstrapGraphicsNDimensional();
     this.bootstrapSliders();
     this.bootstrapLatexWithCopyButtons();
+    this.bootstrapButtonsToggleVisibility();
+  }
+
+  bootstrapButtonsToggleVisibility() {
+    let incomingScriptsInSpans = this.element.querySelectorAll(`[${miscellaneous.knownTags.dataActionToggleVisibility}]`);
+    for (const element of incomingScriptsInSpans) {
+      if (element.tagName.toLowerCase() !== "button") {
+        continue;
+      }
+      if (element.hasAttribute("processed")) {
+        continue;
+      }
+      element.setAttribute("processed", "true");
+      /** @type{string} */
+      const joinedIds = element.getAttribute(miscellaneous.knownTags.dataActionToggleVisibility);
+      if (joinedIds === null) {
+        continue;
+      }
+      const allIds = joinedIds.split(",");
+      const allElements = [];
+      for (const elementId of allIds) {
+        const element = document.getElementById(elementId);
+        if (element === null || element === undefined) {
+          continue;
+        }
+        allElements.push(element);
+      }
+      element.addEventListener("click", () => {
+        this.toggleVisibilityOnElementIds(allElements);
+      });
+    }
+  }
+
+  toggleVisibilityOnElementIds(/**@type{HTMLElement[]} */ elements) {
+    for (const element of elements) {
+      if (element.style.display === 'none') {
+        element.style.display = 'inherit';
+      } else {
+        element.style.display = 'none';
+      }
+    }
   }
 
   bootstrapSliders() {

@@ -16,7 +16,7 @@ function writeHTML(
   /** @type {HTMLElement} */ element,
   /** @type {string} */ htmlContent,
 ) {
-  panels.writeHTML(element, htmlContent);
+  miscellaneousFrontend.writeHTML(element, htmlContent);
 }
 
 class ExampleBuiltIn {
@@ -654,7 +654,7 @@ class Calculator {
     /**@type {string} */
     htmlContent,
   ) {
-    panels.writeHTML(element, htmlContent);
+    miscellaneousFrontend.writeHTML(element, htmlContent);
   }
 
   /** @return {HTMLElement} */

@@ -1,28 +1,5 @@
-/**
- * This file needs to function as stand-alone javascript
- * as well be used as a commonJS module included via
- * require('panels.js')).
- * Please don't require(...) any modules from this file.
- **/
 "use strict";
-
-var module;
-if (module === undefined) {
-  module = {};
-}
-
-function writeHTML(
-  /** @type {HTMLElement} */
-  element,
-  /** @type {string} */
-  htmlContent,
-) {
-  try {
-    element.setHTML(htmlContent);
-  } catch (e) {
-    element.innerHTML = htmlContent;
-  }
-}
+const miscellaneous = require("./miscellaneous_frontend");
 
 function modifyHeightForTimeout(currentButtonPanel, newHeight) {
   currentButtonPanel.style.maxHeight = newHeight;
@@ -57,13 +34,13 @@ function toggleHeight(currentButton, currentPanelID) {
   if (currentPanel.transitionState === "collapsing" ||
     currentPanel.transitionState === "collapsed") {
     currentPanel.transitionState = "expanding";
-    writeHTML(currentButton, "&#9660;");
+    miscellaneous.writeHTML(currentButton, "&#9660;");
   } else if (
     currentPanel.transitionState === null || currentPanel.transitionState === undefined ||
     currentPanel.transitionState === "expanding" || currentPanel.transitionState === "expanded"
   ) {
     currentPanel.transitionState = "collapsing";
-    writeHTML(currentButton, "&#9656;");
+    miscellaneous.writeHTML(currentButton, "&#9656;");
   }
   currentPanel.addEventListener("transitionend", transitionDone);
   setTimeout(
@@ -218,7 +195,7 @@ class PanelExpandable {
     this.panelContent.style.maxWidth = "";
     if (typeof input === "string") {
       let element = document.createElement("span");
-      writeHTML(element, input);
+      miscellaneous.writeHTML(element, input);
       input = element;
     }
     this.panelContent.textContent = "";
@@ -228,7 +205,7 @@ class PanelExpandable {
   }
 
   setPanelLabel(input) {
-    writeHTML(this.panelLabel, input);
+    miscellaneous.writeHTML(this.panelLabel, input);
   }
 
   initialize(
@@ -310,7 +287,7 @@ class PanelExpandable {
     this.buttonCopy.title = "copy";
     this.buttonCopy.className = "buttonProgress";
     let tiny = document.createElement("tiny");
-    writeHTML(tiny, "&#x1F4CB;");
+    miscellaneous.writeHTML(tiny, "&#x1F4CB;");
     this.buttonCopy.appendChild(tiny);
     this.buttonCopy.addEventListener("click", () => {
       this.container.style.transition = this.transitionStyle;
@@ -387,7 +364,7 @@ function makePanelFromData(
       element = document.getElementById(element);
     }
     if (element !== null) {
-      writeHTML(element, data.content);
+      miscellaneous.writeHTML(element, data.content);
     }
     return null;
   }
@@ -437,7 +414,6 @@ class PanelFromToggleAndContent {
 }
 
 module.exports = {
-  writeHTML,
   modifyHeightForTimeout,
   PanelExpandable,
   PanelExpandableData,

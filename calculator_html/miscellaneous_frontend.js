@@ -1,6 +1,9 @@
 "use strict";
-let pathnames = require("./pathnames");
+const pathnames = require("./pathnames");
 
+const knownTags = {
+  dataActionToggleVisibility: "data-action-toggle-visibility"
+};
 
 /** 
  * Extracts links from a standard result json.
@@ -99,7 +102,33 @@ function writeHTML(
     throw new Error(`Unexpected html content: ${htmlContent}`);
   }
   try {
-    element.setHTML(htmlContent);
+    element.setHTML(htmlContent, {
+      sanitizer: {
+        elements: [
+          "p",
+          "div",
+          "span",
+          "b",
+          "script",
+          "button",
+          "br",
+          "hr",
+          "input",
+          "label",
+          "canvas"
+        ],
+        attributes: [
+          "class",
+          "id",
+          "type",
+          ,
+          "name",
+          "style",
+          "height",
+          "width"
+        ],
+      }
+    });
   } catch (e) {
     element.innerHTML = htmlContent;
   }
@@ -343,6 +372,7 @@ function toHex(
 }
 
 module.exports = {
+  knownTags,
   toHex,
   switchMenu,
   appendHtml,

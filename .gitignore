@@ -33,6 +33,8 @@ calculator_html/web_assembly/calculator.wasm
 output/crash_test.html
 
 testFileWritePermissionsSSsas.txt
+alltestedproblems.txt.new
+
 
 *.log
 *.aux

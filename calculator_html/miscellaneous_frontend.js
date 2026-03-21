@@ -121,7 +121,6 @@ function writeHTML(
           "class",
           "id",
           "type",
-          ,
           "name",
           "style",
           "height",

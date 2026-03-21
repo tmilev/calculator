@@ -673,6 +673,11 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
       << "content and the actual one. Wrote the new output as "
       << newFileName
       << ", please use a diff tool to see the difference. "
+      << "When you have inspected the difference and the new behavior "
+      << "looks OK, simply delete file "
+      << CalculatorHTML::Test::filenameFullOutput
+      << " and rerun the unit tests, along the lines of "
+      << "`./calculator test problems` "
       << global.fatal;
     }
     global

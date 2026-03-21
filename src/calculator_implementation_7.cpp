@@ -11139,11 +11139,11 @@ bool CalculatorFunctions::turnRulesOnOff(
   rulesToSwitch.reserve(rulesToConsider.size);
   for (int i = 0; i < rulesToConsider.size; i ++) {
     if (!calculator.namedRules.contains(rulesToConsider[i])) {
-      return
       calculator
-      << "<br>Can't find named rule: "
+      << "<br><b>Can't find named rule: "
       << rulesToConsider[i]
-      << ". Turn-off rules command failed. ";
+      << ". Ignoring. </b>";
+      continue;
     } else {
       rulesToSwitch.addOnTopNoRepetition(rulesToConsider[i]);
     }

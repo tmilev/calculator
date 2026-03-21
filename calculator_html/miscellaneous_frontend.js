@@ -1,8 +1,13 @@
 "use strict";
 const pathnames = require("./pathnames");
 
+const knownAttributes = {
+  dataActionToggleVisibility: "data-action-toggle-visibility",
+};
+
 const knownTags = {
-  dataActionToggleVisibility: "data-action-toggle-visibility"
+  advancedTopic: "advancedtopic",
+  topiclist: "topicList",
 };
 
 /** 
@@ -115,7 +120,21 @@ function writeHTML(
           "hr",
           "input",
           "label",
-          "canvas"
+          "canvas",
+          "a",
+          "table",
+          "tr",
+          "td",
+          "th",
+          "tbody",
+          "ol",
+          "ul",
+          "li",
+          "title",
+          "h1",
+          "h2",
+          "h3",
+          knownTags
         ],
         attributes: [
           "class",
@@ -124,6 +143,8 @@ function writeHTML(
           "name",
           "style",
           "height",
+          "href",
+          knownTags.dataActionToggleVisibility,
           "width"
         ],
       }
@@ -372,6 +393,7 @@ function toHex(
 
 module.exports = {
   knownTags,
+  knownAttributes,
   toHex,
   switchMenu,
   appendHtml,

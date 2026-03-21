@@ -148,7 +148,9 @@ class ElementWithScripts {
   }
 
   bootstrapButtonsToggleVisibility() {
-    let incomingScriptsInSpans = this.element.querySelectorAll(`[${miscellaneous.knownTags.dataActionToggleVisibility}]`);
+    let incomingScriptsInSpans = this.element.querySelectorAll(
+      `[${miscellaneous.knownAttributes.dataActionToggleVisibility}]`
+    );
     for (const element of incomingScriptsInSpans) {
       if (element.tagName.toLowerCase() !== "button") {
         continue;
@@ -158,7 +160,9 @@ class ElementWithScripts {
       }
       element.setAttribute("processed", "true");
       /** @type{string} */
-      const joinedIds = element.getAttribute(miscellaneous.knownTags.dataActionToggleVisibility);
+      const joinedIds = element.getAttribute(
+        miscellaneous.knownAttributes.dataActionToggleVisibility
+      );
       if (joinedIds === null) {
         continue;
       }

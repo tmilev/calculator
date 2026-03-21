@@ -1019,9 +1019,10 @@ class TopicElement {
       contentArray, this.badProblemExplanation,
     );
     let problemBody = document.createElement("span");
+    const problemBodyHTML = this.decodedProblem + this.commentsProblem;
     miscellaneous.writeHTML(
       problemBody,
-      this.decodedProblem + this.commentsProblem,
+      problemBodyHTML
     );
     contentArray.push(problemBody);
     miscellaneousFrontend.appendHtml(this.outputElement, contentArray);

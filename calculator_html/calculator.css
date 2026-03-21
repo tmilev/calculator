@@ -1509,22 +1509,24 @@ span.currentCourseIndicator {
 .switch {
   position: relative;
   width: 32px;
-  height: 18px;
+  height: 19px;
+  box-sizing: border-box;
+  display: inline-block;
 }
 
 /* The slider. */
 .sliderBackground {
   display: inline-block;
-  vertical-align: bottom;
-  margin-top: 4px;
   display: inline-block;
+  position: absolute;
   cursor: pointer;
-  height: 18px;
+  height: 19px;
   width: 32px;
   background-color: #ccc;
   -webkit-transition: .4s;
   transition: .4s;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .switchInput:checked+.sliderBackground {
@@ -1541,8 +1543,8 @@ span.currentCourseIndicator {
   content: "";
   left: 4px;
   top: 3px;
-  height: 12px;
-  width: 12px;
+  height: 13px;
+  width: 13px;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;

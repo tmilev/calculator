@@ -696,6 +696,28 @@ loadBuiltInGeneratorHintsE8() {
     this->output.unknownNegativeGenerators[0] =
     g(- 66) + g(- 67) + g(- 74) + g(- 80) + g(- 81);
   }
+  if (
+    type == A(8, 1) + A(4, 1) + A(4, 1) &&
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
+      List<Rational>({8, 10, 14, 20, 16, 12, 8, 4})
+    ) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({0, 2, 2, 4, 4, 4, 4, 2})
+    ) &&
+    this->output.cartanElementsScaledToActByTwo[2].isEqualTo(
+      List<Rational>({0, 2, 2, 4, 4, 2, 0, 0})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "1. Computations of standard solver "
+    "were obtaining very large coefficients.\n"
+    "2. Solved the subsystem of the first sl(2)-subalgebra. "
+    "3. Seeded the computation with the coefficients "
+    "of the negative root spaces obtained in point 2, "
+    "and got a quick solution.";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 72) + g(- 73) + g(- 75) + g(- 76);
+  }
   return false;
 }
 

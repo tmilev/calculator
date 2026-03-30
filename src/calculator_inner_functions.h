@@ -581,6 +581,14 @@ public:
 };
 
 class CalculatorFunctionsListsAndSets {
+private:
+  // Extract the arguments of a listUnion.
+  static bool extractListUnionArguments(
+    Calculator& calculator,
+    const Expression& input,
+    List<List<Expression> >& output,
+    int& outputCommonOperation
+  );
 public:
   static bool intersection(
     Calculator& calculator, const Expression& input, Expression& output

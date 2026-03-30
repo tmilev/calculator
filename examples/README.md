@@ -1995,11 +1995,11 @@ If the union of two intervals is one interval, replaces the interval.
 Takes union with the empty set. 
 
 *\cup* [\cup] {CalculatorFunctionsListsAndSets::union}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%5c%5ccup%20%28MakeSequence%7b%7d%20x%20%5c%5ccup%20MakeSequence%7b%7dx%20%5c%5ccup%20%28a%2cb%2cx%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%5c%5ccup%20%28MakeSequence%7b%7d%20x%20%5c%5ccup%20MakeSequence%7b%7dx%20%5c%5ccup%20%28a%2cb%2cx%29%29%3b%28x%3by%3b%29%5c%5ccup%28z%3bw%3b%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-x\cup (MakeSequence{} x \cup MakeSequence{}x \cup (a,b,x))
+x\cup (MakeSequence{} x \cup MakeSequence{}x \cup (a,b,x));(x;y;)\cup(z;w;)
 ```
-If all arguments of \cup are of type list, substitutes the expression with a list containing the union of all members (with repetition). If a flag is set requesting that (a,b) is interpreted as an interval, does nothing if either of the two sequences has two elements.
+If all arguments of \cup are of type list or of type command sequencesubstitutes the expression with a concatenation of the lists in the argument. If a flag is set requesting that (a,b) is interpreted as an interval, does nothing if either of the two sequences has two elements.
 
 *\sqcup* [\sqcup] {CalculatorFunctionsListsAndSets::unionNoRepetition}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28x%2cy%2cx%29%5c%5csqcup%281%2cx%2cy%2c2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

@@ -1538,6 +1538,13 @@ bool SemisimpleSubalgebras::loadState(
   return true;
 }
 
+bool SemisimpleSubalgebras::isSolved(const CandidateSubalgebraStatus& status) {
+  return
+  status == CandidateSubalgebraStatus::realized ||
+  status == CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions ||
+  status == CandidateSubalgebraStatus::unrealizableNonFittingCharacter;
+}
+
 bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   STACK_TRACE("SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue");
   ProgressReport reportHeader(1, "Finding semisimple subalgebras. ");
@@ -1557,10 +1564,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
     if (candidate.status != CandidateSubalgebraStatus::realized) {
       this->addNonRealizedSubalgebraIfNew(candidate);
     }
-    if (
-      candidate.status ==
-      CandidateSubalgebraStatus::neitherRealizedNorProvedImpossible
-    ) {
+    if (!this->isSolved(candidate.status)) {
       this->flagHasPossibleSubalgebrasWeCouldntSolveFor = true;
       std::stringstream foundUnrealizedStream;
       foundUnrealizedStream

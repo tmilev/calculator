@@ -277,7 +277,7 @@
     },
     "problems/Express-sin-cos-of-k-times-x-via-sin-x-cos-x-via-EulerFla-1.html":{
       "randomSeed":0,
-      "body":"Euler's formula states that \\(e^{ix}=\\cos x + i\\sin x\\). This can be used to derive de Moivre's formula which states that:\n\n\\(\n\\displaystyle \n\\begin{array}{rcll|l}\ne^{i nx}&=&\\cos (nx)+i\\sin (nx)&&\\text{Euler's~formula~for~nx}\\\\\n(\\cos x+i\\sin x)^n&=&\\cos (nx)+i\\sin (nx)&&\\text{de~Moivre's~formula,~follows~from~above~and~}  \\left(e^{ix} \\right)^n=e^{inx}\n\\end{array}\n\\)\n\n\n<br>\n\n\nIt can be shown that \n\\(\n\\left(z+w\\right)^{7}=\nw^7+7w^6z +21w^5z^2+35w^4z^3+35w^3z^4+21w^2z^5+7w z^6+z^7\n\\)\nfor any \\(z\\) and \\(w\\).\n<hr>\n\n\nUsing the information above, simplify the following expression to an expression that depends on \\(\\sin x\\) and \\(\\cos x\\).\n\n\n<br>\n \n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n\n",
+      "body":"Euler's formula states that \\(e^{ix}=\\cos x + i\\sin x\\). This can be used to derive de Moivre's formula which states that:\n\n\\(\n\\displaystyle \n\\begin{array}{rcll|l}\ne^{i nx}&=&\\cos (nx)+i\\sin (nx)&&\\text{Euler's~formula~for~nx} \\\\\n(\\cos x+i\\sin x)^n&=&\\cos (nx)+i\\sin (nx)&&\\text{de~Moivre's~formula,~follows~from~above~and~}  \\left(e^{ix} \\right)^n=e^{inx}\n\\end{array}\n\\)\n\n\n<br>\n\n\nIt can be shown that \n\\(\n\\left(z+w\\right)^{7}=\nw^7+7w^6z +21w^5z^2+35w^4z^3+35w^3z^4+21w^2z^5+7w z^6+z^7\n\\)\nfor any \\(z\\) and \\(w\\).\n<hr>\n\n\nUsing the information above, simplify the following expression to an expression that depends on \\(\\sin x\\) and \\(\\cos x\\).\n\n\n<br>\n \n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n\n",
       "head":""
     },
     "problems/Derivative-a-of-x-power-b-of-x-1.html":{
@@ -982,7 +982,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-special-angles-1.html":{
       "randomSeed":0,
-      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
+      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
       "head":""
     },
     "problems/trigonometry-triple-angle-sum-exercise-1.html":{
@@ -1432,7 +1432,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-half-angle-formula-1.html":{
       "randomSeed":0,
-      "body":"\nCompute an exact algebraic expression for the given expressions. \n<br>\nUse only the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerZero'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerTwo'></span>\n\n\n\n",
+      "body":"\nCompute an exact algebraic expression for the given expressions. \n<br>\nUse only the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerZero'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerTwo'></span>\n\n\n\n",
       "head":""
     },
     "problems/trigonometry-compute-trig-functions-special-angle-not-first-quadrant-1.html":{
@@ -1972,7 +1972,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-special-angles-2.html":{
       "randomSeed":0,
-      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
+      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
       "head":""
     },
     "problems/Factor-quadratic-no-real-roots-over-the-complex-numbers-1.html":{
@@ -2509,7 +2509,7 @@
     },
     "problems/Express-sin-cos-of-k-times-x-via-sin-x-cos-x-via-EulerFla-1.html":{
       "randomSeed":1,
-      "body":"Euler's formula states that \\(e^{ix}=\\cos x + i\\sin x\\). This can be used to derive de Moivre's formula which states that:\n\n\\(\n\\displaystyle \n\\begin{array}{rcll|l}\ne^{i nx}&=&\\cos (nx)+i\\sin (nx)&&\\text{Euler's~formula~for~nx}\\\\\n(\\cos x+i\\sin x)^n&=&\\cos (nx)+i\\sin (nx)&&\\text{de~Moivre's~formula,~follows~from~above~and~}  \\left(e^{ix} \\right)^n=e^{inx}\n\\end{array}\n\\)\n\n\n<br>\n\n\nIt can be shown that \n\\(\n\\left(z+w\\right)^{3}=\nw^3+3w^2z +3w z^2+z^3\n\\)\nfor any \\(z\\) and \\(w\\).\n<hr>\n\n\nUsing the information above, simplify the following expression to an expression that depends on \\(\\sin x\\) and \\(\\cos x\\).\n\n\n<br>\n \n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n\n",
+      "body":"Euler's formula states that \\(e^{ix}=\\cos x + i\\sin x\\). This can be used to derive de Moivre's formula which states that:\n\n\\(\n\\displaystyle \n\\begin{array}{rcll|l}\ne^{i nx}&=&\\cos (nx)+i\\sin (nx)&&\\text{Euler's~formula~for~nx} \\\\\n(\\cos x+i\\sin x)^n&=&\\cos (nx)+i\\sin (nx)&&\\text{de~Moivre's~formula,~follows~from~above~and~}  \\left(e^{ix} \\right)^n=e^{inx}\n\\end{array}\n\\)\n\n\n<br>\n\n\nIt can be shown that \n\\(\n\\left(z+w\\right)^{3}=\nw^3+3w^2z +3w z^2+z^3\n\\)\nfor any \\(z\\) and \\(w\\).\n<hr>\n\n\nUsing the information above, simplify the following expression to an expression that depends on \\(\\sin x\\) and \\(\\cos x\\).\n\n\n<br>\n \n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n\n",
       "head":""
     },
     "problems/Derivative-a-of-x-power-b-of-x-1.html":{
@@ -3214,7 +3214,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-special-angles-1.html":{
       "randomSeed":1,
-      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
+      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
       "head":""
     },
     "problems/trigonometry-triple-angle-sum-exercise-1.html":{
@@ -3664,7 +3664,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-half-angle-formula-1.html":{
       "randomSeed":1,
-      "body":"\nCompute an exact algebraic expression for the given expressions. \n<br>\nUse only the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerZero'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerTwo'></span>\n\n\n\n",
+      "body":"\nCompute an exact algebraic expression for the given expressions. \n<br>\nUse only the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerZero'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerTwo'></span>\n\n\n\n",
       "head":""
     },
     "problems/trigonometry-compute-trig-functions-special-angle-not-first-quadrant-1.html":{
@@ -4204,7 +4204,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-special-angles-2.html":{
       "randomSeed":1,
-      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
+      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
       "head":""
     },
     "problems/Factor-quadratic-no-real-roots-over-the-complex-numbers-1.html":{
@@ -4741,7 +4741,7 @@
     },
     "problems/Express-sin-cos-of-k-times-x-via-sin-x-cos-x-via-EulerFla-1.html":{
       "randomSeed":2,
-      "body":"Euler's formula states that \\(e^{ix}=\\cos x + i\\sin x\\). This can be used to derive de Moivre's formula which states that:\n\n\\(\n\\displaystyle \n\\begin{array}{rcll|l}\ne^{i nx}&=&\\cos (nx)+i\\sin (nx)&&\\text{Euler's~formula~for~nx}\\\\\n(\\cos x+i\\sin x)^n&=&\\cos (nx)+i\\sin (nx)&&\\text{de~Moivre's~formula,~follows~from~above~and~}  \\left(e^{ix} \\right)^n=e^{inx}\n\\end{array}\n\\)\n\n\n<br>\n\n\nIt can be shown that \n\\(\n\\left(z+w\\right)^{8}=\nw^8+8w^7z +28w^6z^2+56w^5z^3+70w^4z^4+56w^3z^5+28w^2z^6+8w z^7+z^8\n\\)\nfor any \\(z\\) and \\(w\\).\n<hr>\n\n\nUsing the information above, simplify the following expression to an expression that depends on \\(\\sin x\\) and \\(\\cos x\\).\n\n\n<br>\n \n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n\n",
+      "body":"Euler's formula states that \\(e^{ix}=\\cos x + i\\sin x\\). This can be used to derive de Moivre's formula which states that:\n\n\\(\n\\displaystyle \n\\begin{array}{rcll|l}\ne^{i nx}&=&\\cos (nx)+i\\sin (nx)&&\\text{Euler's~formula~for~nx} \\\\\n(\\cos x+i\\sin x)^n&=&\\cos (nx)+i\\sin (nx)&&\\text{de~Moivre's~formula,~follows~from~above~and~}  \\left(e^{ix} \\right)^n=e^{inx}\n\\end{array}\n\\)\n\n\n<br>\n\n\nIt can be shown that \n\\(\n\\left(z+w\\right)^{8}=\nw^8+8w^7z +28w^6z^2+56w^5z^3+70w^4z^4+56w^3z^5+28w^2z^6+8w z^7+z^8\n\\)\nfor any \\(z\\) and \\(w\\).\n<hr>\n\n\nUsing the information above, simplify the following expression to an expression that depends on \\(\\sin x\\) and \\(\\cos x\\).\n\n\n<br>\n \n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n\n",
       "head":""
     },
     "problems/Derivative-a-of-x-power-b-of-x-1.html":{
@@ -5446,7 +5446,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-special-angles-1.html":{
       "randomSeed":2,
-      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
+      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
       "head":""
     },
     "problems/trigonometry-triple-angle-sum-exercise-1.html":{
@@ -5896,7 +5896,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-half-angle-formula-1.html":{
       "randomSeed":2,
-      "body":"\nCompute an exact algebraic expression for the given expressions. \n<br>\nUse only the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerZero'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerTwo'></span>\n\n\n\n",
+      "body":"\nCompute an exact algebraic expression for the given expressions. \n<br>\nUse only the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerZero'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswerTwo'></span>\n\n\n\n",
       "head":""
     },
     "problems/trigonometry-compute-trig-functions-special-angle-not-first-quadrant-1.html":{
@@ -6436,7 +6436,7 @@
     },
     "problems/trigonometry-compute-trig-fun-algebraic-using-special-angles-2.html":{
       "randomSeed":2,
-      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{\\dots} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
+      "body":"\nCompute an exact algebraic expression using the four arithmetic operations and the radicals \\(\\sqrt{(\\dots)} \\).\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelalgebraAnswer'></span>\n\n\n",
       "head":""
     },
     "problems/Factor-quadratic-no-real-roots-over-the-complex-numbers-1.html":{

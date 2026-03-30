@@ -940,6 +940,7 @@ public:
   );
   void hookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void computeSl2sInitOrbitsForComputationOnDemand(bool computeRealSlTwos);
+  static bool isSolved(const CandidateSubalgebraStatus& status);
   void findSemisimpleSubalgebrasInitialize();
   bool findSemisimpleSubalgebrasContinue();
   bool findSemisimpleSubalgebrasFromScratch(

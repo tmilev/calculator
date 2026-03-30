@@ -1292,8 +1292,13 @@ bool CalculatorFunctions::solvePolynomialSystem(
   polynomials = input;
   system.groebner.maximumPolynomialDivisions = (*upperLimits)[0];
   system.groebner.maximumMonomialOperations = (*upperLimits)[1];
+  int doNotsubmit;
+  List<MonomialPolynomial>::Comparator order(
+    MonomialPolynomial::greaterThan_leftLargerWins
+  );
   system.groebner.polynomialOrder.monomialOrder =
   MonomialPolynomial::orderDefault();
+  // order;
   system.algebraicClosure = &calculator.objectContainer.algebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure =
   startWithAlgebraicClosure;
@@ -2810,24 +2815,60 @@ bool CalculatorFunctionsListsAndSets::intersection(
   return output.makeSequence(calculator, &outputList);
 }
 
+bool CalculatorFunctionsListsAndSets::extractListUnionArguments(
+  Calculator& calculator,
+  const Expression& input,
+  List<List<Expression> >& output,
+  int& outputCommonOperation
+) {
+  if (!input.startsWith(calculator.opUnion()) || input.size() < 2) {
+    return false;
+  }
+  output.clear();
+  outputCommonOperation = - 1;
+  for (int i = 1; i < input.size(); i ++) {
+    const Expression& current = input[i];
+    int nextOperation = - 1;
+    if (current.isSequenceNElements()) {
+      nextOperation = calculator.opSequence();
+    } else if (current.startsWith(calculator.opCommandSequence())) {
+      nextOperation = calculator.opCommandSequence();
+    } else {
+      return false;
+    }
+    if (outputCommonOperation == - 1) {
+      outputCommonOperation = nextOperation;
+    }
+    if (outputCommonOperation != nextOperation) {
+      return false;
+    }
+    List<Expression> next;
+    for (int j = 1; j < current.size(); j ++) {
+      next.addOnTop(current[j]);
+    }
+    output.addOnTop(next);
+  }
+  return true;
+}
+
 bool CalculatorFunctionsListsAndSets::listUnion(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsListsAndSets::listUnion");
-  if (!input.startsWith(calculator.opUnion())) {
+  List<List<Expression> > toBeUnited;
+  int command = - 1;
+  if (
+    !CalculatorFunctionsListsAndSets::extractListUnionArguments(
+      calculator, input, toBeUnited, command
+    )
+  ) {
     return false;
   }
-  int numberOfElements = 1;
-  for (int i = 1; i < input.size(); i ++) {
-    if (!input[i].isSequenceNElements()) {
-      return false;
-    }
-  }
-  output.reset(calculator, numberOfElements);
-  output.addChildAtomOnTop(calculator.opSequence());
-  for (int i = 1; i < input.size(); i ++) {
-    for (int j = 1; j < input[i].size(); j ++) {
-      output.addChildOnTop(input[i][j]);
+  output.reset(calculator, toBeUnited.size);
+  output.addChildAtomOnTop(command);
+  for (List<Expression>& expressionList : toBeUnited) {
+    for (Expression& expression : expressionList) {
+      output.addChildOnTop(expression);
     }
   }
   return true;

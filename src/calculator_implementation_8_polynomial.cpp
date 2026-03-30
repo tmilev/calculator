@@ -959,7 +959,7 @@ bool GroebnerComputationCalculator::initializeComputation() {
       << configuration.getValueNoFail("modulus").toString();
     }
   }
-  if (this->upperBound > 1000000) {
+  if (this->upperBound > 100000000) {
     return
     *this->owner
     << "Error: your upper limit of polynomial "
@@ -1067,9 +1067,11 @@ bool GroebnerComputationCalculator::compute() {
     List<Polynomial<Rational> > inputGroebner;
     List<Polynomial<Rational> > outputGroebner;
     GroebnerBasisComputation<Rational> groebnerComputation;
+    this->extractedContext.getFormat(groebnerComputation.format);
     groebnerComputation.polynomialOrder = this->getOrder();
     inputGroebner = this->inputVector;
     outputGroebner = this->inputVector;
+    groebnerComputation.maximumPolynomialDivisions = this->upperBound;
     bool success =
     groebnerComputation.transformToReducedGroebnerBasis(outputGroebner, true);
     return
@@ -1079,6 +1081,7 @@ bool GroebnerComputationCalculator::compute() {
   } else {
     List<Polynomial<ElementZmodP> > outputGroebner;
     GroebnerBasisComputation<ElementZmodP> groebnerComputation;
+    groebnerComputation.maximumPolynomialDivisions = this->upperBound;
     groebnerComputation.polynomialOrder = this->getOrder();
     outputGroebner = this->inputVectorModP;
     bool success =

@@ -5877,13 +5877,15 @@ void Calculator::initializeFunctionsStandard() {
     "\\cup",
     CalculatorFunctionsListsAndSets::listUnion,
     "",
-    "If all arguments of \\cup are of type list, "
+    "If all arguments of \\cup are of type list or of type "
+    "command sequence"
     "substitutes the expression with "
-    "a list containing the union of all members (with repetition). "
+    "a concatenation of the lists in the argument. "
     "If a flag is set requesting that (a,b) is "
     "interpreted as an interval, does nothing if "
     "either of the two sequences has two elements.",
-    "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))",
+    "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x));"
+    "(x;y;)\\cup(z;w;)",
     "CalculatorFunctionsListsAndSets::union",
     "\\cup",
     innerStandard

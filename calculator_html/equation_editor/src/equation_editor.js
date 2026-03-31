@@ -1152,7 +1152,7 @@ class MathNodeFactory {
       rows = 1;
     }
     if (columns <= 0) {
-      columns = 1;
+      columns = 0;
     }
     for (let i = 0; i < rows; i++) {
       matrixTable.appendChild(this.matrixRow(equationEditor, columns));
@@ -12179,6 +12179,7 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
   }
 }
 
+/** Holds a table of math nodes. */
 class MathNodeMatrixTable extends MathNode {
   constructor(
     /** @type {EquationEditor!} */
@@ -12246,6 +12247,11 @@ class MathNodeMatrixTable extends MathNode {
   }
 }
 
+/** 
+ * Holds a matrix: 
+ * a table of mathnodes surrounded by parentheses/brackets or 
+ * some other sort of separator. 
+ */
 class MathNodeMatrix extends MathNode {
   constructor(
     /** @type {EquationEditor!} */
@@ -12393,13 +12399,12 @@ class MathNodeMatrix extends MathNode {
   /** Ensures that a matrix has rows with equal number of columns. */
   normalizeMatrix() {
     let matrixTable = this.children[0].children[1];
-    let columnCount = this.matrixColumnCount();
     let numberOfRows = matrixTable.children.length;
     // Last empty row is ignored. Previous empty rows are preserved.
     /** @type {MathNodeMatrixRow!} */
     let lastRow = /** @type {MathNodeMatrixRow!} */ (
       matrixTable.children[numberOfRows - 1]);
-    if (lastRow.children.length === 0) {
+    if (lastRow.children.length === 0 && numberOfRows !== 1) {
       if (numberOfRows > 1 && lastRow.topLineCount > 0) {
         // We have a last row, that is empty, except for an \hline.
         // This means that the table has a bottom border, which
@@ -12410,6 +12415,10 @@ class MathNodeMatrix extends MathNode {
       }
       numberOfRows--;
       matrixTable.removeChild(numberOfRows);
+    }
+    let columnCount = this.matrixColumnCount();
+    if (columnCount === 0) {
+      columnCount = 1;
     }
     // Expand rows to the colum count.
     for (let i = 0; i < matrixTable.children.length; i++) {

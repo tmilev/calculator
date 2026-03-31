@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <html>
-<script type="text/javascript" src="src/equation_editor.js"></script>
+<!--This scripts loads the equation editor into the global variable window['equationEditor']-->
+<script type="text/javascript" src="out/equation_editor_minified.js"></script>
 <script>
+  // The single global variable equationEditor 
+  // has been loaded in the minified script above.
+  // It contains all the exports of the equation_editor.js file.
+  // The exports of the equation_editor.js file are then called using
+  // the `equationEditor` object, for example:
+  // let editor = new equationEditor.EquationEditor(document.getElementById("editorId"));
   let editor = null;
   function clickSlider(slider) {
     document.getElementById("editor").style.fontSize = `${slider.value}px`;
@@ -21,12 +28,12 @@
   }
 
   function createEditor() {
-    const options = new EquationEditorOptions({
+    const options = new equationEditor.EquationEditorOptions({
       // Can you edit the math or is it static math?
       editable: true,
     });
-    editor = new EquationEditor(document.getElementById('editor'), options);
-    let panel = new EquationEditorButtonPanel(
+    editor = new equationEditor.EquationEditor(document.getElementById('editor'), options);
+    let panel = new equationEditor.EquationEditorButtonPanel(
       // The editor to go with the button panel.
       editor,
       // Render the button panel here.

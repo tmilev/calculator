@@ -14019,25 +14019,20 @@ let mathNodeFactory = new MathNodeFactory();
  * the caller of this functions, i.e., to external javascript files.
  * @suppress {lintVarDeclarations}
  */
-var module;
-if (module === undefined) {
-  module = {
-    exports: null,
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = {
+    CursorInformation,
+    typeset,
+    EquationEditor,
+    EquationEditorButtonFactory,
+    EquationEditorAction,
+    buttonFactories,
+    EquationEditorOptions,
+    EquationEditorButtonPanel,
+    mathFromLatex,
+    mathFromElement,
+    latexConstants,
+    MathNode,
+    knownTypes,
   };
 }
-
-module.exports = {
-  CursorInformation,
-  typeset,
-  EquationEditor,
-  EquationEditorButtonFactory,
-  EquationEditorAction,
-  buttonFactories,
-  EquationEditorOptions,
-  EquationEditorButtonPanel,
-  mathFromLatex,
-  mathFromElement,
-  latexConstants,
-  MathNode,
-  knownTypes,
-};

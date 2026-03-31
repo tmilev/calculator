@@ -1,10 +1,12 @@
 # A math equation editor written from scratch
 
-Demo: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor_with_panel.html
+Demo, app bundled with webpack: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor_bundled.html
 
-Demo, with a custom button: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor.html
+Demo, equation editor with a panel, minified source, installed through global variable: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor_with_panel.html
 
-Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
+Demo, with a weird custom button, uses source code directly: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor.html
+
+Detailed demo+debug page, non-minified source code: https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
 
 - Uses Apache 2.0 license (no more license headaches).
 - Written from scratch: not a single line from another project.

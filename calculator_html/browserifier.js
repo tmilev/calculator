@@ -66,6 +66,7 @@ class Browserifier {
     }
     let currentModule = this.allModules[inputFileName];
     if (!currentModule.flagLoaded) {
+      currentModule.exports = {};
       currentModule.flagLoaded = true;
       currentSource(this.require.bind(this), currentModule);
     }

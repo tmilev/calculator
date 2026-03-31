@@ -670,8 +670,7 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
   this->flagNeedAlgebraicClosure = false;
-  //  int doNotSubmit;
-  // this->flagUseSmallImpliedSubstitutions = true;
+  this->flagUseSmallImpliedSubstitutions = false;
 }
 
 template <class Coefficient>

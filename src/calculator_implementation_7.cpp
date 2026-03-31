@@ -1292,10 +1292,9 @@ bool CalculatorFunctions::solvePolynomialSystem(
   polynomials = input;
   system.groebner.maximumPolynomialDivisions = (*upperLimits)[0];
   system.groebner.maximumMonomialOperations = (*upperLimits)[1];
-  int doNotsubmit;
-  List<MonomialPolynomial>::Comparator order(
-    MonomialPolynomial::greaterThan_leftLargerWins
-  );
+  //List<MonomialPolynomial>::Comparator order(
+  //  MonomialPolynomial::greaterThan_leftLargerWins
+  //);
   system.groebner.polynomialOrder.monomialOrder =
   MonomialPolynomial::orderDefault();
   // order;

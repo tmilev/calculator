@@ -53,6 +53,8 @@ const allLatexSnippets = [
   `123456789`.repeat(10_000),
   // 0x0 matrix shouldn't break us.
   `\\begin{pmatrix}\\end{pmatrix}`,
+  // Support the \choose syntax.
+  `n \\choose k`,
 ];
 
 /** @type {Object.<string, string>} */

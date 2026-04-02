@@ -1737,6 +1737,7 @@ class LaTeXConstants {
       'formInput': '\\formInput',
       'end': '\\end',
       'frac': '\\frac',
+      'choose': '\\choose',
       'mathcal': '\\mathcal',
       'mathfrak': '\\mathfrak',
       'mathbb': '\\mathbb',
@@ -2291,6 +2292,13 @@ class LaTeXConstants {
 /** @type {LaTeXConstants!} */
 const latexConstants = new LaTeXConstants();
 
+/** 
+ * A single-use latex parser to parse a single latex formula given in the constructor. 
+ * 
+ * Usage:
+ * let parser = new LaTeXParser(equationEditor, latex);
+ * let newContent = parser.parse(); // type MathNode.
+ */
 class LaTeXParser {
   constructor(
     /** @type {EquationEditor!} */
@@ -2769,6 +2777,17 @@ class LaTeXParser {
       let node = mathNodeFactory.operatorWithSuperAndSubscript(
         this.equationEditor, fourthToLast.content, null, secondToLast.node);
       return this.replaceParsingStackRange(node, '', -4, -2);
+    }
+    if (
+      thirdToLast.isExpression() &&
+      secondToLast.syntacticRole === "\\choose" &&
+      last.isExpression()
+    ) {
+      this.lastRuleName = "n choose k";
+      let node = mathNodeFactory.matrix(this.equationEditor, 2, 1, "", "binom");
+      node.getMatrixCell(0, 0).children[0].appendChild(thirdToLast.node);
+      node.getMatrixCell(1, 0).children[0].appendChild(last.node);
+      this.replaceParsingStackRange(node, '', -3, -1);
     }
     if (thirdToLast.syntacticRole === 'operatorWithSubscript' &&
       secondToLast.syntacticRole === '_' && last.isExpression()) {

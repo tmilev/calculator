@@ -21,6 +21,7 @@
 
 <script>
   var svgContainer = null;
+  /** @type {EquationEditor}*/
   var editor = null;
   /** @type {HTMLElement|null} */
   var editorContainer = null;
@@ -81,6 +82,7 @@
     editorContainer = document.getElementById('editor');
     svgContainer = document.getElementById("svgContainer");
     mathMLContainer = document.getElementById("mathMLContainer");
+    const latexInputContainer = document.getElementById("latex-input-test");
     const options = new EquationEditorOptions({
       // Can you edit the math or is it static math?
       editable: true,
@@ -88,7 +90,7 @@
       // Will show the formula latex.
       // Modification of the input will modify the editor
       // and the other way round.
-      latexInput: document.getElementById("latex-input-test"),
+      latexInput: latexInputContainer,
       // A container to display debug info, 
       // if you omit this no info will be generated.
       debugLogContainer: document.getElementById("debug"),
@@ -99,6 +101,10 @@
       editHandler: () => {
         typesetSVG();
         typesetMathML();
+        const query = editor.rootNode.toLatex();
+        const escapedQuery = encodeURIComponent(query);
+        const url = `test_equation_editor.html?q=${escapedQuery}`;
+        window.history.replaceState({}, "", url);
       },
       /** @type {Object<string, Function>} */
       extraKeyHandlers: {
@@ -125,6 +131,13 @@
     panel.constructPanelDOM();
     editor.updateDOM();
     editor.rootNode.focus(- 1);
+    const searchParameters = new URLSearchParams(window.location.search);
+    const initialLatex = searchParameters.get("q");
+    if (initialLatex !== null && initialLatex !== undefined && initialLatex !== "") {
+      latexInputContainer.value = initialLatex;
+      editor.writeLatex(initialLatex);
+      editor.rootNode.focus(- 1);
+    }
   }
 
   function createInlinedEditor() {

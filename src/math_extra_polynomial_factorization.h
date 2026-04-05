@@ -308,13 +308,14 @@ public:
 
 class PolynomialFactorizationKronecker {
 public:
-  static const int maximumDegreeDefault = 20;
+  int maximumDegree;
   PolynomialFactorizationUnivariate<Rational>* output;
   Polynomial<Rational> current;
   bool oneFactor(
     std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   PolynomialFactorizationKronecker() {
+    this->maximumDegree = 20;
     this->output = nullptr;
   }
   static bool solvePolynomial(

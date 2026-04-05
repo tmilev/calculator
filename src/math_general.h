@@ -1193,6 +1193,10 @@ public:
   static bool solveAxEqualsBModifyInputReturnFirstSolutionIfExists(
     Matrix<Coefficient>& A, Matrix<Coefficient>& b, Matrix<Coefficient>& output
   );
+  // Solves Ax = b, where b and x are regarded as vector columns.
+  static bool solveAxEqualsBModifyInputReturnFirstSolutionIfExistsVector(
+    Matrix<Coefficient>& A, Vector<Coefficient>& b, Vector<Coefficient>& output
+  );
   Coefficient getDeterminant();
   Coefficient trace() const;
   void assignMatrixIntegerWithDenominator(
@@ -1209,12 +1213,15 @@ public:
   bool getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
     List<Vectors<Coefficient> >& output
   ) const;
-  // Finds the eigenspaces of the matrix corresponding to the given
-  // eigenvalues.
+  // Finds (a basis for) the eigenspaces of the matrix
+  // corresponding to the given eigenvalues.
   // You can use this through the [MatrixEigenvalueFinder] class.
   void getEigenSpacesFromEigenvalues(
     List<Coefficient>& eigenvalues, List<Vectors<Coefficient> >& output
   ) const;
+  // Finds (a basis for) the eigenspace of the matrix
+  // corresponding to the given eigenvalues.
+  // You can use this through the [MatrixEigenvalueFinder] class.
   void getZeroEigenSpace(List<Vector<Coefficient> >& output) const {
     Matrix<Coefficient> matrixCopy = *this;
     matrixCopy.getZeroEigenSpaceModifyMe(output);
@@ -1224,6 +1231,15 @@ public:
     const Coefficient& inputEigenValue,
     List<Vector<Coefficient> >& outputEigenspace
   );
+  // Finds a basis for the generalized
+  // eigenspaces of the matrix. We say that a vector is a generalized
+  // eigenvector with eigenvalue x if it an eigenvector for
+  // (A-x I )^n for some positive integer n.
+  // Useful for finding the Jordan normal form of a matrix.
+  void getGeneralizedEigenspace(
+    const Coefficient& inputEigenValue,
+    List<Vector<Coefficient> >& outputGeneralizedEigenspaces
+  ) const;
   static bool
   systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
     Matrix<Coefficient>& matrixA,
@@ -1822,6 +1838,26 @@ void Matrix<Coefficient>::switchRows(int row1, int row2) {
   Coefficient * swapper = this->elements[row1];
   this->elements[row1] = this->elements[row2];
   this->elements[row2] = swapper;
+}
+
+template <typename Coefficient>
+bool Matrix<Coefficient>::
+solveAxEqualsBModifyInputReturnFirstSolutionIfExistsVector(
+  Matrix<Coefficient>& A, Vector<Coefficient>& b, Vector<Coefficient>& output
+) {
+  Matrix<Coefficient> bConverter;
+  Matrix<Coefficient> outputConverter;
+  bConverter.assignVectorColumn(b);
+  outputConverter.assignVectorColumn(output);
+  if (
+    !Matrix<Coefficient>::solveAxEqualsBModifyInputReturnFirstSolutionIfExists(
+      A, bConverter, outputConverter
+    )
+  ) {
+    return false;
+  }
+  output.assignMatrixDetectRowOrColumn(outputConverter);
+  return true;
 }
 
 template <typename Coefficient>
@@ -2707,6 +2743,54 @@ getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
     }
   }
   return false;
+}
+
+template <typename Coefficient>
+void Matrix<Coefficient>::getGeneralizedEigenspace(
+  const Coefficient& inputEigenValue,
+  List<Vector<Coefficient> >& outputGeneralizedEigenspaces
+) const {
+  STACK_TRACE("Matrix::getGeneralizedEigenspace");
+  if (this->numberOfColumns != this->numberOfRows) {
+    global.fatal
+    << "Function getGeneralizedEigenSpace requires a square matrix. "
+    << global.fatal;
+  }
+  int dimension = this->numberOfColumns;
+  Matrix<Coefficient> matrixMinusEigenvalue = *this;
+  for (int j = 0; j < dimension; j ++) {
+    matrixMinusEigenvalue(j, j) -= inputEigenValue;
+  }
+  Matrix<Coefficient> computer = matrixMinusEigenvalue;
+  List<Vector<Coefficient> > eigenvectors;
+  computer.getZeroEigenSpaceModifyMe(eigenvectors);
+  // Let v be an eigenvector for (A-a*I).
+  // Then the Fitting space corresponding to v
+  // consists of the vectors
+  // v_1 for which (A-a*I)v_1 = v
+  // v_2 for which (A-a*I)v_2 = v_1
+  // ...
+  // In the list below will hold the
+  // fitting spaces corresponding to each eigenvector.
+  List<List<Vector<Coefficient> > > fittingSpaces;
+  for (const Vector<Coefficient>& oneEigenvector : eigenvectors) {
+    List<Vector<Coefficient> > oneFittingSpace;
+    oneFittingSpace.addOnTop(oneEigenvector);
+    Vector<Coefficient> nextElement;
+    for (int i = 0; i < dimension; i ++) {
+      computer = matrixMinusEigenvalue;
+      if (
+        !computer.solveAxEqualsBModifyInputReturnFirstSolutionIfExistsVector(
+          computer, *oneFittingSpace.lastObject(), nextElement
+        )
+      ) {
+        break;
+      }
+      oneFittingSpace.addOnTop(nextElement);
+    }
+    fittingSpaces.addOnTop(oneFittingSpace);
+  }
+  outputGeneralizedEigenspaces.assignListList(fittingSpaces);
 }
 
 template <typename Coefficient>

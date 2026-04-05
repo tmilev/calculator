@@ -2728,16 +2728,18 @@ bool Matrix<Rational>::jordanNormalForm(
   }
   Matrix<AlgebraicNumber> diagonalizer;
   diagonalizer.makeZeroMatrix(dimension);
-  List<Vector<AlgebraicNumber> > allEigenVectors;
-  for (int i = 0; i < solver.solutions.size; i ++) {
-    List<Vector<AlgebraicNumber> > currentEigenVectors;
+  List<Vector<AlgebraicNumber> > allGeneralizedEigenvectors;
+  HashedList<AlgebraicNumber> solutionsWithoutRepetition;
+  solutionsWithoutRepetition.addOnTopNoRepetition(solver.solutions);
+  for (const AlgebraicNumber& eigenValue : solutionsWithoutRepetition) {
+    List<Vector<AlgebraicNumber> > currentGeneralizedEigenVectors;
     diagonalizer = *this;
-    diagonalizer.getEigenspaceModifyMe(
-      solver.solutions[i], currentEigenVectors
+    diagonalizer.getGeneralizedEigenspace(
+      eigenValue, currentGeneralizedEigenVectors
     );
-    allEigenVectors.addListOnTop(currentEigenVectors);
+    allGeneralizedEigenvectors.addListOnTop(currentGeneralizedEigenVectors);
   }
-  if (allEigenVectors.size != dimension) {
+  if (allGeneralizedEigenvectors.size != dimension) {
     if (comments != nullptr) {
       *comments
       << "The Jordan normal form of the matrix is not diagonal; "
@@ -2750,13 +2752,14 @@ bool Matrix<Rational>::jordanNormalForm(
   outputRight.makeZeroMatrix(dimension);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      outputLeft(i, j) = allEigenVectors[j][i];
+      outputLeft(i, j) = allGeneralizedEigenvectors[j][i];
     }
   }
   outputRight = outputLeft;
   if (!outputRight.invert()) {
     global.fatal
-    << "The eigenvector matrix must be invertible."
+    << "The eigenvector matrix must be invertible: "
+    << outputLeft.toString()
     << global.fatal;
   }
   outputDiagonalized = *this;

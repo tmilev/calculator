@@ -3728,10 +3728,17 @@ not{}(3==4)
 If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. If the argument is not a small integer, does nothing. 
 
 *DiagonalizeMatrix* [DiagonalizeMatrix] {CalculatorFunctionsLinearAlgebra::diagonalizeMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%201%260%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%201%260%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%3b%5cnb%3d%5c%5cbegin%7bpmatrix%7d-9%20%26%206%20%26%204%5c%5c%5c%5c%5cn-23%20%26%2014%20%26%207%5c%5c%5c%5c11%20%26%20-6%20%26%20-2%20%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20b%3b%5cnc%3d%5c%5cbegin%7bpmatrix%7d2%20%26%201%20%26%200%5c%5c%5c%5c%5cn0%20%26%202%20%26%201%5c%5c%5c%5c0%20%26%200%20%26%202%20%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20c%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a=\begin{pmatrix}1&1\\ 1&0\end{pmatrix};
-DiagonalizeMatrix a
+DiagonalizeMatrix a;
+b=\begin{pmatrix}-9 & 6 & 4\\
+-23 & 14 & 7\\11 & -6 & -2 \end{pmatrix};
+DiagonalizeMatrix b;
+c=\begin{pmatrix}2 & 1 & 0\\
+0 & 2 & 1\\0 & 0 & 2 \end{pmatrix};
+DiagonalizeMatrix c;
+
 ```
 Tries to diagonalize a matrix (Jordan normal form). As of writing, will succeed only when the eigenvalues are rational or use quadratic radicals and the Jordan normal form is diagonal. When successful, returns a list of three matrices, X, A and X^-1, such that XAX^-1 equals the orignal matrix and A is in Jordan normal form.
 

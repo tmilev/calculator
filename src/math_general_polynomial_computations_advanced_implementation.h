@@ -2335,7 +2335,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::factor(
   );
   this->constantFactor.invert();
   this->nonReduced.addOnTop(this->current);
-  this->maximumDegree = algorithm.maximumDegreeDefault;
+  this->maximumDegree = algorithm.maximumDegree;
   this->algorithm = algorithm.name();
   if (!this->basicChecks(commentsOnFailure)) {
     return false;

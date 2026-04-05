@@ -314,7 +314,7 @@ template <
 >
 class PolynomialFactorizationCantorZassenhaus {
 public:
-  static const int maximumDegreeDefault = 512;
+  int maximumDegree = 512;
   ElementZmodP one;
   int degree;
   int degreeUnknownFactor;
@@ -381,7 +381,7 @@ public:
 
 class PolynomialFactorizationFiniteFields {
 public:
-  static const int maximumDegreeDefault = 100;
+  int maximumDegree = 100;
   PolynomialFactorizationUnivariate<Rational>* output;
   Polynomial<Rational> current;
   Polynomial<ElementZmodP> modularization;

@@ -1292,9 +1292,9 @@ bool CalculatorFunctions::solvePolynomialSystem(
   polynomials = input;
   system.groebner.maximumPolynomialDivisions = (*upperLimits)[0];
   system.groebner.maximumMonomialOperations = (*upperLimits)[1];
-  //List<MonomialPolynomial>::Comparator order(
+  // List<MonomialPolynomial>::Comparator order(
   //  MonomialPolynomial::greaterThan_leftLargerWins
-  //);
+  // );
   system.groebner.polynomialOrder.monomialOrder =
   MonomialPolynomial::orderDefault();
   // order;
@@ -2225,12 +2225,12 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
     &MonomialPolynomial::orderDefault()
   );
   PolynomialFactorizationUnivariate<Rational> factorization;
-  PolynomialFactorizationKronecker algorithm;
+  PolynomialFactorizationFiniteFields algorithm;
   if (
     !factorization.factor(
       this->denominator,
       algorithm,
-      &this->printoutPartialFractionsHtml,
+      nullptr,
       &this->printoutPartialFractionsHtml
     )
   ) {

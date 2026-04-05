@@ -61,6 +61,7 @@ solvePolynomialWithRadicals(
 ) {
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
+  algorithm.maximumDegree = 250;
   if (!factorization.factor(input, algorithm, nullptr, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to factor the characteristic polynomial.";

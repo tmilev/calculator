@@ -5,6 +5,7 @@
 #include "calculator_lie_theory.h"
 #include "crypto_calculator.h"
 #include "html_routines.h"
+#include "math_conversions.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_finite_groups_implementation.h"
@@ -2690,6 +2691,28 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
     output.addChildOnTop(set[i]);
   }
   return true;
+}
+
+template < >
+bool Matrix<AlgebraicNumber>::jordanNormalForm(
+  Matrix<AlgebraicNumber>& outputLeft,
+  Matrix<AlgebraicNumber>& outputDiagonalized,
+  Matrix<AlgebraicNumber>& outputRight,
+  AlgebraicClosureRationals& ownerField,
+  std::stringstream* comments
+) {
+  Matrix<Rational> converter;
+  if (
+    !ConversionFunctions::convertMatrixAlgebraicToMatrixRational(
+      *this, converter, comments
+    )
+  ) {
+    return false;
+  }
+  return
+  converter.jordanNormalForm(
+    outputLeft, outputDiagonalized, outputRight, ownerField, comments
+  );
 }
 
 template < >

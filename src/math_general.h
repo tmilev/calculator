@@ -1332,6 +1332,23 @@ public:
   };
 };
 
+template < >
+bool Matrix<AlgebraicNumber>::jordanNormalForm(
+  Matrix<AlgebraicNumber>& outputLeft,
+  Matrix<AlgebraicNumber>& outputDiagonalized,
+  Matrix<AlgebraicNumber>& outputRight,
+  AlgebraicClosureRationals& ownerField,
+  std::stringstream* comments
+);
+template < >
+bool Matrix<Rational>::jordanNormalForm(
+  Matrix<AlgebraicNumber>& outputLeft,
+  Matrix<AlgebraicNumber>& outputDiagonalized,
+  Matrix<AlgebraicNumber>& outputRight,
+  AlgebraicClosureRationals& ownerField,
+  std::stringstream* comments
+);
+
 template <class Coefficient>
 bool Vectors<Coefficient>::conesIntersect(
   List<Vector<Rational> >& strictCone,

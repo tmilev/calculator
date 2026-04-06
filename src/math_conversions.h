@@ -4,6 +4,15 @@
 #include "math_general.h"
 #include "math_modular_arithmetic.h"
 
+class ConversionFunctions {
+public:
+  static bool convertMatrixAlgebraicToMatrixRational(
+    Matrix<AlgebraicNumber>& input,
+    Matrix<Rational>& output,
+    std::stringstream* commentsOnFailure
+  );
+};
+
 class ConverterOfRationalToZModP: public CoefficientConverter<
   Rational, ElementZmodP
 > {

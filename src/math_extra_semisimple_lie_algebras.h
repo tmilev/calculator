@@ -414,8 +414,10 @@ public:
     this->fileNames.owner = nullptr;
     this->flagDeallocated = true;
   }
+  // Computes (e^(ad A))(B) on condition that
+  // ad A has nilpootent action on B.
   template <class Coefficient>
-  static bool exponentOfAdX(
+  static bool exponentOfAdXIfNilpotent(
     const ElementSemisimpleLieAlgebra<Coefficient>& elementA,
     const ElementSemisimpleLieAlgebra<Coefficient>& elementB,
     ElementSemisimpleLieAlgebra<Coefficient>& output,
@@ -522,7 +524,7 @@ public:
       this->weylGroup.rootSystem.getIndex(input)
     );
   }
-  int getRootIndexFromDisplayIndex(int index);
+  int getCartanGeneratorIndexFromDisplayIndex(int displayIndex);
   int getGeneratorFromDisplayIndex(int index) {
     if (index < 0) {
       return index + this->getNumberOfPositiveRoots();
@@ -666,6 +668,14 @@ public:
   // Algebra.
   template <typename Coefficient>
   bool getElementAdjointRepresentation(
+    const ElementSemisimpleLieAlgebra<Coefficient>& element,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
+  // Same as the previous function but for elements of the Universal Enveloping
+  // Algebra.
+  template <typename Coefficient>
+  bool getElementAdjointRepresentationUniversalEnveloping(
     const ElementUniversalEnveloping<Coefficient>& element,
     Matrix<Coefficient>& output,
     std::stringstream* commentsOnFailure

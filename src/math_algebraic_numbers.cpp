@@ -882,7 +882,7 @@ void AlgebraicClosureRationals::reset() {
   this->basisInjections[0][0].makeEi(0);
   this->quadraticRadicals.clear();
   this->displayNamesBasisElements.setSize(1);
-  this->displayNamesBasisElements[0] = MathMLAndLatex("", "");
+  this->displayNamesBasisElements[0] = MathMLAndLatex("1", "<mn>1</mn>");
   this->generatingElementTensorForm.makeIdentity(1);
   this->generatingElementMatrixForm.makeIdentityMatrix(
     1, Rational::one(), Rational::zero()

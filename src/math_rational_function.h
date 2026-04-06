@@ -209,6 +209,9 @@ public:
   static RationalFraction<Rational> zeroRational() {
     return RationalFraction(Rational::zero());
   }
+  static RationalFraction<Coefficient> oneStatic() {
+    return Coefficient::oneStatic();
+  }
   class Test {
   public:
     static bool all();

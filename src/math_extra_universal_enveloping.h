@@ -267,7 +267,7 @@ public:
     monomial.makeOne(inputOwner);
     this->addMonomial(monomial, coefficient);
   }
-  void simplify(const Coefficient& ringUnit = Coefficient::one());
+  void simplify(const Coefficient& ringUnit = Coefficient::oneStatic());
   int minimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {

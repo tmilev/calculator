@@ -2200,15 +2200,14 @@ bool SemisimpleLieAlgebra::isGeneratorFromCartan(int index) const {
   index < this->getNumberOfPositiveRoots() + this->getRank();
 }
 
-int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int index) {
+int SemisimpleLieAlgebra::getCartanGeneratorIndexFromDisplayIndex(
+  int displayIndex
+) {
+  if (displayIndex <= 0 || displayIndex > this->getRank()) {
+    return - 1;
+  }
   int numberOfPositiveRoots = this->weylGroup.rootsOfBorel.size;
-  if (index < 0) {
-    return index + numberOfPositiveRoots;
-  }
-  if (index > 0) {
-    return index + numberOfPositiveRoots - 1;
-  }
-  return - 1;
+  return displayIndex + numberOfPositiveRoots - 1;
 }
 
 int SemisimpleLieAlgebra::getDisplayIndexFromRootIndex(int index) const {

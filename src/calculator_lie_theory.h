@@ -4,6 +4,14 @@
 #include "calculator_interface.h"
 
 class CalculatorLieTheory {
+private:
+  static bool exponentOfAdjointOfThroughDiagonalization(
+    Calculator& calculator,
+    SemisimpleLieAlgebra& owner,
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementA,
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementB,
+    Expression& output
+  );
 public:
   static bool killingForm(
     Calculator& calculator, const Expression& input, Expression& output
@@ -319,7 +327,7 @@ public:
   static bool exponentOfAdjointOf(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool adjointCommonEigenSpaces(
+  static bool adjointCommonEigenspaces(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool adjointMatrix(

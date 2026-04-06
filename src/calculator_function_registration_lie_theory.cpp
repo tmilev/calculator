@@ -279,7 +279,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "AdCommonEigenspace",
-    CalculatorLieTheory::adjointCommonEigenSpaces,
+    CalculatorLieTheory::adjointCommonEigenspaces,
     "",
     "Computes common eigenspace of the adjoint action of semisimple Lie "
     "algebra elements inside the semisimple Lie algebra. ",
@@ -294,27 +294,32 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "ExponentOfAdjointOf",
     CalculatorLieTheory::exponentOfAdjointOf,
     "",
-    "Computes e^(ad a)(b) where (ad a) "
-    "has nilpotent action and a and b are elements of a "
-    "semisimple Lie algebra. "
+    "Computes e^(ad a)(b) where a and b are elements of a "
+    "semisimple Lie algebra. Will succeed if (ad a) "
+    "has nilpotent action on b. "
+    "If ad a does not act nilpotently on b, will attempt to "
+    "exponentiate by computing the jordan normal form of the operator."
     "The first element is the type of the semisimple Lie algebra, "
     "the second argument is a and the third argument is b. "
     "The first element can be omitted if "
-    "the remaining two arguments are created "
+    "the remaining two arguments "
     "can be converted to a elements "
     "of a common semisimple Lie algebra - in this case, "
     "the two arguments would be linear elements without constant terms "
     "of a common Universal Enveloping Algebra. "
-    "Here, (ad a) has nilpotent "
+    "We recall that (ad a) has nilpotent "
     "action on b if there exists N for which  \\((ad a)^N (b) = 0\\)."
     "We recall that (ad a)(b) stands for the Lie bracket [a,b]. "
     "We also recall that \\(e^A = \\sum_{i=0}^\\infty A^n/n!\\), "
     "where A stands for the linear operator (ad a). "
-    "The series is in fact a finite due to "
-    "the nilpotent action condition.",
+    "If ad a has nilpotent action on b, "
+    "then the sum above becomes finite. ",
     "ExponentOfAdjointOf{}(F_4, "
     "-5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), "
-    "g_{14}+g_{22}+g_{20})",
+    "g_{14}+g_{22}+g_{20});\n"
+    "ExponentOfAdjointOf{}(F_4, "
+    "g_1+g_-1, "
+    "h_1);\n",
     "CalculatorLieTheory::exponentOfAdjointOf",
     "ExponentOfAdjointOf",
     standardOptions

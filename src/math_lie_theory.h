@@ -18,9 +18,13 @@ class MatrixTensor;
 class ChevalleyGenerator {
 public:
   SemisimpleLieAlgebra* owner;
-  // generatorIndex = 0 stands for g_{- N} and all larger indices stand for the
+  // The Chevalley generator g_{- N} corresponds to generatorIndex=0 below.
+  // All larger indices stand for the
   // remaining generators in the Lie algebra basis:
-  // g_{- N}, ... g_{- 1}, h_1, ..., h_k, g_1, ..., g_N.
+  // generator:     g_{- N}, ..., g_{- 1}, h_1, ..., h_k, g_1, ..., g_N.
+  // generatorIndex:  0    , ..., R-1,     R, ..., R-1+k, R+k, ..., 2R+k-1.
+  // Here, R is the number of roots and k is the rank of the semisimple
+  // Lie algebra.
   // Here h_1, ..., h_k are elements of the Cartan subalgebra, the elements
   // g_{- N}, ..., g_{- 1} are the negative Chevalley generators,
   // and g_1, ..., g_N are the positive.

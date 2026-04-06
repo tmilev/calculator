@@ -915,11 +915,42 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
 
 template <typename Coefficient>
 bool SemisimpleLieAlgebra::getElementAdjointRepresentation(
+  const ElementSemisimpleLieAlgebra<Coefficient>& element,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE(
+    "SemisimpleLieAlgebra::"
+    "getElementAdjointRepresentation"
+  );
+  ElementUniversalEnveloping<Coefficient> converter;
+  Coefficient one = Coefficient::oneStatic();
+  if (element.getOwner() == nullptr) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Couldn't find the owner semisimple lie algebra of the zero element.";
+    }
+    return false;
+  }
+  converter.assignElementLieAlgebraArbitrary(
+    element, *element.getOwner(), one
+  );
+  return
+  this->getElementAdjointRepresentationUniversalEnveloping(
+    converter, output, commentsOnFailure
+  );
+}
+
+template <typename Coefficient>
+bool SemisimpleLieAlgebra::getElementAdjointRepresentationUniversalEnveloping(
   const ElementUniversalEnveloping<Coefficient>& element,
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("SemisimpleLieAlgebra::getElementAdjointRepresentation");
+  STACK_TRACE(
+    "SemisimpleLieAlgebra::"
+    "getElementAdjointRepresentationUniversalEnveloping"
+  );
   int numberOfGenerators = this->getNumberOfGenerators();
   output.makeZeroMatrix(numberOfGenerators, 0);
   Coefficient one;

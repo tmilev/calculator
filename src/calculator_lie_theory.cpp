@@ -11,6 +11,7 @@
 #include "math_linear_combination.h"
 #include "math_rational_function.h"
 #include "math_weyl_algebras.h"
+#include <iostream>
 
 template < >
 unsigned int HashFunctions::hashFunction(
@@ -2890,12 +2891,13 @@ bool CalculatorLieTheory::elementsInLieAlgebraExplicitLieAlgebra(
 }
 
 template <class Coefficient>
-bool SemisimpleLieAlgebra::exponentOfAdX(
+bool SemisimpleLieAlgebra::exponentOfAdXIfNilpotent(
   const ElementSemisimpleLieAlgebra<Coefficient>& elementA,
   const ElementSemisimpleLieAlgebra<Coefficient>& elementB,
   ElementSemisimpleLieAlgebra<Coefficient>& output,
   std::stringstream* commentsOnError
 ) {
+  STACK_TRACE("SemisimpleLieAlgebra::exponentOfAdXIfNilpotent");
   SemisimpleLieAlgebra* owner = elementA.getOwner();
   SemisimpleLieAlgebra* ownerB = elementB.getOwner();
   if (owner == nullptr) {
@@ -2903,7 +2905,8 @@ bool SemisimpleLieAlgebra::exponentOfAdX(
   }
   if (ownerB != nullptr && owner != ownerB) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Different semisimple Lie algebras in exponentOfAdX";
+      *commentsOnError
+      << "Different semisimple Lie algebras in exponentOfAdX. ";
     }
     return false;
   }
@@ -2937,9 +2940,54 @@ bool SemisimpleLieAlgebra::exponentOfAdX(
   return false;
 }
 
+bool CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
+  Calculator& calculator,
+  SemisimpleLieAlgebra& owner,
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementA,
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementB,
+  Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization"
+  );
+  Matrix<AlgebraicNumber> adjointMatrixA;
+  if (
+    !owner.getElementAdjointRepresentation(elementA, adjointMatrixA, nullptr)
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract adjoint matrix. ");
+  }
+  std::stringstream out;
+  Matrix<AlgebraicNumber> basisChangeMatrix;
+  Matrix<AlgebraicNumber> basisChangeMatrixInverted;
+  Matrix<AlgebraicNumber> diagonalized;
+  if (
+    !adjointMatrixA.jordanNormalForm(
+      basisChangeMatrix,
+      diagonalized,
+      basisChangeMatrixInverted,
+      calculator.objectContainer.algebraicClosure,
+      &out
+    )
+  ) {
+    return false;
+  }
+  out
+  << "Adjoint matrix: "
+  << adjointMatrixA.toMathMLFinal()
+  << adjointMatrixA.toString();
+  out
+  << "Jordan normal form: "
+  << basisChangeMatrix.toMathMLFinal()
+  << diagonalized.toMathMLFinal()
+  << basisChangeMatrixInverted.toMathMLFinal();
+  return output.assignValue(calculator, out.str());
+}
+
 bool CalculatorLieTheory::exponentOfAdjointOf(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
+  STACK_TRACE("CalculatorLieTheory::exponentOfAdjointOf");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > inputElements;
   Expression outputOnError;
@@ -2963,11 +3011,14 @@ bool CalculatorLieTheory::exponentOfAdjointOf(
   ElementSemisimpleLieAlgebra<AlgebraicNumber> result;
   std::stringstream commentsOnError;
   if (
-    !ownerSemisimple->exponentOfAdX(
+    !ownerSemisimple->exponentOfAdXIfNilpotent(
       elementA, elementB, result, &commentsOnError
     )
   ) {
-    return output.assignError(calculator, commentsOnError.str());
+    return
+    CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
+      calculator, *ownerSemisimple, elementA, elementB, output
+    );
   }
   ElementSemisimpleLieAlgebra<Rational> resultRational;
   Rational converter;
@@ -2993,10 +3044,10 @@ bool CalculatorLieTheory::exponentOfAdjointOf(
   output.assignValueWithContext(calculator, resultRationalFraction, context);
 }
 
-bool CalculatorLieTheory::adjointCommonEigenSpaces(
+bool CalculatorLieTheory::adjointCommonEigenspaces(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorLieTheory::adjointCommonEigenSpaces");
+  STACK_TRACE("CalculatorLieTheory::adjointCommonEigenspaces");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > outputElements;
@@ -3083,7 +3134,9 @@ bool CalculatorLieTheory::adjointMatrix(
   ExpressionContext context = input[1].getContext();
   SemisimpleLieAlgebra& owner = element.getOwner();
   Matrix<RationalFraction<Rational> > result;
-  owner.getElementAdjointRepresentation(element, result, &calculator.comments);
+  owner.getElementAdjointRepresentationUniversalEnveloping(
+    element, result, &calculator.comments
+  );
   Matrix<Expression> resultExpressions;
   resultExpressions.initialize(result.numberOfRows, result.numberOfColumns);
   for (int i = 0; i < resultExpressions.numberOfRows; i ++) {
@@ -6550,19 +6603,17 @@ bool CalculatorLieTheory::cartanGenerator(
   if (!input[2].isSmallInteger(&index)) {
     return false;
   }
-  if (
-    index == 0 ||
-    index > semisimpleLieAlgebra.content->getNumberOfPositiveRoots() ||
-    index < - semisimpleLieAlgebra.content->getNumberOfPositiveRoots()
-  ) {
+  int resultIndex =
+  semisimpleLieAlgebra.content->getCartanGeneratorIndexFromDisplayIndex(
+    index
+  );
+  if (resultIndex < 0) {
     return
     output.assignError(calculator, "Bad Cartan subalgebra generator index.");
   }
   ElementSemisimpleLieAlgebra<Rational> element;
   Vector<Rational> hElement =
-  semisimpleLieAlgebra.content->weylGroup.rootSystem[
-    semisimpleLieAlgebra.content->getRootIndexFromDisplayIndex(index)
-  ];
+  semisimpleLieAlgebra.content->weylGroup.rootSystem[resultIndex];
   element.makeCartanGenerator(hElement, *semisimpleLieAlgebra.content);
   ElementUniversalEnveloping<RationalFraction<Rational> >
   elementUniversalEnveloping;

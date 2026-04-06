@@ -2211,7 +2211,9 @@ chevalleyOrCartanGeneratorFromSemisimplePolynomialForm(
     << owner.toStringLieAlgebraName();
   }
   int rootIndex =
-  owner.getRootIndexFromDisplayIndex(chevalleyGenerator.generatorIndex);
+  owner.getCartanGeneratorIndexFromDisplayIndex(
+    chevalleyGenerator.generatorIndex
+  );
   if (rootIndex < 0) {
     return
     calculator

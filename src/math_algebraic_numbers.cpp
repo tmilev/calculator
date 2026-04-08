@@ -1937,10 +1937,6 @@ std::string AlgebraicNumber::toString(const FormatExpressions* format) const {
   ) {
     out << "[=" << this->toStringNonInjected() << "]";
   }
-  int doNotSubmit;
-//  if (out.str()=="0") {
-//    global.fatal << "Bad zero algebraic number. "<<global.fatal;
-//  }
   return out.str();
 }
 

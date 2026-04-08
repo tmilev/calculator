@@ -820,20 +820,26 @@ bool CalculatorBasics::extractBaseMultiplication(
   }
   bool result = false;
   output = input;
-
-  if (output[2].isOfType<Rational>() && ! output[1].isOfType<Rational>()) {
+  if (output[2].isOfType<Rational>() && !output[1].isOfType<Rational>()) {
     // X * Rational = Rational * X
     output.swapChildren(1, 2);
     result = true;
   }
-  if (output[2].isOfType<AlgebraicNumber>()&& !output[1].isOfType<Rational>() && !output[1].isOfType<AlgebraicNumber>())
-  {
+  if (
+    output[2].isOfType<AlgebraicNumber>() &&
+    !output[1].isOfType<Rational>() &&
+    !output[1].isOfType<AlgebraicNumber>()
+  ) {
     // X * AlgebraicNumber = AlgebraicNumber * X
     output.swapChildren(1, 2);
     result = true;
-
   }
-  if (output[2].isOfType<double>() && !output[1].isOfType<Rational>() && !output[1].isOfType<AlgebraicNumber>() && !output[1].isOfType<double>()) {
+  if (
+    output[2].isOfType<double>() &&
+    !output[1].isOfType<Rational>() &&
+    !output[1].isOfType<AlgebraicNumber>() &&
+    !output[1].isOfType<double>()
+  ) {
     // X * double = double * X
     output.swapChildren(1, 2);
     result = true;

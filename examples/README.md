@@ -1553,7 +1553,7 @@ z
 ```
 The operation =: is the "is denoted by" operation. The expression a =:b always reduces to a =b. In addition to the transformation, the pair of expressions a, b is registered in a special global "registry". This has the following effect. Every time the expression b is met, it is displayed on the screen as a. We note that subsequent occurrences of the expression a will first be replaced by b (as mandated by the a =b command), but then displayed on the screen as a.
 
-Operator or function ^ is overloaded with 35 total handlers.
+Operator or function ^ is overloaded with 36 total handlers.
 
 *^* [EulerFormula] {CalculatorFunctionsTrigonometry::eulerFormulaAsLaw}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22EulerFormula%5c%22%29%3b%5cne%5e%7bi%20x%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1831,6 +1831,15 @@ Lispify(A);
 PlotExpressionTree(A);
 ```
 Replaces \sum_a^b by (\sum, a, b) .
+
+*^* [ExponentOfMatrix] {CalculatorFunctionsLinearAlgebra::exponentOfMatrix}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%200%261%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%3b%5cne%5ea%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+a=\begin{pmatrix}1&1\\ 0&1\end{pmatrix};
+DiagonalizeMatrix a;
+e^a
+```
+Computes (tries to) the exponent of a matrix. 
 
 *^* [PowerEllipticCurveElementRationalByInteger] {CalculatorFunctionsBinaryOps::powerEllipticCuveElementByInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g%20%3d%20ElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20-%20x%20%2b1%2c%20x%20%3d%203%2c%20y%20%3d%205%29%3b%5cng%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3727,21 +3736,6 @@ not{}(3==4)
 ```
 If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. If the argument is not a small integer, does nothing. 
 
-*DiagonalizeMatrix* [DiagonalizeMatrix] {CalculatorFunctionsLinearAlgebra::diagonalizeMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%201%260%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%3b%5cnb%3d%5c%5cbegin%7bpmatrix%7d-9%20%26%206%20%26%204%5c%5c%5c%5c%5cn-23%20%26%2014%20%26%207%5c%5c%5c%5c11%20%26%20-6%20%26%20-2%20%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20b%3b%5cnc%3d%5c%5cbegin%7bpmatrix%7d2%20%26%201%20%26%200%5c%5c%5c%5c%5cn0%20%26%202%20%26%201%5c%5c%5c%5c0%20%26%200%20%26%202%20%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20c%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
-```
-a=\begin{pmatrix}1&1\\ 1&0\end{pmatrix};
-DiagonalizeMatrix a;
-b=\begin{pmatrix}-9 & 6 & 4\\
--23 & 14 & 7\\11 & -6 & -2 \end{pmatrix};
-DiagonalizeMatrix b;
-c=\begin{pmatrix}2 & 1 & 0\\
-0 & 2 & 1\\0 & 0 & 2 \end{pmatrix};
-DiagonalizeMatrix c;
-
-```
-Tries to diagonalize a matrix (Jordan normal form). As of writing, will succeed only when the eigenvalues are rational or use quadratic radicals and the Jordan normal form is diagonal. When successful, returns a list of three matrices, X, A and X^-1, such that XAX^-1 equals the orignal matrix and A is in Jordan normal form.
-
 *FunctionToMatrix* [FunctionToMatrix] {CalculatorFunctionsLinearAlgebra::functionToMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cnA%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3da%2fb%3b%5cnX%3b%5cn%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
@@ -4928,6 +4922,21 @@ Finds the relations between the polynomials.
 ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);ElementEllipticCurveNormalForm(y^2 = x^3 - x + 1, x = 3, y = 5)
 ```
 Makes an elliptic curve from a cubic in normal form, generator letter and base point.
+
+*DiagonalizeMatrix* [DiagonalizeMatrix] {CalculatorFunctionsLinearAlgebra::diagonalizeMatrix}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%201%260%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%3b%5cnb%3d%5c%5cbegin%7bpmatrix%7d-9%20%26%206%20%26%204%5c%5c%5c%5c%5cn-23%20%26%2014%20%26%207%5c%5c%5c%5c11%20%26%20-6%20%26%20-2%20%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20b%3b%5cnc%3d%5c%5cbegin%7bpmatrix%7d2%20%26%201%20%26%200%5c%5c%5c%5c%5cn0%20%26%202%20%26%201%5c%5c%5c%5c0%20%26%200%20%26%202%20%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20c%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+a=\begin{pmatrix}1&1\\ 1&0\end{pmatrix};
+DiagonalizeMatrix a;
+b=\begin{pmatrix}-9 & 6 & 4\\
+-23 & 14 & 7\\11 & -6 & -2 \end{pmatrix};
+DiagonalizeMatrix b;
+c=\begin{pmatrix}2 & 1 & 0\\
+0 & 2 & 1\\0 & 0 & 2 \end{pmatrix};
+DiagonalizeMatrix c;
+
+```
+Tries to diagonalize a matrix (Jordan normal form). As of writing, will succeed only when the eigenvalues are rational or use quadratic radicals and the Jordan normal form is diagonal. When successful, returns a list of three matrices, X, A and X^-1, such that XAX^-1 equals the orignal matrix and A is in Jordan normal form.
 
 *ConvertPolynomialModularToPolynomialRational* [ConvertPolynomialModularToPolynomialRational] {CalculatorFunctions::convertPolynomialModularToPolynomialRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20100x-55%3b%5cnB%20%3d%20PolynomialModP%28A%2c%20101%29%3b%5cnConvertPolynomialModularToPolynomialRational%20B%22%2c%22currentPage%22%3a%22calculator%22%7d)

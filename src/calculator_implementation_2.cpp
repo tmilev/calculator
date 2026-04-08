@@ -234,6 +234,12 @@ Calculator::NamedRuleLocation::NamedRuleLocation() {
   this->isComposite = false;
 }
 
+Expression Calculator::expressionEulersNumber() {
+  Expression result;
+  result.makeAtom(*this, "e");
+  return result;
+}
+
 Expression Calculator::expressionRational(const Rational& input) {
   Expression result;
   result.assignValue(*this, input);

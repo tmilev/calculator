@@ -3028,6 +3028,7 @@ public:
   }
   const ListReferences<Function>* getOperationHandlers(int operation);
   const ListReferences<Function>* getOperationCompositeHandlers(int operation);
+  Expression expressionEulersNumber();
   Expression expressionInteger(int input);
   Expression expressionRational(const Rational& input);
   Expression expressionZero();

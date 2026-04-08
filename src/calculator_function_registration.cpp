@@ -2740,32 +2740,6 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    "DiagonalizeMatrix",
-    CalculatorFunctionsLinearAlgebra::diagonalizeMatrix,
-    "",
-    "Tries to diagonalize a matrix (Jordan normal form). "
-    "As of writing, will succeed only when the eigenvalues "
-    "are rational or use quadratic radicals "
-    "and the Jordan normal form is diagonal. "
-    "When successful, returns a "
-    "list of three matrices, X, A and X^-1, "
-    "such that XAX^-1 equals the orignal "
-    "matrix and A is in Jordan normal form.",
-    "a=\\begin{pmatrix}1&1\\\\ 1&0\\end{pmatrix};\n"
-    "DiagonalizeMatrix a;\n"
-    "b=\\begin{pmatrix}-9 & 6 & 4\\\\\n"
-    "-23 & 14 & 7\\\\"
-    "11 & -6 & -2 \\end{pmatrix};\n"
-    "DiagonalizeMatrix b;\n"
-    "c=\\begin{pmatrix}2 & 1 & 0\\\\\n"
-    "0 & 2 & 1\\\\"
-    "0 & 0 & 2 \\end{pmatrix};\n"
-    "DiagonalizeMatrix c;\n",
-    "CalculatorFunctionsLinearAlgebra::diagonalizeMatrix",
-    "DiagonalizeMatrix",
-    innerStandard
-  );
-  this->addOperationHandler(
     "FunctionToMatrix",
     CalculatorFunctionsLinearAlgebra::functionToMatrix,
     "",

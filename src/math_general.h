@@ -1235,7 +1235,8 @@ public:
   // eigenvector with eigenvalue x if it an eigenvector for
   // (A-x I )^n for some positive integer n.
   // Useful for finding the Jordan normal form of a matrix.
-  void getGeneralizedEigenspace(const Coefficient& inputEigenValue,
+  void getGeneralizedEigenspace(
+    const Coefficient& inputEigenValue,
     List<List<Vector<Coefficient> > >& outputFittingSpace
   ) const;
   static bool
@@ -2759,7 +2760,7 @@ getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
 template <typename Coefficient>
 void Matrix<Coefficient>::getGeneralizedEigenspace(
   const Coefficient& inputEigenValue,
-    List< List<Vector<Coefficient> >>& outputFittingSpace
+  List<List<Vector<Coefficient> > >& outputFittingSpace
 ) const {
   STACK_TRACE("Matrix::getGeneralizedEigenspace");
   if (this->numberOfColumns != this->numberOfRows) {

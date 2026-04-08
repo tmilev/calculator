@@ -589,4 +589,30 @@ public:
   void extractPossibleEigenvalues();
 };
 
+// Holds the Jordan Normal Form of a matrix.
+struct JordanNormalFormResult {
+public:
+  Matrix<AlgebraicNumber> startingMatrix;
+  // The generalized eigenspaces / fitting spaces of the matrix.
+  // One such fitting space is the basis of individual jordan cells.
+  // We say that a vector is a generalized
+  // eigenvector with eigenvalue x if it an eigenvector for
+  // (A-x I )^n for some positive integer n.
+  List<List<Vector<AlgebraicNumber> > > fittingSpaces;
+  // The eigenvalue for each jordan cell/fitting space, in the same order.
+  List<AlgebraicNumber> eigenvaluesPerJordanCell;
+  // The fittingSpaces combined into a single list.
+  List<Vector<AlgebraicNumber> > allGeneralizedEigenvectors;
+  // The jordan normal form:
+  //
+  // startingMatrix =
+  // leftMatrixBasis*diagonalizedJordanNormalForm*rightMatrixBasisInverted
+  //
+  // where rightMatrixBasisInverted = leftMatrixBasis^-1
+  // and diagnolized holds the Jordan normal form.
+  Matrix<AlgebraicNumber> leftMatrixBasis;
+  Matrix<AlgebraicNumber> diagonalizedJordanNormalForm;
+  Matrix<AlgebraicNumber> rightMatrixBasisInverted;
+};
+
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

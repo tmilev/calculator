@@ -2695,10 +2695,9 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
 
 template < >
 bool Matrix<AlgebraicNumber>::jordanNormalForm(
-  Matrix<AlgebraicNumber>& outputLeft,
-  Matrix<AlgebraicNumber>& outputDiagonalized,
-  Matrix<AlgebraicNumber>& outputRight,
+
   AlgebraicClosureRationals& ownerField,
+    JordanNormalFormResult& output,
   std::stringstream* comments
 ) {
   Matrix<Rational> converter;
@@ -2711,17 +2710,15 @@ bool Matrix<AlgebraicNumber>::jordanNormalForm(
   }
   return
   converter.jordanNormalForm(
-    outputLeft, outputDiagonalized, outputRight, ownerField, comments
+  ownerField,  output,comments
   );
 }
 
 template < >
 bool Matrix<Rational>::jordanNormalForm(
-  Matrix<AlgebraicNumber>& outputLeft,
-  Matrix<AlgebraicNumber>& outputDiagonalized,
-  Matrix<AlgebraicNumber>& outputRight,
+
   AlgebraicClosureRationals& ownerField,
-  std::stringstream* comments
+ JordanNormalFormResult& output,  std::stringstream* comments
 ) {
   Matrix<RationalFraction<Rational> > characteristicMatrix;
   characteristicMatrix = *this;
@@ -2751,18 +2748,23 @@ bool Matrix<Rational>::jordanNormalForm(
   }
   Matrix<AlgebraicNumber> diagonalizer;
   diagonalizer.makeZeroMatrix(dimension);
-  List<Vector<AlgebraicNumber> > allGeneralizedEigenvectors;
   HashedList<AlgebraicNumber> solutionsWithoutRepetition;
   solutionsWithoutRepetition.addOnTopNoRepetition(solver.solutions);
   for (const AlgebraicNumber& eigenValue : solutionsWithoutRepetition) {
-    List<Vector<AlgebraicNumber> > currentGeneralizedEigenVectors;
+    List<List<Vector<AlgebraicNumber> >> currentGeneralizedEigenvectors;
     diagonalizer = *this;
     diagonalizer.getGeneralizedEigenspace(
-      eigenValue, currentGeneralizedEigenVectors
+      eigenValue, currentGeneralizedEigenvectors
     );
-    allGeneralizedEigenvectors.addListOnTop(currentGeneralizedEigenVectors);
+    List<Vector<AlgebraicNumber> > flattenedList;
+    flattenedList.assignListList(currentGeneralizedEigenvectors);
+    output.allGeneralizedEigenvectors.addListOnTop(flattenedList);
+    output.fittingSpaces.addListOnTop(currentGeneralizedEigenvectors);
+    for (int i = 0; i < currentGeneralizedEigenvectors.size; i ++){
+      output.eigenvaluesPerJordanCell.addOnTop(eigenValue);
+    }
   }
-  if (allGeneralizedEigenvectors.size != dimension) {
+  if (output.allGeneralizedEigenvectors.size != dimension) {
     if (comments != nullptr) {
       *comments
       << "The Jordan normal form of the matrix is not diagonal; "
@@ -2770,29 +2772,115 @@ bool Matrix<Rational>::jordanNormalForm(
     }
     return false;
   }
-  outputLeft.makeZeroMatrix(dimension);
-  outputDiagonalized.makeZeroMatrix(dimension);
-  outputRight.makeZeroMatrix(dimension);
+  output.startingMatrix = *this;
+  output.leftMatrixBasis
+.makeZeroMatrix(dimension);
+output.diagonalizedJordanNormalForm.makeZeroMatrix(dimension);
+  output.rightMatrixBasisInverted.makeZeroMatrix(dimension);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      outputLeft(i, j) = allGeneralizedEigenvectors[j][i];
+      output.leftMatrixBasis(i, j) = output.allGeneralizedEigenvectors[j][i];
     }
   }
-  outputRight = outputLeft;
-  if (!outputRight.invert()) {
+  output.rightMatrixBasisInverted = output.leftMatrixBasis;
+  if (!output.rightMatrixBasisInverted.invert()) {
     global.fatal
     << "The eigenvector matrix must be invertible: "
-    << outputLeft.toString()
+    << output.rightMatrixBasisInverted.toString()
     << global.fatal;
   }
-  outputDiagonalized = *this;
-  outputDiagonalized = outputRight;
+  output.diagonalizedJordanNormalForm= output.rightMatrixBasisInverted;
   Matrix<AlgebraicNumber> converted;
   converted = *this;
-  outputDiagonalized *= converted;
-  outputDiagonalized *= outputLeft;
+  output.diagonalizedJordanNormalForm *= converted;
+ output.diagonalizedJordanNormalForm *= output.leftMatrixBasis;
   return true;
 }
+
+bool CalculatorFunctionsLinearAlgebra::exponentOfMatrix(
+    Calculator& calculator, const Expression& input, Expression& output
+    ) {
+  STACK_TRACE("CalculatorFunctionsLinearAlgebra::exponentOfMatrix");
+  if (input.size() != 3) {
+    return false;
+  }
+  if (input[1]!=calculator.expressionEulersNumber()){
+    return false;
+  }
+  Matrix<AlgebraicNumber> matrix;
+  if (
+      !CalculatorConversions::functionGetMatrix(
+          calculator, input[2], matrix, false
+          )
+      ) {
+    return false;
+  }
+  if (!matrix.isSquare()) {
+    return
+        calculator
+        << "Diagonalization (Jordan normal form) "
+        << "is allowed only for square matrices. ";
+  }
+  JordanNormalFormResult jordanNormalForm;
+  std::stringstream comments;
+  if (
+      !matrix.jordanNormalForm(
+
+          calculator.objectContainer.algebraicClosure,
+          jordanNormalForm,
+          &comments
+          )
+      ) {
+    return
+        calculator
+        << "Failed to compute the Jordan normal form."
+        << comments.str();
+  }
+  Expression eigenMatrixExpression;
+  Matrix<Expression> exponentOfJordanNormalFormMatrix;
+  int dimension = matrix.numberOfRows;
+  exponentOfJordanNormalFormMatrix.makeZeroMatrix(dimension , calculator.expressionZero());
+  int dimensionCounter=0;
+  for (int i = 0; i <  jordanNormalForm.fittingSpaces.size; i ++){
+    const List<Vector<AlgebraicNumber>>& fittingSpace= jordanNormalForm.fittingSpaces[i];
+    AlgebraicNumber& eigenvalue = jordanNormalForm.eigenvaluesPerJordanCell[i];
+    for (int j = 0; j < fittingSpace.size; j ++){
+      Expression eigenvalueExpression;
+      eigenvalueExpression.assignValue(calculator, eigenvalue);
+      Expression exponentOfEigenvalue;
+      exponentOfEigenvalue.makeXOX(
+          calculator, calculator.opPower(), calculator.expressionEulersNumber(), eigenvalueExpression
+          );
+      for (int k = j; k < fittingSpace.size; k ++){
+        Expression kFactorialExpression = calculator.expressionRational(Rational::factorial(k));
+
+
+      exponentOfJordanNormalFormMatrix(dimensionCounter+j, dimensionCounter+k) = exponentOfEigenvalue/kFactorialExpression;
+      }
+    }
+    dimensionCounter+= fittingSpace.size;
+  }
+
+  Expression eigenMatrixInvertedExpression;
+  Expression exponentOfJordanNormalForm;
+  eigenMatrixExpression.makeMatrix(calculator, jordanNormalForm.leftMatrixBasis);
+  exponentOfJordanNormalForm.makeMatrix(
+      &exponentOfJordanNormalFormMatrix, calculator
+      );
+  eigenMatrixInvertedExpression.makeMatrix(
+      calculator, jordanNormalForm.rightMatrixBasisInverted
+      );
+  return
+      output.makeProduct(
+          calculator,
+          List<Expression>({
+              eigenMatrixExpression,
+              exponentOfJordanNormalForm,
+              eigenMatrixInvertedExpression
+          })
+          );
+}
+
 
 bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
   Calculator& calculator, const Expression& input, Expression& output
@@ -2815,17 +2903,13 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
     << "Diagonalization (Jordan normal form) "
     << "is allowed only for square matrices. ";
   }
-  Matrix<AlgebraicNumber> eigenMatrix;
-  Matrix<AlgebraicNumber> jordanNormalForm;
-  Matrix<AlgebraicNumber> eigenMatrixInverted;
+  JordanNormalFormResult formResult;
   std::stringstream comments;
   if (
     !matrix.jordanNormalForm(
-      eigenMatrix,
-      jordanNormalForm,
-      eigenMatrixInverted,
+
       calculator.objectContainer.algebraicClosure,
-      &comments
+    formResult,  &comments
     )
   ) {
     return
@@ -2837,9 +2921,10 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
   Expression eigenMatrixExpression;
   Expression jordanNormalFormExpression;
   Expression eigenMatrixInvertedExpression;
-  eigenMatrixExpression.makeMatrix(calculator, eigenMatrix);
-  jordanNormalFormExpression.makeMatrix(calculator, jordanNormalForm);
-  eigenMatrixInvertedExpression.makeMatrix(calculator, eigenMatrixInverted);
+
+  eigenMatrixExpression.makeMatrix(calculator, formResult.leftMatrixBasis);
+  jordanNormalFormExpression.makeMatrix(calculator, formResult.diagonalizedJordanNormalForm);
+  eigenMatrixInvertedExpression.makeMatrix(calculator, formResult.rightMatrixBasisInverted);
   result.addOnTop(eigenMatrixExpression);
   result.addOnTop(jordanNormalFormExpression);
   result.addOnTop(eigenMatrixInvertedExpression);

@@ -2071,7 +2071,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
   LargeInteger expectedNumberOfTerms;
   expectedNumberOfTerms = matrix.numberOfColumns;
   expectedNumberOfTerms.raiseToPower(power);
-  if (expectedNumberOfTerms > 10000) {
+  int maximumNumberOfTerms = 200000;
+  if (expectedNumberOfTerms > maximumNumberOfTerms) {
     return
     calculator
     << "The expected number terms in the result of the exponentiation "
@@ -2085,7 +2086,9 @@ bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
     << "="
     << expectedNumberOfTerms
     << ". I have been instructed to proceed only "
-    << "if the expected number of terms is fewer than 10000. ";
+    << "if the expected number of terms is fewer than "
+    << maximumNumberOfTerms
+    << ". ";
   }
   Matrix<Expression> identityMatrixExpression;
   identityMatrixExpression.makeIdentityMatrix(

@@ -74,7 +74,13 @@ solvePolynomialWithRadicals(
     if (factor.totalDegreeInt() > 2) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
-        << "Characteristic polynomial has factor of degree larger than 2.";
+        << "Polynomial "
+        << input.toStringPretty()
+        << " has factor of degree larger than 2: "
+        << factor.toStringPretty()
+        << ". "
+        << "Factorization: "
+        << factorization.toStringResult();
       }
       return false;
     }
@@ -1931,6 +1937,10 @@ std::string AlgebraicNumber::toString(const FormatExpressions* format) const {
   ) {
     out << "[=" << this->toStringNonInjected() << "]";
   }
+  int doNotSubmit;
+//  if (out.str()=="0") {
+//    global.fatal << "Bad zero algebraic number. "<<global.fatal;
+//  }
   return out.str();
 }
 

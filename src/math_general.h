@@ -11,6 +11,7 @@
 class AlgebraicClosureRationals;
 template <class Coefficient>
 class MatrixTensor;
+struct JordanNormalFormResult;
 
 template <
   class Coefficient,
@@ -770,10 +771,8 @@ public:
     return true;
   }
   bool jordanNormalForm(
-    Matrix<AlgebraicNumber>& outputLeft,
-    Matrix<AlgebraicNumber>& outputDiagonalized,
-    Matrix<AlgebraicNumber>& outputRight,
     AlgebraicClosureRationals& ownerField,
+    JordanNormalFormResult& output,
     std::stringstream* comments
   );
   void getVectorFromColumn(int columnIndex, Vector<Coefficient>& output) const;
@@ -1236,9 +1235,8 @@ public:
   // eigenvector with eigenvalue x if it an eigenvector for
   // (A-x I )^n for some positive integer n.
   // Useful for finding the Jordan normal form of a matrix.
-  void getGeneralizedEigenspace(
-    const Coefficient& inputEigenValue,
-    List<Vector<Coefficient> >& outputGeneralizedEigenspaces
+  void getGeneralizedEigenspace(const Coefficient& inputEigenValue,
+    List<List<Vector<Coefficient> > >& outputFittingSpace
   ) const;
   static bool
   systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
@@ -1334,18 +1332,14 @@ public:
 
 template < >
 bool Matrix<AlgebraicNumber>::jordanNormalForm(
-  Matrix<AlgebraicNumber>& outputLeft,
-  Matrix<AlgebraicNumber>& outputDiagonalized,
-  Matrix<AlgebraicNumber>& outputRight,
   AlgebraicClosureRationals& ownerField,
+  JordanNormalFormResult& output,
   std::stringstream* comments
 );
 template < >
 bool Matrix<Rational>::jordanNormalForm(
-  Matrix<AlgebraicNumber>& outputLeft,
-  Matrix<AlgebraicNumber>& outputDiagonalized,
-  Matrix<AlgebraicNumber>& outputRight,
   AlgebraicClosureRationals& ownerField,
+  JordanNormalFormResult& output,
   std::stringstream* comments
 );
 
@@ -2765,7 +2759,7 @@ getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
 template <typename Coefficient>
 void Matrix<Coefficient>::getGeneralizedEigenspace(
   const Coefficient& inputEigenValue,
-  List<Vector<Coefficient> >& outputGeneralizedEigenspaces
+    List< List<Vector<Coefficient> >>& outputFittingSpace
 ) const {
   STACK_TRACE("Matrix::getGeneralizedEigenspace");
   if (this->numberOfColumns != this->numberOfRows) {
@@ -2789,7 +2783,7 @@ void Matrix<Coefficient>::getGeneralizedEigenspace(
   // ...
   // In the list below will hold the
   // fitting spaces corresponding to each eigenvector.
-  List<List<Vector<Coefficient> > > fittingSpaces;
+  outputFittingSpace.clear();
   for (const Vector<Coefficient>& oneEigenvector : eigenvectors) {
     List<Vector<Coefficient> > oneFittingSpace;
     oneFittingSpace.addOnTop(oneEigenvector);
@@ -2805,9 +2799,8 @@ void Matrix<Coefficient>::getGeneralizedEigenspace(
       }
       oneFittingSpace.addOnTop(nextElement);
     }
-    fittingSpaces.addOnTop(oneFittingSpace);
+    outputFittingSpace.addOnTop(oneFittingSpace);
   }
-  outputGeneralizedEigenspaces.assignListList(fittingSpaces);
 }
 
 template <typename Coefficient>

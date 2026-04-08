@@ -819,13 +819,22 @@ bool CalculatorBasics::extractBaseMultiplication(
     return false;
   }
   bool result = false;
-  // handle Anything * Rational = Rational * Anything
   output = input;
-  if (output[2].isOfType<Rational>()) {
+
+  if (output[2].isOfType<Rational>() && ! output[1].isOfType<Rational>()) {
+    // X * Rational = Rational * X
     output.swapChildren(1, 2);
     result = true;
   }
-  if (output[2].isOfType<double>() && !output[1].isOfType<Rational>()) {
+  if (output[2].isOfType<AlgebraicNumber>()&& !output[1].isOfType<Rational>() && !output[1].isOfType<AlgebraicNumber>())
+  {
+    // X * AlgebraicNumber = AlgebraicNumber * X
+    output.swapChildren(1, 2);
+    result = true;
+
+  }
+  if (output[2].isOfType<double>() && !output[1].isOfType<Rational>() && !output[1].isOfType<AlgebraicNumber>() && !output[1].isOfType<double>()) {
+    // X * double = double * X
     output.swapChildren(1, 2);
     result = true;
   }
@@ -833,27 +842,26 @@ bool CalculatorBasics::extractBaseMultiplication(
     if (output[2].size() != 3) {
       return result;
     }
-    // handle Anything1 * (Rational * Anything2) = Rational * (Anything1 *
-    // Anything2)
+    // X * (Rational * Y) = Rational * (X * Y)
     if (output[2][1].isOfType<Rational>()) {
       Expression right;
       right.makeXOX(calculator, calculator.opTimes(), output[1], output[2][2]);
       output.makeXOX(calculator, calculator.opTimes(), output[2][1], right);
       result = true;
     }
-    // <- handle a * (b * anything)
-    // on condition that a*b has an inner handler
     Expression rearranged;
     Expression newExpression;
     rearranged.makeXOX(
       calculator, calculator.opTimes(), output[1], output[2][1]
     );
     if (CalculatorFunctions::times(calculator, rearranged, newExpression)) {
+      // a * (b * X) -> (a * b) * X
+      // on condition that a*b has an inner handler
       output.makeProduct(calculator, newExpression, output[2][2]);
       result = true;
     }
   }
-  // handle 0 * anything = 0
+  // 0 * X = 0
   if (output[1].isEqualToZero()) {
     return output.assignValue(calculator, 0);
   }

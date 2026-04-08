@@ -2958,29 +2958,23 @@ bool CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
     output.assignError(calculator, "Failed to extract adjoint matrix. ");
   }
   std::stringstream out;
-  Matrix<AlgebraicNumber> basisChangeMatrix;
-  Matrix<AlgebraicNumber> basisChangeMatrixInverted;
-  Matrix<AlgebraicNumber> diagonalized;
+  JordanNormalFormResult jordanNormalForm;
   if (
     !adjointMatrixA.jordanNormalForm(
-      basisChangeMatrix,
-      diagonalized,
-      basisChangeMatrixInverted,
-      calculator.objectContainer.algebraicClosure,
-      &out
+      calculator.objectContainer.algebraicClosure, jordanNormalForm, &out
     )
   ) {
+    out << "Failed to compute jordan normal form. ";
+    out << output.assignError(calculator, out.str());
+    calculator << out.str();
     return false;
   }
-  out
-  << "Adjoint matrix: "
-  << adjointMatrixA.toMathMLFinal()
-  << adjointMatrixA.toString();
+  out << "Adjoint matrix: " << adjointMatrixA.toMathMLFinal();
   out
   << "Jordan normal form: "
-  << basisChangeMatrix.toMathMLFinal()
-  << diagonalized.toMathMLFinal()
-  << basisChangeMatrixInverted.toMathMLFinal();
+  << jordanNormalForm.leftMatrixBasis.toMathMLFinal()
+  << jordanNormalForm.diagonalizedJordanNormalForm.toMathMLFinal()
+  << jordanNormalForm.rightMatrixBasisInverted.toMathMLFinal();
   return output.assignValue(calculator, out.str());
 }
 

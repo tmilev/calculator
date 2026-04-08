@@ -670,6 +670,9 @@ public:
   static bool diagonalizeMatrix(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool exponentOfMatrix(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
 };
 
 class CalculatorFunctionsComplexDynamics {

@@ -281,7 +281,6 @@ bool ProblemWithSolution::solveOther(Calculator& calculator) {
     this->toBeSolved,
     this->solutionsSimplified,
     outputNonCacheable,
-    - 1,
     &history.history
   );
   history.owner = &calculator;

@@ -2,10 +2,10 @@
 
 void Calculator::initializeFunctionsVectorPartitionFunctions() {
   STACK_TRACE("Calculator::initializeFunctionsVectorPartitionFunctions");
-  Function::Options innerStandard = Function::Options::standard();
-  Function::Options composite = Function::Options::compositeStandard();
-  Function::Options administrativeNotTested =
-  Function::Options::administrativeNotTested();
+  FunctionOptions innerStandard = FunctionOptions::standard();
+  FunctionOptions composite = FunctionOptions::compositeStandard();
+  FunctionOptions administrativeNotTested =
+  FunctionOptions::administrativeNotTested();
   this->addOperationHandler(
     Calculator::Functions::Names::vectorPartitionFunction,
     CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula,

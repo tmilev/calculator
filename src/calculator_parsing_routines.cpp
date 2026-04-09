@@ -461,6 +461,8 @@ void Calculator::reset() {
   this->maximumLatexChars = 2000;
   this->objectContainer.reset();
   this->operations.clear();
+  this->operationsTransformingChildren.clear();
+  this->namedRules.clear();
   this->allBuiltInTypes.clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.clear();
   this->atomsThatFreezeArguments.clear();
@@ -618,6 +620,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->initializePredefinedStandardOperationsWithoutHandler();
   this->initializeBuiltInsFreezeArguments();
   this->initializeFunctionsStandard();
+  this->initializeFunctionsTransformingChildren();
   if (this->mode == Calculator::Mode::full) {
     this->initializeFunctionsCryptoAndEncoding();
     this->initializeFunctionsScientificBasic();

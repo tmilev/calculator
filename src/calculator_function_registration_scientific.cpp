@@ -6,10 +6,10 @@
 
 void Calculator::initializeFunctionsScientificBasic() {
   STACK_TRACE("Calculator::initializeFunctionsScientificBasic");
-  Function::Options innerStandard = Function::Options::standard();
-  Function::Options innerFreezesArguments =
-  Function::Options::innerFreezesArguments();
-  Function::Options compositeStandard = Function::Options::compositeStandard();
+  FunctionOptions innerStandard = FunctionOptions::standard();
+  FunctionOptions innerFreezesArguments =
+  FunctionOptions::innerFreezesArguments();
+  FunctionOptions compositeStandard = FunctionOptions::compositeStandard();
   this->addOperationHandler(
     "EllipticCurveOrderNIST",
     CalculatorFunctions::nistEllipticCurveOrder,

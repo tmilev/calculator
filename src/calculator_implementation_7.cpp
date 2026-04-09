@@ -3898,6 +3898,25 @@ bool CalculatorFunctions::Test::checkSorting(
   return true;
 }
 
+bool CalculatorFunctions::addTermsInChild(
+  Calculator& calculator,
+  const Expression& inputParent,
+  int childIndex,
+  Expression& outputChild
+) {
+  STACK_TRACE("CalculatorFunctions::addTermsInChild");
+  if (
+    inputParent.startsWith(calculator.opPlus()) ||
+    inputParent.startsWith(calculator.opMinus())
+  ) {
+    return false;
+  }
+  return
+  CalculatorFunctions::addTerms(
+    calculator, inputParent[childIndex], outputChild
+  );
+}
+
 bool CalculatorFunctions::addTerms(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -3917,6 +3936,25 @@ bool CalculatorFunctions::addTerms(
     return false;
   }
   return true;
+}
+
+bool CalculatorFunctions::sortTermsInChild(
+  Calculator& calculator,
+  const Expression& inputParent,
+  int childIndex,
+  Expression& outputChild
+) {
+  STACK_TRACE("CalculatorFunctions::sortTermsInChild");
+  if (
+    inputParent.startsWith(calculator.opPlus()) ||
+    inputParent.startsWith(calculator.opMinus())
+  ) {
+    return false;
+  }
+  return
+  CalculatorFunctions::sortTerms(
+    calculator, inputParent[childIndex], outputChild
+  );
 }
 
 bool CalculatorFunctions::sortTerms(

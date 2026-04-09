@@ -4,19 +4,18 @@
 
 void Calculator::initializeFunctionsExtra() {
   STACK_TRACE("Calculator::initializeFunctionsExtra");
-  Function::Options innerStandard = Function::Options::standard();
-  Function::Options innerNoTest = Function::Options::innerNoTest();
-  Function::Options innerAdminNoTest =
-  Function::Options::administrativeNotTested();
-  Function::Options innerInvisibleNoTest =
-  Function::Options::invisibleNoTest();
-  Function::Options innerInvisibleExperimentalNoTest =
-  Function::Options::invisibleNoTest();
-  Function::Options innerFreezesArguments =
-  Function::Options::innerFreezesArguments();
-  // Function::Options innerNoTestExperimental =
-  // Function::Options::innerNoTestExperimental();
-  // Function::Options innerExperimental = Function::Options::experimental();
+  FunctionOptions innerStandard = FunctionOptions::standard();
+  FunctionOptions innerNoTest = FunctionOptions::innerNoTest();
+  FunctionOptions innerAdminNoTest =
+  FunctionOptions::administrativeNotTested();
+  FunctionOptions innerInvisibleNoTest = FunctionOptions::invisibleNoTest();
+  FunctionOptions innerInvisibleExperimentalNoTest =
+  FunctionOptions::invisibleNoTest();
+  FunctionOptions innerFreezesArguments =
+  FunctionOptions::innerFreezesArguments();
+  // FunctionOptions innerNoTestExperimental =
+  // FunctionOptions::innerNoTestExperimental();
+  // FunctionOptions innerExperimental = FunctionOptions::experimental();
   this->addOperationHandler(
     "LoadFileIntoString",
     CalculatorConversions::loadFileIntoString,
@@ -337,7 +336,7 @@ void Calculator::initializeFunctionsExtra() {
     "/calculusimasterproblemsheet.tex\")",
     "CalculatorFunctionsFreecalc::crawlTexFile",
     "Crawl",
-    Function::Options::administrativeNotTested()
+    FunctionOptions::administrativeNotTested()
   );
   this->addOperationHandler(
     "BuildFreecalc",
@@ -434,13 +433,13 @@ void Calculator::initializeFunctionsExtra() {
 
 void Calculator::initializeFunctionsCryptoAndEncoding() {
   STACK_TRACE("Calculator::initializeFunctionsCryptoAndEncoding");
-  Function::Options innerStandard = Function::Options::standard();
-  Function::Options innerNoTest = Function::Options::innerNoTest();
-  Function::Options innerAdminNoTest =
-  Function::Options::administrativeNotTested();
-  Function::Options innerNoTestExperimental =
-  Function::Options::innerNoTestExperimental();
-  Function::Options innerExperimental = Function::Options::experimental();
+  FunctionOptions innerStandard = FunctionOptions::standard();
+  FunctionOptions innerNoTest = FunctionOptions::innerNoTest();
+  FunctionOptions innerAdminNoTest =
+  FunctionOptions::administrativeNotTested();
+  FunctionOptions innerNoTestExperimental =
+  FunctionOptions::innerNoTestExperimental();
+  FunctionOptions innerExperimental = FunctionOptions::experimental();
   this->addOperationHandler(
     "ConvertBase64ToHex",
     CalculatorFunctionsEncoding::convertBase64ToHex,

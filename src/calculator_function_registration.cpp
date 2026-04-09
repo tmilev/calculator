@@ -10,6 +10,8 @@
 // This file lists calculator functions and various hard-coded rules.
 // Hard-coded functions and operators.
 std::string Calculator::Functions::Names::setRandomSeed = "SetRandomSeed";
+std::string Calculator::Functions::Names::functionTransformingChild =
+"[functionTransformingChild]";
 std::string Calculator::Functions::Names::commandEnclosure =
 "CommandEnclosure";
 std::string Calculator::Functions::Names::bind = "Bind";
@@ -59,49 +61,49 @@ std::string Calculator::Functions::Names::Polynomials::order = "order";
 // but experience showed that life is easier if we
 // take advantage of the order of operations to write less code.
 void Calculator::initializeFunctionsStandard() {
-  Function::Options outerStandard;
+  FunctionOptions outerStandard;
   outerStandard.flagIsInner = false;
-  Function::Options outerAdminInvisibleNoTest;
+  FunctionOptions outerAdminInvisibleNoTest;
   outerAdminInvisibleNoTest.flagIsInner = false;
   outerAdminInvisibleNoTest.administrativeOnly = true;
   outerAdminInvisibleNoTest.dontTestAutomatically = true;
-  Function::Options innerNoTestInvisibleExperimental;
+  FunctionOptions innerNoTestInvisibleExperimental;
   innerNoTestInvisibleExperimental.flagIsInner = true;
   innerNoTestInvisibleExperimental.flagIsExperimental = true;
   innerNoTestInvisibleExperimental.dontTestAutomatically = true;
   innerNoTestInvisibleExperimental.visible = false;
-  Function::Options innerStandard;
+  FunctionOptions innerStandard;
   innerStandard.flagIsInner = true;
-  Function::Options innerFreezesArguments =
-  Function::Options::innerFreezesArguments();
-  Function::Options innerInvisible;
+  FunctionOptions innerFreezesArguments =
+  FunctionOptions::innerFreezesArguments();
+  FunctionOptions innerInvisible;
   innerInvisible.flagIsInner = true;
   innerInvisible.visible = false;
-  Function::Options innerStandardOffByDefault;
+  FunctionOptions innerStandardOffByDefault;
   innerStandardOffByDefault.flagIsInner = true;
   innerStandardOffByDefault.disabledByUser = true;
   innerStandardOffByDefault.disabledByUserDefault = true;
-  Function::Options innerNoTest = Function::Options::innerNoTest();
-  Function::Options innerNoTestExperimental;
+  FunctionOptions innerNoTest = FunctionOptions::innerNoTest();
+  FunctionOptions innerNoTestExperimental;
   innerNoTestExperimental = innerNoTest;
   innerNoTestExperimental.flagIsExperimental = true;
-  Function::Options innerAdminNoTest;
+  FunctionOptions innerAdminNoTest;
   innerAdminNoTest.flagIsInner = true;
   innerAdminNoTest.dontTestAutomatically = true;
   innerAdminNoTest.administrativeOnly = true;
-  Function::Options innerAdminNoTestInvisibleOffByDefault;
+  FunctionOptions innerAdminNoTestInvisibleOffByDefault;
   innerAdminNoTestInvisibleOffByDefault.flagIsInner = true;
   innerAdminNoTestInvisibleOffByDefault.dontTestAutomatically = true;
   innerAdminNoTestInvisibleOffByDefault.administrativeOnly = true;
   innerAdminNoTestInvisibleOffByDefault.visible = false;
   innerAdminNoTestInvisibleOffByDefault.disabledByUser = true;
   innerAdminNoTestInvisibleOffByDefault.disabledByUserDefault = true;
-  Function::Options compositeStandard = Function::Options::compositeStandard();
+  FunctionOptions compositeStandard = FunctionOptions::compositeStandard();
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
-  Function::Options approximation = Function::Options::approximation();
-  Function::Options approximationOffByDefault =
-  Function::Options::approximationOffByDefault();
+  FunctionOptions approximation = FunctionOptions::approximation();
+  FunctionOptions approximationOffByDefault =
+  FunctionOptions::approximationOffByDefault();
   this->addOperationHandler(
     Calculator::Functions::Names::setRandomSeed,
     CalculatorFunctions::setRandomSeed,
@@ -1478,7 +1480,7 @@ void Calculator::initializeFunctionsStandard() {
     "\\sin{}(3.1415)",
     "CalculatorFunctionsTrigonometry::sinApproximate",
     "SineApproximate",
-    Function::Options::approximation()
+    FunctionOptions::approximation()
   );
   this->addOperationHandler(
     "\\cos",
@@ -3602,33 +3604,6 @@ void Calculator::initializeFunctionsStandard() {
     "ScaleToLeadingUnit",
     innerStandard
   );
-  List<std::string> additiveOperations = List<std::string>({"+", "-"});
-  this->addOperationHandler(
-    "+",
-    CalculatorFunctions::sortTerms,
-    "",
-    "Sorts terms (over the rationals). "
-    "Similar to AddTerms but doesn't combine "
-    "monomial coefficients or drop zeroes. ",
-    "2+3+a+2a+b+1+a",
-    "CalculatorFunctions::sortTerms",
-    "SortTerms",
-    Function::Options::outerOffByDefault(),
-    &additiveOperations
-  );
-  this->addOperationHandler(
-    "+",
-    CalculatorFunctions::addTerms,
-    "",
-    "Collects all terms (over the rationals), adding up terms "
-    "proportional up to a rational number. "
-    "Zero summands are removed, unless zero is the only term left. ",
-    "1+a-2a_1+ 1/2+a_1",
-    "CalculatorFunctions::addTerms",
-    "AddTerms",
-    outerStandard,
-    &additiveOperations
-  );
   this->addOperationHandler(
     "+",
     CalculatorFunctionsPolynomial::
@@ -4457,19 +4432,6 @@ void Calculator::initializeFunctionsStandard() {
     "MergeConstantRadicals",
     outerStandard
   );
-  List<std::string> multiplicativeOperations = List<std::string>({"*"});
-  this->addOperationHandler(
-    "*",
-    CalculatorBasics::associate,
-    "",
-    "Associative law: reorders the multiplicative tree in standard form. ",
-    "(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;\n"
-    "(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
-    "CalculatorBasics::associate",
-    "AssociativeRule",
-    outerStandard,
-    &multiplicativeOperations
-  );
   this->addOperationHandler(
     "*",
     CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate,
@@ -4915,7 +4877,7 @@ void Calculator::initializeFunctionsStandard() {
     "2/3",
     "CalculatorEducationalFunctions::divideByNumberTrivial",
     "DivideByNumberTrivial",
-    Function::Options::outerOffByDefault()
+    FunctionOptions::outerOffByDefault()
   );
   this->addOperationHandler(
     "/",
@@ -6030,6 +5992,42 @@ void Calculator::initializeFunctionsStandard() {
     "CalculatorEducationalFunctions::solveJSON",
     "SolveJSON",
     innerFreezesArguments
+  );
+}
+
+void Calculator::initializeFunctionsTransformingChildren() {
+  STACK_TRACE("Calculator::initializeFunctionsTransformingChildren");
+  FunctionOptions outerStandard;
+  outerStandard.flagIsInner = false;
+  List<std::string> additiveOperations = List<std::string>({"+", "-"});
+  this->addOperationTransformingChildren(
+    CalculatorFunctions::sortTermsInChild,
+    "Sorts terms (over the rationals). "
+    "Similar to AddTerms but doesn't combine "
+    "monomial coefficients or drop zeroes. ",
+    "2+3+a+2a+b+1+a",
+    "SortTerms",
+    "CalculatorFunctions::sortTerms",
+    FunctionOptions::outerOffByDefault()
+  );
+  this->addOperationTransformingChildren(
+    CalculatorFunctions::addTermsInChild,
+    "Collects all terms (over the rationals), adding up terms "
+    "proportional up to a rational number. "
+    "Zero summands are removed, unless zero is the only term left. ",
+    "1+a-2a_1+ 1/2+a_1",
+    "AddTerms",
+    "CalculatorFunctions::addTerms",
+    outerStandard
+  );
+  this->addOperationTransformingChildren(
+    CalculatorBasics::associateMultiplicationInChild,
+    "Associative law: reorders the multiplicative tree in standard form. ",
+    "(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;\n"
+    "(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
+    "AssociativeRule",
+    "CalculatorBasics::associate",
+    outerStandard
   );
 }
 

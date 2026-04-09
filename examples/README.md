@@ -72,7 +72,7 @@ Melts down a layer of parenthesis around a list of commands prepended with the M
  More precisely, cycles through all immediate children of the expression.
 If the k^th child X is a list of two elements starting with Melt, then the operation does the following. If the second child Y of X is a list starting with EndStatement(;), then X is replaced with the second, third, ... children of Y. If Y is not a list starting with EndStatement, X is replaced with Y.
 
-Operator or function \+ is overloaded with 45 total handlers.
+Operator or function \+ is overloaded with 43 total handlers.
 
 *\+* [TrigSumToTrigProduct] {CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22TrigSumToTrigProduct%5c%22%29%3b%5cnsin%28a%29%20%2b%20sin%28b%29%3b%5cnsin%28b%29%20-%20sin%28a%29%3b%5cn-%20sin%28b%29%20%2b%20sin%28a%29%3b%5cn-%20sin%28b%29%20-%20sin%28a%29%3b%5cncos%28a%29%20%2b%20cos%28b%29%3b%5cncos%28a%29%20-%20cos%28b%29%3b%5cn-%20cos%28a%29%20-%20cos%28b%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -188,20 +188,6 @@ Adds double or rational to a double or rational approximately using the built-in
 Plot2D{}(sin{}(x), -5, 5) + Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)
 ```
 Superimposes two plots. 
-
-*\+* [SortTerms] {CalculatorFunctions::sortTerms}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%2b3%2ba%2b2a%2bb%2b1%2ba%22%2c%22currentPage%22%3a%22calculator%22%7d)
-```
-2+3+a+2a+b+1+a
-```
-Sorts terms (over the rationals). Similar to AddTerms but doesn't combine monomial coefficients or drop zeroes. 
-
-*\+* [AddTerms] {CalculatorFunctions::addTerms}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2ba-2a_1%2b%201%2f2%2ba_1%22%2c%22currentPage%22%3a%22calculator%22%7d)
-```
-1+a-2a_1+ 1/2+a_1
-```
-Collects all terms (over the rationals), adding up terms proportional up to a rational number. Zero summands are removed, unless zero is the only term left. 
 
 *\+* [CommonDenominator] {CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibrary}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%2fb%2bc%2fd%3b%5cnz%3d%28x-2%29%28x%2b1%29%3b%5cnw%3d%28x-3%29%28x%2b1%29%3b%5cn1%2fz%2b1%2fw%3b%5cn1%2f%28x%2bsqrt%2820%29%29%2b%201%2f%28x%2bsqrt%283%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -678,7 +664,7 @@ Divides a sequence by a scalar.
 ```
 Equivalent to (a/b){}x = (a{}x)/(b{}x) 
 
-Operator or function \* is overloaded with 72 total handlers.
+Operator or function \* is overloaded with 71 total handlers.
 
 *\** [MultiplyMatrixByMatrix] {CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%20%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5c%5cbegin%7bpmatrix%7d%201%26%20-2%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -960,14 +946,6 @@ Rule that commutes constants to the left-most positions. Provided that a is a co
 \sqrt{}2 \sqrt{}3
 ```
 If a and b are constants, replaces a^{c}b^c by (a b)^c.
-
-*\** [AssociativeRule] {CalculatorBasics::associate}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%2a%28c%2a%28d%2ae%29%2af%29%20-%20a%2ab%2ac%2ad%2a%20e%20%2af%3b%5cn%28a%2ab%29%2a%28c%2a%28e%20%2a%20d%29%2af%29%20-%20a%2ab%2ac%2ad%2a%20e%20%2af%22%2c%22currentPage%22%3a%22calculator%22%7d)
-```
-(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;
-(a*b)*(c*(e * d)*f) - a*b*c*d* e *f
-```
-Associative law: reorders the multiplicative tree in standard form. 
 
 *\** [CommuteAtimesBtimesCifUnivariate] {CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%28x%20%2b%201%29%5e%7b-%201%7dx%3b%5cnx%28y%2b%201%29%5e%7b-%201%7dx%3b%5cn%28%5c%5csin%20x%20%29%20x%20%28%5c%5ccos%20x%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

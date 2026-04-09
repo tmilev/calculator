@@ -579,6 +579,29 @@ bool CalculatorBasics::associateTimesDivision(
   return true;
 }
 
+bool CalculatorBasics::associateMultiplicationInChild(
+  Calculator& calculator,
+  const Expression& inputParent,
+  int childIndex,
+  Expression& outputChild
+) {
+  int multiplication = calculator.opTimes();
+  if (inputParent.startsWith(multiplication)) {
+    // We associate only once per product.
+    // Since the parent expression is a product itself,
+    // we shall associate the parent rather than the child.
+    return false;
+  }
+  if (!inputParent[childIndex].startsWith(multiplication)){
+    // Not a product.
+    return false;
+  }
+  return
+  CalculatorBasics::associate(
+    calculator, inputParent[childIndex], outputChild
+  );
+}
+
 bool CalculatorBasics::associate(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -1241,29 +1264,6 @@ getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const {
   ];
 }
 
-Function& Calculator::getFunctionHandlerFromNamedRule(
-  const std::string& inputNamedRule
-) {
-  const Calculator::NamedRuleLocation& current =
-  this->namedRules.getValueNoFail(inputNamedRule);
-  const MemorySaving<Calculator::OperationHandlers>& currentOperation =
-  this->operations.getValueNoFail(current.containerOperation);
-  if (currentOperation.isZeroPointer()) {
-    global.fatal
-    << "Named rule "
-    << inputNamedRule
-    << " registered with operation "
-    << current.containerOperation
-    << " but the operation has no handlers. "
-    << global.fatal;
-  }
-  if (current.isComposite) {
-    return
-    currentOperation.getElementConst().compositeHandlers[current.index];
-  }
-  return currentOperation.getElementConst().handlers[current.index];
-}
-
 int Calculator::addOperationNoRepetitionOrReturnIndexFirst(
   const std::string& operationName
 ) {
@@ -1285,7 +1285,8 @@ void Calculator::addOperationNoRepetitionAllowed(
     << " already created. "
     << global.fatal;
   }
-  this->operations.getValueCreateEmpty(operation);
+  this->operations.getValueCreateEmpty(operation).getElement().atom =
+  operation;
 }
 
 Function::Function() {
@@ -1302,8 +1303,7 @@ Function::Function(
   const std::string& inputExample,
   const std::string& inputAdditionalIndentifier,
   const std::string& inputCalculatorIdentifier,
-  const Options& inputOptions,
-  const List<int>& inputParentsThatBanHandler
+  const FunctionOptions& inputOptions
 ) {
   this->owner = nullptr;
   if (&this->options == &inputOptions) {
@@ -1323,7 +1323,6 @@ Function::Function(
   if (inputArgumentTypes != nullptr) {
     this->argumentTypes = *inputArgumentTypes;
   }
-  this->parentsThatBanHandler = inputParentsThatBanHandler;
 }
 
 void Calculator::addOperationBinaryInnerHandlerWithTypes(
@@ -1335,14 +1334,14 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   const std::string& opExample,
   const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
-  const Function::Options& options
+  const FunctionOptions& options
 ) {
   int indexOperation = this->operations.getIndex(operation);
   if (indexOperation == - 1) {
     indexOperation = this->operations.size();
-    this->operations.getValueCreateEmpty(operation);
+    this->operations.getValueCreateEmpty(operation).getElement().atom =
+    operation;
   }
-  List<int> empty;
   Function innerFunction(
     *this,
     indexOperation,
@@ -1352,8 +1351,7 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
     opExample,
     inputAdditionalIdentifier,
     inputCalculatorIdentifier,
-    options,
-    empty
+    options
   );
   innerFunction.argumentTypes.reset(*this, 2);
   innerFunction.argumentTypes.addChildAtomOnTop(leftType);
@@ -1377,33 +1375,70 @@ void Calculator::registerCalculatorFunction(
   MemorySaving<Calculator::OperationHandlers>& handlerPointer =
   this->operations.values[indexOperation];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
+  if (handler.atom == "") {
+    global.fatal << "Empty handler atom not allowed. " << global.fatal;
+  }
   handler.checkConsistency();
+  Function* result = nullptr;
   if (inputFunction.options.flagIsCompositeHandler) {
     inputFunction.indexInOperationHandlers = handler.compositeHandlers.size;
     handler.compositeHandlers.addOnTop(inputFunction);
-    if (handler.compositeHandlers.size <= 0) {
-      global.fatal << "Composite handlers cannot be empty. " << global.fatal;
-    }
+    result = &handler.compositeHandlers.lastObject();
   } else {
     inputFunction.indexInOperationHandlers = handler.handlers.size;
     handler.handlers.addOnTop(inputFunction);
-    if (handler.handlers.size <= 0) {
-      global.fatal << "Handlers cannot be empty. " << global.fatal;
-    }
+    result = &handler.handlers.lastObject();
   }
-  if (inputFunction.calculatorIdentifier == "") {
-    return;
+  if (this->namedRules.contains(result->calculatorIdentifier)) {
+    global.fatal
+    << "Named rule already registered: "
+    << result->calculatorIdentifier
+    << global.fatal;
   }
-  Calculator::NamedRuleLocation namedRule;
-  namedRule.containerOperation = this->operations.keys[indexOperation];
-  namedRule.index = inputFunction.indexInOperationHandlers;
-  namedRule.isComposite = inputFunction.options.flagIsCompositeHandler;
-  this->namedRules.setKeyValue(inputFunction.calculatorIdentifier, namedRule);
-  if (inputFunction.options.freezesArguments) {
+  FunctionOptions* resultOptions = &result->options;
+  this->namedRules.setKeyValue(result->calculatorIdentifier, resultOptions);
+  if (resultOptions->freezesArguments) {
     this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew(
-      namedRule.containerOperation
+      handler.atom
     );
   }
+}
+
+void Calculator::addOperationTransformingChildren(
+  Expression::FunctionTransformingChildAddress handler,
+  const std::string& inputDescription,
+  const std::string& example,
+  const std::string& inputCalculatorIdentifier,
+  const std::string& inputAdditionalIdentifier,
+  const FunctionOptions& inputOptions
+) {
+  if (
+    this->operationsTransformingChildren.contains(inputCalculatorIdentifier) ||
+    this->namedRules.contains(inputCalculatorIdentifier)
+  ) {
+    global.fatal
+    << "Identifer: "
+    << inputCalculatorIdentifier
+    << " already registered. "
+    << global.fatal;
+  }
+  FunctionTransformingChild functionWrapper(
+    *this,
+    handler,
+    inputDescription,
+    example,
+    inputCalculatorIdentifier,
+    inputAdditionalIdentifier,
+    inputOptions
+  );
+  this->operationsTransformingChildren.setKeyValue(
+    inputCalculatorIdentifier, functionWrapper
+  );
+  FunctionOptions* options =
+  &this->operationsTransformingChildren.getValueNoFailNonConst(
+    inputCalculatorIdentifier
+  ).options;
+  this->namedRules.setKeyValue(inputCalculatorIdentifier, options);
 }
 
 void Calculator::addOperationHandler(
@@ -1414,8 +1449,7 @@ void Calculator::addOperationHandler(
   const std::string& opExample,
   const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
-  const Function::Options& options,
-  const List<std::string>* parentsThatBanHandler
+  const FunctionOptions& options
 ) {
   if (opArgumentListIgnoredForTheTimeBeing != "") {
     global.fatal
@@ -1426,14 +1460,8 @@ void Calculator::addOperationHandler(
   int indexOperation = this->operations.getIndex(operation);
   if (indexOperation == - 1) {
     indexOperation = this->operations.size();
-    this->operations.getValueCreateEmpty(operation);
-  }
-  List<int> parentOperationsThatBanHandler;
-  if (parentsThatBanHandler != nullptr) {
-    for (int i = 0; i < parentsThatBanHandler->size; i ++) {
-      int atom = this->operations.getIndexNoFail((*parentsThatBanHandler)[i]);
-      parentOperationsThatBanHandler.addOnTop(atom);
-    }
+    this->operations.getValueCreateEmpty(operation).getElement().atom =
+    operation;
   }
   Function functionWrapper(
     *this,
@@ -1444,8 +1472,7 @@ void Calculator::addOperationHandler(
     opExample,
     inputAdditionalIdentifier,
     inputCalculatorIdentifier,
-    options,
-    parentOperationsThatBanHandler
+    options
   );
   if (
     functionWrapper.functionAddress == nullptr ||
@@ -1456,9 +1483,9 @@ void Calculator::addOperationHandler(
   this->registerCalculatorFunction(functionWrapper, indexOperation);
 }
 
-Function::Options Function::Options::
-administrativeNotTestedInvisibleOffByDefault() {
-  Function::Options result;
+FunctionOptions FunctionOptions::administrativeNotTestedInvisibleOffByDefault()
+{
+  FunctionOptions result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
   result.administrativeOnly = true;
@@ -1468,78 +1495,78 @@ administrativeNotTestedInvisibleOffByDefault() {
   return result;
 }
 
-Function::Options Function::Options::compositeStandard() {
-  Function::Options result;
+FunctionOptions FunctionOptions::compositeStandard() {
+  FunctionOptions result;
   result.flagIsCompositeHandler = true;
   result.flagIsInner = true;
   return result;
 }
 
-Function::Options Function::Options::innerFreezesArguments() {
-  Function::Options result;
+FunctionOptions FunctionOptions::innerFreezesArguments() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.freezesArguments = true;
   return result;
 }
 
-Function::Options Function::Options::administrativeExperimentalTested() {
-  Function::Options result;
+FunctionOptions FunctionOptions::administrativeExperimentalTested() {
+  FunctionOptions result;
   result.flagIsExperimental = true;
   result.administrativeOnly = true;
   result.dontTestAutomatically = false;
   return result;
 }
 
-Function::Options Function::Options::administrativeTested() {
-  Function::Options result;
+FunctionOptions FunctionOptions::administrativeTested() {
+  FunctionOptions result;
   result.administrativeOnly = true;
   result.dontTestAutomatically = false;
   return result;
 }
 
-Function::Options Function::Options::administrativeNotTestedExperimental() {
-  Function::Options result = Function::Options::administrativeNotTested();
+FunctionOptions FunctionOptions::administrativeNotTestedExperimental() {
+  FunctionOptions result = FunctionOptions::administrativeNotTested();
   result.flagIsExperimental = true;
   return result;
 }
 
-Function::Options Function::Options::innerInvisibleExperimental() {
-  Function::Options result;
+FunctionOptions FunctionOptions::innerInvisibleExperimental() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.flagIsExperimental = true;
   result.visible = false;
   return result;
 }
 
-Function::Options Function::Options::experimental() {
-  Function::Options result;
+FunctionOptions FunctionOptions::experimental() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.flagIsExperimental = true;
   return result;
 }
 
-Function::Options Function::Options::standard() {
-  Function::Options result;
+FunctionOptions FunctionOptions::standard() {
+  FunctionOptions result;
   result.flagIsInner = true;
   return result;
 }
 
-Function::Options Function::Options::nonCacheable() {
-  Function::Options result;
+FunctionOptions FunctionOptions::nonCacheable() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.flagIsCacheable = false;
   return result;
 }
 
-Function::Options Function::Options::approximation() {
-  Function::Options result;
+FunctionOptions FunctionOptions::approximation() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.flagIsApproximation = true;
   return result;
 }
 
-Function::Options Function::Options::approximationOffByDefault() {
-  Function::Options result;
+FunctionOptions FunctionOptions::approximationOffByDefault() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.flagIsApproximation = true;
   result.disabledByUserDefault = true;
@@ -1547,30 +1574,30 @@ Function::Options Function::Options::approximationOffByDefault() {
   return result;
 }
 
-Function::Options Function::Options::innerInvisible() {
-  Function::Options result;
+FunctionOptions FunctionOptions::innerInvisible() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.visible = false;
   return result;
 }
 
-Function::Options Function::Options::innerNoTest() {
-  Function::Options result;
+FunctionOptions FunctionOptions::innerNoTest() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
   return result;
 }
 
-Function::Options Function::Options::innerNoTestExperimental() {
-  Function::Options result;
+FunctionOptions FunctionOptions::innerNoTestExperimental() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
   result.flagIsExperimental = true;
   return result;
 }
 
-Function::Options Function::Options::invisibleExperimentalNoTest() {
-  Function::Options result;
+FunctionOptions FunctionOptions::invisibleExperimentalNoTest() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.flagIsExperimental = true;
   result.dontTestAutomatically = true;
@@ -1578,33 +1605,33 @@ Function::Options Function::Options::invisibleExperimentalNoTest() {
   return result;
 }
 
-Function::Options Function::Options::outerOffByDefault() {
-  Function::Options result;
+FunctionOptions FunctionOptions::outerOffByDefault() {
+  FunctionOptions result;
   result.flagIsInner = false;
   result.disabledByUserDefault = true;
   result.disabledByUser = true;
   return result;
 }
 
-Function::Options Function::Options::invisibleNoTest() {
-  Function::Options result;
+FunctionOptions FunctionOptions::invisibleNoTest() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.visible = false;
   result.dontTestAutomatically = true;
   return result;
 }
 
-Function::Options Function::Options::administrativeNotTested() {
-  Function::Options result;
+FunctionOptions FunctionOptions::administrativeNotTested() {
+  FunctionOptions result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
   result.administrativeOnly = true;
   return result;
 }
 
-Function::Options Function::Options::
-administrativeNotTestedInvisibleExperimental() {
-  Function::Options result;
+FunctionOptions FunctionOptions::administrativeNotTestedInvisibleExperimental()
+{
+  FunctionOptions result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
   result.administrativeOnly = true;
@@ -1612,7 +1639,7 @@ administrativeNotTestedInvisibleExperimental() {
   return result;
 }
 
-void Function::Options::reset() {
+void FunctionOptions::reset() {
   this->flagIsCompositeHandler = false;
   this->flagIsInner = true;
   this->flagMayActOnBoundVars = false;
@@ -1627,8 +1654,76 @@ void Function::Options::reset() {
   this->flagIsApproximation = false;
 }
 
-Function::Options::Options() {
+FunctionOptions::FunctionOptions() {
   this->reset();
+}
+
+FunctionTransformingChild::FunctionTransformingChild() {
+  this->owner = nullptr;
+  this->functionAddress = nullptr;
+}
+
+FunctionTransformingChild::FunctionTransformingChild(
+  Calculator& calculator,
+  Expression::FunctionTransformingChildAddress inputFunctionAddress,
+  const std::string& inputDescription,
+  const std::string& inputExample,
+  const std::string& inputCalculatorIdentifier,
+  const std::string& inputAdditionalIdentifier,
+  const FunctionOptions& inputOptions
+) {
+  this->owner = &calculator;
+  this->functionAddress = inputFunctionAddress;
+  this->description = inputDescription;
+  this->example = inputExample;
+  this->calculatorIdentifier = inputCalculatorIdentifier;
+  this->additionalIdentifier = inputAdditionalIdentifier;
+  this->options = inputOptions;
+}
+
+std::string FunctionTransformingChild::toStringSummary() const {
+  if (this->owner == nullptr) {
+    return "(non-initialized)";
+  }
+  std::stringstream out;
+  if (this->calculatorIdentifier != "") {
+    out
+    << "Rule name: <span style='color:blue'>"
+    << this->calculatorIdentifier
+    << "</span>. ";
+  }
+  if (this->additionalIdentifier != "") {
+    out << "Handler: " << this->additionalIdentifier << ". ";
+  }
+  return out.str();
+}
+
+bool FunctionTransformingChild::applyWithLogs(
+  Calculator& calculator,
+  const Expression& inputParent,
+  int indexInParent,
+  Expression& outputTransformedChild,
+  int64_t reductionStart
+) {
+  if (this->options.disabledByUser) {
+    return false;
+  }
+  int64_t startCurrentFunction = global.getElapsedMilliseconds();
+  if (
+    !this->functionAddress(
+      calculator, inputParent, indexInParent, outputTransformedChild
+    )
+  ) {
+    calculator.accountFunctionByNameTrivialPerformance(
+      this->calculatorIdentifier, startCurrentFunction
+    );
+    return false;
+  }
+  calculator.accountFunctionByNameNonTrivialPerformance(
+    this->calculatorIdentifier, startCurrentFunction
+  );
+  calculator.logFunctionTransformingChildWithTime(*this, reductionStart);
+  return true;
 }
 
 bool Function::inputFitsMyInnerType(const Expression& input) {
@@ -1696,11 +1791,8 @@ std::string Function::toStringSummary() const {
   return out.str();
 }
 
-bool Function::shouldBeApplied(int parentOperationIfAvailable) {
+bool Function::shouldBeApplied() {
   if (this->options.disabledByUser) {
-    return false;
-  }
-  if (this->parentsThatBanHandler.contains(parentOperationIfAvailable)) {
     return false;
   }
   if (this->options.administrativeOnly) {

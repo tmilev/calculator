@@ -378,11 +378,19 @@ bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
     argument = input;
     argument.setChildAtomValue(0, calculator.opSequence());
   }
+  Expression argumentInCommandSequence;
+  argumentInCommandSequence.makeOX(
+    calculator, calculator.opCommandSequence(), argument
+  );
   Expression outputTransformation;
   bool notUsed = false;
   Calculator::ExpressionHistoryEnumerator history;
   calculator.evaluateExpression(
-    calculator, argument, outputTransformation, notUsed, - 1, &history.history
+    calculator,
+    argumentInCommandSequence,
+    outputTransformation,
+    notUsed,
+    &history.history
   );
   std::stringstream out;
   history.owner = &calculator;

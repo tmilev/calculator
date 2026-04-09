@@ -5,22 +5,22 @@
 
 void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   STACK_TRACE("Calculator::initializeFunctionsSemisimpleLieAlgebras");
-  Function::Options standardOptions = Function::Options::standard();
-  Function::Options noTest = Function::Options::innerNoTest();
-  Function::Options invisible = Function::Options::innerInvisible();
-  Function::Options adminNoTest = Function::Options::administrativeNotTested();
-  Function::Options invisibleExperimental =
-  Function::Options::innerInvisibleExperimental();
-  Function::Options adminNoTestExperimental =
-  Function::Options::administrativeNotTestedExperimental();
-  Function::Options experimental = Function::Options::experimental();
-  Function::Options adminNoTestInvisibleOffByDefault =
-  Function::Options::administrativeNotTestedInvisibleOffByDefault();
-  Function::Options adminNoTestInvisibleExperimental =
-  Function::Options::administrativeNotTestedInvisibleExperimental();
-  Function::Options invisibleNoTest = Function::Options::invisibleNoTest();
-  Function::Options experimentalNoTest =
-  Function::Options::innerNoTestExperimental();
+  FunctionOptions standardOptions = FunctionOptions::standard();
+  FunctionOptions noTest = FunctionOptions::innerNoTest();
+  FunctionOptions invisible = FunctionOptions::innerInvisible();
+  FunctionOptions adminNoTest = FunctionOptions::administrativeNotTested();
+  FunctionOptions invisibleExperimental =
+  FunctionOptions::innerInvisibleExperimental();
+  FunctionOptions adminNoTestExperimental =
+  FunctionOptions::administrativeNotTestedExperimental();
+  FunctionOptions experimental = FunctionOptions::experimental();
+  FunctionOptions adminNoTestInvisibleOffByDefault =
+  FunctionOptions::administrativeNotTestedInvisibleOffByDefault();
+  FunctionOptions adminNoTestInvisibleExperimental =
+  FunctionOptions::administrativeNotTestedInvisibleExperimental();
+  FunctionOptions invisibleNoTest = FunctionOptions::invisibleNoTest();
+  FunctionOptions experimentalNoTest =
+  FunctionOptions::innerNoTestExperimental();
   this->addOperationHandler(
     "SemisimpleLieAlgebra",
     CalculatorConversions::semisimpleLieAlgebra,
@@ -1567,7 +1567,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
     "CalculatorFunctions::constructCartanSubalgebra",
     "CartanSA",
-    Function::Options::administrativeExperimentalTested()
+    FunctionOptions::administrativeExperimentalTested()
   );
   this->addOperationHandler(
     "GenerateVectorSpaceClosedWithRespectToLieBracket",

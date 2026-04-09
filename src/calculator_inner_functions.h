@@ -1020,8 +1020,20 @@ public:
   static bool sortTerms(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool sortTermsInChild(
+    Calculator& calculator,
+    const Expression& inputParent,
+    int childIndex,
+    Expression& outputChild
+  );
   static bool addTerms(
     Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool addTermsInChild(
+    Calculator& calculator,
+    const Expression& inputParent,
+    int childIndex,
+    Expression& outputChild
   );
   static bool isPrimeMillerRabin(
     Calculator& calculator, const Expression& input, Expression& output

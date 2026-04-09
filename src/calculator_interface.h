@@ -131,6 +131,14 @@ public:
   typedef bool(*FunctionAddress)(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  // A function for transforming an expression to another relative to a parent
+  // expression.
+  typedef bool(*FunctionTransformingChildAddress)(
+    Calculator& calculator,
+    const Expression& inputParent,
+    int indexInParent,
+    Expression& outputTransformedChild
+  );
   // A function that converts an expression to string and writes the string
   // into the given stream.
   typedef bool(*ToStringHandler)(
@@ -1587,6 +1595,98 @@ template < >
 bool WithContext<Polynomial<Rational> >::toExpression(
   Calculator& calculator, Expression& output
 );
+struct FunctionOptions {
+public:
+  // When flagIsCompositeHandler set, the operation OP applies
+  // to expressions of the form ((OP ...), argument1, ...).
+  // When flagIsCompositeHandler is not set, the operation OP applies
+  // to expressions of the form (OP, argument1, ...)
+  bool flagIsCompositeHandler;
+  bool flagIsInner;
+  bool flagMayActOnBoundVars;
+  bool visible;
+  bool flagIsExperimental;
+  bool disabledByUser;
+  bool disabledByUserDefault;
+  bool freezesArguments;
+  bool flagIsCacheable;
+  bool flagIsApproximation;
+  // The dontTestAutomatically
+  // indicates that the function should not be auto-tested.
+  // This functions that are not auto-tested include the following.
+  // - The automated test trigger function.
+  // - Calculator functions that do not have reproducible results,
+  //   such as, for example, the GenerateRandomPrime function.
+  //   Note such C++ functions are not ``functions''
+  //   in the mathematical sense.
+  // - Functions that crash the calculator deliberately,
+  //   such as the Crash function.
+  // - Functions that run extra slowly.
+  // - Functions that are considered experimental / in development.
+  bool dontTestAutomatically;
+  bool administrativeOnly;
+  void reset();
+  static FunctionOptions administrativeNotTestedInvisibleExperimental();
+  static FunctionOptions administrativeNotTested();
+  static FunctionOptions administrativeNotTestedInvisibleOffByDefault();
+  static FunctionOptions administrativeNotTestedExperimental();
+  static FunctionOptions administrativeExperimentalTested();
+  static FunctionOptions administrativeTested();
+  static FunctionOptions innerInvisible();
+  static FunctionOptions standard();
+  static FunctionOptions nonCacheable();
+  static FunctionOptions compositeStandard();
+  static FunctionOptions approximation();
+  static FunctionOptions approximationOffByDefault();
+  static FunctionOptions innerFreezesArguments();
+  static FunctionOptions innerInvisibleExperimental();
+  static FunctionOptions experimental();
+  static FunctionOptions invisibleNoTest();
+  static FunctionOptions innerNoTest();
+  static FunctionOptions innerNoTestExperimental();
+  static FunctionOptions invisibleExperimentalNoTest();
+  static FunctionOptions outerOffByDefault();
+  FunctionOptions();
+};
+
+// A function that transforms a child of a parent Expression
+// to a different child expression.
+// The function input is the parent expression, and the of the child;
+// the output is the transformed child.
+// The output transformation needs not be substituted in the parent expression;
+// it is the task of the user of FunctionTransformingChildExpression
+// to carry out the substitution in the parent.
+class FunctionTransformingChild {
+public:
+  Calculator* owner;
+  std::string description;
+  std::string example;
+  // A unique identifier for the function.
+  std::string calculatorIdentifier;
+  std::string additionalIdentifier;
+  FunctionOptions options;
+  Expression::FunctionTransformingChildAddress functionAddress;
+  FunctionTransformingChild();
+  FunctionTransformingChild(
+    Calculator& calculator,
+    Expression::FunctionTransformingChildAddress inputFunctionAddress,
+    const std::string& inputDescription,
+    const std::string& inputExample,
+    const std::string& inputCalculatorIdentifier,
+    const std::string& inputAdditionalIdentifier,
+    const FunctionOptions& inputOptions
+  );
+  bool applyWithLogs(
+    Calculator& calculator,
+    const Expression& inputParent,
+    int indexInParent,
+    Expression& outputTransformedChild,
+    int64_t reductionStart
+  );
+  std::string toStringSummary() const;
+};
+
+// A function that transforms an input Expression to an output Expression.
 class Function {
 private:
   // Used in constructors.
@@ -1600,7 +1700,6 @@ private:
     this->functionAddress = nullptr;
     this->indexInOperationHandlers = - 1;
     this->indexOperation = - 1;
-    this->parentsThatBanHandler.clear();
     this->options.reset();
   }
 public:
@@ -1613,72 +1712,13 @@ public:
   std::string additionalIdentifier;
   int indexOperation;
   int indexInOperationHandlers;
-  // List of direct parent atoms that ban the use of this handler.
-  // We will be looking up entries in this list;
-  // please refactor to a hashed list if its size ever exceeds
-  // 5.
-  List<int> parentsThatBanHandler;
-  class Options {
-  public:
-    // When flagIsCompositeHandler set, the operation OP applies
-    // to expressions of the form ((OP ...), argument1, ...).
-    // When flagIsCompositeHandler is not set, the operation OP applies
-    // to expressions of the form (OP, argument1, ...)
-    bool flagIsCompositeHandler;
-    bool flagIsInner;
-    bool flagMayActOnBoundVars;
-    bool visible;
-    bool flagIsExperimental;
-    bool disabledByUser;
-    bool disabledByUserDefault;
-    bool freezesArguments;
-    bool flagIsCacheable;
-    bool flagIsApproximation;
-    // The dontTestAutomatically
-    // indicates that the function should not be auto-tested.
-    // This functions that are not auto-tested include the following.
-    // - The automated test trigger function.
-    // - Calculator functions that do not have reproducible results,
-    //   such as, for example, the GenerateRandomPrime function.
-    //   Note such C++ functions are not ``functions''
-    //   in the mathematical sense.
-    // - Functions that crash the calculator deliberately,
-    //   such as the Crash function.
-    // - Functions that run extra slowly.
-    // - Functions that are considered experimental / in development.
-    bool dontTestAutomatically;
-    bool administrativeOnly;
-    void reset();
-    static Options administrativeNotTestedInvisibleExperimental();
-    static Options administrativeNotTested();
-    static Options administrativeNotTestedInvisibleOffByDefault();
-    static Options administrativeNotTestedExperimental();
-    static Options administrativeExperimentalTested();
-    static Options administrativeTested();
-    static Options innerInvisible();
-    static Options standard();
-    static Options nonCacheable();
-    static Options compositeStandard();
-    static Options approximation();
-    static Options approximationOffByDefault();
-    static Options innerFreezesArguments();
-    static Options innerInvisibleExperimental();
-    static Options experimental();
-    static Options invisibleNoTest();
-    static Options innerNoTest();
-    static Options innerNoTestExperimental();
-    static Options invisibleExperimentalNoTest();
-    static Options outerOffByDefault();
-    Options();
-  };
-
-  Options options;
+  FunctionOptions options;
   Expression::FunctionAddress functionAddress;
   std::string toStringShort() const;
   std::string toStringSummary() const;
   std::string toStringFull() const;
   JSData toJSON() const;
-  bool shouldBeApplied(int parentOperationIfAvailable);
+  bool shouldBeApplied();
   bool inputFitsMyInnerType(const Expression& input);
   Function();
   Function(
@@ -1690,8 +1730,7 @@ public:
     const std::string& inputExample,
     const std::string& inputAdditionalIndentifier,
     const std::string& inputCalculatorIdentifier,
-    const Function::Options& inputOptions,
-    const List<int>& inputParentsThatBanHandler
+    const FunctionOptions& inputOptions
   );
   static unsigned int hashFunction(const Function& input) {
     return input.hashFunction();
@@ -1702,11 +1741,17 @@ public:
       reinterpret_cast<uintptr_t>(this->functionAddress)
     );
   }
+  bool applyWithLogs(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    Function** outputHandler,
+    int64_t reductionStart
+  );
   bool apply(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   bool checkConsistency() const;
@@ -2687,6 +2732,7 @@ public:
       static std::string bind;
       static std::string quote;
       static std::string freeze;
+      static std::string functionTransformingChild;
       class Trigonometry {
       public:
         static std::string sine;
@@ -2726,6 +2772,8 @@ public:
   MapReferences<
     std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction
   > operations;
+  MapReferences<std::string, FunctionTransformingChild>
+  operationsTransformingChildren;
   HashedList<std::string> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string> atomsNotAllowingChainRule;
   HashedList<std::string> arithmeticOperations;
@@ -2750,20 +2798,7 @@ public:
   toStringDataHandlers;
   MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>
   toMathMLDataHandlers;
-  class NamedRuleLocation {
-  public:
-    // Operation for which the named rule was registered.
-    // Since each rule name can be registered only once,
-    // this is unique.
-    std::string containerOperation;
-    bool isComposite;
-    int index;
-    NamedRuleLocation();
-  };
-
-  MapList<
-    std::string, NamedRuleLocation, HashFunctions::hashFunction<std::string>
-  > namedRules;
+  MapList<std::string, FunctionOptions*> namedRules;
   // Calculator functions have as arguments two expressions passed by
   // reference,
   // const Expression& input and Expression& output. Calculator functions
@@ -3017,7 +3052,6 @@ public:
     const DynkinType& dynkinType,
     FormatExpressions* format = nullptr
   );
-  Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool checkPredefinedFunctionNameRepetitions();
   bool checkOperationHandlers();
   bool checkConsistencyAfterInitialization();
@@ -3043,9 +3077,18 @@ public:
   Expression expressionMinusInfinity();
   Expression expressionSquareRootNegativeOne();
   void logFunctionWithTime(Function& input, int64_t startTime);
+  void logFunctionTransformingChildWithTime(
+    FunctionTransformingChild& input, int64_t startTime
+  );
   void accountFunctionTrivialPerformance(Function& input, int64_t startTime);
   void accountFunctionNonTrivialPerformance(
     Function& input, int64_t startTime
+  );
+  void accountFunctionByNameTrivialPerformance(
+    const std::string& input, int64_t startTime
+  );
+  void accountFunctionByNameNonTrivialPerformance(
+    const std::string& input, int64_t startTime
   );
   void logTime(int64_t startTime);
   void logPublicError(const std::string& error);
@@ -3536,7 +3579,7 @@ public:
     int inconsistenciesMathML;
     int unknown;
     int unknownMathML;
-    // see Function::Options
+    // see FunctionOptions
     int noTestSkips;
     Calculator* owner;
     std::string reportHtml;
@@ -3586,21 +3629,18 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   static bool outerStandardCompositeHandler(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   static bool outerStandardHandler(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   static bool outerPowerRaiseToFirst(
@@ -3759,7 +3799,7 @@ public:
     const std::string& opExample,
     const std::string& inputAdditionalIdentifier,
     const std::string& inputCalculatorIdentifier,
-    const Function::Options& options
+    const FunctionOptions& options
   );
   void addOperationHandler(
     const std::string& operation,
@@ -3769,8 +3809,15 @@ public:
     const std::string& opExample,
     const std::string& inputAdditionalIdentifier,
     const std::string& inputCalculatorIdentifier,
-    const Function::Options& options,
-    const List<std::string>* parentsThatBanHandler = nullptr
+    const FunctionOptions& options
+  );
+  void addOperationTransformingChildren(
+    Expression::FunctionTransformingChildAddress handler,
+    const std::string& inputDescription,
+    const std::string& example,
+    const std::string& inputAdditionalIdentifier,
+    const std::string& inputCalculatorIdentifier,
+    const FunctionOptions& inputOptions
   );
   void addOneStringAtomHandler(int atom, Expression::ToStringHandler handler);
   void addOneMathMLAtomHandler(int atom, Expression::ToMathMLHandler handler);
@@ -3810,6 +3857,7 @@ public:
   void initializeBuiltInAtomsNotInterpretedAsFunctions();
   void initializeAtomsNotGoodForChainRule();
   void initializeFunctionsStandard();
+  void initializeFunctionsTransformingChildren();
   void initializeFunctionsScientificBasic();
   void initializeFunctionsVectorPartitionFunctions();
   void initializeFunctionsExtra();
@@ -3830,7 +3878,6 @@ public:
     const Expression& input,
     Expression& output,
     bool& outputIsCacheable,
-    int operatorIndexParentIfAvailable,
     Expression* outputHistory
   );
   class EvaluateLoop {
@@ -3845,13 +3892,16 @@ public:
     bool builtInEvaluationWithStatistics();
     bool userDefinedEvaluationWithStatistics();
     bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
+    bool evaluateOneChild(
+      StateMaintainerCalculator& maintainRuleStack, int childIndex
+    );
+    bool evaluateOneChildOneRoundReturnFalseWhenDone(int childIndex);
     void reportChildEvaluation(
       ProgressReport& report, Expression& output, int childIndex
     );
   public:
     Calculator* owner;
     bool flagIsNonCacheable;
-    int operatorIndexParent;
     int numberOfTransformations;
     int indexInCache;
     bool reductionOccurred;
@@ -3864,10 +3914,8 @@ public:
     void writeCache();
     bool outputHasErrors();
     EvaluateLoop(Calculator& inputOwner);
-    bool setOutput(
-      const Expression& input, Function* handler, const std::string& info
-    );
-    void accountHistory(Function* handler, const std::string& info);
+    bool setOutput(const Expression& input, const std::string& info);
+    void accountHistory(const std::string& info);
     bool checkInitialization();
     void accountHistoryChildTransformation(
       const Expression& transformedChild,
@@ -3978,6 +4026,12 @@ public:
   );
   static bool associate(
     Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool associateMultiplicationInChild(
+    Calculator& calculator,
+    const Expression& inputParent,
+    int childIndex,
+    Expression& outputChild
   );
   static bool subZeroDivAnythingWithZero(
     Calculator& calculator, const Expression& input, Expression& output

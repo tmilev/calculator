@@ -228,12 +228,6 @@ bool Calculator::OperationHandlers::checkConsistency() {
   return true;
 }
 
-Calculator::NamedRuleLocation::NamedRuleLocation() {
-  this->containerOperation = "";
-  this->index = - 1;
-  this->isComposite = false;
-}
-
 Expression Calculator::expressionEulersNumber() {
   Expression result;
   result.makeAtom(*this, "e");
@@ -362,26 +356,58 @@ void Calculator::logTime(int64_t startTime) {
 void Calculator::accountFunctionTrivialPerformance(
   Function& input, int64_t startTime
 ) {
+  this->accountFunctionByNameTrivialPerformance(
+    input.calculatorIdentifier, startTime
+  );
+}
+
+void Calculator::accountFunctionByNameTrivialPerformance(
+  const std::string& input, int64_t startTime
+) {
   int64_t elapsed = global.getElapsedMilliseconds() - startTime;
   LargeInteger largeInteger;
   largeInteger = elapsed;
   this->statistics.trivialPerformancePerHandler.addMonomial(
-    input.calculatorIdentifier, largeInteger
+    input, largeInteger
   );
 }
 
 void Calculator::accountFunctionNonTrivialPerformance(
   Function& input, int64_t startTime
 ) {
+  this->accountFunctionByNameNonTrivialPerformance(
+    input.calculatorIdentifier, startTime
+  );
+}
+
+void Calculator::accountFunctionByNameNonTrivialPerformance(
+  const std::string& input, int64_t startTime
+) {
   int64_t elapsed = global.getElapsedMilliseconds() - startTime;
   LargeInteger largeInteger;
   largeInteger = elapsed;
   this->statistics.nonTrivialPerformancePerHandler.addMonomial(
-    input.calculatorIdentifier, largeInteger
+    input, largeInteger
   );
 }
 
 void Calculator::logFunctionWithTime(Function& input, int64_t startTime) {
+  this->statistics.totalSubstitutions ++;
+  if (!this->flagLogEvaluation) {
+    return;
+  }
+  *this
+  << "<hr>Built-in substitution "
+  << this->statistics.totalSubstitutions
+  << ": "
+  << input.toStringSummary();
+  this->logTime(startTime);
+  *this << "Rule stack size: " << this->ruleStack.size();
+}
+
+void Calculator::logFunctionTransformingChildWithTime(
+  FunctionTransformingChild& input, int64_t startTime
+) {
   this->statistics.totalSubstitutions ++;
   if (!this->flagLogEvaluation) {
     return;
@@ -432,7 +458,6 @@ bool Calculator::outerStandardCompositeHandler(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   int64_t start = 0;
@@ -451,31 +476,17 @@ bool Calculator::outerStandardCompositeHandler(
   if (handlers == nullptr) {
     return false;
   }
-  for (int i = 0; i < handlers->size; i ++) {
-    Function& currentHandler = (*handlers)[i];
-    if (!currentHandler.shouldBeApplied(operatorIndexParentIfAvailable)) {
+  for (Function& currentHandler : *handlers) {
+    if (!currentHandler.shouldBeApplied()) {
       continue;
     }
-    int64_t startCurrentFunction = global.getElapsedMilliseconds();
     if (
-      !currentHandler.apply(
-        calculator,
-        input,
-        output,
-        operatorIndexParentIfAvailable,
-        outputHandler
+      currentHandler.applyWithLogs(
+        calculator, input, output, outputHandler, start
       )
     ) {
-      calculator.accountFunctionTrivialPerformance(
-        currentHandler, startCurrentFunction
-      );
-      continue;
+      return true;
     }
-    calculator.accountFunctionNonTrivialPerformance(
-      currentHandler, startCurrentFunction
-    );
-    calculator.logFunctionWithTime(currentHandler, start);
-    return true;
   }
   return false;
 }
@@ -490,30 +501,46 @@ bool Function::checkConsistency() const {
   return true;
 }
 
+bool Function::applyWithLogs(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  Function** outputHandler,
+  int64_t reductionStart
+) {
+  int64_t startCurrentFunction = global.getElapsedMilliseconds();
+  if (!this->apply(calculator, input, output, outputHandler)) {
+    calculator.accountFunctionTrivialPerformance(*this, startCurrentFunction);
+    return false;
+  }
+  calculator.accountFunctionNonTrivialPerformance(*this, startCurrentFunction);
+  calculator.logFunctionWithTime(*this, reductionStart);
+  return true;
+}
+
 bool Function::apply(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   int64_t start = 0;
   if (this->owner->flagLogEvaluation) {
     start = global.getElapsedMilliseconds();
   }
-  if (!this->shouldBeApplied(operatorIndexParentIfAvailable)) {
+  if (!this->shouldBeApplied()) {
     return false;
   }
   if (this->functionAddress == nullptr) {
     global.fatal
     << "Attempt to apply non-initialized function. "
     << global.fatal;
+    return false;
   }
   if (!this->options.flagIsInner) {
     if (this->functionAddress(calculator, input, output)) {
       if (output != input) {
         output.checkConsistency();
-        calculator.logFunctionWithTime(*this, start);
         if (outputHandler != nullptr) {
           *outputHandler = this;
         }
@@ -525,7 +552,6 @@ bool Function::apply(
   if (this->inputFitsMyInnerType(input)) {
     if (this->functionAddress(calculator, input, output)) {
       output.checkConsistency();
-      calculator.logFunctionWithTime(*this, start);
       if (outputHandler != nullptr) {
         *outputHandler = this;
       }
@@ -539,10 +565,10 @@ bool Calculator::outerStandardHandler(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   STACK_TRACE("Calculator::outerStandardHandler");
+  int64_t startTime = global.getElapsedMilliseconds();
   const Expression& functionNameNode = input[0];
   int operationIndex = - 1;
   if (!functionNameNode.isOperation(operationIndex)) {
@@ -553,24 +579,14 @@ bool Calculator::outerStandardHandler(
   }
   const ListReferences<Function>& handlers =
   calculator.operations.values[operationIndex].getElement().handlers;
-  for (int i = 0; i < handlers.size; i ++) {
-    Function& currentFunction = handlers[i];
-    int64_t startTime = global.getElapsedMilliseconds();
+  for (Function& currentFunction : handlers) {
     if (
-      currentFunction.apply(
-        calculator,
-        input,
-        output,
-        operatorIndexParentIfAvailable,
-        outputHandler
+      currentFunction.applyWithLogs(
+        calculator, input, output, outputHandler, startTime
       )
     ) {
-      calculator.accountFunctionNonTrivialPerformance(
-        currentFunction, startTime
-      );
       return true;
     }
-    calculator.accountFunctionTrivialPerformance(currentFunction, startTime);
   }
   return false;
 }
@@ -579,7 +595,6 @@ bool Calculator::outerStandardFunction(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   STACK_TRACE("Calculator::outerStandardFunction");
@@ -634,11 +649,7 @@ bool Calculator::outerStandardFunction(
   }
   if (
     calculator.outerStandardCompositeHandler(
-      calculator,
-      input,
-      output,
-      operatorIndexParentIfAvailable,
-      &transformation.firstApplicableHandler
+      calculator, input, output, &transformation.firstApplicableHandler
     )
   ) {
     if (outputHandler != nullptr) {
@@ -649,11 +660,7 @@ bool Calculator::outerStandardFunction(
   }
   if (
     calculator.outerStandardHandler(
-      calculator,
-      input,
-      output,
-      operatorIndexParentIfAvailable,
-      &transformation.firstApplicableHandler
+      calculator, input, output, &transformation.firstApplicableHandler
     )
   ) {
     if (outputHandler != nullptr) {
@@ -766,6 +773,7 @@ bool Calculator::expressionMatchesPattern(
 }
 
 void StateMaintainerCalculator::addRule(const Expression& rule) {
+  STACK_TRACE("StateMaintainerCalculator::addRule");
   if (this->owner == nullptr) {
     global.fatal
     << "StackMaintainerCalculator has zero owner. "
@@ -785,8 +793,7 @@ void StateMaintainerCalculator::addRule(const Expression& rule) {
       if (!this->owner->namedRules.contains(currentRule)) {
         continue;
       }
-      this->owner->getFunctionHandlerFromNamedRule(currentRule).options.
-      disabledByUser =
+      this->owner->namedRules.getValueNoFail(currentRule)->disabledByUser =
       rule.startsWith(this->owner->opRulesOff());
     }
   }
@@ -820,10 +827,9 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
         if (!this->owner->namedRules.contains(currentRuleName)) {
           continue;
         }
-        Function& currentRule =
-        this->owner->getFunctionHandlerFromNamedRule(currentRuleName);
-        currentRule.options.disabledByUser =
-        currentRule.options.disabledByUserDefault;
+        FunctionOptions* currentOptions =
+        this->owner->namedRules.getValueNoFail(currentRuleName);
+        currentOptions->disabledByUser = currentOptions->disabledByUserDefault;
         shouldUpdateRules = true;
       }
     }
@@ -832,19 +838,19 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     for (int i = 0; i < this->startingRuleStackSize; i ++) {
       if (ruleStack[i].startsWith(this->owner->opRulesOn())) {
         for (int j = 1; j < ruleStack[i].size(); j ++) {
-          Function& currentFunction =
-          this->owner->getFunctionHandlerFromNamedRule(
+          FunctionOptions* currentOptions =
+          this->owner->namedRules.getValueNoFail(
             ruleStack[i][j].getValue<std::string>()
           );
-          currentFunction.options.disabledByUser = false;
+          currentOptions->disabledByUser = false;
         }
       } else if (ruleStack[i].startsWith(this->owner->opRulesOff())) {
         for (int j = 1; j < ruleStack[i].size(); j ++) {
-          Function& currentFunction =
-          this->owner->getFunctionHandlerFromNamedRule(
+          FunctionOptions* currentOptions =
+          this->owner->namedRules.getValueNoFail(
             ruleStack[i][j].getValue<std::string>()
           );
-          currentFunction.options.disabledByUser = true;
+          currentOptions->disabledByUser = true;
         }
       }
     }
@@ -931,9 +937,7 @@ bool Calculator::evaluateExpression(
   STACK_TRACE("Calculator::evaluateExpression");
   bool notUsed = false;
   return
-  calculator.evaluateExpression(
-    calculator, input, output, notUsed, - 1, nullptr
-  );
+  calculator.evaluateExpression(calculator, input, output, notUsed, nullptr);
 }
 
 bool Calculator::isTimedOut() {
@@ -961,7 +965,6 @@ bool Calculator::isTimedOut() {
 
 Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
   this->owner = &inputOwner;
-  this->operatorIndexParent = - 1;
   this->flagIsNonCacheable = false;
   this->numberOfTransformations = 0;
   this->indexInCache = - 1;
@@ -995,9 +998,7 @@ void Calculator::EvaluateLoop::accountHistoryChildTransformation(
   this->history->addChildOnTop(incomingHistory);
 }
 
-void Calculator::EvaluateLoop::accountHistory(
-  Function* handler, const std::string& info
-) {
+void Calculator::EvaluateLoop::accountHistory(const std::string& info) {
   STACK_TRACE("Calculator::EvaluateLoop::accountHistory");
   this->checkInitialization();
   if (this->history == nullptr) {
@@ -1024,11 +1025,7 @@ void Calculator::EvaluateLoop::accountHistory(
     this->history->addChildAtomOnTop(this->owner->opExpressionHistory());
   }
   std::stringstream description;
-  if (handler != nullptr) {
-    description << handler->calculatorIdentifier;
-  } else {
-    description << info;
-  }
+  description << info;
   Expression extraInformation;
   extraInformation.assignValue(*this->owner, description.str());
   incomingHistory.makeXOX(
@@ -1042,14 +1039,14 @@ void Calculator::EvaluateLoop::accountHistory(
 }
 
 bool Calculator::EvaluateLoop::setOutput(
-  const Expression& input, Function* handler, const std::string& info
+  const Expression& input, const std::string& info
 ) {
   STACK_TRACE("Calculator::EvaluateLoop::setOutput");
   if (this->output == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
   *(this->output) = input;
-  this->accountHistory(handler, info);
+  this->accountHistory(info);
   return true;
 }
 
@@ -1140,6 +1137,110 @@ void Calculator::EvaluateLoop::reportChildEvaluation(
   report.report(reportStream.str());
 }
 
+bool Calculator::EvaluateLoop::evaluateOneChild(
+  StateMaintainerCalculator& maintainRuleStack, int childIndex
+) {
+  STACK_TRACE("Calculator::EvaluateLoop::evaluateOneChild");
+  while (this->evaluateOneChildOneRoundReturnFalseWhenDone(childIndex)) {
+    if (this->detectLoops()) {
+      break;
+    }
+    this->accountIntermediateState();
+  }
+  if (this->output->startsWith(this->owner->opCommandSequence())) {
+    if (
+      !this->owner->accountRule((*this->output)[childIndex], maintainRuleStack
+      )
+    ) {
+      std::stringstream out;
+      out
+      << "Failed to account rule: "
+      << (*this->output)[childIndex].toString()
+      << ". Most likely the cause is too deeply nested recursion. ";
+      this->output->assignError(*this->owner, out.str());
+      this->owner->flagAbortComputationASAP = true;
+    }
+  }
+  return !this->owner->flagAbortComputationASAP;
+}
+
+bool Calculator::EvaluateLoop::evaluateOneChildOneRoundReturnFalseWhenDone(
+  int childIndex
+) {
+  STACK_TRACE(
+    "Calculator::EvaluateLoop::evaluateOneChildOneRoundReturnFalseWhenDone"
+  );
+  Expression* childHistory = nullptr;
+  Expression childHistoryContainer;
+  if (this->history != nullptr) {
+    childHistory = &childHistoryContainer;
+  }
+  bool childIsNonCacheable = false;
+  if (this->history != nullptr) {
+    this->currentChild = (*this->output)[childIndex];
+  }
+  Expression evaluationWithoutContext;
+  if (
+    this->owner->evaluateExpression(
+      *this->owner, (*this->output)[childIndex],
+      evaluationWithoutContext,
+      childIsNonCacheable,
+      childHistory
+    )
+  ) {
+
+    this->output->setChild(childIndex, evaluationWithoutContext);
+    this->accountHistoryChildTransformation(
+      evaluationWithoutContext, childHistoryContainer, childIndex
+    );
+  }
+  if ((*this->output)[childIndex].isError() || this->owner->flagAbortComputationASAP) {
+    this->owner->flagAbortComputationASAP = true;
+    return false;
+  }
+
+  // If the child is non-cache-able, so is the current one.
+  // Once evaluation has passed through a non-cacheable expression,
+  // our expression is no longer cache-able.
+  if (childIsNonCacheable) {
+    this->flagIsNonCacheable = true;
+  }
+  bool transformedInContext = false;
+  Expression evaluationInContext;
+  int64_t startTime = global.getElapsedMilliseconds();
+  for (
+    FunctionTransformingChild& handler :
+    this->owner->operationsTransformingChildren.values
+  ) {
+    if (
+      handler.applyWithLogs(
+        *this->owner, (*this->output),
+        childIndex,
+        evaluationInContext,
+        startTime
+      )
+    ) {
+      if (this->owner->flagLogEvaluation){
+        *(this->owner)
+            << "<br>"
+            << HtmlRoutines::getMathNoDisplay((*this->output)[childIndex].toString())
+            << " -> "
+            << HtmlRoutines::getMathNoDisplay(evaluationInContext.toString());
+
+      }
+      transformedInContext = true;
+      this->output->setChild(childIndex, evaluationInContext);
+      this->accountHistory(handler.calculatorIdentifier);
+      break;
+    }
+  }
+  if ((*this->output)[childIndex].isError()) {
+    this->owner->flagAbortComputationASAP = true;
+    return false;
+  }
+  return transformedInContext;
+}
+
 bool Calculator::EvaluateLoop::evaluateChildren(
   StateMaintainerCalculator& maintainRuleStack
 ) {
@@ -1147,57 +1248,9 @@ bool Calculator::EvaluateLoop::evaluateChildren(
   if (this->output->isFrozen()) {
     return true;
   }
-  int indexOperation = - 1;
-  if (this->output->size() > 0) {
-    if ((*this->output)[0].isAtom()) {
-      indexOperation = (*this->output)[0].data;
-    }
-  }
-  Expression childEvaluation;
-  Expression historyContainer;
-  Expression* historyChild = nullptr;
-  if (this->history != nullptr) {
-    historyChild = &historyContainer;
-  }
   for (int i = 0; i < this->output->size(); i ++) {
-    bool childIsNonCacheable = false;
-    if (this->history != nullptr) {
-      this->currentChild = (*this->output)[i];
-    }
-    if (
-      this->owner->evaluateExpression(
-        *this->owner, (*this->output)[i],
-        childEvaluation,
-        childIsNonCacheable,
-        indexOperation,
-        historyChild
-      )
-    ) {
-      this->output->setChild(i, childEvaluation);
-    }
-    this->accountHistoryChildTransformation(
-      childEvaluation, historyContainer, i
-    );
-    // If the child is non-cache-able, so is the current one.
-    // Once evaluation has passed through a non-cacheable expression,
-    // our expression is no longer cache-able.
-    if (childIsNonCacheable) {
-      this->flagIsNonCacheable = true;
-    }
-    if ((*this->output)[i].isError()) {
-      this->owner->flagAbortComputationASAP = true;
+    if (!this->evaluateOneChild(maintainRuleStack, i)) {
       return false;
-    }
-    if (this->output->startsWith(this->owner->opCommandSequence())) {
-      if (!this->owner->accountRule((*this->output)[i], maintainRuleStack)) {
-        std::stringstream out;
-        out
-        << "Failed to account rule: "
-        << (*this->output)[i].toString()
-        << ". Most likely the cause is too deeply nested recursion. ";
-        this->output->assignError(*this->owner, out.str());
-        this->owner->flagAbortComputationASAP = true;
-      }
     }
     if (this->owner->flagAbortComputationASAP) {
       return false;
@@ -1244,7 +1297,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
         << "User-defined substition: "
         << currentPattern.toString();
       }
-      this->setOutput(afterPatternMatch, nullptr, substitutionComment.str());
+      this->setOutput(afterPatternMatch, substitutionComment.str());
       this->reductionOccurred = true;
       if (this->owner->flagLogEvaluation) {
         *this->owner
@@ -1275,11 +1328,7 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
   Function* handlerContainer = nullptr;
   if (
     !this->owner->outerStandardFunction(
-      *(this->owner),
-      *(this->output),
-      result,
-      this->operatorIndexParent,
-      &handlerContainer
+      *(this->owner), *(this->output), result, &handlerContainer
     )
   ) {
     return false;
@@ -1292,7 +1341,7 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
     << " -> "
     << HtmlRoutines::getMathNoDisplay(result.toString());
   }
-  return this->setOutput(result, handlerContainer, "");
+  return this->setOutput(result, handlerContainer->calculatorIdentifier);
 }
 
 bool Calculator::EvaluateLoop::detectLoopsWithStatistics() {
@@ -1301,7 +1350,6 @@ bool Calculator::EvaluateLoop::detectLoopsWithStatistics() {
 }
 
 bool Calculator::EvaluateLoop::detectLoops() {
-  this->intermediateOutputs.grandMasterConsistencyCheck();
   if (this->output->flagDeallocated) {
     global.fatal << "Not allowed to have deallocation here. " << global.fatal;
   }
@@ -1309,14 +1357,15 @@ bool Calculator::EvaluateLoop::detectLoops() {
     return false;
   }
   std::stringstream errorStream;
-  errorStream << "Detected 'infinite' substitution cycle: ";
+  errorStream << "Detected 'infinite' substitution cycle; see comments. ";
+  *this->owner << "<hr><b style='color:red'>Cycle detected:</b><br>";
   for (int i = 0; i < this->intermediateOutputs.size; i ++) {
-    errorStream << this->intermediateOutputs[i].toString() << " -> ";
+    *this->owner << this->intermediateOutputs[i].toString() << " -> ";
   }
-  errorStream << this->output->toString();
+  *this->owner << this->output->toString();
   Expression error;
   error.assignError(*this->owner, errorStream.str());
-  this->setOutput(error, nullptr, errorStream.str());
+  this->setOutput(error, errorStream.str());
   this->owner->flagAbortComputationASAP = true;
   return true;
 }
@@ -1381,7 +1430,7 @@ bool Calculator::EvaluateLoop::reduceUsingCache() {
     << " = "
     << cache.reducesTo.toString();
   }
-  this->setOutput(cache.reducesTo, nullptr, comment.str());
+  this->setOutput(cache.reducesTo, comment.str());
   return true;
 }
 
@@ -1405,7 +1454,6 @@ bool Calculator::evaluateExpression(
   const Expression& input,
   Expression& output,
   bool& outputIsNonCacheable,
-  int operatorIndexParentIfAvailable,
   Expression* outputHistory
 ) {
   STACK_TRACE("Calculator::evaluateExpression");
@@ -1418,7 +1466,6 @@ bool Calculator::evaluateExpression(
   if (state.history != nullptr) {
     state.history->reset(calculator);
   }
-  state.operatorIndexParent = operatorIndexParentIfAvailable;
   if (calculator.statistics.report.getElement().tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Evaluating expression: " << input.toString();
@@ -1442,7 +1489,7 @@ bool Calculator::evaluateExpression(
     << input.toString()
     << " aborted. ";
   }
-  state.setOutput(input, nullptr, "");
+  state.setOutput(input, "");
   if (state.output->isError()) {
     calculator.flagAbortComputationASAP = true;
     return true;
@@ -1456,7 +1503,7 @@ bool Calculator::evaluateExpression(
     calculator.flagAbortComputationASAP = true;
     Expression errorExpression;
     errorExpression.assignError(calculator, errorStream.str());
-    return state.setOutput(errorExpression, nullptr, "Error");
+    return state.setOutput(errorExpression, "Error");
   }
   // reduction phase:
   // ////////////////////////////////

@@ -1233,9 +1233,9 @@ public:
     if (this->getIndex(o) != - 1) {
       std::stringstream crashStream;
       crashStream
-      << "Request to add object "
+      << "Request to add object ["
       << o
-      << " does not allow repetition, "
+      << "] does not allow repetition, "
       << "but the object is already in the list. ";
       fatalCrash(crashStream.str());
     }

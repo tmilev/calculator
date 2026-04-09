@@ -2469,7 +2469,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.isStarOrAmpersand() &&
     last.type == CodeFormatter::Element::GreaterThan
   ) {
-    this->lastRuleName = "type less than type star greater than";
+    this->lastRuleName = "type lessThan type star greaterThan";
     fifthToLast.makeFrom5(
       CodeFormatter::Element::TypeExpression,
       fifthToLast,
@@ -2479,6 +2479,20 @@ bool CodeFormatter::Processor::applyOneRule() {
       last
     );
     return this->removeLast(4);
+  }
+  if (
+    sixthToLast.isIdentifierOrAtom() &&
+    fifthToLast.type == CodeFormatter::Element::LessThan &&
+    fourthToLast.type == CodeFormatter::Element::CommaList &&
+    thirdToLast.isExpressionIdentifierOrAtom() &&
+    secondToLast.isStarOrAmpersand() &&
+    last.type == CodeFormatter::Element::GreaterThan
+  ) {
+    this->lastRuleName = "type lessThan commaList type star greaterThan";
+    thirdToLast.makeFrom2(
+      CodeFormatter::Element::TypeExpression, thirdToLast, secondToLast
+    );
+    return this->removeBelowLast(1);
   }
   if (
     last.type == CodeFormatter::Element::Unknown &&

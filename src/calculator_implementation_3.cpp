@@ -1023,7 +1023,7 @@ bool Calculator::Test::processResults() {
     << this->noTestSkips
     << " functions were not tested. "
     << "The kinds of functions not auto-tested are "
-    << "described in the comments of class Function::Options. ";
+    << "described in the comments of class FunctionOptions. ";
   }
   if (this->inconsistencies > 0 || this->inconsistenciesMathML > 0) {
     out

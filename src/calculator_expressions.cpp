@@ -2347,11 +2347,8 @@ int Expression::getNumberOfColumns() const {
   return maximum;
 }
 
-void Expression::getMultiplicandsRecursive(
-  List<Expression>& outputAppendList
-) const {
-
-
+void Expression::getMultiplicandsRecursive(List<Expression>& outputAppendList)
+const {
   this->checkInitialization();
   this->owner->collectOpands(*this, this->owner->opTimes(), outputAppendList);
 }
@@ -6098,14 +6095,13 @@ bool Expression::isSumLikeOperatorWithLimits() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->isSumLikeOperatorAtom()){
+  if (this->isSumLikeOperatorAtom()) {
     return true;
   }
-  if (this->size()!=3 && this->size() != 2){
+  if (this->size() != 3 && this->size() != 2) {
     return false;
   }
   return (*this)[0].isSumLikeOperatorAtom();
-
 }
 
 bool Expression::isSumLikeOperatorAtom() const {

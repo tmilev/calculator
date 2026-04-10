@@ -571,7 +571,7 @@ bool CalculatorBasics::associateTimesDivision(
   }
   List<Expression> multiplicands;
   input[1].getMultiplicandsRecursive(multiplicands);
-  if (multiplicands.lastObject()->isSumLikeOperatorWithLimits()){
+  if (multiplicands.lastObject()->isSumLikeOperatorWithLimits()) {
     // Do not transform (a \sum) b/d --> (a\sum b)/d.
     return false;
   }
@@ -598,7 +598,7 @@ bool CalculatorBasics::associateMultiplicationInChild(
     // we shall associate the parent rather than the child.
     return false;
   }
-  if (!inputParent[childIndex].startsWith(multiplication)){
+  if (!inputParent[childIndex].startsWith(multiplication)) {
     // Not a product.
     return false;
   }

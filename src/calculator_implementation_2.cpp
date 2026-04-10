@@ -730,11 +730,9 @@ bool Calculator::expressionMatchesPattern(
   int matchedExpressionsAtStart = matchedExpressions.size();
   for (int i = 0; i < pattern.size(); i ++) {
     if (
-      !
-        this->expressionMatchesPattern(
-          pattern[i], input[i], matchedExpressions, commentsGeneral
-        )
-
+      !this->expressionMatchesPattern(
+        pattern[i], input[i], matchedExpressions, commentsGeneral
+      )
     ) {
       if (i == 0) {
         return false;
@@ -1185,17 +1183,17 @@ bool Calculator::EvaluateLoop::evaluateOneChildOneRoundReturnFalseWhenDone(
       childHistory
     )
   ) {
-
     this->output->setChild(childIndex, evaluationWithoutContext);
     this->accountHistoryChildTransformation(
       evaluationWithoutContext, childHistoryContainer, childIndex
     );
   }
-  if ((*this->output)[childIndex].isError() || this->owner->flagAbortComputationASAP) {
+  if ((*this->output)[childIndex].isError() ||
+    this->owner->flagAbortComputationASAP
+  ) {
     this->owner->flagAbortComputationASAP = true;
     return false;
   }
-
   // If the child is non-cache-able, so is the current one.
   // Once evaluation has passed through a non-cacheable expression,
   // our expression is no longer cache-able.
@@ -1217,13 +1215,14 @@ bool Calculator::EvaluateLoop::evaluateOneChildOneRoundReturnFalseWhenDone(
         startTime
       )
     ) {
-      if (this->owner->flagLogEvaluation){
+      if (this->owner->flagLogEvaluation) {
         *(this->owner)
-            << "<br>"
-            << HtmlRoutines::getMathNoDisplay((*this->output)[childIndex].toString())
-            << " -> "
-            << HtmlRoutines::getMathNoDisplay(evaluationInContext.toString());
-
+        << "<br>"
+        << HtmlRoutines::getMathNoDisplay((*this->output)[childIndex].toString(
+          )
+        )
+        << " -> "
+        << HtmlRoutines::getMathNoDisplay(evaluationInContext.toString());
       }
       transformedInContext = true;
       this->output->setChild(childIndex, evaluationInContext);

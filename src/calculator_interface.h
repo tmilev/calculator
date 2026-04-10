@@ -182,9 +182,7 @@ public:
   ) const;
   void getBaseExponentForm(Expression& outputBase, Expression& outputExponent)
   const;
-  void getMultiplicandsRecursive(
-    List<Expression>& outputAppendList, int depth = 0
-  ) const;
+  void getMultiplicandsRecursive(List<Expression>& outputAppendList) const;
   void getMultiplicandsDivisorsRecursive(
     List<Expression>& outputAppendList, int depth = 0
   ) const;
@@ -252,6 +250,7 @@ public:
   bool isGoodForChainRuleFunction(std::string* outputWhichOperation = nullptr)
   const;
   bool isSumLikeOperatorAtom() const;
+  bool isSumLikeOperatorWithLimits() const;
   bool isIntegralFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,

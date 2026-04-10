@@ -569,6 +569,12 @@ bool CalculatorBasics::associateTimesDivision(
   if (!input[2].startsWith(calculator.opDivide(), 3)) {
     return false;
   }
+  List<Expression> multiplicands;
+  input[1].getMultiplicandsRecursive(multiplicands);
+  if (multiplicands.lastObject()->isSumLikeOperatorWithLimits()){
+    // Do not transform (a \sum) b/d --> (a\sum b)/d.
+    return false;
+  }
   Expression newLeftExpression;
   newLeftExpression.makeXOX(
     calculator, calculator.opTimes(), input[1], input[2][1]

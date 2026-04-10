@@ -2348,20 +2348,12 @@ int Expression::getNumberOfColumns() const {
 }
 
 void Expression::getMultiplicandsRecursive(
-  List<Expression>& outputAppendList, int depth
+  List<Expression>& outputAppendList
 ) const {
-  STACK_TRACE("Expression::getMultiplicandsRecursive");
+
+
   this->checkInitialization();
-  if (depth == 0) {
-    outputAppendList.setSize(0);
-  }
-  if (!this->startsWith(this->owner->opTimes())) {
-    outputAppendList.addOnTop(*this);
-    return;
-  }
-  for (int i = 1; i < this->size(); i ++) {
-    (*this)[i].getMultiplicandsDivisorsRecursive(outputAppendList, depth + 1);
-  }
+  this->owner->collectOpands(*this, this->owner->opTimes(), outputAppendList);
 }
 
 void Expression::getMultiplicandsDivisorsRecursive(
@@ -6100,6 +6092,20 @@ bool Expression::isArithmeticOperation(std::string* outputWhichOperation) const 
     return false;
   }
   return this->owner->arithmeticOperations.contains(operationName);
+}
+
+bool Expression::isSumLikeOperatorWithLimits() const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  if (this->isSumLikeOperatorAtom()){
+    return true;
+  }
+  if (this->size()!=3 && this->size() != 2){
+    return false;
+  }
+  return (*this)[0].isSumLikeOperatorAtom();
+
 }
 
 bool Expression::isSumLikeOperatorAtom() const {

@@ -524,10 +524,6 @@ bool Function::apply(
   Expression& output,
   Function** outputHandler
 ) {
-  int64_t start = 0;
-  if (this->owner->flagLogEvaluation) {
-    start = global.getElapsedMilliseconds();
-  }
   if (!this->shouldBeApplied()) {
     return false;
   }
@@ -734,11 +730,11 @@ bool Calculator::expressionMatchesPattern(
   int matchedExpressionsAtStart = matchedExpressions.size();
   for (int i = 0; i < pattern.size(); i ++) {
     if (
-      !(
+      !
         this->expressionMatchesPattern(
           pattern[i], input[i], matchedExpressions, commentsGeneral
         )
-      )
+
     ) {
       if (i == 0) {
         return false;
@@ -778,6 +774,7 @@ void StateMaintainerCalculator::addRule(const Expression& rule) {
     global.fatal
     << "StackMaintainerCalculator has zero owner. "
     << global.fatal;
+    return;
   }
   this->owner->ruleStack.addChildOnTop(rule);
   this->owner->cachedExpressionsPerStack.clear();

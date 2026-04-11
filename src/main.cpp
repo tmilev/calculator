@@ -551,6 +551,28 @@ int MainFunctions::mainLoadDatabase() {
   return exitCode;
 }
 
+// A class to deploy the calculator executable to
+// a single remote server.
+// As of writing, this is how we
+// deploy the reference calculator server.
+// The deployer reads all configurations
+// (address of your server, github project, etc.)
+// from your configuration file and should be usable for other deployments.
+// However, we make some assumptions about your deployment.
+// The assumptions are the following.
+// 1. You are running the calculator on a remote server.
+// 2. You are compiling the calculator from source on your server.
+// 3. You are using git+github.
+// 4. You are calling the calculator binary from a developer laptop
+//    with configured passwordless ssh login to your remote server.
+// 5. Your calculator deployment is located in folder
+//    ~/courses_calculator/calculator
+//    on your server.
+// 6. On your remote server, you have setup a systemctl rule that lets you
+//    kill and restart the calculator binary using the command:
+//    `sudo systemctl restart calculator`.
+// 7. You are using deployment branches (see gitBranchName() below) to
+//    take a snapshot from the master branch for your deployment.
 class Deployer {
 public:
   static std::string gitBranchName();

@@ -1576,9 +1576,11 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctions::evaluateToDouble,
     "",
     "Floating point value of a number. "
-    "Uses the built-in C++ floating point library.",
+    "Uses the built-in C++ floating point library. "
+    "Will apply to every element of a matrix argument. ",
     "DoubleValue{}(3/7);\n"
-    "DoubleValue{}(13!+0.1,0);",
+    "DoubleValue{}(13!+0.1,0);\n"
+    "DoubleValue\\begin{pmatrix}e^2&e\\\\-e& 3e\\end{pmatrix}",
     "CalculatorFunctions::evaluateToDouble",
     "DoubleValue",
     innerStandard

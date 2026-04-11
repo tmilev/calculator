@@ -62,7 +62,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
     return false;
   }
   List<SyntacticElement> elements;
-  calculator.parser.parseFillDictionary(argumentString, elements);
+  calculator.parser.parseFillDictionaryDeprecated(argumentString, elements);
   Expression evaluatedExpression;
   std::stringstream out;
   bool previousWasInteger = false;

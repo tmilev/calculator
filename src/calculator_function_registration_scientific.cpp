@@ -834,9 +834,13 @@ void Calculator::initializeFunctionsScientificBasic() {
     CalculatorFunctionsLinearAlgebra::exponentOfMatrix,
     "",
     "Computes (tries to) the exponent of a matrix. ",
-    "a=\\begin{pmatrix}1&1\\\\ 0&1\\end{pmatrix};\n"
-    "DiagonalizeMatrix a;\n"
-    "e^a",
+    "A=\\begin{pmatrix}1&1  \\\\ 0&1  \\end{pmatrix};\n"
+    "B=\\begin{pmatrix}2&1&0\\\\ 0&2&0\\\\0&0&1 \\end{pmatrix};\n"
+    "C=\\begin{pmatrix}1&1&-1\\\\ -1&-2&2\\\\-2&1&-1\\end{pmatrix};\n"
+    "e^A;\n"
+    "e^B;\n"
+    "e^C;\n"
+    "e^\\begin{pmatrix}1&2&-1\\\\ -1&-2&2\\\\-2&1&-1\\end{pmatrix}",
     "CalculatorFunctionsLinearAlgebra::exponentOfMatrix",
     "ExponentOfMatrix",
     innerStandard

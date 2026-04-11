@@ -1760,9 +1760,55 @@ class CalculatorParser;
 
 class SyntacticElement {
 public:
+  enum Role {
+    // UNKNOWN syntactic role, for use when not initialized.
+    UNKNOWN,
+    // TODO: please remove once rid of the commandSequences.
+    RAW,
+    DIGITS_RAW,
+    DIGITS,
+    LETTERS,
+    QUOTE_UNDER_CONSTRUCTION,
+    VARIABLE,
+    END_PROGRAM,
+    BACKSLASH,
+    QUOTE,
+    PERCENT,
+    WHITE_SPACE,
+    TILDE,
+    EQUALS,
+    EXPRESSION,
+    CHOOSE,
+    COLON,
+    IF,
+    DOT,
+    LEFT_PARENTHESIS,
+    RIGHT_PARENTHESIS,
+    LEFT_BRACKET,
+    RIGHT_BRACKET,
+    LEFT_CURLY_BRACE,
+    RIGHT_CURLY_BRACE,
+    DOUBLE_BACKSLASH,
+    AMPERSAND,
+    BEGIN,
+    END,
+    FRAC,
+    SQRT,
+    ARRAY_ENVIRONMENT,
+    MATRIX_ENVIRONMENT,
+    MATRIX_UNDER_CONSTRUCTION,
+    MATRIX_END
+  };
+  // Deprecated. Switch to syntacticRole instead.
   int controlIndex;
+  // The syntactic role played by a given element.
+  SyntacticElement::Role syntacticRole;
+  // The string corresponding to the syntactic element
+  // or empty if the element was constructed.
+  std::string source;
   int totalNonBoundVariablesInherited;
   int totalBoundVariablesInherited;
+  // Data held by a SyntacticElement whose role is Expression
   Expression data;
   List<Expression> dataList;
   std::string errorString;
@@ -1770,9 +1816,11 @@ public:
     CalculatorParser& owner, bool includeLispifiedExpressions
   ) const;
   std::string toStringSyntaxRole(const CalculatorParser& owner) const;
+  std::string toStringDebug(const CalculatorParser& owner) const;
   SyntacticElement() {
+    // Syntactic element roles must be initialized as unknown.
+    this->syntacticRole = SyntacticElement::Role::UNKNOWN;
     this->controlIndex = 0;
-    // controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
     this->totalNonBoundVariablesInherited = - 1;
     // - 1 stands for unknown
@@ -2267,12 +2315,12 @@ private:
   // set in the constructor of Calculator.
   Calculator* owner;
   int numberOfEmptyTokensStart;
-  int counterInSyntacticSoup;
+  int counterInToBeParsed;
   bool flagLogSyntaxRules;
   bool flagEncounteredSplit;
-  List<SyntacticElement> syntacticSoup;
+  List<SyntacticElement> toBeParsed;
   List<SyntacticElement> syntacticStack;
-  List<SyntacticElement>* currrentSyntacticSoup;
+  List<SyntacticElement>* currrentlyParsed;
   List<SyntacticElement>* currentSyntacticStack;
   HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
@@ -2283,6 +2331,12 @@ private:
 public:
   // Control sequences parametrize the syntactical elements
   HashedList<std::string> controlSequences;
+  // The i^th element of this array contains the syntactic role of
+  // the character whose value is i.
+  static List<SyntacticElement::Role> singleCharacterSyntacticRoles;
+  static MapList<std::string, SyntacticElement::Role> keyWordsToSyntacticRoles;
+  static MapList<std::string,std::string>
+      keyWordAutocorrections;
   std::string syntaxErrors;
   List<std::string> parsingLog;
   std::string lastRuleName;
@@ -2451,7 +2505,7 @@ private:
   bool replaceXXXXXByCon(int controlIndex);
   bool replaceXXXXXByConCon(int controlIndex1, int controlIndex2);
   bool replaceXXXXByConCon(int controlIndex1, int controlIndex2);
-  bool replaceXdotsXByMatrixStart(int numberOfXs);
+  bool replaceElementsByMatrixStart(int numberOfXs);
   bool replaceXXXXByCon(int controlIndex1);
   bool replaceXXYByY() {
     (*this->currentSyntacticStack)[this->currentSyntacticStack->size - 3] = (
@@ -2517,8 +2571,11 @@ private:
   bool replaceVByVDotsVWith(const List<std::string>& variables);
   bool replaceAXbyEX();
   bool replaceAXXbyEXX();
-  bool replaceIntegerXbyEX();
-  bool replaceIntegerDotIntegerByE();
+  void rationalFromIntegerDotInteger(
+    const std::string& beforeDecimalPoint,
+    const std::string& afterDecimalPoint,
+    Expression& output
+  );
   bool replaceXXByEEmptySequence();
   bool replaceOXdotsXbyEXdotsX(int numberOfXs);
   bool replaceOXbyEX();
@@ -2527,7 +2584,6 @@ private:
   bool replaceXXbyO(int operation);
   bool replaceXXYbyOY(int operation);
   bool replaceXEXByEContainingOE(int inputOpIndex);
-  bool replaceXXByEmptyString();
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   bool replaceXXbyE();
   void resetStack() {
@@ -2539,6 +2595,9 @@ private:
   SyntacticElement getEmptySyntacticElement();
   int conBindVariable() {
     return this->controlSequences.getIndexNoFail("{{}}");
+  }
+  int conQuoteUnderConstruction() {
+    return this->controlSequences.getIndexNoFail("QuoteUnderConstruction");
   }
   int conEqualEqual() {
     return this->controlSequences.getIndexNoFail("==");
@@ -2595,15 +2654,16 @@ private:
     return this->controlSequences.getIndexNoFail("EndProgram");
   }
   bool isDefiniteIntegral(const std::string& syntacticRole);
-  void parseFillDictionary(const std::string& input);
+  void extractSyntacticElementsDefaultOutput(const std::string& input);
   void logParsingOperation();
-  bool extractExpressions(
+  bool extractExpressionsFromPreprocessed(
     Expression& outputExpression, std::string* outputErrors
   );
   int getOperationIndexFromControlIndex(int controlIndex);
   bool decreaseStackExceptLast(int decrease);
   bool decreaseStack(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);
+  // Applies one reduction rule of the LR parser to reduce the parsing stack.
   bool applyOneRule();
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
@@ -2662,8 +2722,22 @@ public:
   // and trims them away in-place if they form non-standard white space.
   // When trimming happens, returns true, otherwise returns false.
   bool trimNonStandardWhiteSpaceFromEnd(std::string& inputOutput);
-  void parseFillDictionary(
+  // Deprecated, use extractContiguousWords instead.
+  void parseFillDictionaryDefaultOutputDeprecated(const std::string& input);
+  // Deprecated. Use extractContiguousWords instead.
+  void parseFillDictionaryDeprecated(
     const std::string& input, List<SyntacticElement>& output
+  );
+  // Initialization function.
+  // Must be called once per executable. Not thread safe.
+  static void initializeStatic();
+  static void initializeSingleCharacterSyntacticRoles();
+  static void initializeKeyWordsToSyntacticRoles();
+  static void registerSyntacticRole(
+    char character, SyntacticElement::Role role
+  );
+  static void registerKeyword(
+    const std::string& keyWord, SyntacticElement::Role role
   );
   void initialize(Calculator* inputOwner) {
     this->owner = inputOwner;
@@ -2677,6 +2751,12 @@ public:
     const std::string& input,
     unsigned int& indexOfLast,
     List<SyntacticElement>& output
+  );
+  SyntacticElement::Role syntacticRoleFromCharacter(char input);
+  SyntacticElement makeFromSingleCharacter(char input);
+  // Lexes/extracts a list of syntactic elements to be parsed.
+  void extractContiguousWords(
+    const std::string& input, ListReferences<SyntacticElement>& output
   );
 };
 

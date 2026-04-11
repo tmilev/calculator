@@ -1811,11 +1811,15 @@ PlotExpressionTree(A);
 Replaces \sum_a^b by (\sum, a, b) .
 
 *^* [ExponentOfMatrix] {CalculatorFunctionsLinearAlgebra::exponentOfMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%200%261%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%3b%5cne%5ea%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%3d%5c%5cbegin%7bpmatrix%7d1%261%20%20%5c%5c%5c%5c%200%261%20%20%5c%5cend%7bpmatrix%7d%3b%5cnB%3d%5c%5cbegin%7bpmatrix%7d2%261%260%5c%5c%5c%5c%200%262%260%5c%5c%5c%5c0%260%261%20%5c%5cend%7bpmatrix%7d%3b%5cnC%3d%5c%5cbegin%7bpmatrix%7d1%261%26-1%5c%5c%5c%5c%20-1%26-2%262%5c%5c%5c%5c-2%261%26-1%5c%5cend%7bpmatrix%7d%3b%5cne%5eA%3b%5cne%5eB%3b%5cne%5eC%3b%5cne%5e%5c%5cbegin%7bpmatrix%7d1%262%26-1%5c%5c%5c%5c%20-1%26-2%262%5c%5c%5c%5c-2%261%26-1%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-a=\begin{pmatrix}1&1\\ 0&1\end{pmatrix};
-DiagonalizeMatrix a;
-e^a
+A=\begin{pmatrix}1&1  \\ 0&1  \end{pmatrix};
+B=\begin{pmatrix}2&1&0\\ 0&2&0\\0&0&1 \end{pmatrix};
+C=\begin{pmatrix}1&1&-1\\ -1&-2&2\\-2&1&-1\end{pmatrix};
+e^A;
+e^B;
+e^C;
+e^\begin{pmatrix}1&2&-1\\ -1&-2&2\\-2&1&-1\end{pmatrix}
 ```
 Computes (tries to) the exponent of a matrix. 
 
@@ -3101,12 +3105,13 @@ Round function.
 Operator or function DoubleValue is overloaded with 2 total handlers.
 
 *DoubleValue* [DoubleValue] {CalculatorFunctions::evaluateToDouble}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%29%3b%5cnDoubleValue%7b%7d%2813%21%2b0.1%2c0%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%29%3b%5cnDoubleValue%7b%7d%2813%21%2b0.1%2c0%29%3b%5cnDoubleValue%5c%5cbegin%7bpmatrix%7de%5e2%26e%5c%5c%5c%5c-e%26%203e%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(3/7);
 DoubleValue{}(13!+0.1,0);
+DoubleValue\begin{pmatrix}e^2&e\\-e& 3e\end{pmatrix}
 ```
-Floating point value of a number. Uses the built-in C++ floating point library.
+Floating point value of a number. Uses the built-in C++ floating point library. Will apply to every element of a matrix argument. 
 
 *DoubleValue* [DoubleValueWithRounding] {CalculatorFunctions::evaluateToDoubleWithRounding}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%2c3%29%3b%5cnDoubleValue%7b%7d%283%2f7777777%2c2%29%3b%5cnDoubleValue%7b%7d%280.0030%2c2%29%3b%5cnDoubleValue%7b%7d%283.0030%2c2%29%3b%5cnDoubleValue%7b%7d%283%2f7777777%2c0%29%3b%5cnDoubleValue%7b%7d%2813%21%2b0.1%2c0%29%3b%5cnDoubleValue%7b%7d%283%2f7%2c100%29%3b%5cnDoubleValue%7b%7d%283%2f7%2c-5%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)

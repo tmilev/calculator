@@ -10424,6 +10424,19 @@ void LaTeXProcedures::endLatexDocument(std::fstream& output) {
   output << "\\end{document}";
 }
 
+bool LaTeXProcedures::stringDisplaysAsItselfInLatex(const std::string& latex) {
+  for (char character : latex) {
+    if (MathRoutines::isDigit(character)) {
+      continue;
+    }
+    if (MathRoutines::isLatinLetter(character)) {
+      continue;
+    }
+    return false;
+  }
+  return true;
+}
+
 void LaTeXProcedures::getStringFromColorIndex(
   int colorIndex, std::string& output, DrawingVariables& drawInput
 ) {

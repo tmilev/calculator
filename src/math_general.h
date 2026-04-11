@@ -2219,6 +2219,7 @@ public:
   static void getStringFromColorIndex(
     int colorIndex, std::string& output, DrawingVariables& drawInput
   );
+  static bool stringDisplaysAsItselfInLatex(const std::string& latex);
 };
 
 class Permutation: public SelectionWithDifferentMaxMultiplicities {

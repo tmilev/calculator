@@ -1178,7 +1178,7 @@ bool Expression::toMathMLEndStatementOneRowTopLevel(
     StringRoutines::Conversions::stringToCalculatorDisplay(
       currentE.getValue<std::string>()
     );
-  } else if (currentE.requiresNoMathTags()) {
+  } else if (currentE.requiresNoMathTagsNonConstRunTime()) {
     format.flagDontCollalpseProductsByUnits = false;
     currentOutput = currentE.toString(&format);
   } else {

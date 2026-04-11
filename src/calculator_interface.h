@@ -1242,7 +1242,7 @@ public:
   std::string toStringWithStartingExpression(
     FormatExpressions* format,
     Expression* startingExpression,
-    std::stringstream& out,
+    const std::string& stringWithoutStartingExpression,
     JSData* outputJS
   ) const;
   bool toStringEndStatement(
@@ -1290,7 +1290,7 @@ public:
     int index,
     FormatExpressions& format
   ) const;
-  bool requiresNoMathTags() const;
+  bool requiresNoMathTagsNonConstRunTime() const;
   static unsigned int hashFunction(const Expression& input);
   unsigned int hashFunction() const;
   Expression(): flagDeallocated(false) {
@@ -2335,8 +2335,7 @@ public:
   // the character whose value is i.
   static List<SyntacticElement::Role> singleCharacterSyntacticRoles;
   static MapList<std::string, SyntacticElement::Role> keyWordsToSyntacticRoles;
-  static MapList<std::string,std::string>
-      keyWordAutocorrections;
+  static MapList<std::string, std::string> keyWordAutocorrections;
   std::string syntaxErrors;
   List<std::string> parsingLog;
   std::string lastRuleName;

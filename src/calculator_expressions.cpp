@@ -3767,16 +3767,29 @@ std::string Expression::toStringAllSlidersInExpression() const {
   return out.str();
 }
 
-bool Expression::requiresNoMathTags() const {
-  return
-  this->hasType<Plot>() ||
-  this->isOfType<std::string>() ||
-  this->isOfType<JSData>() ||
-  this->isOfType<SemisimpleSubalgebras>() ||
-  this->isOfType<WeylGroupData>() ||
-  this->isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >
-  () ||
-  this->isOfType<VectorPartitionFunction>();
+bool Expression::requiresNoMathTagsNonConstRunTime() const {
+  if (
+    this->hasType<Plot>() ||
+    this->isOfType<JSData>() ||
+    this->isOfType<SemisimpleSubalgebras>() ||
+    this->isOfType<WeylGroupData>() ||
+    this->isOfType<
+      GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+    >() ||
+    this->isOfType<VectorPartitionFunction>()
+  ) {
+    return true;
+  }
+  std::string whichString;
+  if (this->isOfType(&whichString)) {
+    return !LaTeXProcedures::stringDisplaysAsItselfInLatex(whichString);
+  }
+  for (int i = 0; i < this->children.size; i ++) {
+    if ((*this)[i].requiresNoMathTagsNonConstRunTime()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool Expression::toStringTimes(
@@ -4228,12 +4241,19 @@ bool Expression::toStringEndStatementOneRow(
     out << ";";
   }
   out << "</td><td class='cellCalculatorResult'>";
+  bool shouldOmitMathTags = false;
+  if (isFinal) {
+    // Important: this should only be called at the top level.
+    // The requiresNoMathTagsNonConstRunTime runs potentially very slowly;
+    // we cannot to afford it below the top level.
+    shouldOmitMathTags = currentE.requiresNoMathTagsNonConstRunTime();
+  }
   if (currentE.isOfType<std::string>() && isFinal) {
     currentOutput =
     StringRoutines::Conversions::stringToCalculatorDisplay(
       currentE.getValue<std::string>()
     );
-  } else if (currentE.requiresNoMathTags() && isFinal) {
+  } else if (shouldOmitMathTags) {
     format.flagDontCollalpseProductsByUnits = false;
     currentOutput = currentE.toString(&format);
   } else {
@@ -5060,7 +5080,7 @@ bool Expression::toStringIntersection(
 std::string Expression::toStringWithStartingExpression(
   FormatExpressions* format,
   Expression* startingExpression,
-  std::stringstream& out,
+  const std::string& stringWithoutStartingExpression,
   JSData* outputJS
 ) const {
   std::stringstream outTrue;
@@ -5076,7 +5096,7 @@ std::string Expression::toStringWithStartingExpression(
   outTrue << "<table class='tableCalculatorOutput'>";
   outTrue << "<tr><th>Input</th><th>Result</th></tr>";
   if (this->isListStartingWithAtom(this->owner->opCommandSequence())) {
-    outTrue << out.str();
+    outTrue << stringWithoutStartingExpression;
   } else {
     if (format != nullptr) {
       format->flagDontCollalpseProductsByUnits = true;
@@ -5089,10 +5109,16 @@ std::string Expression::toStringWithStartingExpression(
     outTrue << "<tr>";
     outTrue << "<td class='cellCalculatorInput'>" << input << "</td>";
     std::string output;
-    if (this->requiresNoMathTags() && isFinal) {
-      output = out.str();
+    bool omitTags = false;
+    if (isFinal) {
+      // Performance alert: do not compute this below the top level.
+      omitTags = this->requiresNoMathTagsNonConstRunTime();
+    }
+    if (omitTags) {
+      output = stringWithoutStartingExpression;
     } else {
-      output = HtmlRoutines::getMathNoDisplay(out.str());
+      output =
+      HtmlRoutines::getMathNoDisplay(stringWithoutStartingExpression);
     }
     outTrue << "<td class='cellCalculatorResult'>" << output << "</td>";
     outTrue << "</tr>";
@@ -5818,7 +5844,7 @@ std::string Expression::toString(
   if (startingExpression != nullptr) {
     return
     this->toStringWithStartingExpression(
-      &formatCopy, startingExpression, out, outputJS
+      &formatCopy, startingExpression, out.str(), outputJS
     );
   }
   if (outputJS != nullptr) {

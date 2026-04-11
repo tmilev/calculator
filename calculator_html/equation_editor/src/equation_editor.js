@@ -2115,6 +2115,35 @@ class LaTeXConstants {
     }
   }
 
+  isAbcdef(/**@type {string} */ input) {
+    return input >= 'a' && input <= 'f';
+  }
+
+  /** 
+   * Returns whether the input is a sequence along the lines of `xab`
+   * that could denote an escaped byte inside a string when prepended by
+   * backslash, as in "\xab".
+   * @return {boolean} 
+   */
+  isEscapedBytelikeSequenceStartingWithX(/** @type {string} */ input) {
+    if (input.length > 3) {
+      return false;
+    }
+    if (input.length == 3) {
+      return input[0] == 'x' &&
+        this.isAbcdef(input[1]) &&
+        this.isAbcdef(input[2]);
+    }
+    if (input.length == 2) {
+      return input[0] == 'x' &&
+        this.isAbcdef(input[1]);
+    }
+    if (input.length == 1) {
+      return input[0] == 'x';
+    }
+    return false;
+  }
+
   /** Computes the value of this.utf16ToLatexMap. */
   computeUtf16ToLatexMap() {
     if (this.utf16ToLatexMap !== null) {
@@ -2627,6 +2656,13 @@ class LaTeXParser {
       this.lastRuleName = 'latex command';
       return this.replaceParsingStackTop(
         null, latexConstants.latexBackslashCommands[last.content], -2);
+    }
+    if (secondToLast.syntacticRole === '\\' &&
+      latexConstants.isEscapedBytelikeSequenceStartingWithX(last.content)
+    ) {
+      this.lastRuleName = 'bytelike sequence to atom';
+      let node = mathNodeFactory.atom(this.equationEditor, "\\" + last.content);
+      return this.replaceParsingStackTop(node, '', -2);
     }
     if (secondToLast.syntacticRole === '\\left' &&
       last.syntacticRole in latexConstants.leftDelimiters) {
@@ -3164,6 +3200,8 @@ class LaTeXParser {
     }
     return false;
   }
+
+
 
   /** @return {boolean} */
   areMatchingDelimiters(

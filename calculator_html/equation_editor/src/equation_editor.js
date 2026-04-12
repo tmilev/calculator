@@ -594,8 +594,16 @@ class MathNodeFactory {
     equationEditor,
     /** @type {MathNode?} */
     content,
+    /** @type {{color: string|undefined, isMathbf: boolean|undefined }} */
+    properties
   ) {
     const result = new MathNodeGenericBox(equationEditor);
+    if (properties.color !== undefined && properties.color !== null) {
+      result.color = properties.color;
+    }
+    if (properties.isMathbf !== undefined && properties.isMathbf !== null) {
+      result.isMathbf = properties.isMathbf;
+    }
     result.appendChild(this.horizontalMath(equationEditor, content));
     return result;
   }
@@ -853,7 +861,7 @@ class MathNodeFactory {
       horizontalBraceTopRight,
     ]);
     let superscript =
-      mathNodeFactory.genericMathBox(equationEditor, overBraceContent);
+      mathNodeFactory.genericMathBox(equationEditor, overBraceContent, {});
     result.appendChild(base);
     result.appendChild(horizontalBrace);
     result.appendChild(superscript);
@@ -895,7 +903,7 @@ class MathNodeFactory {
       horizontalBraceBottomRight,
     ]);
     let subscript =
-      mathNodeFactory.genericMathBox(equationEditor, underBraceContent);
+      mathNodeFactory.genericMathBox(equationEditor, underBraceContent, {});
     result.appendChild(base);
     result.appendChild(horizontalBrace);
     result.appendChild(subscript);
@@ -2681,9 +2689,9 @@ class LaTeXParser {
         this.lastRuleName = 'apply color';
         // We already have the color set along the lines of \\color{red}{last}
         // with secondToLast = \color{red} and secondToLast.node = red.
+        const desiredColor = secondToLast.node.toLatex();
         let node =
-          mathNodeFactory.genericMathBox(this.equationEditor, last.node);
-        node.type.colorText = secondToLast.node.toLatex();
+          mathNodeFactory.genericMathBox(this.equationEditor, last.node, { color: desiredColor });
         return this.replaceParsingStackTop(node, '', -2);
       }
     }
@@ -2691,7 +2699,7 @@ class LaTeXParser {
       this.lastRuleName = 'apply bold';
       // We already have the color set along the lines of \\color{red}{last}
       // with secondToLast = \color{red} and secondToLast.node = red.
-      let node = mathNodeFactory.genericMathBox(this.equationEditor, last.node);
+      let node = mathNodeFactory.genericMathBox(this.equationEditor, last.node, { isMathbf: true });
       node.type.fontWeight = 'bold';
       return this.replaceParsingStackTop(node, '', -2);
     }
@@ -3200,8 +3208,6 @@ class LaTeXParser {
     }
     return false;
   }
-
-
 
   /** @return {boolean} */
   areMatchingDelimiters(
@@ -4146,7 +4152,6 @@ class EquationEditor {
       console.log(`Failed to construct node from your input ${latex}.`);
       return false;
     }
-
     this.rootNode.appendChild(newContent);
     if (this.options.useMathML) {
       this.writeMathML(latex);
@@ -5487,6 +5492,52 @@ class MathNode {
      */
     this.extraData = null;
   }
+
+  /** @return {string} */
+  toStringDebugDataWithoutChildren() {
+    let content = `${this.type.type}[${this.constructor.name}]`;
+    if (this.element !== null) {
+      content += `[${this.element.textContent}]`;
+    }
+    if (this.focused) {
+      content += ', F';
+    }
+    if (this.desiredCursorPosition !== -1) {
+      content += `, FD[${this.desiredCursorPosition}]`;
+    }
+    if (this.boundingBox.width !== 0) {
+      content += `, w: ${this.boundingBox.width}`;
+    }
+    if (this.boundingBox.height !== 0) {
+      content += `, h: ${this.boundingBox.height}`;
+    }
+    if (this.boundingBox.left !== 0) {
+      content += `, l: ${this.boundingBox.left}`;
+    }
+    if (this.boundingBox.top !== 0) {
+      content += `, t: ${this.boundingBox.top}`;
+    }
+    if (this.boundingBox.distanceFromTopToFractionLine !== 0) {
+      content += `, fl: ${this.boundingBox.distanceFromTopToFractionLine}`;
+    }
+    if (this.type.type === knownTypes.atom.type) {
+      content += `, cursor: ${this.positionCursorBeforeKeyEvents}, `;
+    }
+    return content;
+  }
+
+  /** @return {string} */
+  toStringDebugData(recursionDepth) {
+    if (recursionDepth === null || recursionDepth === undefined) {
+      recursionDepth = 0;
+    }
+    let result = '-'.repeat(recursionDepth) + this.toStringDebugDataWithoutChildren();
+    for (let i = 0; i < this.children.length; i++) {
+      result += '\n' + this.children[i].toStringDebugData(recursionDepth + 1);
+    }
+    return result;
+  }
+
 
   /** Creates a the DOM element if missing. */
   createDOMElementIfMissing() {
@@ -9124,36 +9175,8 @@ class MathNode {
     if (indentationLevel === null || indentationLevel === undefined) {
       indentationLevel = 0;
     }
-    const indentation = '-'.repeat(indentationLevel);
     const result = [];
-    let content = `${indentation}${this.type.type}[${this.constructor.name}]`;
-    if (this.element !== null) {
-      content += `[${this.element.textContent}]`;
-    }
-    if (this.focused) {
-      content += ', F';
-    }
-    if (this.desiredCursorPosition !== -1) {
-      content += `, FD[${this.desiredCursorPosition}]`;
-    }
-    if (this.boundingBox.width !== 0) {
-      content += `, w: ${this.boundingBox.width}`;
-    }
-    if (this.boundingBox.height !== 0) {
-      content += `, h: ${this.boundingBox.height}`;
-    }
-    if (this.boundingBox.left !== 0) {
-      content += `, l: ${this.boundingBox.left}`;
-    }
-    if (this.boundingBox.top !== 0) {
-      content += `, t: ${this.boundingBox.top}`;
-    }
-    if (this.boundingBox.distanceFromTopToFractionLine !== 0) {
-      content += `, fl: ${this.boundingBox.distanceFromTopToFractionLine}`;
-    }
-    if (this.type.type === knownTypes.atom.type) {
-      content += `, cursor: ${this.positionCursorBeforeKeyEvents}, `;
-    }
+    let content = '-'.repeat(indentationLevel) + this.toStringDebugDataWithoutChildren()
     result.push(document.createTextNode(content));
     for (let i = 0; i < this.children.length; i++) {
       let childrenElements =
@@ -10002,6 +10025,8 @@ class MathNodeGenericBox extends MathNode {
     equationEditor,
   ) {
     super(equationEditor, knownTypes.genericMathBox);
+    this.isMathbf = false;
+    this.color = '';
   }
 
   /** @return {LatexWithAnnotation!} */
@@ -10010,18 +10035,22 @@ class MathNodeGenericBox extends MathNode {
     options,
   ) {
     let childLatex = this.children[0].toLatexWithAnnotation(options);
-    let color = this.type.colorText;
-    if (color === '') {
-      return new LatexWithAnnotation(`{${childLatex.latex}}`);
+    if (this.color !== '') {
+      return new LatexWithAnnotation(`{\\color{${color}}{${childLatex.latex}}}`);
     }
-    return new LatexWithAnnotation(`{\\color{${color}}{${childLatex.latex}}}`);
+    if (this.isMathbf) {
+      return new LatexWithAnnotation(`{\\mathbf{${childLatex.latex}}}`);
+    }
+    return new LatexWithAnnotation(`{${childLatex.latex}}`);
   }
 
   toMathML() {
     const result = this.children[0].toMathML();
-    let color = this.type.colorText;
-    if (color !== '') {
-      result.style.color = color;
+    if (this.color !== '') {
+      result.style.color = this.color;
+    }
+    if (this.isMathbf) {
+      result.style.fontWeight = 'bolder';
     }
     return result;
   }

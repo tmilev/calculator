@@ -1780,6 +1780,7 @@ public:
     EXPRESSION,
     CHOOSE,
     COLON,
+    SEMICOLON,
     IF,
     DOT,
     LEFT_PARENTHESIS,
@@ -1793,11 +1794,11 @@ public:
     BEGIN,
     END,
     FRAC,
-    SQRT,
     ARRAY_ENVIRONMENT,
     MATRIX_ENVIRONMENT,
     MATRIX_UNDER_CONSTRUCTION,
-    MATRIX_END
+    MATRIX_END,
+    FONT_MODIFIER
   };
   // Deprecated. Switch to syntacticRole instead.
   int controlIndex;
@@ -2350,7 +2351,6 @@ private:
     const std::string& newRole,
     int stackOffset
   );
-  bool isFontModifier(const std::string& input) const;
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);

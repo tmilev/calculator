@@ -156,9 +156,6 @@ const {
   case SyntacticElement::Role::FRAC:
     out << "FRAC";
     break;
-  case SyntacticElement::Role::SQRT:
-    out << "SQRT";
-    break;
   case SyntacticElement::Role::MATRIX_ENVIRONMENT:
     out << "MATRIX_ENVIRONMENT";
     break;
@@ -171,48 +168,76 @@ const {
   case SyntacticElement::Role::MATRIX_END:
     out << "MATRIX_END";
     break;
+  case SyntacticElement::Role::SEMICOLON:
+    out << "SEMICOLON";
+    break;
+  case SyntacticElement::Role::FONT_MODIFIER:
+    out << "FONT_MODIFIER";
+    break;
+  case SyntacticElement::Role::CHOOSE:
+    out << "CHOOSE";
+    break;
   }
   out << "]";
   return out.str();
 }
 
+void CalculatorParser::initializeSingleCharacterSyntacticRoles() {
+  singleCharacterSyntacticRoles.setSize(128);
+  for (int i = 0; i < 128; i ++) {
+    singleCharacterSyntacticRoles[i] = SyntacticElement::Role::RAW;
+  }
+  registerSyntacticRole('"', SyntacticElement::Role::QUOTE);
+  registerSyntacticRole('%', SyntacticElement::Role::PERCENT);
+  registerSyntacticRole('\n', SyntacticElement::Role::WHITE_SPACE);
+  registerSyntacticRole('\r', SyntacticElement::Role::WHITE_SPACE);
+  registerSyntacticRole(' ', SyntacticElement::Role::WHITE_SPACE);
+  registerSyntacticRole('~', SyntacticElement::Role::TILDE);
+  registerSyntacticRole('=', SyntacticElement::Role::EQUALS);
+  registerSyntacticRole(':', SyntacticElement::Role::COLON);
+  registerSyntacticRole(';', SyntacticElement::Role::SEMICOLON);
+  registerSyntacticRole('.', SyntacticElement::Role::DOT);
+  registerSyntacticRole('\\', SyntacticElement::Role::BACKSLASH);
+  registerSyntacticRole('(', SyntacticElement::Role::LEFT_PARENTHESIS);
+  registerSyntacticRole(')', SyntacticElement::Role::RIGHT_PARENTHESIS);
+  registerSyntacticRole('[', SyntacticElement::Role::LEFT_BRACKET);
+  registerSyntacticRole(']', SyntacticElement::Role::RIGHT_BRACKET);
+  registerSyntacticRole('{', SyntacticElement::Role::LEFT_CURLY_BRACE);
+  registerSyntacticRole('}', SyntacticElement::Role::RIGHT_CURLY_BRACE);
+  registerSyntacticRole('&', SyntacticElement::Role::AMPERSAND);
+}
+
 void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
-  CalculatorParser::registerKeyword("if", SyntacticElement::Role::IF);
-  CalculatorParser::registerKeyword("\\begin", SyntacticElement::Role::BEGIN);
-  CalculatorParser::registerKeyword("\\end", SyntacticElement::Role::END);
-  CalculatorParser::registerKeyword("\\sqrt", SyntacticElement::Role::SQRT);
-  CalculatorParser::registerKeyword(
-    "\\choose", SyntacticElement::Role::CHOOSE
-  );
-  CalculatorParser::registerKeyword(
-    "matrix", SyntacticElement::Role::MATRIX_ENVIRONMENT
-  );
-  CalculatorParser::registerKeyword(
-    "pmatrix", SyntacticElement::Role::MATRIX_ENVIRONMENT
-  );
-  CalculatorParser::registerKeyword(
-    "bmatrix", SyntacticElement::Role::MATRIX_ENVIRONMENT
-  );
-  CalculatorParser::registerKeyword(
-    "array", SyntacticElement::Role::ARRAY_ENVIRONMENT
-  );
-  CalculatorParser::keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("ln", "\\log");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("log", "\\log");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("\\ln", "\\log");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("infinity", "\\infty");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("infty", "\\infty");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("pi", "\\pi");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("arcsin", "\\arcsin");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("arccos", "\\arccos");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("arctan", "\\arctan");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("sin", "\\sin");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("cos", "\\cos");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("tan", "\\tan");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("cot", "\\cot");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("csc", "\\csc");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("sec", "\\sec");
-  CalculatorParser::keyWordAutocorrections.setKeyValue("choose", "\\choose");
+  registerKeyword("if", SyntacticElement::Role::IF);
+  registerKeyword("\\begin", SyntacticElement::Role::BEGIN);
+  registerKeyword("\\end", SyntacticElement::Role::END);
+  registerKeyword("\\frac", SyntacticElement::Role::FRAC);
+  registerKeyword("\\choose", SyntacticElement::Role::CHOOSE);
+  registerKeyword("matrix", SyntacticElement::Role::MATRIX_ENVIRONMENT);
+  registerKeyword("pmatrix", SyntacticElement::Role::MATRIX_ENVIRONMENT);
+  registerKeyword("bmatrix", SyntacticElement::Role::MATRIX_ENVIRONMENT);
+  registerKeyword("array", SyntacticElement::Role::ARRAY_ENVIRONMENT);
+  registerKeyword("\\mathbf", SyntacticElement::Role::FONT_MODIFIER);
+  registerKeyword("\\mathfrak", SyntacticElement::Role::FONT_MODIFIER);
+  registerKeyword("\\mathcal", SyntacticElement::Role::FONT_MODIFIER);
+  registerKeyword("\\mathbb", SyntacticElement::Role::FONT_MODIFIER);
+  keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
+  keyWordAutocorrections.setKeyValue("ln", "\\log");
+  keyWordAutocorrections.setKeyValue("log", "\\log");
+  keyWordAutocorrections.setKeyValue("\\ln", "\\log");
+  keyWordAutocorrections.setKeyValue("infinity", "\\infty");
+  keyWordAutocorrections.setKeyValue("infty", "\\infty");
+  keyWordAutocorrections.setKeyValue("pi", "\\pi");
+  keyWordAutocorrections.setKeyValue("arcsin", "\\arcsin");
+  keyWordAutocorrections.setKeyValue("arccos", "\\arccos");
+  keyWordAutocorrections.setKeyValue("arctan", "\\arctan");
+  keyWordAutocorrections.setKeyValue("sin", "\\sin");
+  keyWordAutocorrections.setKeyValue("cos", "\\cos");
+  keyWordAutocorrections.setKeyValue("tan", "\\tan");
+  keyWordAutocorrections.setKeyValue("cot", "\\cot");
+  keyWordAutocorrections.setKeyValue("csc", "\\csc");
+  keyWordAutocorrections.setKeyValue("sec", "\\sec");
+  keyWordAutocorrections.setKeyValue("choose", "\\choose");
 }
 
 std::string SyntacticElement::toStringHumanReadable(
@@ -329,55 +354,6 @@ void CalculatorParser::initializeStatic() {
   }
   CalculatorParser::initializeSingleCharacterSyntacticRoles();
   CalculatorParser::initializeKeyWordsToSyntacticRoles();
-}
-
-void CalculatorParser::initializeSingleCharacterSyntacticRoles() {
-  CalculatorParser::singleCharacterSyntacticRoles.setSize(128);
-  for (int i = 0; i < 128; i ++) {
-    CalculatorParser::singleCharacterSyntacticRoles[i] =
-    SyntacticElement::Role::RAW;
-  }
-  CalculatorParser::registerSyntacticRole('"', SyntacticElement::Role::QUOTE);
-  CalculatorParser::registerSyntacticRole(
-    '%', SyntacticElement::Role::PERCENT
-  );
-  CalculatorParser::registerSyntacticRole(
-    '\n', SyntacticElement::Role::WHITE_SPACE
-  );
-  CalculatorParser::registerSyntacticRole(
-    '\r', SyntacticElement::Role::WHITE_SPACE
-  );
-  CalculatorParser::registerSyntacticRole(
-    ' ', SyntacticElement::Role::WHITE_SPACE
-  );
-  CalculatorParser::registerSyntacticRole('~', SyntacticElement::Role::TILDE);
-  CalculatorParser::registerSyntacticRole('=', SyntacticElement::Role::EQUALS);
-  CalculatorParser::registerSyntacticRole(':', SyntacticElement::Role::COLON);
-  CalculatorParser::registerSyntacticRole('.', SyntacticElement::Role::DOT);
-  CalculatorParser::registerSyntacticRole(
-    '\\', SyntacticElement::Role::BACKSLASH
-  );
-  CalculatorParser::registerSyntacticRole(
-    '(', SyntacticElement::Role::LEFT_PARENTHESIS
-  );
-  CalculatorParser::registerSyntacticRole(
-    ')', SyntacticElement::Role::RIGHT_PARENTHESIS
-  );
-  CalculatorParser::registerSyntacticRole(
-    '[', SyntacticElement::Role::LEFT_BRACKET
-  );
-  CalculatorParser::registerSyntacticRole(
-    ']', SyntacticElement::Role::RIGHT_BRACKET
-  );
-  CalculatorParser::registerSyntacticRole(
-    '{', SyntacticElement::Role::LEFT_CURLY_BRACE
-  );
-  CalculatorParser::registerSyntacticRole(
-    '}', SyntacticElement::Role::RIGHT_CURLY_BRACE
-  );
-  CalculatorParser::registerSyntacticRole(
-    '&', SyntacticElement::Role::AMPERSAND
-  );
 }
 
 void CalculatorParser::registerSyntacticRole(
@@ -1637,14 +1613,6 @@ const HashedList<std::string>& CalculatorParser::whitespaceContainer() {
   // ideographic space.
   result.addOnTop("\u3000");
   return result;
-}
-
-bool CalculatorParser::isFontModifier(const std::string& input) const {
-  return
-  input == "\\mathbb" ||
-  input == "\\mathbf" ||
-  input == "\\mathfrak" ||
-  input == "\\mathcal";
 }
 
 bool CalculatorParser::isInterpretedAsEmptySpace(const std::string& input) {
@@ -3082,6 +3050,7 @@ bool CalculatorParser::replaceXEEXBy_OofEE_X(int inputOperation) {
   newExpression.addChildOnTop(middle.data);
   newExpression.addChildOnTop(right.data);
   left.data = newExpression;
+  left.syntacticRole = SyntacticElement::Role::EXPRESSION;
   left.controlIndex = this->conExpression();
   middle = *(*this->currentSyntacticStack).lastObject();
   if (this->flagLogSyntaxRules) {
@@ -3557,11 +3526,11 @@ void CalculatorParser::logParsingOperation() {
   }
   std::stringstream out;
   out
-  << this->toStringSyntacticStackHTMLTable(false, false)
-  << "<br>"
   << "["
   << this->lastRuleName
-  << "]";
+  << "]"
+  << "<br>"
+  << this->toStringSyntacticStackHTMLTable(false, false);
   this->parsingLog.addOnTop(out.str());
 }
 
@@ -3692,14 +3661,12 @@ bool CalculatorParser::applyOneRule() {
           secondToLastExpression.source
         )
       );
-      secondToLastExpression.source = "";
       this->lastRuleName = "letters to variable";
     } else {
       // The letters are a keyword.
       secondToLastExpression.controlIndex = controlIndex;
       secondToLastExpression.syntacticRole =
       this->keyWordsToSyntacticRoles.values[keywordIndex];
-      secondToLastExpression.source = "";
       this->lastRuleName = "letters to keyword";
     }
     return true;
@@ -3788,7 +3755,7 @@ bool CalculatorParser::applyOneRule() {
   const std::string& eighthToLastS =
   this->controlSequences[eighthToLastE.controlIndex];
   if (
-    secondToLastS == "%" &&
+    secondToLastRole == SyntacticElement::Role::PERCENT &&
     lastRole == SyntacticElement::Role::LETTERS &&
     lastExpression.source == "LogParsing"
   ) {
@@ -4010,13 +3977,16 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
-  if (thirdToLastS == "%" && lastS == ";") {
+  if (
+    thirdToLastRole == SyntacticElement::Role::PERCENT &&
+    lastRole == SyntacticElement::Role::SEMICOLON
+  ) {
     this->lastRuleName = "remove code comment terminated by semicolon";
     this->popTopSyntacticStack();
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
-  if (thirdToLastS == "%") {
+  if (thirdToLastRole == SyntacticElement::Role::PERCENT) {
     this->lastRuleName = "remove code comment";
     return this->popBelowStackTop();
   }
@@ -4189,56 +4159,61 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceXByCon(this->conApplyFunction());
   }
   if (
-    fifthToLastS == "{" &&
-    fourthToLastS == "{" &&
-    thirdToLastS == "Variable" &&
-    secondToLastS == "}" &&
-    lastS == "}"
+    fifthToLastRole == SyntacticElement::Role::LEFT_CURLY_BRACE &&
+    fourthToLastRole == SyntacticElement::Role::LEFT_CURLY_BRACE &&
+    thirdToLastRole == SyntacticElement::Role::VARIABLE &&
+    secondToLastRole == SyntacticElement::Role::RIGHT_CURLY_BRACE &&
+    lastRole == SyntacticElement::Role::RIGHT_CURLY_BRACE
   ) {
     return this->replaceXXVXdotsXbyE_BOUND_XdotsX(2);
   }
-  if (this->isFontModifier(secondToLastS) && lastS == "Variable") {
-    std::string variable;
-    std::string fontModifier;
-    if (
-      lastExpression.data.isOperation(&variable) &&
-      secondToLastExpression.data.isOperation(&fontModifier) &&
-      variable.size() < 10
-    ) {
-      Expression newElement;
-      newElement.makeAtom(*this->owner, secondToLastS + "{" + variable + "}");
-      this->setStackValue(newElement, "Expression", - 2);
-      this->lastRuleName = "mathbb variable -> expression";
-      return this->decreaseStack(1);
-    }
-  }
   if (
-    this->isFontModifier(fourthToLastS) &&
-    thirdToLastS == "{" &&
-    secondToLastS == "Variable" &&
-    lastS == "}"
+    secondToLastRole == SyntacticElement::Role::FONT_MODIFIER && (
+      lastRole == SyntacticElement::Role::VARIABLE ||
+      lastRole == SyntacticElement::Role::LETTERS
+    ) &&
+    lastExpression.source.size() < 10 &&
+    lastExpression.source.size() > 0
   ) {
-    std::string variable;
-    std::string fontModifier;
-    if (
-      secondToLastExpression.data.isOperation(&variable) &&
-      fourthToLastExpression.data.isOperation(&fontModifier) &&
-      variable.size() < 10
-    ) {
-      Expression newElement;
-      newElement.makeAtom(*this->owner, fourthToLastS + "{" + variable + "}");
-      this->setStackValue(newElement, "Expression", - 4);
-      this->lastRuleName = "mathbb {variable} -> expression";
-      return this->decreaseStack(3);
-    }
+    secondToLastExpression.data.makeAtom(
+      *this->owner,
+      secondToLastExpression.source + "{" + lastExpression.source + "}"
+    );
+    secondToLastExpression.source = "";
+    secondToLastExpression.syntacticRole = SyntacticElement::Role::EXPRESSION;
+    secondToLastExpression.controlIndex = this->conExpression();
+    this->lastRuleName = "mathbb variable to expression";
+    return this->decreaseStack(1);
   }
   if (
-    secondToLastS == "Variable" && ((lastS != "}" && lastS != " ") ||
-      thirdToLastS != "{" ||
-      fourthToLastS != "{"
+    fourthToLastRole == SyntacticElement::FONT_MODIFIER &&
+    thirdToLastRole == SyntacticElement::Role::LEFT_CURLY_BRACE && (
+      secondToLastRole == SyntacticElement::Role::VARIABLE ||
+      secondToLastRole == SyntacticElement::Role::LETTERS
+    ) &&
+    lastRole == SyntacticElement::Role::RIGHT_CURLY_BRACE &&
+    secondToLastExpression.source.size() < 10 &&
+    secondToLastExpression.source.size() > 0
+  ) {
+    fourthToLastExpression.data.makeAtom(
+      *this->owner,
+      fourthToLastExpression.source + "{" + secondToLastExpression.source + "}"
+    );
+    fourthToLastExpression.source = "";
+    fourthToLastExpression.syntacticRole = SyntacticElement::Role::EXPRESSION;
+    this->lastRuleName = "mathbf {variable} to expression";
+    return this->decreaseStack(3);
+  }
+  if (
+    secondToLastRole == SyntacticElement::Role::VARIABLE && ((
+        lastRole != SyntacticElement::Role::RIGHT_CURLY_BRACE &&
+        lastRole != SyntacticElement::Role::WHITE_SPACE
+      ) ||
+      thirdToLastRole != SyntacticElement::Role::RIGHT_CURLY_BRACE ||
+      fourthToLastRole != SyntacticElement::Role::RIGHT_CURLY_BRACE
     )
   ) {
-    this->lastRuleName = "variable Y -> expression Y";
+    this->lastRuleName = "variable Y to expression Y";
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(1);
   }
   if (
@@ -4498,9 +4473,9 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceEOEXByEX();
   }
   if (
-    secondToLastS == "Expression" &&
-    thirdToLastS == "Expression" &&
-    fourthToLastS == "\\frac"
+    secondToLastRole == SyntacticElement::Role::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::Role::EXPRESSION &&
+    fourthToLastRole == SyntacticElement::Role::FRAC
   ) {
     return this->replaceXEEXBy_OofEE_X(this->owner->opDivide());
   }
@@ -5026,9 +5001,13 @@ bool CalculatorParser::applyOneRule() {
     this->replaceEXdotsXbySsXdotsX(1);
     return this->setLastRuleName("Commands;Expression)");
   }
-  if (secondToLastS == "Expression" && lastS == ";") {
+  if (
+    secondToLastRole == SyntacticElement::Role::EXPRESSION &&
+    lastRole == SyntacticElement::Role::SEMICOLON
+  ) {
     this->replaceEXdotsXBySs(1);
-    return this->setLastRuleName("Expression;");
+    this->lastRuleName = "expression semicolon";
+    return true;
   }
   if (secondToLastS == "Expression" && lastS == "EndProgram") {
     this->replaceEXdotsXbySsXdotsX(1);

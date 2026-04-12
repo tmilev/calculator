@@ -1765,6 +1765,8 @@ public:
     UNKNOWN,
     // TODO: please remove once rid of the commandSequences.
     RAW,
+    // Dummy syntactic element padded at the front before parsing.
+    START_FILLER,
     DIGITS_RAW,
     DIGITS,
     LETTERS,
@@ -1777,6 +1779,8 @@ public:
     WHITE_SPACE,
     TILDE,
     EQUALS,
+    // Double equal sign.
+    EQUALS_EQUALS,
     EXPRESSION,
     CHOOSE,
     COLON,
@@ -1798,7 +1802,7 @@ public:
     MATRIX_ENVIRONMENT,
     MATRIX_UNDER_CONSTRUCTION,
     MATRIX_END,
-    FONT_MODIFIER
+    FONT_MODIFIER,COMMA,PLUS,MINUS,SEQUENCE_STATEMENTS,OR,AND, LEFT_SEPARATOR, RIGHT_SEPARATOR,PIPE,LESS_THAN,GREATER_THAN
   };
   // Deprecated. Switch to syntacticRole instead.
   int controlIndex;
@@ -2354,14 +2358,14 @@ private:
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
-  bool isSeparatorFromTheLeftForDefinition(const std::string& input);
+  bool isSeparatorFromTheLeftForDefinition(SyntacticElement::Role role);
   bool isSeparatorFromTheLeftForList(const std::string& input);
   bool isBoundVariableInContext(int inputOperation);
   bool isNonBoundVariableInContext(int inputOperation);
   bool isStandardCalculatorCharacter(unsigned char input);
   bool isSeparatorFromTheLeftForInterval(const std::string& input);
   bool isSeparatorFromTheRightGeneral(const std::string& input);
-  bool isSeparatorFromTheRightForDefinition(const std::string& input);
+  bool isSeparatorFromTheRightForDefinition(SyntacticElement::Role role);
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool allowsPowerInPreceding(const std::string& lookAhead);
   bool allowsPowerInNext(const std::string& lookBehind);
@@ -2371,7 +2375,7 @@ private:
   bool allowsOrInPreceding(const std::string& lookAhead);
   bool allowsAndInPreceding(const std::string& lookAhead);
   bool allowsInInPreceding(const std::string& lookAhead);
-  bool allowsPlusInPreceding(const std::string& lookAhead);
+  bool allowsPlusInPreceding(SyntacticElement::Role role);
   bool allowsTimesInNext(const std::string& preceding);
   bool allowsTimesInPreceding(
     const SyntacticElement& preceding, const std::string& lookAhead
@@ -2575,7 +2579,6 @@ private:
     const std::string& afterDecimalPoint,
     Expression& output
   );
-  bool replaceXXByEEmptySequence();
   bool replaceOXdotsXbyEXdotsX(int numberOfXs);
   bool replaceOXbyEX();
   bool replaceObyE();
@@ -2586,12 +2589,12 @@ private:
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   bool replaceXXbyE();
   void resetStack() {
-    SyntacticElement emptyElement = this->getEmptySyntacticElement();
+    SyntacticElement emptyElement = this->getStartFillerElement();
     (*this->currentSyntacticStack).initializeFillInObject(
       this->numberOfEmptyTokensStart, emptyElement
     );
   }
-  SyntacticElement getEmptySyntacticElement();
+  SyntacticElement getStartFillerElement();
   int conBindVariable() {
     return this->controlSequences.getIndexNoFail("{{}}");
   }

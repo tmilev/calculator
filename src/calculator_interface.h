@@ -1785,6 +1785,7 @@ public:
     CHOOSE,
     COLON,
     SEMICOLON,
+    SQRT,
     IF,
     DOT,
     LEFT_PARENTHESIS,
@@ -1802,7 +1803,12 @@ public:
     MATRIX_ENVIRONMENT,
     MATRIX_UNDER_CONSTRUCTION,
     MATRIX_END,
-    FONT_MODIFIER,COMMA,PLUS,MINUS,SEQUENCE_STATEMENTS,OR,AND, LEFT_SEPARATOR, RIGHT_SEPARATOR,PIPE,LESS_THAN,GREATER_THAN
+    FONT_MODIFIER,COMMA,PLUS,MINUS,SEQUENCE_STATEMENTS,OR,AND, LEFT_SEPARATOR, RIGHT_SEPARATOR,PIPE,LESS_THAN_LIKE,GREATER_THAN_LIKE,UNDERSCORE,
+    UPPER_CARET, LEFT_RIGHT_CURLY_BRACE, CIRC, DOLLAR, BACKSLASH_INT, INTEGRAL_WITH_SUB_AND_SUPERSCRIPT,INTEGRAL_WITH_SUBSCRIPT, INTEGRAL_WITH_SUPERSCRIPT,
+    STAR,
+    DIVISION_SIGN,
+    CUP,
+    CAP,TENSOR_PRODUCT
   };
   // Deprecated. Switch to syntacticRole instead.
   int controlIndex;
@@ -1821,6 +1827,7 @@ public:
     CalculatorParser& owner, bool includeLispifiedExpressions
   ) const;
   std::string toStringSyntaxRole(const CalculatorParser& owner) const;
+  static std::string syntaxRoleToString(SyntacticElement::Role role);
   std::string toStringDebug(const CalculatorParser& owner) const;
   SyntacticElement() {
     // Syntactic element roles must be initialized as unknown.
@@ -2348,13 +2355,6 @@ public:
   // Initialized in initializeMainAll().
   static const HashedList<std::string>& whitespaceContainer();
 private:
-  // Sets an expression value and syntactic role to a given position in the
-  // stack.
-  bool setStackValue(
-    const Expression& newExpression,
-    const std::string& newRole,
-    int stackOffset
-  );
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
@@ -2370,19 +2370,18 @@ private:
   bool allowsPowerInPreceding(const std::string& lookAhead);
   bool allowsPowerInNext(const std::string& lookBehind);
   bool allowsLimitProcessInPreceding(const std::string& lookAhead);
-  bool allowsApplyFunctionInPreceding(const std::string& lookAhead);
+  bool allowsApplyFunctionInPreceding(SyntacticElement::Role role);
   bool allowsIfInPreceding(const std::string& lookAhead);
   bool allowsOrInPreceding(const std::string& lookAhead);
   bool allowsAndInPreceding(const std::string& lookAhead);
   bool allowsInInPreceding(const std::string& lookAhead);
   bool allowsPlusInPreceding(SyntacticElement::Role role);
-  bool allowsTimesInNext(const std::string& preceding);
-  bool allowsTimesInPreceding(
-    const SyntacticElement& preceding, const std::string& lookAhead
+  bool allowsTimesInNext(const SyntacticElement& preceding);
+  bool allowsTimesInPreceding(const SyntacticElement& preceding, const SyntacticElement& lookAhead
   );
-  bool allowsTimesInPreceding(const std::string& lookAhead);
-  bool allowsTensorInPreceding(const std::string& lookAhead);
-  bool allowsDivideInPreceding(const std::string& lookAhead);
+  bool allowsTimesInPreceding(const SyntacticElement& lookAhead);
+  bool allowsTensorInPreceding(const SyntacticElement& lookAhead);
+  bool allowsDivideInPreceding(const SyntacticElement& lookAhead);
   void addTrigonometricSplit(
     const std::string& trigonometricFunction,
     const List<std::string>& variables
@@ -2415,7 +2414,6 @@ private:
   bool replaceEXXEXEXBy_CofEEE_X(int controlIndex);
   bool replaceEOXbyEX();
   bool replaceEEBy_CofEE(int controlIndex);
-  bool replaceEEXBy_CofEE_X(int controlIndex);
   bool replaceOOEEXbyEXpowerLike();
   bool replaceEEByE();
   bool replaceEXEXByEX();
@@ -2655,7 +2653,7 @@ private:
   int conEndProgram() {
     return this->controlSequences.getIndexNoFail("EndProgram");
   }
-  bool isDefiniteIntegral(const std::string& syntacticRole);
+  bool isDefiniteIntegral(SyntacticElement::Role role);
   void extractSyntacticElementsDefaultOutput(const std::string& input);
   void logParsingOperation();
   bool extractExpressionsFromPreprocessed(

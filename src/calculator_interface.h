@@ -1778,9 +1778,11 @@ public:
     PERCENT,
     WHITE_SPACE,
     TILDE,
+    EQUALS_COLON,
     EQUALS,
     // Double equal sign.
     EQUALS_EQUALS,
+    EQUALS_EQUALS_EQUALS,
     EXPRESSION,
     CHOOSE,
     COLON,
@@ -2389,14 +2391,14 @@ private:
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(SyntacticElement::Role role);
   bool isSeparatorFromTheRightForList(const std::string& input);
-  bool allowsPowerInPreceding(const std::string& lookAhead);
+  bool allowsPowerInPreceding(SyntacticElement::Role lookAhead);
   bool allowsPowerInNext(const std::string& lookBehind);
   bool allowsLimitProcessInPreceding(const std::string& lookAhead);
   bool allowsApplyFunctionInPreceding(SyntacticElement::Role role);
-  bool allowsIfInPreceding(const std::string& lookAhead);
+  bool allowsIfInPreceding(SyntacticElement::Role lookAhead);
   bool allowsOrInPreceding(const std::string& lookAhead);
   bool allowsAndInPreceding(const std::string& lookAhead);
-  bool allowsInInPreceding(const std::string& lookAhead);
+  bool allowsInInPreceding(SyntacticElement::Role lookAhead);
   bool allowsPlusInPreceding(SyntacticElement::Role role);
   bool allowsTimesInNext(const SyntacticElement& preceding);
   bool allowsTimesInPreceding(
@@ -2457,10 +2459,7 @@ private:
   bool replaceOXEXByEX();
   bool replaceOXEEXByEX();
   bool replaceOXXEXEXEXByE();
-  bool replaceSqrtXEXByEX();
   bool replaceOXEXEByE();
-  bool replaceOXEXEXByEX();
-  bool replaceOXEXEXXByEXX();
   bool replaceOXEXEXEXByE();
   bool replaceEOEXByEX();
   bool replaceEPowerMinusEXByEX();
@@ -2495,7 +2494,6 @@ private:
   bool replaceMatrixXByE();
   bool replaceCXByE();
   bool replaceCXByEX();
-  bool replaceXEXEXBy_CofEE(int operation);
   bool replaceEXEByCofEE(int operation);
   bool replaceXYByConY(int controlIndex) {
     (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].

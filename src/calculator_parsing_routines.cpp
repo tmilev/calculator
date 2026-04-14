@@ -54,136 +54,100 @@ const {
   return out.str();
 }
 
-std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role){
+std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
   switch (role) {
+  case SyntacticElement::FACTORIAL:
+    return "FACTORIAL";
   case SyntacticElement::INTEGRAL_WITH_SUBSCRIPT:
     return "INTEGRAL_WITH_SUBSCRIPT";
-      case SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT:
+  case SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT:
     return "INTEGRAL_WITH_SUB_AND_SUPERSCRIPT";
-      case SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT:
+  case SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT:
     return "INTEGRAL_WITH_SUPERSCRIPT";
-      case SyntacticElement::BACKSLASH_INT:
+  case SyntacticElement::BACKSLASH_INT:
     return "BACKSLASH_INT";
   case SyntacticElement::UPPER_CARET:
     return "UPPER_CARET";
   case SyntacticElement::DOLLAR:
     return "DOLLAR";
-
+  case SyntacticElement::SEQUENCE:
+    return "SEQUENCE";
   case SyntacticElement::LEFT_RIGHT_CURLY_BRACE:
     return "LEFT_RIGHT_CURLY_BRACE";
-
   case SyntacticElement::CIRC:
     return "CIRC";
-
-
   case SyntacticElement::DIGITS:
     return "DIGITS";
-
   case SyntacticElement::DIGITS_RAW:
     return "DIGITS_RAW";
-
   case SyntacticElement::LETTERS:
     return "LETTERS";
-
   case SyntacticElement::QUOTE_UNDER_CONSTRUCTION:
     return "QUOTE_UNDER_CONSTRUCTION";
-
   case SyntacticElement::RAW:
     return "RAW";
-
   case SyntacticElement::UNKNOWN:
     return "UNKNOWN";
-
   case SyntacticElement::VARIABLE:
     return "VARIABLE";
-
   case SyntacticElement::START_FILLER:
- return "START_FILLER";
-
+    return "START_FILLER";
   case SyntacticElement::END_PROGRAM:
     return "END_PROGRAM";
-
   case SyntacticElement::QUOTE:
     return "QUOTE";
-
   case SyntacticElement::BACKSLASH:
     return "BACKSLASH";
-
   case SyntacticElement::PERCENT:
     return "PERCENT";
-
   case SyntacticElement::WHITE_SPACE:
     return "WHITE_SPACE";
-
   case SyntacticElement::TILDE:
     return "TILDE";
-
   case SyntacticElement::EQUALS:
     return "EQUALS";
-
   case SyntacticElement::EXPRESSION:
     return "EXPRESSION";
-
   case SyntacticElement::COLON:
     return "COLON";
-
   case SyntacticElement::IF:
     return "IF";
-
   case SyntacticElement::LEFT_PARENTHESIS:
     return "LEFT_PARENTHESES";
-
   case SyntacticElement::RIGHT_PARENTHESIS:
     return "RIGHT_PARENTHESIS";
-
   case SyntacticElement::LEFT_BRACKET:
     return "LEFT_BRACKET";
-
   case SyntacticElement::RIGHT_BRACKET:
     return "RIGHT_BRACKET";
-
   case SyntacticElement::LEFT_CURLY_BRACE:
     return "LEFT_CURLY_BRACE";
-
   case SyntacticElement::RIGHT_CURLY_BRACE:
     return "RIGHT_CURLY_BRACE";
-
   case SyntacticElement::DOUBLE_BACKSLASH:
     return "DOUBLE_BACKSLASH";
-
   case SyntacticElement::DOT:
     return "DOT";
-
   case SyntacticElement::AMPERSAND:
     return "AMPERSAND";
-
   case SyntacticElement::BEGIN:
     return "BEGIN";
-
   case SyntacticElement::END:
     return "END";
-
   case SyntacticElement::FRAC:
     return "FRAC";
-
   case SyntacticElement::MATRIX_ENVIRONMENT:
     return "MATRIX_ENVIRONMENT";
-
   case SyntacticElement::ARRAY_ENVIRONMENT:
     return "ARRAY_ENVIRONMENT";
-
   case SyntacticElement::MATRIX_UNDER_CONSTRUCTION:
     return "MATRIX_UNDER_CONSTRUCTION";
-
   case SyntacticElement::MATRIX_END:
     return "MATRIX_END";
-
   case SyntacticElement::SEMICOLON:
     return "SEMICOLON";
-
   case SyntacticElement::FONT_MODIFIER:
     return "FONT_MODIFIER";
-
   case SyntacticElement::CHOOSE:
     return "CHOOSE";
   case SyntacticElement::COMMA:
@@ -212,6 +176,18 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role){
     return "PIPE";
   case UNDERSCORE:
     return "UNDERSCORE";
+  case STAR:
+    return "STAR";
+  case DIVISION_SIGN:
+    return "DIVISION_SIGN";
+  case CUP:
+    return "CUP";
+  case CAP:
+    return "CAP";
+  case TENSOR_PRODUCT:
+    return "TENSOR_PRODUCT";
+  case SQRT:
+    return "SQRT";
   }
   return "SHOULD_BE_UNREACHABLE";
 }
@@ -264,6 +240,7 @@ void CalculatorParser::initializeSingleCharacterSyntacticRoles() {
   registerSyntacticRole(',', SyntacticElement::COMMA);
   registerSyntacticRole('|', SyntacticElement::PIPE);
   registerSyntacticRole('>', SyntacticElement::GREATER_THAN_LIKE);
+  registerSyntacticRole('!', SyntacticElement::FACTORIAL);
   registerSyntacticRole('<', SyntacticElement::LESS_THAN_LIKE);
   registerSyntacticRole('^', SyntacticElement::UPPER_CARET);
 }
@@ -288,9 +265,9 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\\geq", SyntacticElement::GREATER_THAN_LIKE);
   registerKeyword("\\circ", SyntacticElement::CIRC);
   registerKeyword("\\int", SyntacticElement::BACKSLASH_INT);
-  registerKeyword( "\\cup", SyntacticElement::CUP);
-  registerKeyword( "\\cap", SyntacticElement::CAP);
-
+  registerKeyword("\\cup", SyntacticElement::CUP);
+  registerKeyword("\\cap", SyntacticElement::CAP);
+  registerKeyword("\\sqrt", SyntacticElement::SQRT);
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("ln", "\\log");
   keyWordAutocorrections.setKeyValue("log", "\\log");
@@ -312,6 +289,7 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   keyWordAutocorrections.setKeyValue("beta", "\\beta");
   keyWordAutocorrections.setKeyValue("gamma", "\\gamma");
   keyWordAutocorrections.setKeyValue("delta", "\\delta");
+  keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
 }
 
 std::string SyntacticElement::toStringHumanReadable(
@@ -995,48 +973,6 @@ bool CalculatorParser::replaceOXEXEXEXByE() {
   return this->decreaseStackSetCharacterRanges(7);
 }
 
-bool CalculatorParser::replaceSqrtEXByEX() {
-  SyntacticElement& left = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    3
-  ];
-  SyntacticElement& argument = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    2
-  ];
-  Expression newExpression;
-  newExpression.reset(*this->owner, 3);
-  newExpression.addChildAtomOnTop(this->owner->opSqrt());
-  newExpression.addChildOnTop(this->owner->expressionTwo());
-  newExpression.addChildOnTop(argument.data);
-  left.data = newExpression;
-  left.controlIndex = this->conExpression();
-  return this->decreaseStackExceptLast(1);
-}
-
-bool CalculatorParser::replaceSqrtEXXByEXX() {
-  int lastSize = (*this->currentSyntacticStack).size;
-  SyntacticElement& left = (*this->currentSyntacticStack)[lastSize - 4];
-  SyntacticElement& argument = (*this->currentSyntacticStack)[lastSize - 3];
-  Expression newExpression;
-  newExpression.reset(*this->owner, 3);
-  newExpression.addChildAtomOnTop(this->owner->opSqrt());
-  newExpression.addChildOnTop(this->owner->expressionTwo());
-  newExpression.addChildOnTop(argument.data);
-  left.data = newExpression;
-  left.controlIndex = this->conExpression();
-  (*this->currentSyntacticStack)[lastSize - 3] = (
-    *this->currentSyntacticStack
-  )[lastSize - 2];
-  (*this->currentSyntacticStack)[lastSize - 2] = (
-    *this->currentSyntacticStack
-  )[lastSize - 1];
-  (*this->currentSyntacticStack).setSize(lastSize - 1);
-  return true;
-}
-
 bool CalculatorParser::replaceSqrtXEXByEX() {
   SyntacticElement& left = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
@@ -1290,7 +1226,6 @@ bool CalculatorParser::canBeRegardedAsDifferentialForm(
   if (role == SyntacticElement::VARIABLE || role == SyntacticElement::LETTERS) {
     return this->canBeRegardedAsDifferentialForm(input.source);
   }
-
   if (role != SyntacticElement::EXPRESSION) {
     return false;
   }
@@ -1626,7 +1561,6 @@ bool CalculatorParser::isLeftSeparator(unsigned char c) {
     return false;
   }
 }
-
 
 const HashedList<std::string>& CalculatorParser::whitespaceContainer() {
   static HashedList<std::string> result;
@@ -2046,6 +1980,7 @@ bool CalculatorParser::replaceXXbyEX() {
     2
   ];
   element.controlIndex = this->conExpression();
+  element.syntacticRole = SyntacticElement::EXPRESSION;
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Calculator::replaceXXbyEX]";
   }
@@ -2076,6 +2011,8 @@ replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
     }
   }
   functionExpressionlt.data = newExpression;
+  functionExpressionlt.controlIndex = this->conExpression();
+  functionExpressionlt.syntacticRole = SyntacticElement::EXPRESSION;
   return this->decreaseStackSetCharacterRanges(4);
 }
 
@@ -2126,9 +2063,9 @@ bool CalculatorParser::replaceXEXByEContainingOE(int inputOpIndex) {
   outputElement.data.addChildAtomOnTop(inputOpIndex);
   outputElement.data.addChildOnTop(inputElement.data);
   outputElement.controlIndex = this->conExpression();
+  outputElement.syntacticRole = SyntacticElement::EXPRESSION;
   return this->decreaseStackSetCharacterRanges(2);
 }
-
 
 bool CalculatorParser::isBoundVariableInContext(int inputOperation) {
   return this->boundVariablesInContext.contains(inputOperation);
@@ -2273,8 +2210,7 @@ bool CalculatorParser::replaceElementsByMatrixStart(int numberOfXs) {
   currentElement.dataList.setSize(1);
   currentElement.dataList.lastObject()->makeSequence(*this->owner);
   currentElement.controlIndex = this->conMatrixStart();
-  currentElement.syntacticRole =
-  SyntacticElement::MATRIX_UNDER_CONSTRUCTION;
+  currentElement.syntacticRole = SyntacticElement::MATRIX_UNDER_CONSTRUCTION;
   return this->decreaseStackSetCharacterRanges(numberOfXs - 1);
 }
 
@@ -2405,7 +2341,6 @@ bool CalculatorParser::replaceAXXbyEXX() {
   ];
   element.controlIndex = this->conExpression();
   element.syntacticRole = SyntacticElement::EXPRESSION;
-
   return true;
 }
 
@@ -2445,15 +2380,14 @@ bool CalculatorParser::isStandardCalculatorCharacter(unsigned char input) {
 }
 
 bool CalculatorParser::allowsApplyFunctionInPreceding(
-    SyntacticElement::Role role
-    ) {
-  return role != SyntacticElement::LEFT_CURLY_BRACE&&
-         role != SyntacticElement::UNDERSCORE&&
-         role !=SyntacticElement::CIRC&&
-
-
-             role != SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
-         role!= SyntacticElement::DOLLAR;
+  SyntacticElement::Role role
+) {
+  return
+  role != SyntacticElement::LEFT_CURLY_BRACE &&
+  role != SyntacticElement::UNDERSCORE &&
+  role != SyntacticElement::CIRC &&
+  role != SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
+  role != SyntacticElement::DOLLAR;
 }
 
 bool CalculatorParser::replaceSequenceUXEYBySequenceZY(int controlIndex) {
@@ -2547,6 +2481,7 @@ bool CalculatorParser::replaceYXdotsXBySequenceYXdotsX(
   newExpression.addChildOnTop(main.data);
   main.data = newExpression;
   main.controlIndex = controlIndex;
+  main.syntacticRole = SyntacticElement::SEQUENCE;
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceYXdotsXBySequenceYXdotsX]";
   }
@@ -2707,8 +2642,6 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits(
   }
   return this->replaceVByVDotsVWith(split);
 }
-
-
 
 bool CalculatorParser::replaceEXXEXEBy_CofEEE(int controlIndex) {
   SyntacticElement& middle = (*this->currentSyntacticStack)[(
@@ -3145,22 +3078,22 @@ bool CalculatorParser::isSeparatorFromTheLeftGeneral(
 }
 
 bool CalculatorParser::isSeparatorFromTheLeftForInterval(
-  const std::string& input
+  SyntacticElement::Role input
 ) {
   return
-  input == "," ||
-  input == "(" ||
-  input == "[" ||
-  input == ":" ||
-  input == ";" ||
-  input == "=" ||
-  input == "==" ||
-  input == "\\\\" ||
-  input == "\\cup" ||
-  input == "\\cap" ||
-  input == "\\end" ||
-  input == "&" ||
-  input == "EndProgram";
+  input == SyntacticElement::COMMA ||
+  input == SyntacticElement::LEFT_PARENTHESIS ||
+  input == SyntacticElement::LEFT_BRACKET ||
+  input == SyntacticElement::COLON ||
+  input == SyntacticElement::SEMICOLON ||
+  input == SyntacticElement::EQUALS ||
+  input == SyntacticElement::EQUALS_EQUALS ||
+  input == SyntacticElement::DOUBLE_BACKSLASH ||
+  input == SyntacticElement::CUP ||
+  input == SyntacticElement::CAP ||
+  input == SyntacticElement::END ||
+  input == SyntacticElement::AMPERSAND ||
+  input == SyntacticElement::END_PROGRAM;
 }
 
 bool CalculatorParser::isSeparatorFromTheRightGeneral(const std::string& input)
@@ -3207,44 +3140,48 @@ bool CalculatorParser::isSeparatorFromTheRightForList(const std::string& input)
 }
 
 bool CalculatorParser::isSeparatorFromTheLeftForDefinition(
-    SyntacticElement::Role role
-    ) {
-  return
-      role == SyntacticElement::START_FILLER||
-      role ==SyntacticElement::LEFT_CURLY_BRACE ||
-      role == SyntacticElement::LEFT_PARENTHESIS ||
-      role == SyntacticElement::SEMICOLON ||
-      role ==SyntacticElement::COMMA ||
-      role == SyntacticElement::PERCENT ||
-         role == SyntacticElement::SEQUENCE_STATEMENTS ||
-      role == SyntacticElement::WHITE_SPACE ||
-      role == SyntacticElement::OR ||
-      role == SyntacticElement::AND ;
-}
-
-bool CalculatorParser::isSeparatorFromTheRightForDefinition(SyntacticElement::Role role
+  SyntacticElement::Role role
 ) {
   return
-      role == SyntacticElement::RIGHT_CURLY_BRACE ||
-  role == SyntacticElement::RIGHT_PARENTHESIS ||
+  role == SyntacticElement::START_FILLER ||
+  role == SyntacticElement::LEFT_CURLY_BRACE ||
+  role == SyntacticElement::LEFT_PARENTHESIS ||
   role == SyntacticElement::SEMICOLON ||
-  role == SyntacticElement::COMMA||
-  role == SyntacticElement::END_PROGRAM ||
-         role == SyntacticElement::OR ||
-  role ==  SyntacticElement::AND;
+  role == SyntacticElement::COMMA ||
+  role == SyntacticElement::PERCENT ||
+  role == SyntacticElement::SEQUENCE_STATEMENTS ||
+  role == SyntacticElement::WHITE_SPACE ||
+  role == SyntacticElement::OR ||
+  role == SyntacticElement::AND;
 }
 
-bool CalculatorParser::allowsTensorInPreceding(const SyntacticElement& lookAhead) {
-  return this->allowsTimesInPreceding(lookAhead) || lookAhead.syntacticRole == SyntacticElement::TENSOR_PRODUCT;
+bool CalculatorParser::isSeparatorFromTheRightForDefinition(
+  SyntacticElement::Role role
+) {
+  return
+  role == SyntacticElement::RIGHT_CURLY_BRACE ||
+  role == SyntacticElement::RIGHT_PARENTHESIS ||
+  role == SyntacticElement::SEMICOLON ||
+  role == SyntacticElement::COMMA ||
+  role == SyntacticElement::END_PROGRAM ||
+  role == SyntacticElement::OR ||
+  role == SyntacticElement::AND;
+}
+
+bool CalculatorParser::allowsTensorInPreceding(
+  const SyntacticElement& lookAhead
+) {
+  return
+  this->allowsTimesInPreceding(lookAhead) ||
+  lookAhead.syntacticRole == SyntacticElement::TENSOR_PRODUCT;
 }
 
 bool CalculatorParser::allowsTimesInNext(const SyntacticElement& preceding) {
-  if(
-          preceding.syntacticRole == SyntacticElement::LEFT_CURLY_BRACE ||
-      preceding.syntacticRole == SyntacticElement::UPPER_CARET  ||
-      preceding.syntacticRole == SyntacticElement::UNDERSCORE ||
-      preceding.source== "\\sqrt"
-
+  if (
+    preceding.syntacticRole == SyntacticElement::LEFT_CURLY_BRACE ||
+    preceding.syntacticRole == SyntacticElement::UPPER_CARET ||
+    preceding.syntacticRole == SyntacticElement::UNDERSCORE ||
+    preceding.syntacticRole == SyntacticElement::SQRT
   ) {
     return false;
   }
@@ -3257,57 +3194,59 @@ bool CalculatorParser::allowsTimesInPreceding(
   if (preceding.controlIndex == this->conExpression()) {
     if (preceding.data.isBuiltInAtom()) {
       return
-          lookAhead.syntacticRole ==SyntacticElement::PLUS           ||
-      lookAhead.syntacticRole == SyntacticElement::MINUS         ||
-      lookAhead.syntacticRole == SyntacticElement::STAR         ||
-             lookAhead.syntacticRole ==SyntacticElement::DIVISION_SIGN          ||
-             lookAhead.syntacticRole == SyntacticElement::CUP     ||
-      lookAhead.syntacticRole == SyntacticElement::RIGHT_PARENTHESIS         ||
-      lookAhead.syntacticRole == SyntacticElement::RIGHT_BRACKET         ||
-      lookAhead.syntacticRole == SyntacticElement::RIGHT_CURLY_BRACE         ||
-      lookAhead.syntacticRole == SyntacticElement::EQUALS         ||
-      lookAhead.syntacticRole == SyntacticElement::GREATER_THAN_LIKE         ||
-      lookAhead.syntacticRole == SyntacticElement::LESS_THAN_LIKE         ||
-      lookAhead.syntacticRole == SyntacticElement::COMMA         ||
-      lookAhead.syntacticRole == SyntacticElement::SEMICOLON         ||
-      lookAhead.syntacticRole == SyntacticElement::COLON         ||
-             lookAhead.syntacticRole == SyntacticElement::AMPERSAND         ||
-      lookAhead.syntacticRole == SyntacticElement::MATRIX_UNDER_CONSTRUCTION    ||
+      lookAhead.syntacticRole == SyntacticElement::PLUS ||
+      lookAhead.syntacticRole == SyntacticElement::MINUS ||
+      lookAhead.syntacticRole == SyntacticElement::STAR ||
+      lookAhead.syntacticRole == SyntacticElement::DIVISION_SIGN ||
+      lookAhead.syntacticRole == SyntacticElement::CUP ||
+      lookAhead.syntacticRole == SyntacticElement::RIGHT_PARENTHESIS ||
+      lookAhead.syntacticRole == SyntacticElement::RIGHT_BRACKET ||
+      lookAhead.syntacticRole == SyntacticElement::RIGHT_CURLY_BRACE ||
+      lookAhead.syntacticRole == SyntacticElement::EQUALS ||
+      lookAhead.syntacticRole == SyntacticElement::GREATER_THAN_LIKE ||
+      lookAhead.syntacticRole == SyntacticElement::LESS_THAN_LIKE ||
+      lookAhead.syntacticRole == SyntacticElement::COMMA ||
+      lookAhead.syntacticRole == SyntacticElement::SEMICOLON ||
+      lookAhead.syntacticRole == SyntacticElement::COLON ||
+      lookAhead.syntacticRole == SyntacticElement::AMPERSAND ||
+      lookAhead.syntacticRole == SyntacticElement::MATRIX_UNDER_CONSTRUCTION ||
       lookAhead.syntacticRole == SyntacticElement::MATRIX_END ||
-             lookAhead.syntacticRole == SyntacticElement::BACKSLASH ||
-      lookAhead.syntacticRole == SyntacticElement::OR        ||
-      lookAhead.syntacticRole == SyntacticElement::AND       ||
+      lookAhead.syntacticRole == SyntacticElement::BACKSLASH ||
+      lookAhead.syntacticRole == SyntacticElement::OR ||
+      lookAhead.syntacticRole == SyntacticElement::AND ||
       lookAhead.syntacticRole == SyntacticElement::END_PROGRAM;
     }
   }
   return this->allowsTimesInPreceding(lookAhead);
 }
 
-bool CalculatorParser::allowsTimesInPreceding(const SyntacticElement& lookAhead) {
+bool CalculatorParser::allowsTimesInPreceding(
+  const SyntacticElement& lookAhead
+) {
   SyntacticElement::Role role = lookAhead.syntacticRole;
-
   return
-      role == SyntacticElement::PLUS ||
-  role==  SyntacticElement::MINUS ||
+  role == SyntacticElement::PLUS ||
+  role == SyntacticElement::MINUS ||
   role == SyntacticElement::STAR ||
-  role== SyntacticElement::DIVISION_SIGN ||
+  role == SyntacticElement::DIVISION_SIGN ||
   this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.contains(
     lookAhead.source
   ) ||
-  role ==  SyntacticElement::FRAC ||
-  role ==  SyntacticElement::EXPRESSION ||
-  role ==  SyntacticElement::DIGITS ||
-  role ==  SyntacticElement::CUP ||
-  role ==  SyntacticElement::LEFT_PARENTHESIS ||
-  role ==  SyntacticElement::LEFT_BRACKET ||
-         role == SyntacticElement:: PIPE||
-  role ==  SyntacticElement::RIGHT_PARENTHESIS ||
-  role ==  SyntacticElement::RIGHT_BRACKET ||
-  role ==  SyntacticElement::RIGHT_CURLY_BRACE ||
-  role ==  SyntacticElement::EQUALS ||
-  role ==  SyntacticElement::GREATER_THAN_LIKE ||
-  role ==  SyntacticElement::LESS_THAN_LIKE ||
-         role ==  SyntacticElement::VARIABLE ||
+  role == SyntacticElement::FRAC ||
+  role == SyntacticElement::EXPRESSION ||
+  role == SyntacticElement::DIGITS ||
+  role == SyntacticElement::CUP ||
+  role == SyntacticElement::LEFT_PARENTHESIS ||
+  role == SyntacticElement::LEFT_BRACKET ||
+  role == SyntacticElement::PIPE ||
+  role == SyntacticElement::RIGHT_PARENTHESIS ||
+  role == SyntacticElement::RIGHT_BRACKET ||
+  role == SyntacticElement::RIGHT_CURLY_BRACE ||
+  role == SyntacticElement::EQUALS ||
+  role == SyntacticElement::GREATER_THAN_LIKE ||
+  role == SyntacticElement::LESS_THAN_LIKE ||
+  role == SyntacticElement::VARIABLE ||
+  role == SyntacticElement::LETTERS ||
   role == SyntacticElement::COMMA ||
   role == SyntacticElement::SEMICOLON ||
   role == SyntacticElement::COLON ||
@@ -3408,12 +3347,12 @@ bool CalculatorParser::allowsIfInPreceding(const std::string& lookAhead) {
 
 bool CalculatorParser::allowsPlusInPreceding(SyntacticElement::Role role) {
   return
-      role == SyntacticElement::PLUS||
+  role == SyntacticElement::PLUS ||
   role == SyntacticElement::MINUS ||
   role == SyntacticElement::COMMA ||
   role == SyntacticElement::EQUALS ||
   role == SyntacticElement::LESS_THAN_LIKE ||
-  role == SyntacticElement::GREATER_THAN_LIKE  ||
+  role == SyntacticElement::GREATER_THAN_LIKE ||
   role == SyntacticElement::RIGHT_PARENTHESIS ||
   role == SyntacticElement::SEMICOLON ||
   role == SyntacticElement::RIGHT_BRACKET ||
@@ -3425,11 +3364,12 @@ bool CalculatorParser::allowsPlusInPreceding(SyntacticElement::Role role) {
   role == SyntacticElement::END_PROGRAM ||
   role == SyntacticElement::AMPERSAND ||
   role == SyntacticElement::MATRIX_END ||
-  role == SyntacticElement::BACKSLASH
-;
+  role == SyntacticElement::BACKSLASH;
 }
 
-bool CalculatorParser::allowsDivideInPreceding(const SyntacticElement& lookAhead) {
+bool CalculatorParser::allowsDivideInPreceding(
+  const SyntacticElement& lookAhead
+) {
   return this->allowsTimesInPreceding(lookAhead);
 }
 
@@ -3568,6 +3508,7 @@ void CalculatorParser::logParsingOperation() {
   << "<br>"
   << this->toStringSyntacticStackHTMLTable(false, false);
   this->parsingLog.addOnTop(out.str());
+  this->lastRuleName = "";
 }
 
 bool CalculatorParser::applyOneRule() {
@@ -3619,8 +3560,7 @@ bool CalculatorParser::applyOneRule() {
     lastRole == SyntacticElement::QUOTE
   ) {
     lastExpression.controlIndex = this->conQuoteUnderConstruction();
-    lastExpression.syntacticRole =
-    SyntacticElement::QUOTE_UNDER_CONSTRUCTION;
+    lastExpression.syntacticRole = SyntacticElement::QUOTE_UNDER_CONSTRUCTION;
     this->lastRuleName = "start quote";
     lastExpression.source = "";
     return true;
@@ -3637,9 +3577,7 @@ bool CalculatorParser::applyOneRule() {
     return true;
   }
   if (lastExpression.syntacticRole == SyntacticElement::DIGITS_RAW) {
-    if (
-      secondToLastExpression.syntacticRole != SyntacticElement::LETTERS
-    ) {
+    if (secondToLastExpression.syntacticRole != SyntacticElement::LETTERS) {
       lastExpression.controlIndex = this->conInteger();
       lastExpression.syntacticRole = SyntacticElement::DIGITS;
       this->lastRuleName = "raw digits to digits";
@@ -3774,16 +3712,12 @@ bool CalculatorParser::applyOneRule() {
     *this->currentSyntacticStack
   )[(*this->currentSyntacticStack).size - 6];
   SyntacticElement::Role sixthToLastRole = sixthToLastExpression.syntacticRole;
-  const std::string& sixthToLastS =
-  this->controlSequences[sixthToLastExpression.controlIndex];
   const SyntacticElement& seventhToLastE = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     7
   ];
-  const std::string& seventhToLastS =
-  this->controlSequences[seventhToLastE.controlIndex];
-   SyntacticElement& eighthToLastE = (*this->currentSyntacticStack)[(
+  SyntacticElement& eighthToLastE = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     8
@@ -4027,8 +3961,10 @@ bool CalculatorParser::applyOneRule() {
     return this->popBelowStackTop();
   }
   if (
-      secondToLastRole == SyntacticElement::DOUBLE_BACKSLASH
-      && ( thirdToLastRole == SyntacticElement::COMMA || thirdToLastRole == SyntacticElement::PLUS || thirdToLastRole == SyntacticElement::MINUS
+    secondToLastRole == SyntacticElement::DOUBLE_BACKSLASH && (
+      thirdToLastRole == SyntacticElement::COMMA ||
+      thirdToLastRole == SyntacticElement::PLUS ||
+      thirdToLastRole == SyntacticElement::MINUS
     )
   ) {
     if (this->flagLogSyntaxRules) {
@@ -4036,16 +3972,28 @@ bool CalculatorParser::applyOneRule() {
     }
     return this->popBelowStackTop();
   }
-  if (secondToLastRole == SyntacticElement::BACKSLASH_INT && lastRole == SyntacticElement::EXPRESSION) {
+  if (
+    secondToLastRole == SyntacticElement::BACKSLASH_INT &&
+    lastRole == SyntacticElement::EXPRESSION
+  ) {
     return this->replaceOXbyEX();
   }
-  if (thirdToLastRole == SyntacticElement::BACKSLASH_INT && secondToLastRole == SyntacticElement::EXPRESSION) {
+  if (
+    thirdToLastRole == SyntacticElement::BACKSLASH_INT &&
+    secondToLastRole == SyntacticElement::EXPRESSION
+  ) {
     return this->replaceOXXByEXX();
   }
-  if (secondToLastRole == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT && lastRole == SyntacticElement::EXPRESSION) {
+  if (
+    secondToLastRole == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT &&
+    lastRole == SyntacticElement::EXPRESSION
+  ) {
     return this->replaceAXbyEX();
   }
-  if (thirdToLastRole ==  SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT && secondToLastRole == SyntacticElement::EXPRESSION) {
+  if (
+    thirdToLastRole == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT &&
+    secondToLastRole == SyntacticElement::EXPRESSION
+  ) {
     return this->replaceAXXbyEXX();
   }
   if (
@@ -4053,23 +4001,26 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->canBeRegardedAsDifferentialForm(lastExpression)
   ) {
-    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION ;
+    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
     thirdToLastExpression.controlIndex = this->conExpression();
     return true;
   }
-  if ((fifthToLastRole == SyntacticElement::BACKSLASH_INT || this->isDefiniteIntegral(fifthToLastRole)) &&
-    fourthToLastRole == SyntacticElement::EXPRESSION  && (
-          thirdToLastRole ==SyntacticElement::PLUS || thirdToLastRole == SyntacticElement::MINUS
+  if ((
+      fifthToLastRole == SyntacticElement::BACKSLASH_INT ||
+      this->isDefiniteIntegral(fifthToLastRole)
     ) &&
-    secondToLastRole == SyntacticElement::EXPRESSION  &&
+    fourthToLastRole == SyntacticElement::EXPRESSION && (
+      thirdToLastRole == SyntacticElement::PLUS ||
+      thirdToLastRole == SyntacticElement::MINUS
+    ) &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->canBeRegardedAsDifferentialForm(lastExpression)
   ) {
     return this->replaceEOEXByEX();
   }
   if (
     fourthToLastRole == SyntacticElement::BACKSLASH_INT &&
-      thirdToLastRole == SyntacticElement::UNDERSCORE
-&&
+    thirdToLastRole == SyntacticElement::UNDERSCORE &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     Expression integralAtom;
@@ -4080,18 +4031,19 @@ bool CalculatorParser::applyOneRule() {
       integralAtom,
       secondToLastExpression.data
     );
-    fourthToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_WITH_SUBSCRIPT;
-    fourthToLastExpression.controlIndex=this->controlSequences.getIndexNoFail("\\int_{*}");
+    fourthToLastExpression.syntacticRole =
+    SyntacticElement::INTEGRAL_WITH_SUBSCRIPT;
+    fourthToLastExpression.controlIndex =
+    this->controlSequences.getIndexNoFail("\\int_{*}");
     return this->decreaseStackExceptLast(2);
   }
   if (
-      fourthToLastRole ==SyntacticElement::BACKSLASH_INT &&
-      thirdToLastRole== SyntacticElement::UPPER_CARET &&
+    fourthToLastRole == SyntacticElement::BACKSLASH_INT &&
+    thirdToLastRole == SyntacticElement::UPPER_CARET &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     Expression integralAtom;
     integralAtom.makeAtom(*this->owner, "\\int");
-
     fourthToLastExpression.data.makeXOX(
       *this->owner,
       this->owner->opPower(),
@@ -4099,13 +4051,15 @@ bool CalculatorParser::applyOneRule() {
       secondToLastExpression.data
     );
     this->lastRuleName = "\\int^{*}";
-    fourthToLastExpression.syntacticRole =SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT ;
-        fourthToLastExpression.controlIndex = this->controlSequences.getIndexNoFail("\\int^{*}");
+    fourthToLastExpression.syntacticRole =
+    SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT;
+    fourthToLastExpression.controlIndex =
+    this->controlSequences.getIndexNoFail("\\int^{*}");
     return this->decreaseStackExceptLast(2);
   }
   if (
     thirdToLastRole == SyntacticElement::INTEGRAL_WITH_SUBSCRIPT &&
-      secondToLastRole == SyntacticElement::UPPER_CARET &&
+    secondToLastRole == SyntacticElement::UPPER_CARET &&
     lastRole == SyntacticElement::EXPRESSION
   ) {
     thirdToLastExpression.data.makeXOX(
@@ -4114,33 +4068,35 @@ bool CalculatorParser::applyOneRule() {
       thirdToLastExpression.data,
       lastExpression.data
     );
-    thirdToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
-    thirdToLastExpression.controlIndex=this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
-
+    thirdToLastExpression.syntacticRole =
+    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+    thirdToLastExpression.controlIndex =
+    this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
     this->lastRuleName = "int_{*}^{**}";
     return this->decreaseStack(2);
   }
   if (
-      fourthToLastRole == SyntacticElement::INTEGRAL_WITH_SUBSCRIPT&&
+    fourthToLastRole == SyntacticElement::INTEGRAL_WITH_SUBSCRIPT &&
     thirdToLastRole == SyntacticElement::UPPER_CARET &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
-
     fourthToLastExpression.data.makeXOX(
       *this->owner,
       this->owner->opPower(),
       fourthToLastExpression.data,
       secondToLastExpression.data
     );
-    fourthToLastExpression.controlIndex = this->controlSequences.getIndexNoFail( "\\int_{*}^{**}");
-    fourthToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+    fourthToLastExpression.controlIndex =
+    this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
+    fourthToLastExpression.syntacticRole =
+    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
     this->lastRuleName = "int_{*} ^ {**} --> int_{*}^{**}";
     return this->decreaseStackExceptLast(2);
   }
   if (
-    thirdToLastRole == SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT&&
-      secondToLastRole ==SyntacticElement::UNDERSCORE  &&
-      lastRole == SyntacticElement::EXPRESSION
+    thirdToLastRole == SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT &&
+    secondToLastRole == SyntacticElement::UNDERSCORE &&
+    lastRole == SyntacticElement::EXPRESSION
   ) {
     thirdToLastExpression.data.makeXOX(
       *this->owner,
@@ -4149,13 +4105,15 @@ bool CalculatorParser::applyOneRule() {
       lastExpression.data
     );
     this->lastRuleName = "[\\int^{*}_{**}]";
-    thirdToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
-    thirdToLastExpression.controlIndex=this->controlSequences.getIndexNoFail( "\\int_{*}^{**}");
+    thirdToLastExpression.syntacticRole =
+    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+    thirdToLastExpression.controlIndex =
+    this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
     return this->decreaseStack(2);
   }
   if (
-      fourthToLastRole  == SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT &&
-      thirdToLastRole  == SyntacticElement::UNDERSCORE &&
+    fourthToLastRole == SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT &&
+    thirdToLastRole == SyntacticElement::UNDERSCORE &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     fourthToLastExpression.data.makeXOX(
@@ -4165,12 +4123,10 @@ bool CalculatorParser::applyOneRule() {
       secondToLastExpression.data
     );
     this->lastRuleName = "\\int^{*} _ Expression to \\int^{*}_{**}";
-
-   fourthToLastExpression.controlIndex =
-        this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
-
-    fourthToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
-
+    fourthToLastExpression.controlIndex =
+    this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
+    fourthToLastExpression.syntacticRole =
+    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
     return this->decreaseStackExceptLast(2);
   }
   if (this->owner->flagUsePredefinedWordSplits) {
@@ -4200,7 +4156,7 @@ bool CalculatorParser::applyOneRule() {
     lastS == "\\circ" &&
     secondToLastS != "{" &&
     secondToLastS != "(" &&
-      secondToLastRole != SyntacticElement::UPPER_CARET
+    secondToLastRole != SyntacticElement::UPPER_CARET
   ) {
     return this->replaceXByCon(this->conApplyFunction());
   }
@@ -4276,61 +4232,73 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(2);
   }
   if (
-      fourthToLastRole ==SyntacticElement::LEFT_CURLY_BRACE&&
-    thirdToLastRole ==  SyntacticElement::VARIABLE &&
-      secondToLastRole == SyntacticElement::RIGHT_CURLY_BRACE
-           &&
-      lastRole !=SyntacticElement::RIGHT_CURLY_BRACE &&
-      lastRole != SyntacticElement::WHITE_SPACE
+    fourthToLastRole == SyntacticElement::LEFT_CURLY_BRACE &&
+    thirdToLastRole == SyntacticElement::VARIABLE &&
+    secondToLastRole == SyntacticElement::RIGHT_CURLY_BRACE &&
+    lastRole != SyntacticElement::RIGHT_CURLY_BRACE &&
+    lastRole != SyntacticElement::WHITE_SPACE
   ) {
     this->lastRuleName = "{variable}}X -> {expression}}X";
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(2);
   }
-  if ((secondToLastRole ==SyntacticElement::LEFT_SEPARATOR  || secondToLastRole== SyntacticElement::RIGHT_SEPARATOR) &&
-      lastRole == SyntacticElement::PIPE
+  if ((
+      secondToLastRole == SyntacticElement::LEFT_SEPARATOR ||
+      secondToLastRole == SyntacticElement::RIGHT_SEPARATOR
+    ) &&
+    lastRole == SyntacticElement::PIPE
   ) {
     this->lastRuleName = "left or right pipe to pipe";
     return this->popBelowStackTop();
   }
   if (
-      secondToLastRole == SyntacticElement::LEFT_SEPARATOR  && (lastRole == SyntacticElement::LEFT_PARENTHESIS
-
-                                                               ||lastRole == SyntacticElement::LEFT_BRACKET ||
-                                                               lastRole == SyntacticElement::LEFT_CURLY_BRACE
-                                                                   )
+    secondToLastRole == SyntacticElement::LEFT_SEPARATOR && (
+      lastRole == SyntacticElement::LEFT_PARENTHESIS ||
+      lastRole == SyntacticElement::LEFT_BRACKET ||
+      lastRole == SyntacticElement::LEFT_CURLY_BRACE
+    )
   ) {
     this->lastRuleName = "left delimiter to delimiter";
     return this->popBelowStackTop();
   }
   if (
     secondToLastRole == SyntacticElement::RIGHT_SEPARATOR && (
-          lastRole ==SyntacticElement::RIGHT_PARENTHESIS || lastRole==SyntacticElement::RIGHT_BRACKET
-                                                                || lastRole == SyntacticElement::RIGHT_CURLY_BRACE
+      lastRole == SyntacticElement::RIGHT_PARENTHESIS ||
+      lastRole == SyntacticElement::RIGHT_BRACKET ||
+      lastRole == SyntacticElement::RIGHT_CURLY_BRACE
     )
   ) {
     this->lastRuleName = "right delimiter to delimiter ";
     return this->popBelowStackTop();
   }
-  if (lastRole == SyntacticElement::EQUALS  && secondToLastRole== SyntacticElement::EQUALS) {
-    this->lastRuleName="equals equals to equalsEquals";
+  if (
+    lastRole == SyntacticElement::EQUALS &&
+    secondToLastRole == SyntacticElement::EQUALS
+  ) {
+    this->lastRuleName = "equals equals to equalsEquals";
     secondToLastExpression.controlIndex = this->conEqualEqual();
     secondToLastExpression.syntacticRole = SyntacticElement::EQUALS_EQUALS;
-return    this->popTopSyntacticStack();
+    return this->popTopSyntacticStack();
   }
-  if (secondToLastRole== SyntacticElement::LEFT_PARENTHESIS && lastRole==SyntacticElement::RIGHT_PARENTHESIS) {
-secondToLastExpression.data.reset(*this->owner, 1);
-secondToLastExpression.data.addChildAtomOnTop(this->owner->opSequence());
-secondToLastExpression.controlIndex = this->conExpression();
-secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
+  if (
+    secondToLastRole == SyntacticElement::LEFT_PARENTHESIS &&
+    lastRole == SyntacticElement::RIGHT_PARENTHESIS
+  ) {
+    secondToLastExpression.data.reset(*this->owner, 1);
+    secondToLastExpression.data.addChildAtomOnTop(this->owner->opSequence());
+    secondToLastExpression.controlIndex = this->conExpression();
+    secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    this->lastRuleName = "left right parentheses to empty sequence";
     return this->decreaseStackSetCharacterRanges(1);
-
   }
   if (secondToLastS == "\\text" && lastS == "d") {
     if (lastExpression.data.isOperationGiven("d")) {
       return this->replaceXXbyO(this->owner->opDifferential());
     }
   }
-  if (thirdToLastS == "\\text" && secondToLastRole == SyntacticElement::EXPRESSION) {
+  if (
+    thirdToLastS == "\\text" &&
+    secondToLastRole == SyntacticElement::EXPRESSION
+  ) {
     if (secondToLastExpression.data.isOperationGiven("d")) {
       return this->replaceXXYbyOY(this->owner->opDifferential());
     }
@@ -4367,6 +4335,7 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsApplyFunctionInPreceding(lastRole)
   ) {
+    this->lastRuleName = "e circ e any to e of e any";
     return this->replaceEXEXByEX();
   }
   // end of ambiguity.
@@ -4380,9 +4349,9 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     return this->replaceOXEEXByEX();
   }
   if (
-      fourthToLastRole == SyntacticElement::EXPRESSION &&
-      thirdToLastRole ==SyntacticElement::UNDERSCORE &&
-    secondToLastRole ==  SyntacticElement::EXPRESSION&&
+    fourthToLastRole == SyntacticElement::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::UNDERSCORE &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     lastRole != SyntacticElement::UNDERSCORE
   ) {
     return this->replaceEOEXByEX();
@@ -4395,7 +4364,10 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   ) {
     return this->replaceXYYXByYY();
   }
-  if (secondToLastRole == SyntacticElement::EXPRESSION && lastS == "!") {
+  if (
+    secondToLastRole == SyntacticElement::EXPRESSION &&
+    lastRole == SyntacticElement::FACTORIAL
+  ) {
     return this->replaceEOByE();
   }
   if (
@@ -4474,15 +4446,15 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     return this->replaceEPowerMinusEXByEX();
   }
   if (
-   thirdToLastRole == SyntacticElement::MINUS &&
-      secondToLastRole == SyntacticElement::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::MINUS &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsPlusInPreceding(lastRole)
   ) {
     return this->replaceEOEXByEX();
   }
   if (
-      thirdToLastRole == SyntacticElement::MINUS &&
+    thirdToLastRole == SyntacticElement::MINUS &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     lastS == "|" &&
@@ -4491,17 +4463,17 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     return this->replaceEOEXByEX();
   }
   if (
-      secondToLastRole ==SyntacticElement::EXPRESSION &&
-      thirdToLastRole == SyntacticElement::MINUS &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::MINUS &&
     this->allowsPlusInPreceding(lastRole)
   ) {
-
-    thirdToLastExpression.data.makeOX(*this->owner, this->owner->opMinus(), secondToLastExpression.data);
-    thirdToLastExpression.syntacticRole=SyntacticElement::EXPRESSION;
-    thirdToLastExpression.controlIndex= this->conExpression();
+    thirdToLastExpression.data.makeOX(
+      *this->owner, this->owner->opMinus(), secondToLastExpression.data
+    );
+    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    thirdToLastExpression.controlIndex = this->conExpression();
     this->lastRuleName = "minus expression to minusexpression";
-    return    this->decreaseStackExceptLast(1);
-
+    return this->decreaseStackExceptLast(1);
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
@@ -4604,10 +4576,10 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     return this->replaceOXEEXByEX();
   }
   if (
-    seventhToLastS == "\\sqrt" &&
-    sixthToLastS == "[" &&
+    seventhToLastRole == SyntacticElement::SQRT &&
+    sixthToLastRole == SyntacticElement::LEFT_BRACKET &&
     fifthToLastRole == SyntacticElement::EXPRESSION &&
-    fourthToLastS == "]" &&
+    fourthToLastRole == SyntacticElement::RIGHT_BRACKET &&
     thirdToLastRole == SyntacticElement::EXPRESSION
   ) {
     return this->replaceOXEXEXXByEXX();
@@ -4618,30 +4590,29 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(secondToLastExpression, lastExpression)
   ) {
-
-
     if (this->flagLogSyntaxRules) {
-      this->lastRuleName = "(expression expression any) to (expression times expression any)";
+      this->lastRuleName =
+      "(expression expression any) to (expression times expression any)";
     }
-    thirdToLastExpression.data.makeXOX(*this->owner, this->owner->opTimes(), thirdToLastExpression.data, secondToLastExpression.data);
-
-
+    thirdToLastExpression.data.makeXOX(
+      *this->owner,
+      this->owner->opTimes(),
+      thirdToLastExpression.data,
+      secondToLastExpression.data
+    );
     Expression impliedFunApplication;
     if (
       CalculatorBasics::timesToFunctionApplication(
-        *this->owner, thirdToLastExpression.data,
-        impliedFunApplication
+        *this->owner, thirdToLastExpression.data, impliedFunApplication
       )
     ) {
-     thirdToLastExpression.
-      data =
-      impliedFunApplication;
+      thirdToLastExpression.data = impliedFunApplication;
       if (this->flagLogSyntaxRules) {
-        this->lastRuleName = "(expression expression any) to (expression of expression any)";
+        this->lastRuleName =
+        "(expression expression any) to (expression of expression any)";
       }
     }
-    return    this->decreaseStackExceptLast(1);
-
+    return this->decreaseStackExceptLast(1);
   }
   if ((lastS == ">" && secondToLastS == "=") || (
       lastS == "=" && secondToLastS == ">"
@@ -4649,13 +4620,25 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   ) {
     return this->replaceXXByCon(this->conGEQ());
   }
-  if (thirdToLastS == "|" && secondToLastRole == SyntacticElement::EXPRESSION && lastS == "|") {
+  if (
+    thirdToLastS == "|" &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
+    lastS == "|"
+  ) {
     return this->replaceOEXByE();
   }
-  if (thirdToLastS == "(" && secondToLastRole == SyntacticElement::EXPRESSION && lastS == ")") {
+  if (
+    thirdToLastS == "(" &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
+    lastS == ")"
+  ) {
     return this->replaceXEXByE();
   }
-  if (thirdToLastS == "{" && secondToLastRole == SyntacticElement::EXPRESSION && lastS == "}") {
+  if (
+    thirdToLastS == "{" &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
+    lastS == "}"
+  ) {
     return this->replaceXEXByE();
   }
   if (
@@ -4671,32 +4654,41 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   if (thirdToLastS == "{" && secondToLastS == "\\circ" && lastS == "}") {
     return this->replaceOXbyEX();
   }
-  if (secondToLastRole == SyntacticElement::UPPER_CARET&& lastS == "\\circ") {
+  if (secondToLastRole == SyntacticElement::UPPER_CARET && lastS == "\\circ") {
     return this->replaceObyE();
   }
   if (this->owner->flagUseBracketsForIntervals) {
-    if (thirdToLastS == "(" && secondToLastRole == SyntacticElement::EXPRESSION && lastS == "]") {
+    if (
+      thirdToLastRole == SyntacticElement::LEFT_PARENTHESIS &&
+      secondToLastRole == SyntacticElement::EXPRESSION &&
+      lastRole == SyntacticElement::RIGHT_BRACKET
+    ) {
       return
       this->replaceXEXByEContainingOE(this->owner->opIntervalRightClosed());
     }
-    if (thirdToLastS == "[" && secondToLastRole == SyntacticElement::EXPRESSION && lastS == ")") {
+    if (
+      thirdToLastRole == SyntacticElement::LEFT_BRACKET &&
+      secondToLastRole == SyntacticElement::EXPRESSION &&
+      lastRole == SyntacticElement::RIGHT_PARENTHESIS
+    ) {
       return
       this->replaceXEXByEContainingOE(this->owner->opIntervalLeftClosed());
     }
-    if (thirdToLastS == "[" && secondToLastRole == SyntacticElement::EXPRESSION && lastS == "]") {
+    if (
+      thirdToLastRole == SyntacticElement::LEFT_BRACKET &&
+      secondToLastRole == SyntacticElement::EXPRESSION &&
+      lastRole == SyntacticElement::RIGHT_BRACKET
+    ) {
       return this->replaceXEXByEContainingOE(this->owner->opIntervalClosed());
     }
-    if (this->owner->flagUseBracketsForIntervals) {
-      if (secondToLastExpression.data.isSequenceNElements(2)) {
-        if (
-          this->isSeparatorFromTheLeftForInterval(fourthToLastS) &&
-          thirdToLastS == "(" &&
-          secondToLastS == "Sequence" &&
-          lastS == ")"
-        ) {
-          return
-          this->replaceXEXByEContainingOE(this->owner->opIntervalOpen());
-        }
+    if (secondToLastExpression.data.isSequenceNElements(2)) {
+      if (
+        this->isSeparatorFromTheLeftForInterval(fourthToLastRole) &&
+        thirdToLastRole == SyntacticElement::LEFT_PARENTHESIS &&
+        secondToLastRole == SyntacticElement::SEQUENCE &&
+        lastRole == SyntacticElement::RIGHT_PARENTHESIS
+      ) {
+        return this->replaceXEXByEContainingOE(this->owner->opIntervalOpen());
       }
     }
   }
@@ -4758,9 +4750,9 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   }
   if (
     this->isSeparatorFromTheLeftForDefinition(fifthToLastRole) &&
-      fourthToLastRole ==SyntacticElement::EXPRESSION&&
-      thirdToLastRole == SyntacticElement::EQUALS &&
-    secondToLastRole ==SyntacticElement::EXPRESSION&&
+    fourthToLastRole == SyntacticElement::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::EQUALS &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->isSeparatorFromTheRightForDefinition(lastRole)
   ) {
     this->replaceEOEXByEX();
@@ -4776,7 +4768,7 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     return this->replaceEOEXByEX();
   }
   if (
-    lastS == "Sequence" &&
+    lastRole == SyntacticElement::SEQUENCE &&
     lastExpression.data.size() == 0 &&
     lastExpression.data.data == this->owner->opList()
   ) {
@@ -4785,32 +4777,54 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
       this->controlSequences.getIndexNoFail("MakeSequence")
     );
   }
-  if (thirdToLastS == "\\sqrt" && secondToLastRole == SyntacticElement::EXPRESSION) {
-    return this->replaceSqrtEXByEX();
-  }
-  if (fourthToLastS == "\\sqrt" && thirdToLastRole == SyntacticElement::EXPRESSION) {
-    return this->replaceSqrtEXXByEXX();
+  if (
+    thirdToLastRole == SyntacticElement::SQRT &&
+    secondToLastRole == SyntacticElement::EXPRESSION
+  ) {
+    thirdToLastExpression.data.makeXOX(
+      *this->owner,
+      this->owner->opSqrt(),
+      this->owner->expressionTwo(),
+      secondToLastExpression.data
+    );
+    thirdToLastExpression.controlIndex = this->conExpression();
+    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    return this->decreaseStackExceptLast(1);
   }
   if (
-    fourthToLastS == "\\sqrt" &&
+    fourthToLastRole == SyntacticElement::SQRT &&
+    thirdToLastRole == SyntacticElement::EXPRESSION
+  ) {
+    fourthToLastExpression.data.makeXOX(
+      *this->owner,
+      this->owner->opSqrt(),
+      this->owner->expressionTwo(),
+      thirdToLastExpression.data
+    );
+    fourthToLastExpression.controlIndex = this->conExpression();
+    fourthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    return this->decreaseStackExceptLastTwo(1);
+  }
+  if (
+    fourthToLastRole == SyntacticElement::SQRT &&
     thirdToLastS == "{}" &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     return this->replaceSqrtXEXByEX();
   }
   if (
-    sixthToLastS == "\\sqrt" &&
+    sixthToLastRole == SyntacticElement::SQRT &&
     fifthToLastRole == SyntacticElement::LEFT_BRACKET &&
-      fourthToLastRole == SyntacticElement::EXPRESSION&&
-      thirdToLastRole ==SyntacticElement::RIGHT_BRACKET &&
-    secondToLastRole== SyntacticElement::EXPRESSION
+    fourthToLastRole == SyntacticElement::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::RIGHT_BRACKET &&
+    secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     return this->replaceOXEXEXByEX();
   }
   if (
     this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.contains
     (thirdToLastS) &&
-      secondToLastRole ==SyntacticElement::EXPRESSION &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
     return this->replaceOEXByEX();
@@ -4818,8 +4832,8 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   if (
     this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.contains
     (fourthToLastS) &&
-      thirdToLastRole == SyntacticElement::UPPER_CARET &&
-      secondToLastRole == SyntacticElement::EXPRESSION&&
+    thirdToLastRole == SyntacticElement::UPPER_CARET &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->isSeparatorFromTheRightGeneral(lastS)
   ) {
     return this->replaceC1C2Eby_C2ofC1E();
@@ -4827,8 +4841,8 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   if (
     this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.contains
     (fourthToLastS) &&
-      thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
-      secondToLastRole == SyntacticElement::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsApplyFunctionInPreceding(lastRole)
   ) {
     return this->replaceOXEXByEX();
@@ -4842,8 +4856,8 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   }
   if (
     fourthToLastS == "\\log" &&
-    thirdToLastRole ==SyntacticElement::UNDERSCORE &&
-      secondToLastRole == SyntacticElement::EXPRESSION
+    thirdToLastRole == SyntacticElement::UNDERSCORE &&
+    secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     return
     this->replaceXYYYByConYYY(
@@ -4861,44 +4875,45 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     }
   }
   if (
-      fourthToLastRole==SyntacticElement::EXPRESSION &&
+    fourthToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastS == "\\cup" &&
-    secondToLastRole ==SyntacticElement::EXPRESSION  &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
     return this->replaceEOEXByEX();
   }
   if (
-    fourthToLastRole==SyntacticElement::EXPRESSION  &&
+    fourthToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastS == "\\cap" &&
-    secondToLastRole==SyntacticElement::EXPRESSION &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
     return this->replaceEOEXByEX();
   }
   if (
-    fourthToLastRole==SyntacticElement::EXPRESSION &&
+    fourthToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastS == "\\sqcup" &&
-    secondToLastRole==SyntacticElement::EXPRESSION &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
     return this->replaceEOEXByEX();
   }
   if (
     thirdToLastS == "if" &&
-    secondToLastRole==SyntacticElement::EXPRESSION  &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsIfInPreceding(lastS)
   ) {
     return this->replaceOXXByEXX();
   }
   if (
-    fourthToLastS == "Sequence" &&
-    thirdToLastS == "," &&
-    secondToLastRole==SyntacticElement::EXPRESSION  && (
-      lastS == "," ||
-      lastS == ")" ||
-      lastS == "}" || (
-        this->owner->flagUseBracketsForIntervals && lastS == "]"
+    fourthToLastRole == SyntacticElement::SEQUENCE &&
+    thirdToLastRole == SyntacticElement::COMMA &&
+    secondToLastRole == SyntacticElement::EXPRESSION && (
+      lastRole == SyntacticElement::COMMA ||
+      lastRole == SyntacticElement::RIGHT_PARENTHESIS ||
+      lastRole == SyntacticElement::RIGHT_CURLY_BRACE || (
+        this->owner->flagUseBracketsForIntervals &&
+        lastRole == SyntacticElement::RIGHT_BRACKET
       )
     )
   ) {
@@ -4908,63 +4923,82 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
       thirdToLastS != "[" || this->owner->flagUseBracketsForIntervals
     ) &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
-    lastS == ","
+    lastRole == SyntacticElement::COMMA
   ) {
     return this->replaceYXBySequenceX(this->conSequence());
   }
   if (
     thirdToLastS == "MakeSequence" &&
     secondToLastS == "{}" &&
-    lastRole==SyntacticElement::EXPRESSION
+    lastRole == SyntacticElement::EXPRESSION
   ) {
     return this->replaceXXYBySequenceY(this->conExpression());
   }
   if (
     fourthToLastS == "MakeSequence" &&
     thirdToLastS == "{}" &&
-    secondToLastRole==SyntacticElement::EXPRESSION
+    secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     return this->replaceXXYXBySequenceYX(this->conExpression());
   }
   if (
-    thirdToLastS == "Sequence" &&
-    secondToLastS == "," && (lastS == ")" || lastS == "}" || lastS == "]")
+    thirdToLastRole == SyntacticElement::SEQUENCE &&
+    secondToLastRole == SyntacticElement::COMMA && (
+      lastRole == SyntacticElement::RIGHT_PARENTHESIS ||
+      lastRole == SyntacticElement::RIGHT_CURLY_BRACE ||
+      lastRole == SyntacticElement::RIGHT_BRACKET
+    )
   ) {
     this->lastRuleName = "replace xy by y";
     return this->replaceXYByY();
   }
   if (
-    fifthToLastRole==SyntacticElement::EXPRESSION &&
+    fifthToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastS == "{}" &&
     thirdToLastS == "(" &&
-    secondToLastS == "Sequence" &&
+    secondToLastRole == SyntacticElement::SEQUENCE &&
     lastS == ")"
   ) {
     return this->replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   }
   if (
-    fifthToLastRole==SyntacticElement::EXPRESSION &&
+    fifthToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastS == "{}" &&
     thirdToLastS == "{" &&
-    secondToLastS == "Sequence" &&
+    secondToLastRole == SyntacticElement::SEQUENCE &&
     lastS == "}"
   ) {
     return this->replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   }
   if (
-    secondToLastS == "Sequence" && ((thirdToLastS == "(" && lastS == ")") || (
-        thirdToLastS == "{" && lastS == "}"
+    secondToLastRole == SyntacticElement::SEQUENCE && ((
+        thirdToLastRole == SyntacticElement::LEFT_PARENTHESIS &&
+        lastRole == SyntacticElement::RIGHT_PARENTHESIS
+      ) || (
+        thirdToLastRole == SyntacticElement::LEFT_CURLY_BRACE &&
+        lastRole == SyntacticElement::RIGHT_CURLY_BRACE
       ) || (
         this->owner->flagUseBracketsForIntervals && ((
-            thirdToLastS == "[" && lastS == ")"
-          ) || (thirdToLastS == "(" && lastS == "]") || (
-            thirdToLastS == "[" && lastS == "]"
+            thirdToLastRole == SyntacticElement::LEFT_BRACKET &&
+            lastRole == SyntacticElement::RIGHT_PARENTHESIS
+          ) || (
+            thirdToLastRole == SyntacticElement::LEFT_PARENTHESIS &&
+            lastRole == SyntacticElement::RIGHT_BRACKET
+          ) || (
+            thirdToLastRole == SyntacticElement::LEFT_BRACKET &&
+            lastRole == SyntacticElement::RIGHT_BRACKET
           )
         )
       )
     )
   ) {
-    return this->replaceXXbyEX();
+    secondToLastExpression.controlIndex = this->conExpression();
+    secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName =
+      "left delimiter sequence right delimiter to expression";
+    }
+    return true;
   }
   if (
     fourthToLastRole == SyntacticElement::BEGIN &&
@@ -5006,8 +5040,7 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     secondToLastRole == SyntacticElement::BACKSLASH &&
     lastRole == SyntacticElement::BACKSLASH
   ) {
-    secondToLastExpression.syntacticRole =
-    SyntacticElement::DOUBLE_BACKSLASH;
+    secondToLastExpression.syntacticRole = SyntacticElement::DOUBLE_BACKSLASH;
     secondToLastExpression.source = "\\\\";
     secondToLastExpression.controlIndex =
     this->controlSequences.getIndexNoFail("\\\\");
@@ -5018,9 +5051,8 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     return this->popTopSyntacticStack();
   }
   if (
-      thirdToLastRole == SyntacticElement::MATRIX_UNDER_CONSTRUCTION
-&&
-      secondToLastRole== SyntacticElement::EXPRESSION &&
+    thirdToLastRole == SyntacticElement::MATRIX_UNDER_CONSTRUCTION &&
+    secondToLastRole == SyntacticElement::EXPRESSION &&
     lastRole == SyntacticElement::AMPERSAND
   ) {
     return this->replaceMatrixEXByMatrix();
@@ -5040,20 +5072,23 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   }
   if (
     thirdToLastRole == SyntacticElement::MATRIX_UNDER_CONSTRUCTION &&
-      secondToLastRole ==SyntacticElement::EXPRESSION &&
-      lastRole == SyntacticElement::DOUBLE_BACKSLASH
+    secondToLastRole == SyntacticElement::EXPRESSION &&
+    lastRole == SyntacticElement::DOUBLE_BACKSLASH
   ) {
     return this->replaceMatrixEXByMatrixNewRow();
   }
-  if (secondToLastRole == SyntacticElement::MATRIX_UNDER_CONSTRUCTION && lastRole == SyntacticElement::MATRIX_END) {
+  if (
+    secondToLastRole == SyntacticElement::MATRIX_UNDER_CONSTRUCTION &&
+    lastRole == SyntacticElement::MATRIX_END
+  ) {
     return this->replaceMatrixXByE();
   }
   if (!this->owner->flagUseBracketsForIntervals) {
     if (
       fifthToLastS == "[" &&
-      fourthToLastRole==SyntacticElement::EXPRESSION &&
-      thirdToLastS == "," &&
-      secondToLastRole==SyntacticElement::EXPRESSION &&
+      fourthToLastRole == SyntacticElement::EXPRESSION &&
+      thirdToLastRole == SyntacticElement::COMMA &&
+      secondToLastRole == SyntacticElement::EXPRESSION &&
       lastS == "]"
     ) {
       return this->replaceXEXEXBy_CofEE(this->conLieBracket());
@@ -5065,15 +5100,17 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     sixthToLastRole == SyntacticElement::COLON &&
     fifthToLastS == "if" &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
-      thirdToLastRole ==SyntacticElement::EQUALS &&
+    thirdToLastRole == SyntacticElement::EQUALS &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->isSeparatorFromTheRightForDefinition(lastRole)
   ) {
     return this->replaceEXXEXEXBy_CofEEE_X(this->conDefineConditional());
   }
   if (
-    thirdToLastS == "SequenceStatements" &&
-    secondToLastRole==SyntacticElement::EXPRESSION && (lastS == ")" || lastS == "}")
+    thirdToLastRole == SyntacticElement::SEQUENCE_STATEMENTS &&
+    secondToLastRole == SyntacticElement::EXPRESSION && (
+      lastS == ")" || lastS == "}"
+    )
   ) {
     this->replaceEXdotsXbySsXdotsX(1);
     return this->setLastRuleName("Commands;Expression)");
@@ -5086,12 +5123,16 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
     this->lastRuleName = "expression semicolon";
     return true;
   }
-  if (secondToLastRole==SyntacticElement::EXPRESSION && lastS == "EndProgram") {
+  if (
+    secondToLastRole == SyntacticElement::EXPRESSION && lastS == "EndProgram"
+  ) {
     this->replaceEXdotsXbySsXdotsX(1);
     return this->setLastRuleName("Expression EndProgram");
   }
   if ((thirdToLastS == "(" || thirdToLastS == "{") &&
-    secondToLastS == "SequenceStatements" && (lastS == ")" || lastS == "}")
+    secondToLastRole == SyntacticElement::SEQUENCE_STATEMENTS && (
+      lastS == ")" || lastS == "}"
+    )
   ) {
     return this->replaceXEXByE();
   }
@@ -5106,10 +5147,13 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
   ) {
     return this->replaceSsSsXdotsXbySsXdotsX(1);
   }
-  if (secondToLastS == "SequenceStatements" && lastRole ==SyntacticElement::END_PROGRAM) {
+  if (
+    secondToLastS == "SequenceStatements" &&
+    lastRole == SyntacticElement::END_PROGRAM
+  ) {
     return this->replaceXXByCon(this->conExpression());
   }
-  if (lastRole ==SyntacticElement::END_PROGRAM) {
+  if (lastRole == SyntacticElement::END_PROGRAM) {
     return this->decreaseStackSetCharacterRanges(1);
   }
   return false;
@@ -5118,6 +5162,6 @@ secondToLastExpression.syntacticRole =SyntacticElement::EXPRESSION;
 bool CalculatorParser::isDefiniteIntegral(SyntacticElement::Role role) {
   return
   role == SyntacticElement::INTEGRAL_WITH_SUBSCRIPT ||
-         role ==  SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT||
-         role == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+  role == SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT ||
+  role == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
 }

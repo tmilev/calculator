@@ -1797,18 +1797,40 @@ public:
     DOUBLE_BACKSLASH,
     AMPERSAND,
     BEGIN,
+    FACTORIAL,
     END,
     FRAC,
     ARRAY_ENVIRONMENT,
     MATRIX_ENVIRONMENT,
     MATRIX_UNDER_CONSTRUCTION,
     MATRIX_END,
-    FONT_MODIFIER,COMMA,PLUS,MINUS,SEQUENCE_STATEMENTS,OR,AND, LEFT_SEPARATOR, RIGHT_SEPARATOR,PIPE,LESS_THAN_LIKE,GREATER_THAN_LIKE,UNDERSCORE,
-    UPPER_CARET, LEFT_RIGHT_CURLY_BRACE, CIRC, DOLLAR, BACKSLASH_INT, INTEGRAL_WITH_SUB_AND_SUPERSCRIPT,INTEGRAL_WITH_SUBSCRIPT, INTEGRAL_WITH_SUPERSCRIPT,
+    FONT_MODIFIER,
+    COMMA,
+    PLUS,
+    MINUS,
+    SEQUENCE_STATEMENTS,
+    OR,
+    AND,
+    LEFT_SEPARATOR,
+    RIGHT_SEPARATOR,
+    PIPE,
+    LESS_THAN_LIKE,
+    GREATER_THAN_LIKE,
+    UNDERSCORE,
+    UPPER_CARET,
+    LEFT_RIGHT_CURLY_BRACE,
+    CIRC,
+    DOLLAR,
+    BACKSLASH_INT,
+    INTEGRAL_WITH_SUB_AND_SUPERSCRIPT,
+    INTEGRAL_WITH_SUBSCRIPT,
+    INTEGRAL_WITH_SUPERSCRIPT,
     STAR,
     DIVISION_SIGN,
     CUP,
-    CAP,TENSOR_PRODUCT
+    CAP,
+    TENSOR_PRODUCT,
+    SEQUENCE
   };
   // Deprecated. Switch to syntacticRole instead.
   int controlIndex;
@@ -2363,7 +2385,7 @@ private:
   bool isBoundVariableInContext(int inputOperation);
   bool isNonBoundVariableInContext(int inputOperation);
   bool isStandardCalculatorCharacter(unsigned char input);
-  bool isSeparatorFromTheLeftForInterval(const std::string& input);
+  bool isSeparatorFromTheLeftForInterval(SyntacticElement::Role input);
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(SyntacticElement::Role role);
   bool isSeparatorFromTheRightForList(const std::string& input);
@@ -2377,7 +2399,8 @@ private:
   bool allowsInInPreceding(const std::string& lookAhead);
   bool allowsPlusInPreceding(SyntacticElement::Role role);
   bool allowsTimesInNext(const SyntacticElement& preceding);
-  bool allowsTimesInPreceding(const SyntacticElement& preceding, const SyntacticElement& lookAhead
+  bool allowsTimesInPreceding(
+    const SyntacticElement& preceding, const SyntacticElement& lookAhead
   );
   bool allowsTimesInPreceding(const SyntacticElement& lookAhead);
   bool allowsTensorInPreceding(const SyntacticElement& lookAhead);
@@ -2434,8 +2457,6 @@ private:
   bool replaceOXEXByEX();
   bool replaceOXEEXByEX();
   bool replaceOXXEXEXEXByE();
-  bool replaceSqrtEXXByEXX();
-  bool replaceSqrtEXByEX();
   bool replaceSqrtXEXByEX();
   bool replaceOXEXEByE();
   bool replaceOXEXEXByEX();

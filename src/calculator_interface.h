@@ -1784,11 +1784,13 @@ public:
     EQUALS_EQUALS,
     EQUALS_EQUALS_EQUALS,
     EXPRESSION,
+    ERROR,
     CHOOSE,
     COLON,
     SEMICOLON,
     SQRT,
     IF,
+    MAKE_SEQUENCE,
     DOT,
     LEFT_PARENTHESIS,
     RIGHT_PARENTHESIS,
@@ -1831,6 +1833,7 @@ public:
     DIVISION_SIGN,
     CUP,
     CAP,
+    SQ_CUP,
     TENSOR_PRODUCT,
     SEQUENCE
   };

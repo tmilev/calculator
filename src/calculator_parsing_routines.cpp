@@ -56,6 +56,8 @@ const {
 
 std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
   switch (role) {
+  case SyntacticElement::ERROR:
+    return "ERROR";
   case SyntacticElement::EQUALS_COLON:
     return "EQUALS_COLON";
   case SyntacticElement::EQUALS_EQUALS_EQUALS:
@@ -192,6 +194,10 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
     return "TENSOR_PRODUCT";
   case SQRT:
     return "SQRT";
+  case SQ_CUP:
+    return "SQ_CUP";
+  case MAKE_SEQUENCE:
+    return "MAKE_SEQUENCE";
   }
   return "SHOULD_BE_UNREACHABLE";
 }
@@ -270,8 +276,10 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\\circ", SyntacticElement::CIRC);
   registerKeyword("\\int", SyntacticElement::BACKSLASH_INT);
   registerKeyword("\\cup", SyntacticElement::CUP);
+  registerKeyword("\\sqcup", SyntacticElement::SQ_CUP);
   registerKeyword("\\cap", SyntacticElement::CAP);
   registerKeyword("\\sqrt", SyntacticElement::SQRT);
+  registerKeyword("MakeSequence", SyntacticElement::MAKE_SEQUENCE);
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("ln", "\\log");
   keyWordAutocorrections.setKeyValue("log", "\\log");
@@ -1950,6 +1958,9 @@ bool CalculatorParser::replaceXEXByE() {
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].
   controlIndex =
   this->conExpression();
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].
+  syntacticRole =
+  SyntacticElement::EXPRESSION;
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Calculator::replaceXEXByE]";
   }
@@ -1963,6 +1974,9 @@ bool CalculatorParser::replaceXEXYByEY() {
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].
   controlIndex =
   this->conExpression();
+  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].
+  syntacticRole =
+  SyntacticElement::EXPRESSION;
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] = (
     *this->currentSyntacticStack
   )[(*this->currentSyntacticStack).size - 1];
@@ -2027,6 +2041,7 @@ bool CalculatorParser::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {
     << "but later to denote a bound variable. This is not allowed. ";
     element.errorString = out.str();
     element.controlIndex = this->conError();
+    element.syntacticRole = SyntacticElement::ERROR;
     this->decreaseStackSetCharacterRanges(numberOfXs);
     this->replaceXXYByY();
     return true;
@@ -3580,7 +3595,10 @@ bool CalculatorParser::applyOneRule() {
     }
     return this->popTopSyntacticStack();
   }
-  if (lastS == "(" || lastS == "{") {
+  if (
+    lastRole == SyntacticElement::LEFT_PARENTHESIS ||
+    lastRole == SyntacticElement::LEFT_CURLY_BRACE
+  ) {
     (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].
     totalNonBoundVariablesInherited =
     this->nonBoundVariablesInContext.size;
@@ -4792,7 +4810,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     fourthToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "\\cup" &&
+    thirdToLastRole == SyntacticElement::CUP &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
@@ -4800,7 +4818,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     fourthToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "\\cap" &&
+    thirdToLastRole == SyntacticElement::CAP &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
@@ -4808,7 +4826,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     fourthToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "\\sqcup" &&
+    thirdToLastRole == SyntacticElement::SQ_CUP &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
@@ -4836,23 +4854,26 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceSequenceUXEYBySequenceZY(this->conSequence());
   }
   if ((
-      fourthToLastS != "MakeSequence" ||
+      fourthToLastRole != SyntacticElement::MAKE_SEQUENCE ||
       thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE
-    ) && (thirdToLastS != "[" || this->owner->flagUseBracketsForIntervals) &&
+    ) && (
+      thirdToLastRole != SyntacticElement::LEFT_BRACKET ||
+      this->owner->flagUseBracketsForIntervals
+    ) &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     lastRole == SyntacticElement::COMMA
   ) {
     return this->replaceYXBySequenceX(this->conSequence());
   }
   if (
-    thirdToLastS == "MakeSequence" &&
+    thirdToLastRole != SyntacticElement::MAKE_SEQUENCE &&
     secondToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
     lastRole == SyntacticElement::EXPRESSION
   ) {
     return this->replaceXXYBySequenceY(this->conExpression());
   }
   if (
-    fourthToLastS == "MakeSequence" &&
+    fourthToLastRole != SyntacticElement::MAKE_SEQUENCE &&
     thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
@@ -4872,7 +4893,7 @@ bool CalculatorParser::applyOneRule() {
   if (
     fifthToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
-    thirdToLastS == "(" &&
+    thirdToLastRole == SyntacticElement::LEFT_PARENTHESIS &&
     secondToLastRole == SyntacticElement::SEQUENCE &&
     lastS == ")"
   ) {

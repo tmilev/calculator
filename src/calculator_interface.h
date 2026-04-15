@@ -1790,6 +1790,7 @@ public:
     SEMICOLON,
     SQRT,
     IF,
+    IN,
     MAKE_SEQUENCE,
     DOT,
     LEFT_PARENTHESIS,
@@ -1821,6 +1822,8 @@ public:
     LESS_THAN_LIKE,
     GREATER_THAN_LIKE,
     UNDERSCORE,
+    LOGARITHM,
+    LOGARITHM_BASE,
     UPPER_CARET,
     LEFT_RIGHT_CURLY_BRACE,
     CIRC,
@@ -1830,12 +1833,15 @@ public:
     INTEGRAL_WITH_SUBSCRIPT,
     INTEGRAL_WITH_SUPERSCRIPT,
     STAR,
+    CDOT,
+    TIMES_X_SIGN,
     DIVISION_SIGN,
     CUP,
     CAP,
     SQ_CUP,
     TENSOR_PRODUCT,
-    SEQUENCE
+    SEQUENCE,
+    TEXT
   };
   // Deprecated. Switch to syntacticRole instead.
   int controlIndex;
@@ -2473,7 +2479,6 @@ private:
   bool replaceECByC();
   bool replaceEXEBySequence(int controlIndex);
   bool replaceYXBySequenceX(int controlIndex);
-  bool replaceXXXbyE();
   bool replaceYBySequenceY(int controlIndex);
   bool replaceXXYBySequenceY(int controlIndex);
   bool replaceXXYXBySequenceYX(int controlIndex);
@@ -2509,16 +2514,6 @@ private:
     controlIndex =
     controlIndex;
     return true;
-  }
-  bool replaceXYYYByConYYY(int controlIndex) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].
-    controlIndex =
-    controlIndex;
-    return true;
-  }
-  bool replaceXXByCon(int controlIndex) {
-    this->replaceXYByConY(controlIndex);
-    return this->decreaseStackSetCharacterRanges(1);
   }
   bool replaceXByCon(int controlIndex);
   bool replaceXByO(int operation);
@@ -2583,7 +2578,6 @@ private:
     );
     return true;
   }
-  bool replaceXEXByE();
   bool replaceXEXYByEY();
   bool replaceVbyVdotsVAccordingToPredefinedWordSplits(
     const std::string& currentVariable
@@ -2600,14 +2594,11 @@ private:
     Expression& output
   );
   bool replaceOXdotsXbyEXdotsX(int numberOfXs);
-  bool replaceOXbyEX();
   bool replaceObyE();
-  bool replaceXXbyEX();
   bool replaceXXbyO(int operation);
   bool replaceXXYbyOY(int operation);
   bool replaceXEXByEContainingOE(int inputOpIndex);
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  bool replaceXXbyE();
   void resetStack() {
     SyntacticElement emptyElement = this->getStartFillerElement();
     (*this->currentSyntacticStack).initializeFillInObject(

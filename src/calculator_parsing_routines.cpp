@@ -76,6 +76,8 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
     return "LOGARITHM";
   case SyntacticElement::ERROR:
     return "ERROR";
+  case TO:
+    return "TO";
   case SyntacticElement::EQUALS_COLON:
     return "EQUALS_COLON";
   case SyntacticElement::EQUALS_EQUALS_EQUALS:
@@ -2762,34 +2764,6 @@ bool CalculatorParser::replaceEXEXByEX() {
   return true;
 }
 
-bool CalculatorParser::replaceXXbyO(int operation) {
-  SyntacticElement& result = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    2
-  ];
-  result.data.makeAtom(*this->owner, operation);
-  result.controlIndex = this->conExpression();
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceXXbyO]";
-  }
-  return this->decreaseStackSetCharacterRanges(1);
-}
-
-bool CalculatorParser::replaceXXYbyOY(int operation) {
-  SyntacticElement& result = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    3
-  ];
-  result.data.makeAtom(*this->owner, operation);
-  result.controlIndex = this->conExpression();
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceXXYbyOY]";
-  }
-  return this->decreaseStackExceptLast(1);
-}
-
 bool CalculatorParser::replaceEPowerMinusEXByEX() {
   SyntacticElement& base = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
@@ -4216,17 +4190,37 @@ bool CalculatorParser::applyOneRule() {
     this->lastRuleName = "left right parentheses to empty sequence";
     return this->decreaseStackSetCharacterRanges(1);
   }
-  if (secondToLastS == "\\text" && lastS == "d") {
+  if (
+    secondToLastRole == SyntacticElement::TEXT && (
+      lastRole == SyntacticElement::LETTERS ||
+      lastRole == SyntacticElement::VARIABLE ||
+      lastRole == SyntacticElement::EXPRESSION
+    )
+  ) {
     if (lastExpression.data.isOperationGiven("d")) {
-      return this->replaceXXbyO(this->owner->opDifferential());
+      secondToLastExpression.data.makeAtom(
+        *this->owner, this->owner->opDifferential()
+      );
+      secondToLastExpression.controlIndex = this->conExpression();
+      secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+      if (this->flagLogSyntaxRules) {
+        this->lastRuleName = "\\text d to differential";
+      }
+      return this->decreaseStackSetCharacterRanges(1);
     }
   }
   if (
-    thirdToLastS == "\\text" &&
+    thirdToLastRole == SyntacticElement::TEXT &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     if (secondToLastExpression.data.isOperationGiven("d")) {
-      return this->replaceXXYbyOY(this->owner->opDifferential());
+      thirdToLastExpression.data.makeAtom(*this->owner, "\\text{d}");
+      thirdToLastExpression.controlIndex = this->conExpression();
+      thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+      if (this->flagLogSyntaxRules) {
+        this->lastRuleName = "[Rule: Calculator::replaceXXYbyOY]";
+      }
+      return this->decreaseStackExceptLast(1);
     }
   }
   if (

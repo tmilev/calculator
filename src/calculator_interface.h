@@ -2599,8 +2599,6 @@ private:
     Expression& output
   );
   bool replaceOXdotsXbyEXdotsX(int numberOfXs);
-  bool replaceXXbyO(int operation);
-  bool replaceXXYbyOY(int operation);
   bool replaceXEXByEContainingOE(int inputOpIndex);
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   void resetStack() {

@@ -210,6 +210,8 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
     return "LOGARITH_BASE";
   case TEXT:
     return "TEXT";
+  case MOD:
+    return "MOD";
   }
   return "SHOULD_BE_UNREACHABLE";
 }
@@ -271,6 +273,8 @@ void CalculatorParser::initializeSingleCharacterSyntacticRoles() {
 
 void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("if", SyntacticElement::IF);
+  registerKeyword("and", SyntacticElement::AND);
+  registerKeyword("or", SyntacticElement::OR);
   registerKeyword("\\begin", SyntacticElement::BEGIN);
   registerKeyword("\\end", SyntacticElement::END);
   registerKeyword("\\frac", SyntacticElement::FRAC);
@@ -300,6 +304,7 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("MakeSequence", SyntacticElement::MAKE_SEQUENCE);
   registerKeyword("\\text", SyntacticElement::TEXT);
   registerKeyword("\\in", SyntacticElement::IN);
+  registerKeyword("\\mod", SyntacticElement::MOD);
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("ln", "\\log");
   keyWordAutocorrections.setKeyValue("log", "\\log");
@@ -322,6 +327,7 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   keyWordAutocorrections.setKeyValue("gamma", "\\gamma");
   keyWordAutocorrections.setKeyValue("delta", "\\delta");
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
+  keyWordAutocorrections.setKeyValue("mod", "\\mod");
 }
 
 std::string SyntacticElement::toStringHumanReadable(
@@ -4048,6 +4054,7 @@ bool CalculatorParser::applyOneRule() {
     lastRole == SyntacticElement::COLON
   ) {
     secondToLastExpression.syntacticRole = SyntacticElement::EQUALS_COLON;
+    secondToLastExpression.source = "=:";
     this->lastRuleName = "equal colon to equalsColon";
     return this->popTopSyntacticStack();
   }
@@ -4760,7 +4767,13 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->isSeparatorFromTheRightForDefinition(lastRole)
   ) {
-    return this->replaceEOEXByEX();
+    fourthToLastExpression.data.makeXOX(*this->owner, this->owner->opIsDenotedBy(), fourthToLastExpression.data, secondToLastExpression.data);
+    fourthToLastExpression.controlIndex = this->conExpression();
+    fourthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    this->lastRuleName="y =: x to isDenotedBy";
+return    this->decreaseStackExceptLast(2);
+
+
   }
   if (
     lastRole == SyntacticElement::SEQUENCE &&

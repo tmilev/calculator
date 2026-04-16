@@ -1835,7 +1835,7 @@ public:
     STAR,
     CDOT,
     TIMES_X_SIGN,
-    DIVISION_SIGN,
+    DIVISION_SIGN,MOD,
     CUP,
     CAP,
     SQ_CUP,

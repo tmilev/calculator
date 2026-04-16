@@ -128,9 +128,10 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
         global.fatal
         << "Failed to parse built-in example for rule: "
         << currentHandler.calculatorIdentifier
-        << ". The example was: "
+        << ". The example was:\n"
         << currentHandler.example
-        << ". "
+        << "\nError string:\n"
+        << ownerInitialized.parser.toStringSyntacticStackHTMLSimple()
         << global.fatal;
       }
     }

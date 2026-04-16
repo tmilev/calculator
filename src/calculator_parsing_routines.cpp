@@ -118,6 +118,10 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
     return "START_FILLER";
   case SyntacticElement::END_PROGRAM:
     return "END_PROGRAM";
+  case OPLUS:
+    return "OPLUS";
+  case SET_MINUS:
+    return "SET_MINUS";
   case SyntacticElement::QUOTE:
     return "QUOTE";
   case SyntacticElement::BACKSLASH:
@@ -315,6 +319,7 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\\left", SyntacticElement::LEFT_SEPARATOR);
   registerKeyword("\\right", SyntacticElement::RIGHT_SEPARATOR);
   registerKeyword("\u00F7", SyntacticElement::DIVISION_SIGN);
+  registerKeyword("\\to", SyntacticElement::TO);
   registerKeyword("\\leq", SyntacticElement::LESS_THAN_LIKE);
   registerKeyword("\\geq", SyntacticElement::GREATER_THAN_LIKE);
   registerKeyword("\\circ", SyntacticElement::CIRC);
@@ -325,11 +330,13 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\\sqrt", SyntacticElement::SQRT);
   registerKeyword("\\cdot", SyntacticElement::CDOT);
   registerKeyword("\\otimes", SyntacticElement::TENSOR_PRODUCT);
+  registerKeyword("\\oplus", SyntacticElement::OPLUS);
   registerKeyword("\\times", SyntacticElement::TIMES_X_SIGN);
   registerKeyword("MakeSequence", SyntacticElement::MAKE_SEQUENCE);
   registerKeyword("\\text", SyntacticElement::TEXT);
   registerKeyword("\\in", SyntacticElement::IN);
   registerKeyword("\\mod", SyntacticElement::MOD);
+  registerKeyword("\\setminus", SyntacticElement::SET_MINUS);
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("ln", "\\log");
   keyWordAutocorrections.setKeyValue("log", "\\log");
@@ -1661,6 +1668,7 @@ void CalculatorParser::extractSyntacticElementsDefaultOutput(
 ) {
   STACK_TRACE("CalculatorParser::extractSyntacticElementsDefaultOutput");
   ListReferences<SyntacticElement> contiguousWords;
+  this->initializeStatic();
   this->extractContiguousWords(input, contiguousWords);
   *this->currrentlyParsed = contiguousWords;
   SyntacticElement currentElement;
@@ -1916,23 +1924,6 @@ bool CalculatorParser::replaceOXdotsXbyEXdotsX(int numberOfXs) {
     std::stringstream out;
     out << "[Rule: Calculator::replaceOXdotsXbyEXdotsX: " << numberOfXs << "]";
     this->lastRuleName = out.str();
-  }
-  element.controlIndex = this->conExpression();
-  return true;
-}
-
-bool CalculatorParser::replaceObyE() {
-  SyntacticElement& element = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    1
-  ];
-  element.data.makeAtom(
-    *this->owner,
-    this->getOperationIndexFromControlIndex(element.controlIndex)
-  );
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Calculator::replaceObyE]";
   }
   element.controlIndex = this->conExpression();
   return true;
@@ -2821,12 +2812,7 @@ bool CalculatorParser::replaceEPowerMinusEXByEX() {
   return this->decreaseStackExceptLast(3);
 }
 
-bool CalculatorParser::replaceEOEXByEX() {
-  SyntacticElement& middle = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    3
-  ];
+bool CalculatorParser::replaceEOEXByEX(int operationIndex) {
   SyntacticElement& left = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
@@ -2837,22 +2823,10 @@ bool CalculatorParser::replaceEOEXByEX() {
     ).size -
     2
   ];
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceEOEXByEX]";
-  }
-  Expression newExpression;
-  newExpression.reset(*this->owner, 3);
-  newExpression.addChildAtomOnTop(
-    this->getOperationIndexFromControlIndex(middle.controlIndex)
-  );
-  newExpression.addChildOnTop(left.data);
-  newExpression.addChildOnTop(right.data);
-  left.data = newExpression;
+  left.data.makeXOX(*this->owner, operationIndex, left.data, right.data);
   left.controlIndex = this->conExpression();
   left.syntacticRole = SyntacticElement::EXPRESSION;
-  middle = *(*this->currentSyntacticStack).lastObject();
-  this->decreaseStackExceptLast(2);
-  return true;
+  return this->decreaseStackExceptLast(2);
 }
 
 bool CalculatorParser::replaceEXEXBy_OofEE_X(int operation) {
@@ -3955,7 +3929,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->canBeRegardedAsDifferentialForm(lastExpression)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression plus expression to expression";
+    return this->replaceEOEXByEX(this->owner->opPlus());
   }
   if (
     fourthToLastRole == SyntacticElement::BACKSLASH_INT &&
@@ -4104,9 +4079,9 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceXByO(this->owner->opEmptySet());
   }
   if (
-    lastS == "\\circ" &&
-    secondToLastS != "{" &&
-    secondToLastS != "(" &&
+    lastRole == SyntacticElement::CIRC &&
+    secondToLastRole != SyntacticElement::LEFT_CURLY_BRACE &&
+    secondToLastRole != SyntacticElement::LEFT_PARENTHESIS &&
     secondToLastRole != SyntacticElement::UPPER_CARET
   ) {
     return this->replaceXByCon(this->conApplyFunction());
@@ -4305,7 +4280,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     lastRole != SyntacticElement::UNDERSCORE
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression _ expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opUnderscore());
   }
   if (
     fourthToLastS == "{" &&
@@ -4335,31 +4311,35 @@ bool CalculatorParser::applyOneRule() {
     this->allowsPowerInPreceding(lastRole) &&
     this->allowsPowerInNext(fifthToLastS)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression ^ expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opPower());
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "\\setminus" &&
+    thirdToLastRole == SyntacticElement::SET_MINUS &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsPowerInPreceding(lastRole)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression \\setminus expression to expression";
+    return this->replaceEOEXByEX(this->owner->opSetMinus());
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "or" &&
+    thirdToLastRole == SyntacticElement::OR &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsOrInPreceding(lastS)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression or expression to expression";
+    return this->replaceEOEXByEX(this->owner->opOr());
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "and" &&
+    thirdToLastRole == SyntacticElement::AND &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsAndInPreceding(lastS)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression and expression to expression";
+    return this->replaceEOEXByEX(this->owner->opAnd());
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
@@ -4367,31 +4347,35 @@ bool CalculatorParser::applyOneRule() {
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsPlusInPreceding(lastRole)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression + expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opPlus());
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "\\oplus" &&
+    thirdToLastRole == SyntacticElement::OPLUS &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsPlusInPreceding(lastRole)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression \\oplus expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opDirectSum());
   }
   if (
-    fifthToLastS == "|" &&
+    fifthToLastRole == SyntacticElement::PIPE &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastRole == SyntacticElement::PLUS &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
-    lastS == "|"
+    lastRole == SyntacticElement::PIPE
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "|expression + expression| to |expression|";
+    return this->replaceEOEXByEX(this->owner->opPlus());
   }
   if (
     fifthToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastRole == SyntacticElement::UPPER_CARET &&
     thirdToLastRole == SyntacticElement::MINUS &&
     secondToLastRole == SyntacticElement::EXPRESSION && (
-      lastRole == SyntacticElement::EXPRESSION || lastS == "Variable"
+      lastRole == SyntacticElement::EXPRESSION ||
+      lastRole == SyntacticElement::VARIABLE
     )
   ) {
     return this->replaceEPowerMinusEXByEX();
@@ -4402,16 +4386,18 @@ bool CalculatorParser::applyOneRule() {
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsPlusInPreceding(lastRole)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression - expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opMinus());
   }
   if (
     thirdToLastRole == SyntacticElement::MINUS &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
-    lastS == "|" &&
-    fifthToLastS == "|"
+    lastRole == SyntacticElement::PIPE &&
+    fifthToLastRole == SyntacticElement::PIPE
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "|expression - expression| to |expression|";
+    return this->replaceEOEXByEX(this->owner->opMinus());
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
@@ -4429,10 +4415,16 @@ bool CalculatorParser::applyOneRule() {
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastRole == SyntacticElement::MINUS &&
-    lastS == "|" &&
-    fourthToLastS == "|"
+    lastRole == SyntacticElement::PIPE &&
+    fourthToLastRole == SyntacticElement::PIPE
   ) {
-    return this->replaceOEXByEX();
+    thirdToLastExpression.data.makeOX(
+      *this->owner, this->owner->opMinus(), secondToLastExpression.data
+    );
+    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    thirdToLastExpression.controlIndex = this->conExpression();
+    this->lastRuleName = "|- expression| to |expression|";
+    return this->decreaseStackExceptLast(1);
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION && (
@@ -4556,11 +4548,12 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     secondToLastRole == SyntacticElement::EXPRESSION &&
-    thirdToLastS == "\\to" &&
+    thirdToLastRole == SyntacticElement::TO &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsLimitProcessInPreceding(lastS)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression \\to expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opLimitProcess());
   }
   if (
     this->owner->atomsWhoseExponentsAreInterpretedAsFunctions.contains(
@@ -4704,8 +4697,21 @@ bool CalculatorParser::applyOneRule() {
     this->lastRuleName = "{ circ sign } to { circ }";
     return true;
   }
-  if (secondToLastRole == SyntacticElement::UPPER_CARET && lastS == "\\circ") {
-    return this->replaceObyE();
+  if (
+    secondToLastRole == SyntacticElement::UPPER_CARET && (
+      lastRole == SyntacticElement::CIRC || (
+        lastRole == SyntacticElement::LETTERS &&
+        lastExpression.source == "\\circ"
+      )
+    )
+  ) {
+    lastExpression.data.makeAtom(*this->owner, this->owner->opCirc());
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName = "^ \\circ to ^ atom(circ)";
+    }
+    lastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    lastExpression.controlIndex = this->conExpression();
+    return true;
   }
   if (this->owner->flagUseBracketsForIntervals) {
     if (
@@ -4759,7 +4765,8 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastRole == SyntacticElement::EQUALS_EQUALS_EQUALS &&
     fourthToLastRole == SyntacticElement::EXPRESSION
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression === expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opEqualEqualEqual());
   }
   if (
     this->isSeparatorFromTheLeftForDefinition(fifthToLastRole) &&
@@ -4768,7 +4775,8 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastRole == SyntacticElement::EQUALS_EQUALS &&
     fourthToLastRole == SyntacticElement::EXPRESSION
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression == expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opEqualEqual());
   }
   if (
     this->isSeparatorFromTheLeftForDefinition(fifthToLastRole) &&
@@ -4779,7 +4787,10 @@ bool CalculatorParser::applyOneRule() {
     ) &&
     fourthToLastRole == SyntacticElement::EXPRESSION
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression > expression X to expression X";
+    int operation =
+    this->owner->operations.getIndexNoFail(thirdToLastExpression.source);
+    return this->replaceEOEXByEX(operation);
   }
   if (
     this->isSeparatorFromTheLeftForDefinition(fifthToLastRole) &&
@@ -4788,8 +4799,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->isSeparatorFromTheRightForDefinition(lastRole)
   ) {
-    this->replaceEOEXByEX();
-    return this->setLastRuleName("Expression=Expression");
+    this->lastRuleName = "expression = expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opDefine());
   }
   if (
     this->isSeparatorFromTheLeftForDefinition(fifthToLastRole) &&
@@ -4958,7 +4969,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression \\cup expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opUnion());
   }
   if (
     fourthToLastRole == SyntacticElement::EXPRESSION &&
@@ -4966,7 +4978,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression \\cap expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opIntersection());
   }
   if (
     fourthToLastRole == SyntacticElement::EXPRESSION &&
@@ -4974,7 +4987,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "expression \\sqcup expression X to expression X";
+    return this->replaceEOEXByEX(this->owner->opUnionNoRepetition());
   }
   if (
     thirdToLastRole == SyntacticElement::IF &&
@@ -5007,21 +5021,45 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     lastRole == SyntacticElement::COMMA
   ) {
-    return this->replaceYXBySequenceX(this->conSequence());
+    secondToLastExpression.data.makeOX(
+      *this->owner, this->owner->opSequence(), secondToLastExpression.data
+    );
+    secondToLastExpression.syntacticRole = SyntacticElement::SEQUENCE;
+    secondToLastExpression.controlIndex = this->conSequence();
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName = "expression comma to sequence";
+    }
+    return true;
   }
   if (
     thirdToLastRole == SyntacticElement::MAKE_SEQUENCE &&
     secondToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
     lastRole == SyntacticElement::EXPRESSION
   ) {
-    return this->replaceXXYBySequenceY(this->conExpression());
+    thirdToLastExpression.data.makeOX(
+      *this->owner, this->owner->opSequence(), lastExpression.data
+    );
+    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    thirdToLastExpression.controlIndex = this->conExpression();
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName = "makeSequence {} expression to expression";
+    }
+    return this->decreaseStackSetCharacterRanges(2);
   }
   if (
     fourthToLastRole == SyntacticElement::MAKE_SEQUENCE &&
     thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
-    return this->replaceXXYXBySequenceYX(this->conExpression());
+    fourthToLastExpression.data.makeOX(
+      *this->owner, this->owner->opSequence(), secondToLastExpression.data
+    );
+    fourthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    fourthToLastExpression.controlIndex = this->conExpression();
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName = "makeSequence {} expression X to expression X";
+    }
+    return this->decreaseStackExceptLast(2);
   }
   if (
     thirdToLastRole == SyntacticElement::SEQUENCE &&

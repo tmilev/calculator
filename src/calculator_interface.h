@@ -1779,11 +1779,14 @@ public:
     WHITE_SPACE,
     TILDE,
     EQUALS_COLON,
+    SET_MINUS,
     EQUALS,
     // Double equal sign.
     EQUALS_EQUALS,
     EQUALS_EQUALS_EQUALS,
     EXPRESSION,
+    OPLUS,
+    TO,
     ERROR,
     CHOOSE,
     COLON,
@@ -2472,7 +2475,7 @@ private:
   bool replaceOXXEXEXEXByE();
   bool replaceOXEXEByE();
   bool replaceOXEXEXEXByE();
-  bool replaceEOEXByEX();
+  bool replaceEOEXByEX(int operationIndex);
   bool replaceEPowerMinusEXByEX();
   bool replaceELimitsUnderscoreEPowerEByE();
   bool replaceELimitsPowerEUnderscoreEByE();
@@ -2596,7 +2599,6 @@ private:
     Expression& output
   );
   bool replaceOXdotsXbyEXdotsX(int numberOfXs);
-  bool replaceObyE();
   bool replaceXXbyO(int operation);
   bool replaceXXYbyOY(int operation);
   bool replaceXEXByEContainingOE(int inputOpIndex);

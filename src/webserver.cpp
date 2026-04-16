@@ -4746,7 +4746,6 @@ void WebServer::initializeMainAll() {
   this->initializeMainMIMETypes();
   MathML::mapFromLatexToMathMLEquivalents();
   MathMLConverter::converterCalculator();
-  CalculatorParser::whitespaceContainer();
   CalculatorParser::initializeStatic();
 }
 

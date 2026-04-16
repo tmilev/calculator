@@ -1835,7 +1835,8 @@ public:
     STAR,
     CDOT,
     TIMES_X_SIGN,
-    DIVISION_SIGN,MOD,
+    DIVISION_SIGN,
+    MOD,
     CUP,
     CAP,
     SQ_CUP,
@@ -1874,6 +1875,7 @@ public:
   }
   std::string getIntegerStringCrashIfNot(CalculatorParser& owner);
   bool isCommandEnclosure() const;
+  bool endsOnWhitespace() const;
 };
 
 class PlotObject {

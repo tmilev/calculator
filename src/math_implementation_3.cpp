@@ -661,6 +661,12 @@ std::string StringRoutines::Conversions::codePointToBackslashEscapedString(
       return "\\r";
     } else if (currentCharacter == '"') {
       return "\\\"";
+    } else if (currentCharacter == '\v') {
+      return "\\v";
+    } else if (currentCharacter == '\t') {
+      return "\\t";
+    } else if (currentCharacter == '\f') {
+      return "\\f";
     } else {
       out << currentCharacter;
       return out.str();

@@ -9,6 +9,7 @@ bool JSData::Test::all() {
   JSData::Test::badInput();
   JSData::Test::decodeEscapedUnicode();
   JSData::Test::loadLarger();
+  JSData::Test::endcodeNonstandardWhitespace();
   return true;
 }
 
@@ -140,6 +141,30 @@ bool JSData::Test::decodeEscapedUnicode() {
     << ". However, I expected: "
     << expectedOutput
     << ". "
+    << global.fatal;
+  }
+  return true;
+}
+
+bool JSData::Test::endcodeNonstandardWhitespace() {
+  STACK_TRACE("JSData::Test::endcodeNonstandardWhitespace");
+  JSData data;
+  data =
+  "\t\n\v\f\r\u0085\u00a0\u2000\u2001"
+  "\u2002\u2003\u2004\u2005\u2006\u2007"
+  "\u2008\u2009\u200A\u2028\u2029\u202f"
+  "\u205f\u3000A";
+  std::string actual = data.toString();
+  std::string expected =
+  "\"\\t\\n\\v\\f\\r\\u0085\\u00a0\\u2000\\u2001\\u2002\\u2003"
+  "\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a"
+  "\\u2028\\u2029\\u202f\\u205f\\u3000A\"";
+  if (actual != expected) {
+    global.fatal
+    << "In endcodeNonstandardWhitespace: wanted whitespace encoding:\n"
+    << expected
+    << "\ngot instead:\n"
+    << actual
     << global.fatal;
   }
   return true;

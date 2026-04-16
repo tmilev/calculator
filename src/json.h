@@ -156,6 +156,7 @@ public:
     static bool recodeOnce(const List<std::string>& pair, bool relaxedInput);
     static bool recodeRelaxed();
     static bool decodeEscapedUnicode();
+    static bool endcodeNonstandardWhitespace();
     static bool badInput();
     static bool loadLarger();
   };

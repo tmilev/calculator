@@ -23,6 +23,22 @@ std::string SyntacticElement::getIntegerStringCrashIfNot(
   return result;
 }
 
+bool SyntacticElement::endsOnWhitespace() const {
+  int size = static_cast<int>(this->source.size());
+  const HashedList<std::string> whiteSpaces =
+  CalculatorParser::whitespaceContainer();
+  for (int i = 0; i < 3; i ++) {
+    if (i >= size) {
+      return false;
+    }
+    std::string end = this->source.substr(size - i - 1);
+    if (whiteSpaces.contains(end)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool SyntacticElement::isCommandEnclosure() const {
   Calculator* owner = this->data.owner;
   if (this->data.owner == nullptr) {
@@ -226,7 +242,13 @@ const {
     out << this->source;
   }
   if (this->syntacticRole == SyntacticElement::RAW) {
-    out << "[" << owner.controlSequences[this->controlIndex] << "]";
+    out
+    << "["
+    << owner.controlSequences[this->controlIndex]
+    << "]"
+    << "("
+    << this->controlIndex
+    << ")";
     return out.str();
   }
   out << "[";
@@ -244,6 +266,9 @@ void CalculatorParser::initializeSingleCharacterSyntacticRoles() {
   registerSyntacticRole('%', SyntacticElement::PERCENT);
   registerSyntacticRole('\n', SyntacticElement::WHITE_SPACE);
   registerSyntacticRole('\r', SyntacticElement::WHITE_SPACE);
+  registerSyntacticRole('\t', SyntacticElement::WHITE_SPACE);
+  registerSyntacticRole('\v', SyntacticElement::WHITE_SPACE);
+  registerSyntacticRole('\f', SyntacticElement::WHITE_SPACE);
   registerSyntacticRole(' ', SyntacticElement::WHITE_SPACE);
   registerSyntacticRole('~', SyntacticElement::TILDE);
   registerSyntacticRole('_', SyntacticElement::UNDERSCORE);
@@ -443,6 +468,7 @@ void CalculatorParser::initializeStatic() {
     return;
   }
   CalculatorParser::initializeSingleCharacterSyntacticRoles();
+  CalculatorParser::whitespaceContainer();
   CalculatorParser::initializeKeyWordsToSyntacticRoles();
 }
 
@@ -1634,9 +1660,9 @@ void CalculatorParser::extractSyntacticElementsDefaultOutput(
   const std::string& input
 ) {
   STACK_TRACE("CalculatorParser::extractSyntacticElementsDefaultOutput");
-  ListReferences<SyntacticElement> congiuousWords;
-  this->extractContiguousWords(input, congiuousWords);
-  *this->currrentlyParsed = congiuousWords;
+  ListReferences<SyntacticElement> contiguousWords;
+  this->extractContiguousWords(input, contiguousWords);
+  *this->currrentlyParsed = contiguousWords;
   SyntacticElement currentElement;
   currentElement.data.reset(*this->owner);
   currentElement.controlIndex = this->conEndProgram();
@@ -1753,10 +1779,10 @@ SyntacticElement::Role CalculatorParser::syntacticRoleFromCharacter(
   if (MathRoutines::isLatinLetter(input)) {
     return SyntacticElement::LETTERS;
   }
-  int inputUnsigned = static_cast<int>(static_cast<unsigned char>(input));
-  if (inputUnsigned > 127) {
-    return SyntacticElement::RAW;
+  if (input < 0) {
+    return SyntacticElement::LETTERS;
   }
+  int inputUnsigned = static_cast<int>(static_cast<unsigned char>(input));
   return CalculatorParser::singleCharacterSyntacticRoles[inputUnsigned];
 }
 
@@ -1765,7 +1791,11 @@ SyntacticElement CalculatorParser::makeFromSingleCharacter(char input) {
   result.source = input;
   if (MathRoutines::isDigit(input)) {
     result.controlIndex = this->controlSequences.getIndexNoFail("Digits");
-  } else if (MathRoutines::isLatinLetter(input)) {
+  } else if (
+    MathRoutines::isLatinLetter(input) ||    // A non-ascii UTF8 character
+    // has all of its bytes smaller than 0.
+    input < 0
+  ) {
     result.controlIndex = this->controlSequences.getIndexNoFail("Letters");
   }
   int indexInControlSequences =
@@ -1795,7 +1825,8 @@ void CalculatorParser::extractContiguousWords(
         maybeNext.syntacticRole == SyntacticElement::DIGITS_RAW
       ) || (
         previous->syntacticRole == SyntacticElement::LETTERS &&
-        maybeNext.syntacticRole == SyntacticElement::LETTERS
+        maybeNext.syntacticRole == SyntacticElement::LETTERS &&
+        !previous->endsOnWhitespace()
       )
     ) {
       previous->source.push_back(current);
@@ -3634,8 +3665,7 @@ bool CalculatorParser::applyOneRule() {
   ) {
     this->flagLogSyntaxRules = true;
     this->lastRuleName = "log parsing";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
+    return this->decreaseStack(2);
   }
   if (
     secondToLastRole == SyntacticElement::PERCENT &&
@@ -4716,11 +4746,12 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EQUALS_EQUALS &&
     lastRole == SyntacticElement::EQUALS
   ) {
-    this->lastRuleName = "double equals equals to triple equals";
+    this->lastRuleName = "double equals to triple equals";
     secondToLastExpression.controlIndex = this->conEqualEqualEqual();
     secondToLastExpression.syntacticRole =
     SyntacticElement::EQUALS_EQUALS_EQUALS;
-    return true;
+    secondToLastExpression.source = "==";
+    return this->popTopSyntacticStack();
   }
   if (
     this->isSeparatorFromTheRightGeneral(lastS) &&
@@ -4767,13 +4798,16 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->isSeparatorFromTheRightForDefinition(lastRole)
   ) {
-    fourthToLastExpression.data.makeXOX(*this->owner, this->owner->opIsDenotedBy(), fourthToLastExpression.data, secondToLastExpression.data);
+    fourthToLastExpression.data.makeXOX(
+      *this->owner,
+      this->owner->opIsDenotedBy(),
+      fourthToLastExpression.data,
+      secondToLastExpression.data
+    );
     fourthToLastExpression.controlIndex = this->conExpression();
     fourthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
-    this->lastRuleName="y =: x to isDenotedBy";
-return    this->decreaseStackExceptLast(2);
-
-
+    this->lastRuleName = "y =: x to isDenotedBy";
+    return this->decreaseStackExceptLast(2);
   }
   if (
     lastRole == SyntacticElement::SEQUENCE &&
@@ -5236,6 +5270,16 @@ return    this->decreaseStackExceptLast(2);
   if (lastRole == SyntacticElement::END_PROGRAM) {
     this->lastRuleName = "remove end program";
     return this->decreaseStackSetCharacterRanges(1);
+  }
+  if (
+    lastRole == SyntacticElement::LETTERS && lastExpression.endsOnWhitespace()
+  ) {
+    this->trimNonStandardWhiteSpaceFromEnd(lastExpression.source);
+    if (lastExpression.source.empty()) {
+      this->popTopSyntacticStack();
+    }
+    this->lastRuleName = "trim non-standard whitespace";
+    return true;
   }
   return false;
 }

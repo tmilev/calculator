@@ -271,11 +271,13 @@ bool Calculator::Examples::Test::compose() {
 }
 
 bool CalculatorParserTest::all() {
+  STACK_TRACE("CalculatorParserTest::all");
   CalculatorParserTest::whitespace();
   return true;
 }
 
 bool CalculatorParserTest::whitespace() {
+  STACK_TRACE("CalculatorParserTest::whitespace");
   std::string expression;
   Calculator owner;
   owner.initialize(Calculator::Mode::educational);

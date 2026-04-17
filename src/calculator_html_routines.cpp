@@ -62,20 +62,20 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
     return false;
   }
   List<SyntacticElement> elements;
-  calculator.parser.parseFillDictionaryDeprecated(argumentString, elements);
+  calculator.parser.stringToSyntacticElements(argumentString, elements);
   Expression evaluatedExpression;
   std::stringstream out;
   bool previousWasInteger = false;
   for (int i = 0; i < elements.size; i ++) {
     SyntacticElement& currentElement = elements[i];
-    if (currentElement.controlIndex == calculator.parser.conVariable()) {
+    if (currentElement.syntacticRole == SyntacticElement::LETTERS) {
       calculator.evaluateExpression(
         calculator, currentElement.data, evaluatedExpression
       );
       out << evaluatedExpression.toString();
       continue;
     }
-    if (currentElement.controlIndex == calculator.parser.conInteger()) {
+    if (currentElement.syntacticRole == SyntacticElement::DIGITS_RAW) {
       if (!previousWasInteger) {
         out << "{";
       }
@@ -87,7 +87,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
       out << "}";
     }
     previousWasInteger = false;
-    out << calculator.parser.controlSequences[currentElement.controlIndex];
+    out << currentElement.source;
   }
   if (previousWasInteger) {
     out << "}";

@@ -2007,6 +2007,18 @@ void Calculator::writeAutoCompleteKeyWordsToFile() {
   fileStream << out.str();
 }
 
+void Calculator::addAutoCompleteKeyWords(const List<std::string>& keyWords) {
+  for (const std::string& keyWord : keyWords) {
+    if (keyWord.empty()) {
+      continue;
+    }
+    if (!MathRoutines::isLatinLetter(keyWord[0])) {
+      continue;
+    }
+    autoCompleteKeyWords.addOnTopNoRepetition(keyWord);
+  }
+}
+
 void Calculator::computeAutoCompleteKeyWords() {
   STACK_TRACE("Calculator::computeAutoCompleteKeyWords");
   this->autoCompleteKeyWords.setExpectedSize(this->operations.size() * 2);
@@ -2016,15 +2028,10 @@ void Calculator::computeAutoCompleteKeyWords() {
   for (int i = 0; i < this->namedRules.size(); i ++) {
     this->autoCompleteKeyWords.addOnTopNoRepetition(this->namedRules.keys[i]);
   }
-  for (int i = 0; i < this->parser.controlSequences.size; i ++) {
-    if (this->parser.controlSequences[i].size() > 0) {
-      if (MathRoutines::isLatinLetter(this->parser.controlSequences[i][0])) {
-        autoCompleteKeyWords.addOnTopNoRepetition(
-          this->parser.controlSequences[i]
-        );
-      }
-    }
-  }
+  this->addAutoCompleteKeyWords(
+    CalculatorParser::keyWordsToSyntacticRoles.keys
+  );
+  this->addAutoCompleteKeyWords(this->operations.keys);
 }
 
 JSData Calculator::toJSONPerformancePerHandler() {
@@ -2314,16 +2321,6 @@ std::string Calculator::toString() {
   << "requested by the user<br> "
   << this->objectContainer.toString();
   out
-  << "<hr>Control sequences ("
-  << this->parser.controlSequences.size
-  << " total):\n<br>\n";
-  for (int i = 0; i < this->parser.controlSequences.size; i ++) {
-    out << openTag1 << this->parser.controlSequences[i] << closeTag1;
-    if (i != this->parser.controlSequences.size) {
-      out << ", ";
-    }
-  }
-  out
   << "<br>\n User or run-time defined atoms = "
   << this->operations.size()
   << " (= "
@@ -2403,14 +2400,14 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   *(*this->currentSyntacticStack).lastObject();
   if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1
   ) {
-    if (lastSyntacticElement.controlIndex != this->conExpression()) {
+    if (lastSyntacticElement.syntacticRole != SyntacticElement::EXPRESSION) {
       isBad = true;
     }
   }
   if (!isBad) {
     out
     << this->currentSyntacticStack->lastObject()->toStringHumanReadable(
-      *this, includeLispifiedExpressions
+      includeLispifiedExpressions
     );
     return out.str();
   }
@@ -2431,9 +2428,7 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
     << "<td style='vertical-align:top;background-color:"
     << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0")
     << "'>"
-    << currentElement.toStringHumanReadable(
-      *this, includeLispifiedExpressions
-    )
+    << currentElement.toStringHumanReadable(includeLispifiedExpressions)
     << "</td>";
     counter ++;
   }

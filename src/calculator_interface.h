@@ -1780,6 +1780,8 @@ public:
     TILDE,
     EQUALS_COLON,
     SET_MINUS,
+    BINOM,
+    LIM,
     EQUALS,
     // Double equal sign.
     EQUALS_EQUALS,
@@ -1847,8 +1849,6 @@ public:
     SEQUENCE,
     TEXT
   };
-  // Deprecated. Switch to syntacticRole instead.
-  int controlIndex;
   // The syntactic role played by a given element.
   SyntacticElement::Role syntacticRole;
   // The string corresponding to the syntactic element
@@ -1860,23 +1860,19 @@ public:
   Expression data;
   List<Expression> dataList;
   std::string errorString;
-  std::string toStringHumanReadable(
-    CalculatorParser& owner, bool includeLispifiedExpressions
-  ) const;
-  std::string toStringSyntaxRole(const CalculatorParser& owner) const;
+  std::string toStringHumanReadable(bool includeLispifiedExpressions) const;
+  std::string toStringSyntaxRole() const;
   static std::string syntaxRoleToString(SyntacticElement::Role role);
-  std::string toStringDebug(const CalculatorParser& owner) const;
+  std::string toStringDebug() const;
   SyntacticElement() {
     // Syntactic element roles must be initialized as unknown.
     this->syntacticRole = SyntacticElement::Role::UNKNOWN;
-    this->controlIndex = 0;
     this->errorString = "";
     this->totalNonBoundVariablesInherited = - 1;
     // - 1 stands for unknown
     this->totalBoundVariablesInherited = - 1;
     // - 1 stands for unknown
   }
-  std::string getIntegerStringCrashIfNot(CalculatorParser& owner);
   bool isCommandEnclosure() const;
   bool endsOnWhitespace() const;
 };
@@ -2379,8 +2375,6 @@ private:
     std::string, List<std::string>, HashFunctions::hashFunction<std::string>
   > predefinedWordSplits;
 public:
-  // Control sequences parametrize the syntactical elements
-  HashedList<std::string> controlSequences;
   // The i^th element of this array contains the syntactic role of
   // the character whose value is i.
   static List<SyntacticElement::Role> singleCharacterSyntacticRoles;
@@ -2395,23 +2389,20 @@ public:
 private:
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
-  bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(SyntacticElement::Role role);
-  bool isSeparatorFromTheLeftForList(const std::string& input);
   bool isBoundVariableInContext(int inputOperation);
   bool isNonBoundVariableInContext(int inputOperation);
   bool isStandardCalculatorCharacter(unsigned char input);
   bool isSeparatorFromTheLeftForInterval(SyntacticElement::Role input);
-  bool isSeparatorFromTheRightGeneral(const std::string& input);
+  bool isSeparatorFromTheRightGeneral(SyntacticElement::Role role);
   bool isSeparatorFromTheRightForDefinition(SyntacticElement::Role role);
-  bool isSeparatorFromTheRightForList(const std::string& input);
   bool allowsPowerInPreceding(SyntacticElement::Role lookAhead);
-  bool allowsPowerInNext(const std::string& lookBehind);
-  bool allowsLimitProcessInPreceding(const std::string& lookAhead);
+  bool allowsPowerInNext(SyntacticElement::Role lookBehind);
+  bool allowsLimitProcessInPreceding(SyntacticElement::Role lookAhead);
   bool allowsApplyFunctionInPreceding(SyntacticElement::Role role);
   bool allowsIfInPreceding(SyntacticElement::Role lookAhead);
-  bool allowsOrInPreceding(const std::string& lookAhead);
-  bool allowsAndInPreceding(const std::string& lookAhead);
+  bool allowsOrInPreceding(SyntacticElement::Role lookAhead);
+  bool allowsAndInPreceding(SyntacticElement::Role lookAhead);
   bool allowsInInPreceding(SyntacticElement::Role lookAhead);
   bool allowsPlusInPreceding(SyntacticElement::Role role);
   bool allowsTimesInNext(const SyntacticElement& preceding);
@@ -2426,7 +2417,6 @@ private:
     const List<std::string>& variables
   );
   bool decreaseStackSetCharacterRanges(int decrease);
-  SyntacticElement getSyntacticElementEnd();
   bool popTopSyntacticStack() {
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
       -
@@ -2449,13 +2439,7 @@ private:
   bool setLastRuleName(const std::string& ruleName);
   bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs);
   bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs);
-  bool replaceEXXEXEBy_CofEEE(int controlIndex);
-  bool replaceEXXEXEXBy_CofEEE_X(int controlIndex);
-  bool replaceEOXbyEX();
-  bool replaceEEBy_CofEE(int controlIndex);
-  bool replaceOOEEXbyEXpowerLike();
   bool replaceEEByE();
-  bool replaceEXEXByEX();
   bool replaceEXEXBy_OofEE_X(int operation);
   bool replaceSsSsXdotsXbySsXdotsX(int numberOfDots);
   bool replaceEXdotsXbySsXdotsX(int numberOfDots);
@@ -2463,73 +2447,22 @@ private:
     this->replaceEXdotsXbySsXdotsX(numberOfDots);
     return this->decreaseStackSetCharacterRanges(numberOfDots);
   }
-  bool replaceOEXByE();
   bool replaceOEXByEX();
-  bool replaceC1C2Eby_C2ofC1E();
-  bool replaceEOByE();
-  bool replaceOEByE();
   bool replaceOXXByEXX();
-  bool replaceOXEByE();
-  bool replaceOXEXByEX();
   bool replaceOXEEXByEX();
-  bool replaceOXXEXEXEXByE();
-  bool replaceOXEXEByE();
-  bool replaceOXEXEXEXByE();
   bool replaceEOEXByEX(int operationIndex);
-  bool replaceEPowerMinusEXByEX();
   bool replaceELimitsUnderscoreEPowerEByE();
   bool replaceELimitsPowerEUnderscoreEByE();
-  bool replaceXEEXBy_OofEE_X(int inputOperation);
-  bool replaceXEEBy_OofEE(int inputOperation);
   bool replaceECByC();
-  bool replaceEXEBySequence(int controlIndex);
-  bool replaceYXBySequenceX(int controlIndex);
   bool replaceYBySequenceY(int controlIndex);
-  bool replaceXXYBySequenceY(int controlIndex);
   bool replaceXXYXBySequenceYX(int controlIndex);
   bool replaceYXdotsXBySequenceYXdotsX(int controlIndex, int numberOfXs = 0);
-  bool replaceSequenceXEBySequence(int controlIndex);
-  bool replaceSequenceUXEYBySequenceZY(int controlIndex);
   bool replaceCEByC();
   bool replaceCCByC();
-  bool replaceEOEByE() {
-    return
-    this->replaceEXEByCofEE((*this->currentSyntacticStack)[(
-          *this->currentSyntacticStack
-        ).size -
-        2
-      ].controlIndex
-    );
-  }
   bool replaceMatrixEXByMatrix();
-  bool replaceMatrixEXByMatrixX();
   bool replaceMatrixEXByMatrixNewRow();
   bool replaceMatrixXByE();
-  bool replaceCXByE();
-  bool replaceCXByEX();
-  bool replaceEXEByCofEE(int operation);
-  bool replaceXYByConY(int controlIndex) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].
-    controlIndex =
-    controlIndex;
-    return true;
-  }
-  bool replaceXYYByConYY(int controlIndex) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].
-    controlIndex =
-    controlIndex;
-    return true;
-  }
-  bool replaceXByCon(int controlIndex);
-  bool replaceXByO(int operation);
-  bool replaceXByConCon(int controlIndex1, int controlIndex2);
-  bool replaceXXXByCon(int controlIndex);
-  bool replaceXXXByConCon(int controlIndex1, int controlIndex2);
-  bool replaceXXXXXByCon(int controlIndex);
-  bool replaceXXXXXByConCon(int controlIndex1, int controlIndex2);
-  bool replaceXXXXByConCon(int controlIndex1, int controlIndex2);
   bool replaceElementsByMatrixStart(int numberOfXs);
-  bool replaceXXXXByCon(int controlIndex1);
   bool replaceXXYByY() {
     (*this->currentSyntacticStack)[this->currentSyntacticStack->size - 3] = (
       *this->currentSyntacticStack
@@ -2583,7 +2516,6 @@ private:
     );
     return true;
   }
-  bool replaceXEXYByEY();
   bool replaceVbyVdotsVAccordingToPredefinedWordSplits(
     const std::string& currentVariable
   );
@@ -2591,14 +2523,11 @@ private:
     const std::string& currentVariable
   );
   bool replaceVByVDotsVWith(const List<std::string>& variables);
-  bool replaceAXbyEX();
-  bool replaceAXXbyEXX();
   void rationalFromIntegerDotInteger(
     const std::string& beforeDecimalPoint,
     const std::string& afterDecimalPoint,
     Expression& output
   );
-  bool replaceOXdotsXbyEXdotsX(int numberOfXs);
   bool replaceXEXByEContainingOE(int inputOpIndex);
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   void resetStack() {
@@ -2608,73 +2537,13 @@ private:
     );
   }
   SyntacticElement getStartFillerElement();
-  int conBindVariable() {
-    return this->controlSequences.getIndexNoFail("{{}}");
-  }
-  int conQuoteUnderConstruction() {
-    return this->controlSequences.getIndexNoFail("QuoteUnderConstruction");
-  }
-  int conEqualEqual() {
-    return this->controlSequences.getIndexNoFail("==");
-  }
-  int conEqualEqualEqual() {
-    return this->controlSequences.getIndexNoFail("===");
-  }
-  int conApplyFunction() {
-    return this->controlSequences.getIndexNoFail("{}");
-  }
-  int conTimes() {
-    return this->controlSequences.getIndexNoFail("*");
-  }
-  int conEndStatement() {
-    return this->controlSequences.getIndexNoFail(";");
-  }
-  int conDefineConditional() {
-    return this->controlSequences.getIndexNoFail("if=");
-  }
-  int conGEQ() {
-    return this->controlSequences.getIndexNoFail("\\geq");
-  }
-  int conComma() {
-    return this->controlSequences.getIndexNoFail(",");
-  }
-  int conQuote() {
-    return this->controlSequences.getIndexNoFail("\"");
-  }
-  int conDefine() {
-    return this->controlSequences.getIndexNoFail("=");
-  }
-  int conIsDenotedBy() {
-    return this->controlSequences.getIndexNoFail("=:");
-  }
-  int conSequenceNoRepetition() {
-    return this->controlSequences.getIndexNoFail("SequenceNoRepetition");
-  }
-  int conMatrixStart() {
-    return this->controlSequences.getIndexNoFail("Matrix");
-  }
-  int conMatrixEnd() {
-    return this->controlSequences.getIndexNoFail("MatrixEnd");
-  }
-  int conLieBracket() {
-    return this->controlSequences.getIndexNoFail("[]");
-  }
-  int conOpenBracket() {
-    return this->controlSequences.getIndexNoFail("(");
-  }
-  int conCloseBracket() {
-    return this->controlSequences.getIndexNoFail(")");
-  }
-  int conEndProgram() {
-    return this->controlSequences.getIndexNoFail("EndProgram");
-  }
   bool isDefiniteIntegral(SyntacticElement::Role role);
   void extractSyntacticElementsDefaultOutput(const std::string& input);
   void logParsingOperation();
   bool extractExpressionsFromPreprocessed(
     Expression& outputExpression, std::string* outputErrors
   );
-  int getOperationIndexFromControlIndex(int controlIndex);
+  int getOperationIndex(const std::string& operation);
   bool decreaseStackExceptLast(int decrease);
   bool decreaseStack(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);
@@ -2686,35 +2555,7 @@ private:
   bool parseEmbedInCommandSequence(
     const std::string& input, Expression& output
   );
-  int getExpressionIndex();
 public:
-  int conSequence() {
-    return this->controlSequences.getIndexNoFail("Sequence");
-  }
-  int conError() {
-    return this->controlSequences.getIndexNoFail("Error");
-  }
-  int conExpression() {
-    return this->controlSequences.getIndexNoFail("Expression");
-  }
-  int conVariable() {
-    return this->controlSequences.getIndexNoFail("Variable");
-  }
-  int conInteger() {
-    return this->controlSequences.getIndexNoFail("Integer");
-  }
-  int conIntegralUnderscore() {
-    return this->controlSequences.getIndexNoFail("\\int_{*}");
-  }
-  int conIntegralSuperScript() {
-    return this->controlSequences.getIndexNoFail("\\int^{*}");
-  }
-  int conIntegralSuperSubScript() {
-    return this->controlSequences.getIndexNoFail("\\int_{*}^{**}");
-  }
-  int conSequenceStatements() {
-    return this->controlSequences.getIndexNoFail("SequenceStatements");
-  }
   std::string toStringIsCorrectAsciiCalculatorString(const std::string& input);
   std::string toStringSyntacticStackHTMLTable(
     bool includeLispifiedExpressions, bool ignoreCommandEnclosures
@@ -2737,10 +2578,9 @@ public:
   // and trims them away in-place if they form non-standard white space.
   // When trimming happens, returns true, otherwise returns false.
   bool trimNonStandardWhiteSpaceFromEnd(std::string& inputOutput);
-  // Deprecated, use extractContiguousWords instead.
-  void parseFillDictionaryDefaultOutputDeprecated(const std::string& input);
-  // Deprecated. Use extractContiguousWords instead.
-  void parseFillDictionaryDeprecated(
+  // This function is intended for calculator function use.
+  // The internal parser uses extractContiguousWords instead.
+  void stringToSyntacticElements(
     const std::string& input, List<SyntacticElement>& output
   );
   // Initialization function.
@@ -3101,6 +2941,7 @@ public:
   Expression getNewBoundVariable();
   Expression getNewAtom(const std::string& preferredName = "");
   void computeAutoCompleteKeyWords();
+  void addAutoCompleteKeyWords(const List<std::string>& keyWords);
   void writeAutoCompleteKeyWordsToFile();
   std::string toStringOutputAndSpecials();
   class Examples {

@@ -2448,9 +2448,7 @@ private:
     this->replaceEXdotsXbySsXdotsX(numberOfDots);
     return this->decreaseStackSetCharacterRanges(numberOfDots);
   }
-  bool replaceOEXByEX();
   bool replaceOXXByEXX();
-  bool replaceOXEEXByEX();
   bool replaceEOEXByEX(int operationIndex);
   bool replaceELimitsUnderscoreEPowerEByE();
   bool replaceELimitsPowerEUnderscoreEByE();
@@ -2544,7 +2542,7 @@ private:
   bool extractExpressionsFromPreprocessed(
     Expression& outputExpression, std::string* outputErrors
   );
-  int getOperationIndex(const std::string& operation);
+  int getOperationIndexNoFail(const std::string& operation);
   bool decreaseStackExceptLast(int decrease);
   bool decreaseStack(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);

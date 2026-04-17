@@ -1041,7 +1041,8 @@ bool Calculator::Test::processResults() {
     << " and rerun the present test to store the expected results. "
     << "Alternatively, run: ./calculator test update";
     out
-    << "<table class='tableCalculatorOutput' style='border-collapse: collapse;'>"
+    <<
+    "<table class='tableCalculatorOutput' style='border-collapse: collapse;'>"
     << badCommands.str()
     << "</table>";
     global

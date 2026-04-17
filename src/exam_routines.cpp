@@ -2581,7 +2581,6 @@ void CalculatorHTML::initAutocompleteExtras() {
   this->autoCompleteExtrasForProblems.addOnTop("logarithms");
   this->autoCompleteExtrasForProblems.addOnTop("buttons");
   this->autoCompleteExtrasForProblems.addOnTop("displaystyle");
-
 }
 
 void CalculatorHTML::initBuiltInSpanClasses() {

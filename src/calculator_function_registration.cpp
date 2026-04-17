@@ -6243,6 +6243,8 @@ void Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively() {
   addOnTopNoRepetitionMustBeNew("\\arccos");
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.
   addOnTopNoRepetitionMustBeNew("\\log");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.
+  addOnTopNoRepetitionMustBeNew("\\ln");
 }
 
 void Calculator::initializeOperationsThatAreKnownFunctions() {

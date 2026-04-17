@@ -313,10 +313,11 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\\setminus", SyntacticElement::SET_MINUS);
   registerKeyword("\\binom", SyntacticElement::BINOM);
   registerKeyword("\\lim", SyntacticElement::LIM);
+  registerKeyword("\\log", SyntacticElement::LOGARITHM);
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("ln", "\\log");
-  keyWordAutocorrections.setKeyValue("log", "\\log");
   keyWordAutocorrections.setKeyValue("\\ln", "\\log");
+  keyWordAutocorrections.setKeyValue("log", "\\log");
   keyWordAutocorrections.setKeyValue("infinity", "\\infty");
   keyWordAutocorrections.setKeyValue("infty", "\\infty");
   keyWordAutocorrections.setKeyValue("pi", "\\pi");
@@ -332,8 +333,6 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   keyWordAutocorrections.setKeyValue("choose", "\\choose");
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("mod", "\\mod");
-
-
   autocompleteKeyWords.addOnTop("NoFrac");
   autocompleteKeyWords.addOnTop("ShowContext");
   autocompleteKeyWords.addOnTop("NoLogarithmExponentShortcut");
@@ -940,30 +939,6 @@ bool CalculatorParser::decreaseStackExceptLastTwo(int decrease) {
   return true;
 }
 
-bool CalculatorParser::replaceOXEEXByEX() {
-  SyntacticElement& opElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    5
-  ];
-  SyntacticElement& leftExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    3
-  ];
-  SyntacticElement& rightExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    2
-  ];
-  Expression newExpression(*this->owner);
-  newExpression.addChildAtomOnTop(this->getOperationIndex(opElement.source));
-  newExpression.addChildOnTop(leftExpression.data);
-  newExpression.addChildOnTop(rightExpression.data);
-  opElement.data = newExpression;
-  return this->decreaseStackExceptLast(3);
-}
-
 bool CalculatorParser::canBeRegardedAsDifferentialForm(
   const std::string& input
 ) {
@@ -998,29 +973,6 @@ bool CalculatorParser::replaceOXXByEXX() {
   }
   left.data.makeAtom(*this->owner, left.source);
   left.syntacticRole = SyntacticElement::EXPRESSION;
-  return true;
-}
-
-bool CalculatorParser::replaceOEXByEX() {
-  SyntacticElement& middle = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    3
-  ];
-  SyntacticElement& right = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    2
-  ];
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceOEXByEX]";
-  }
-  Expression newExpression;
-  newExpression.reset(*this->owner, 2);
-  newExpression.addChildAtomOnTop(middle.source);
-  newExpression.addChildOnTop(right.data);
-  middle.data = newExpression;
-  this->decreaseStackExceptLast(1);
   return true;
 }
 
@@ -1436,8 +1388,8 @@ void CalculatorParser::stringToSyntacticElements(
   }
 }
 
-int CalculatorParser::getOperationIndex(const std::string& operation) {
-  return this->owner->operations.getIndex(operation);
+int CalculatorParser::getOperationIndexNoFail(const std::string& operation) {
+  return this->owner->operations.getIndexNoFail(operation);
 }
 
 bool CalculatorParser::
@@ -1709,7 +1661,7 @@ bool CalculatorParser::allowsApplyFunctionInPreceding(
 }
 
 bool CalculatorParser::replaceYBySequenceY() {
-  this->replaceYXdotsXBySequenceYXdotsX( 0);
+  this->replaceYXdotsXBySequenceYXdotsX(0);
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceYBySequenceY]";
   }
@@ -1717,7 +1669,7 @@ bool CalculatorParser::replaceYBySequenceY() {
 }
 
 bool CalculatorParser::replaceXXYXBySequenceYX() {
-  this->replaceYXdotsXBySequenceYXdotsX( 1);
+  this->replaceYXdotsXBySequenceYXdotsX(1);
   this->replaceXXYXByYX();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceXXYXBySequenceYX]";
@@ -1725,9 +1677,7 @@ bool CalculatorParser::replaceXXYXBySequenceYX() {
   return true;
 }
 
-bool CalculatorParser::replaceYXdotsXBySequenceYXdotsX(
- int numberOfXs
-) {
+bool CalculatorParser::replaceYXdotsXBySequenceYXdotsX(int numberOfXs) {
   SyntacticElement& main = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
@@ -2218,7 +2168,8 @@ bool CalculatorParser::allowsPlusInPreceding(SyntacticElement::Role role) {
   role == SyntacticElement::SQRT ||
   role == SyntacticElement::END_PROGRAM ||
   role == SyntacticElement::AMPERSAND ||
-         role == SyntacticElement::MATRIX_END ||role==SyntacticElement::DOUBLE_BACKSLASH;
+  role == SyntacticElement::MATRIX_END ||
+  role == SyntacticElement::DOUBLE_BACKSLASH;
 }
 
 bool CalculatorParser::allowsDivideInPreceding(
@@ -3216,7 +3167,7 @@ bool CalculatorParser::applyOneRule() {
     result.addChildOnTop(fourthToLastExpression.data);
     result.addChildOnTop(secondToLastExpression.data);
     fourthToLastExpression.data = result;
-    fourthToLastExpression.source="";
+    fourthToLastExpression.source = "";
     return this->decreaseStackExceptLast(2);
   }
   // end of ambiguity.
@@ -3227,7 +3178,15 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsLimitProcessInPreceding(lastRole)
   ) {
-    return this->replaceOXEEXByEX();
+    fifthToLastE.data.makeXOX(
+      *this->owner,
+      this->owner->opLimit(),
+      thirdToLastExpression.data,
+      secondToLastExpression.data
+    );
+    fifthToLastE.syntacticRole = SyntacticElement::EXPRESSION;
+    this->lastRuleName = "limit _ expression expression to expression";
+    return this->decreaseStackExceptLast(3);
   }
   if (
     fourthToLastRole == SyntacticElement::EXPRESSION &&
@@ -3556,7 +3515,16 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
-    return this->replaceOXEEXByEX();
+    fifthToLastE.data.makeXOX(
+      *this->owner,
+      this->owner->opLogBase(),
+      thirdToLastExpression.data,
+      secondToLastExpression.data
+    );
+    fifthToLastE.syntacticRole = SyntacticElement::EXPRESSION;
+    fifthToLastE.source = "";
+    this->lastRuleName = "logarithm _ expression expression to expression";
+    return this->decreaseStackExceptLast(3);
   }
   if (
     seventhToLastRole == SyntacticElement::SQRT &&
@@ -3872,7 +3840,18 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
-    return this->replaceOEXByEX();
+    Expression operation;
+    operation.makeAtom(*this->owner, thirdToLastExpression.source);
+    thirdToLastExpression.data.reset(*this->owner);
+    thirdToLastExpression.data.addChildOnTop(operation);
+    thirdToLastExpression.data.addChildOnTop(secondToLastExpression.data);
+    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    thirdToLastExpression.source = "";
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName =
+      "known operation expression to known operation of expression";
+    }
+    return this->decreaseStackExceptLast(1);
   }
   if (
     this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.contains

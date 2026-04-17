@@ -1269,8 +1269,9 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
       currentCalculator.autoCompleteKeyWords
     );
     editedFile.initAutocompleteExtras();
-    autocompleteKeyWords.addOnTopNoRepetition(editedFile.autoCompleteExtrasForProblems);
-
+    autocompleteKeyWords.addOnTopNoRepetition(
+      editedFile.autoCompleteExtrasForProblems
+    );
   }
   JSData autoCompleteWordsJS;
   autoCompleteWordsJS.elementType = JSData::Type::tokenArray;

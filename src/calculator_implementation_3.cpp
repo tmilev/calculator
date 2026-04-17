@@ -963,7 +963,7 @@ bool Calculator::Test::processResults() {
       currentLine
       << "<td style='min-width:100px;'>"
       << "<b style='color:red'>unexpected result</b></td>"
-      << "<td class='cellCalculatorResult'>";
+      << "<td class='cellCalculatorResult' style='border:1px solid black;'>";
       currentLine << differ.differenceHTML("actual", "expected");
       currentLine << "</td>";
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
@@ -1041,7 +1041,7 @@ bool Calculator::Test::processResults() {
     << " and rerun the present test to store the expected results. "
     << "Alternatively, run: ./calculator test update";
     out
-    << "<table class='tableCalculatorOutput'>"
+    << "<table class='tableCalculatorOutput' style='border-collapse: collapse;'>"
     << badCommands.str()
     << "</table>";
     global

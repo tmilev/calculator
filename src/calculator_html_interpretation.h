@@ -280,7 +280,7 @@ public:
   static const std::string bugsGenericMessage;
   HashedList<std::string> tagKeysNoValue;
   List<std::string> calculatorTopicElementNames;
-  List<std::string> autoCompleteExtras;
+  List<std::string> autoCompleteExtrasForProblems;
   Selection studentTagsAnswered;
   ProblemData problemData;
   List<std::string> answerHighlights;

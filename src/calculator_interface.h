@@ -2380,6 +2380,7 @@ public:
   static List<SyntacticElement::Role> singleCharacterSyntacticRoles;
   static MapList<std::string, SyntacticElement::Role> keyWordsToSyntacticRoles;
   static MapList<std::string, std::string> keyWordAutocorrections;
+  static List<std::string> autocompleteKeyWords;
   std::string syntaxErrors;
   List<std::string> parsingLog;
   std::string lastRuleName;
@@ -2454,9 +2455,9 @@ private:
   bool replaceELimitsUnderscoreEPowerEByE();
   bool replaceELimitsPowerEUnderscoreEByE();
   bool replaceECByC();
-  bool replaceYBySequenceY(int controlIndex);
-  bool replaceXXYXBySequenceYX(int controlIndex);
-  bool replaceYXdotsXBySequenceYXdotsX(int controlIndex, int numberOfXs = 0);
+  bool replaceYBySequenceY();
+  bool replaceXXYXBySequenceYX();
+  bool replaceYXdotsXBySequenceYXdotsX(int numberOfXs = 0);
   bool replaceCEByC();
   bool replaceCCByC();
   bool replaceMatrixEXByMatrix();

@@ -2031,6 +2031,7 @@ void Calculator::computeAutoCompleteKeyWords() {
   this->addAutoCompleteKeyWords(
     CalculatorParser::keyWordsToSyntacticRoles.keys
   );
+  this->addAutoCompleteKeyWords(CalculatorParser::autocompleteKeyWords);
   this->addAutoCompleteKeyWords(this->operations.keys);
 }
 

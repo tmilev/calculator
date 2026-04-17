@@ -5,6 +5,7 @@ List<SyntacticElement::Role> CalculatorParser::singleCharacterSyntacticRoles;
 MapList<std::string, SyntacticElement::Role> CalculatorParser::
 keyWordsToSyntacticRoles;
 MapList<std::string, std::string> CalculatorParser::keyWordAutocorrections;
+List<std::string> CalculatorParser::autocompleteKeyWords;
 
 bool SyntacticElement::endsOnWhitespace() const {
   int size = static_cast<int>(this->source.size());
@@ -329,12 +330,30 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   keyWordAutocorrections.setKeyValue("csc", "\\csc");
   keyWordAutocorrections.setKeyValue("sec", "\\sec");
   keyWordAutocorrections.setKeyValue("choose", "\\choose");
-  keyWordAutocorrections.setKeyValue("alpha", "\\alpha");
-  keyWordAutocorrections.setKeyValue("beta", "\\beta");
-  keyWordAutocorrections.setKeyValue("gamma", "\\gamma");
-  keyWordAutocorrections.setKeyValue("delta", "\\delta");
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("mod", "\\mod");
+
+
+  autocompleteKeyWords.addOnTop("NoFrac");
+  autocompleteKeyWords.addOnTop("ShowContext");
+  autocompleteKeyWords.addOnTop("NoLogarithmExponentShortcut");
+  autocompleteKeyWords.addOnTop("LogParsing");
+  autocompleteKeyWords.addOnTop("UseMathML");
+  autocompleteKeyWords.addOnTop("LogEvaluation");
+  autocompleteKeyWords.addOnTop("HidePolynomialDataStructure");
+  autocompleteKeyWords.addOnTop("NumberColors");
+  autocompleteKeyWords.addOnTop("LogRules");
+  autocompleteKeyWords.addOnTop("LogCache");
+  autocompleteKeyWords.addOnTop("LogFull");
+  autocompleteKeyWords.addOnTop("UseBracketForIntervals");
+  autocompleteKeyWords.addOnTop("DontUsePredefinedWordSplits");
+  autocompleteKeyWords.addOnTop("PlotShowJavascriptOnly");
+  autocompleteKeyWords.addOnTop("PlotDetails");
+  autocompleteKeyWords.addOnTop("UseLnInsteadOfLog");
+  autocompleteKeyWords.addOnTop("UseLnAbsInsteadOfLog");
+  autocompleteKeyWords.addOnTop("CalculatorStatus");
+  autocompleteKeyWords.addOnTop("FullTree");
+  autocompleteKeyWords.addOnTop("HideLHS");
 }
 
 std::string SyntacticElement::toStringHumanReadable(
@@ -1689,16 +1708,16 @@ bool CalculatorParser::allowsApplyFunctionInPreceding(
   role != SyntacticElement::DOLLAR;
 }
 
-bool CalculatorParser::replaceYBySequenceY(int controlIndex) {
-  this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 0);
+bool CalculatorParser::replaceYBySequenceY() {
+  this->replaceYXdotsXBySequenceYXdotsX( 0);
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceYBySequenceY]";
   }
   return true;
 }
 
-bool CalculatorParser::replaceXXYXBySequenceYX(int controlIndex) {
-  this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 1);
+bool CalculatorParser::replaceXXYXBySequenceYX() {
+  this->replaceYXdotsXBySequenceYXdotsX( 1);
   this->replaceXXYXByYX();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceXXYXBySequenceYX]";
@@ -1707,7 +1726,7 @@ bool CalculatorParser::replaceXXYXBySequenceYX(int controlIndex) {
 }
 
 bool CalculatorParser::replaceYXdotsXBySequenceYXdotsX(
-  int controlIndex, int numberOfXs
+ int numberOfXs
 ) {
   SyntacticElement& main = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
@@ -2199,8 +2218,7 @@ bool CalculatorParser::allowsPlusInPreceding(SyntacticElement::Role role) {
   role == SyntacticElement::SQRT ||
   role == SyntacticElement::END_PROGRAM ||
   role == SyntacticElement::AMPERSAND ||
-  role == SyntacticElement::MATRIX_END ||
-  role == SyntacticElement::BACKSLASH;
+         role == SyntacticElement::MATRIX_END ||role==SyntacticElement::DOUBLE_BACKSLASH;
 }
 
 bool CalculatorParser::allowsDivideInPreceding(
@@ -2555,7 +2573,7 @@ bool CalculatorParser::applyOneRule() {
     ).size -
     8
   ];
-  SyntacticElement::Role sEventhToLastRole =
+  SyntacticElement::Role seventhToLastRole =
   seventhToLastExpression.syntacticRole;
   SyntacticElement::Role eighthToLastRole = eighthToLastE.syntacticRole;
   if (
@@ -3198,6 +3216,7 @@ bool CalculatorParser::applyOneRule() {
     result.addChildOnTop(fourthToLastExpression.data);
     result.addChildOnTop(secondToLastExpression.data);
     fourthToLastExpression.data = result;
+    fourthToLastExpression.source="";
     return this->decreaseStackExceptLast(2);
   }
   // end of ambiguity.
@@ -3245,8 +3264,8 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastExpression.data.makeXOX(
       *this->owner,
       this->owner->opBinom(),
-      thirdToLastExpression.data,
-      secondToLastExpression.data
+      secondToLastExpression.data,
+      lastExpression.data
     );
     thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
     if (this->flagLogSyntaxRules) {
@@ -3540,7 +3559,7 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceOXEEXByEX();
   }
   if (
-    sEventhToLastRole == SyntacticElement::SQRT &&
+    seventhToLastRole == SyntacticElement::SQRT &&
     sixthToLastRole == SyntacticElement::LEFT_BRACKET &&
     fifthToLastRole == SyntacticElement::EXPRESSION &&
     fourthToLastRole == SyntacticElement::RIGHT_BRACKET &&
@@ -4178,7 +4197,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     this->isSeparatorFromTheLeftForDefinition(eighthToLastRole) &&
-    sEventhToLastRole == SyntacticElement::EXPRESSION &&
+    seventhToLastRole == SyntacticElement::EXPRESSION &&
     sixthToLastRole == SyntacticElement::COLON &&
     fifthToLastRole == SyntacticElement::IF &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
@@ -4187,14 +4206,14 @@ bool CalculatorParser::applyOneRule() {
     this->isSeparatorFromTheRightForDefinition(lastRole)
   ) {
     Expression result(*this->owner);
-    result.addChildAtomOnTop(this->owner->opIf());
+    result.addChildAtomOnTop(this->owner->opDefineConditional());
     result.addChildOnTop(seventhToLastExpression.data);
     result.addChildOnTop(fourthToLastExpression.data);
     result.addChildOnTop(secondToLastExpression.data);
-    secondToLastExpression.data = result;
-    secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    seventhToLastExpression.data = result;
+    seventhToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
     if (this->flagLogSyntaxRules) {
-      this->lastRuleName = "[Rule: Calculator::replaceEXXEXEXBy_CofEEE_X]";
+      this->lastRuleName = "expression : if expression equals expression";
     }
     return this->decreaseStackExceptLast(5);
   }

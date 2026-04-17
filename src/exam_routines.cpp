@@ -2573,34 +2573,15 @@ void TopicElementParser::initializeElementTypes() {
 
 void CalculatorHTML::initAutocompleteExtras() {
   STACK_TRACE("CalculatorHTML::initAutocompleteExtras");
-  if (this->autoCompleteExtras.size > 0) {
+  if (this->autoCompleteExtrasForProblems.size > 0) {
     return;
   }
-  this->autoCompleteExtras.addOnTop("answerCalculatorHighlight");
-  this->autoCompleteExtras.addOnTop("algebra");
-  this->autoCompleteExtras.addOnTop("logarithms");
-  this->autoCompleteExtras.addOnTop("buttons");
-  this->autoCompleteExtras.addOnTop("displaystyle");
-  this->autoCompleteExtras.addOnTop("NoFrac");
-  this->autoCompleteExtras.addOnTop("ShowContext");
-  this->autoCompleteExtras.addOnTop("NoLogarithmExponentShortcut");
-  this->autoCompleteExtras.addOnTop("LogParsing");
-  this->autoCompleteExtras.addOnTop("UseMathML");
-  this->autoCompleteExtras.addOnTop("LogEvaluation");
-  this->autoCompleteExtras.addOnTop("HidePolynomialDataStructure");
-  this->autoCompleteExtras.addOnTop("NumberColors");
-  this->autoCompleteExtras.addOnTop("LogRules");
-  this->autoCompleteExtras.addOnTop("LogCache");
-  this->autoCompleteExtras.addOnTop("LogFull");
-  this->autoCompleteExtras.addOnTop("UseBracketForIntervals");
-  this->autoCompleteExtras.addOnTop("DontUsePredefinedWordSplits");
-  this->autoCompleteExtras.addOnTop("PlotShowJavascriptOnly");
-  this->autoCompleteExtras.addOnTop("PlotDetails");
-  this->autoCompleteExtras.addOnTop("UseLnInsteadOfLog");
-  this->autoCompleteExtras.addOnTop("UseLnAbsInsteadOfLog");
-  this->autoCompleteExtras.addOnTop("CalculatorStatus");
-  this->autoCompleteExtras.addOnTop("FullTree");
-  this->autoCompleteExtras.addOnTop("HideLHS");
+  this->autoCompleteExtrasForProblems.addOnTop("answerCalculatorHighlight");
+  this->autoCompleteExtrasForProblems.addOnTop("algebra");
+  this->autoCompleteExtrasForProblems.addOnTop("logarithms");
+  this->autoCompleteExtrasForProblems.addOnTop("buttons");
+  this->autoCompleteExtrasForProblems.addOnTop("displaystyle");
+
 }
 
 void CalculatorHTML::initBuiltInSpanClasses() {

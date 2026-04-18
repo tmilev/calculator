@@ -278,6 +278,8 @@ public:
   bool isCacheableExpression() const;
   bool isBuiltInScalar() const;
   bool isElementaryObject() const;
+  bool isTypeAtom() const;
+
   bool isBuiltInType(std::string* outputWhichOperation = nullptr) const;
   bool isBuiltInType(int* outputWhichType) const;
   bool isIntervalRealLine() const;
@@ -1833,8 +1835,13 @@ public:
     LEFT_RIGHT_CURLY_BRACE,
     CIRC,
     DOLLAR,
-    BACKSLASH_INT,
-    INTEGRAL_WITH_SUB_AND_SUPERSCRIPT,
+    // Integral sign, not finalized to an integral operator.
+    INTEGRAL_SIGN,
+    // Integral operator, may be indefinite such as:
+    //  \int
+    // or definite such as:
+    // \int _a ^b
+    INTEGRAL_OPERATOR,
     INTEGRAL_WITH_SUBSCRIPT,
     INTEGRAL_WITH_SUPERSCRIPT,
     STAR,
@@ -2362,7 +2369,6 @@ private:
   Calculator* owner;
   int numberOfEmptyTokensStart;
   int counterInToBeParsed;
-  bool flagLogSyntaxRules;
   bool flagEncounteredSplit;
   List<SyntacticElement> toBeParsed;
   List<SyntacticElement> syntacticStack;
@@ -2375,19 +2381,32 @@ private:
     std::string, List<std::string>, HashFunctions::hashFunction<std::string>
   > predefinedWordSplits;
 public:
+  struct FlagDescription {
+    bool* flagLocation;
+    std::string description;
+  };
+
+  bool flagLogSyntaxRules;
   // The i^th element of this array contains the syntactic role of
   // the character whose value is i.
   static List<SyntacticElement::Role> singleCharacterSyntacticRoles;
   static MapList<std::string, SyntacticElement::Role> keyWordsToSyntacticRoles;
   static MapList<std::string, std::string> keyWordAutocorrections;
-  static List<std::string> autocompleteKeyWords;
+  static HashedList<std::string> keyWordsWithDigits;
   std::string syntaxErrors;
   List<std::string> parsingLog;
   std::string lastRuleName;
   // This function is not thread safe.
   // Initialized in initializeMainAll().
   static const HashedList<std::string>& whitespaceContainer();
+  // Flags that can be modified through the CalculatorParser.
+  MapList<std::string, FlagDescription> modifyableFlags;
 private:
+  void addFlagDescription(
+    const std::string& keyWord,
+    bool* inputFlagLocation,
+    const std::string& inputDescription = ""
+  );
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftForDefinition(SyntacticElement::Role role);
@@ -2593,9 +2612,7 @@ public:
   static void registerKeyword(
     const std::string& keyWord, SyntacticElement::Role role
   );
-  void initialize(Calculator* inputOwner) {
-    this->owner = inputOwner;
-  }
+  void initialize(Calculator* inputOwner);
   void initializeControlSequences();
   void initializeStringsThatSplitIfFollowedByDigit();
   void initializePredefinedWordSplits();
@@ -2855,7 +2872,8 @@ public:
   bool flagHideLHS;
   bool flagHidePolynomialBuiltInTypeIndicator;
   bool flagDisplayFullExpressionTree;
-  bool flagUseFracInRationalLaTeX;
+  bool flagSkipEvaluation;
+  bool flagDontUseFracInRational;
   bool flagUseHtml;
   bool flagDisplayContext;
   bool flagHasGraphics;
@@ -2956,7 +2974,7 @@ public:
     // Generates a JSON with all functions and their documentation.
     JSData toJSONFunctionHandlers();
     JSData toJSONFunctionHandlersAndExamples();
-    JSData toJSONExamples();
+    JSData toJSONExamples(const std::string& examplesFolder);
     // Writes a readme file in folder examples/Readme.md.
     bool writeExamplesReadme();
     std::string getExamplesReadmeFragment();

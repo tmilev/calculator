@@ -10568,7 +10568,9 @@ void Calculator::Test::initialize() {
     global.fatal << "Non-initialized calculator test. " << global.fatal;
   }
   this->commands.clear();
-  JSData examples = this->owner->examples.toJSONExamples();
+  List<std::string> exampleFolders = List<std::string>({"examples/", "examples/internal/"});
+  for (const std::string& exampleFolder: exampleFolders){
+  JSData examples = this->owner->examples.toJSONExamples(exampleFolder);
   for (int i = 0; i < examples.objects.size(); i ++) {
     Calculator::Test::OneTest oneTest;
     oneTest.requresAdminAccess = false;
@@ -10577,6 +10579,7 @@ void Calculator::Test::initialize() {
     oneTest.atom = name;
     oneTest.functionAdditionalIdentifier = name;
     this->commands.setKeyValue(oneTest.command, oneTest);
+  }
   }
   this->initializeLoadTestCases();
   for (int i = 0; i < this->owner->numberOfPredefinedAtoms; i ++) {

@@ -792,9 +792,7 @@ bool Expression::toMathMLBuiltIn<AlgebraicNumber>(
   (void) format;
   (void) outputProperties;
   FormatExpressions formatLocal;
-  if (input.owner->flagUseFracInRationalLaTeX) {
-    formatLocal.flagUseFrac = true;
-  }
+    formatLocal.flagUseFrac = !input.owner->flagDontUseFracInRational;
   MathExpressionFormattingProperties properties;
   std::string currentString =
   input.getValue<AlgebraicNumber>().toMathML(&formatLocal, &properties);
@@ -1692,7 +1690,7 @@ bool Expression::toMathMLDivide(
   if (!input.startsWith(commands.opDivide(), 3)) {
     return false;
   }
-  bool doUseFrac = commands.flagUseFracInRationalLaTeX;
+  bool doUseFrac = !commands.flagDontUseFracInRational;
   if (
     doUseFrac && (
       input[1].startsWith(commands.opTimes()) ||

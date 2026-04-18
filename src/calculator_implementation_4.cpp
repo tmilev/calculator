@@ -2015,7 +2015,7 @@ void Calculator::addAutoCompleteKeyWords(const List<std::string>& keyWords) {
     if (!MathRoutines::isLatinLetter(keyWord[0])) {
       continue;
     }
-    autoCompleteKeyWords.addOnTopNoRepetition(keyWord);
+    this->autoCompleteKeyWords.addOnTopNoRepetition(keyWord);
   }
 }
 
@@ -2031,8 +2031,11 @@ void Calculator::computeAutoCompleteKeyWords() {
   this->addAutoCompleteKeyWords(
     CalculatorParser::keyWordsToSyntacticRoles.keys
   );
-  this->addAutoCompleteKeyWords(CalculatorParser::autocompleteKeyWords);
+  this->addAutoCompleteKeyWords(this->parser.modifyableFlags.keys);
   this->addAutoCompleteKeyWords(this->operations.keys);
+  for (const std::string& builtInType: this->allBuiltInTypes){
+    this->autoCompleteKeyWords.removeFirstOccurenceSwapWithLast(builtInType);
+  }
 }
 
 JSData Calculator::toJSONPerformancePerHandler() {

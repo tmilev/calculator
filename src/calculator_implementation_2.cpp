@@ -32,15 +32,19 @@ JSData Calculator::Examples::toJSONFunctionHandlersAndExamples() {
   JSData result;
   result[WebAPI::Frontend::calculatorHandlerDocumentation] =
   this->toJSONFunctionHandlers();
-  result[WebAPI::Frontend::calculatorExamples] = this->toJSONExamples();
+  result[WebAPI::Frontend::calculatorExamples] = this->toJSONExamples("");
   return result;
 }
 
-JSData Calculator::Examples::toJSONExamples() {
+JSData Calculator::Examples::toJSONExamples(const std::string& examplesFolder) {
+  std::string folder = examplesFolder;
+  if (folder.empty()){
+    folder = "examples/";
+  }
   JSData result;
   result.elementType = JSData::Type::tokenObject;
   List<std::string> fileNames;
-  if (!FileOperations::getFolderFileNamesVirtual("examples/", fileNames)) {
+  if (!FileOperations::getFolderFileNamesVirtual(folder, fileNames)) {
     result[WebAPI::Result::error] = "Failed to open examples";
     return result;
   }
@@ -56,7 +60,7 @@ JSData Calculator::Examples::toJSONExamples() {
     std::stringstream errorStream;
     std::string content;
     FileOperations::loadFileToStringVirtual(
-      "examples/" + fileName, content, false, &errorStream
+      folder + fileName, content, false, &errorStream
     );
     result[fileNameWithoutExtension] = content;
   }
@@ -1758,7 +1762,11 @@ void Calculator::evaluateCommands() {
   if (global.runMode != GlobalVariables::RunMode::consoleRegular) {
     report.report("Evaluating expressions, current expression stack:\n");
   }
-  this->evaluateExpression(*this, startingExpression, this->programExpression);
+  if (!this->flagSkipEvaluation) {
+    this->evaluateExpression(
+      *this, startingExpression, this->programExpression
+    );
+  }
   if (this->recursionDepth != 0) {
     global.fatal
     << "The starting recursion "

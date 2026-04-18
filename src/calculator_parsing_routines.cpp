@@ -5,7 +5,7 @@ List<SyntacticElement::Role> CalculatorParser::singleCharacterSyntacticRoles;
 MapList<std::string, SyntacticElement::Role> CalculatorParser::
 keyWordsToSyntacticRoles;
 MapList<std::string, std::string> CalculatorParser::keyWordAutocorrections;
-List<std::string> CalculatorParser::autocompleteKeyWords;
+HashedList<std::string> CalculatorParser::keyWordsWithDigits;
 
 bool SyntacticElement::endsOnWhitespace() const {
   int size = static_cast<int>(this->source.size());
@@ -67,12 +67,12 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
     return "FACTORIAL";
   case SyntacticElement::INTEGRAL_WITH_SUBSCRIPT:
     return "INTEGRAL_WITH_SUBSCRIPT";
-  case SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT:
-    return "INTEGRAL_WITH_SUB_AND_SUPERSCRIPT";
+  case SyntacticElement::INTEGRAL_OPERATOR:
+    return "INTEGRAL_OPERATOR";
   case SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT:
     return "INTEGRAL_WITH_SUPERSCRIPT";
-  case SyntacticElement::BACKSLASH_INT:
-    return "BACKSLASH_INT";
+  case SyntacticElement::INTEGRAL_SIGN:
+    return "INTEGRAL_SIGN";
   case SyntacticElement::UPPER_CARET:
     return "UPPER_CARET";
   case SyntacticElement::DOLLAR:
@@ -297,7 +297,7 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\\displaystyle", SyntacticElement::WHITE_SPACE);
   registerKeyword("\\geq", SyntacticElement::GREATER_THAN_LIKE);
   registerKeyword("\\circ", SyntacticElement::CIRC);
-  registerKeyword("\\int", SyntacticElement::BACKSLASH_INT);
+  registerKeyword("\\int", SyntacticElement::INTEGRAL_SIGN);
   registerKeyword("\\cup", SyntacticElement::CUP);
   registerKeyword("\\sqcup", SyntacticElement::SQ_CUP);
   registerKeyword("\\cap", SyntacticElement::CAP);
@@ -333,26 +333,8 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   keyWordAutocorrections.setKeyValue("choose", "\\choose");
   keyWordAutocorrections.setKeyValue("sqrt", "\\sqrt");
   keyWordAutocorrections.setKeyValue("mod", "\\mod");
-  autocompleteKeyWords.addOnTop("NoFrac");
-  autocompleteKeyWords.addOnTop("ShowContext");
-  autocompleteKeyWords.addOnTop("NoLogarithmExponentShortcut");
-  autocompleteKeyWords.addOnTop("LogParsing");
-  autocompleteKeyWords.addOnTop("UseMathML");
-  autocompleteKeyWords.addOnTop("LogEvaluation");
-  autocompleteKeyWords.addOnTop("HidePolynomialDataStructure");
-  autocompleteKeyWords.addOnTop("NumberColors");
-  autocompleteKeyWords.addOnTop("LogRules");
-  autocompleteKeyWords.addOnTop("LogCache");
-  autocompleteKeyWords.addOnTop("LogFull");
-  autocompleteKeyWords.addOnTop("UseBracketForIntervals");
-  autocompleteKeyWords.addOnTop("DontUsePredefinedWordSplits");
-  autocompleteKeyWords.addOnTop("PlotShowJavascriptOnly");
-  autocompleteKeyWords.addOnTop("PlotDetails");
-  autocompleteKeyWords.addOnTop("UseLnInsteadOfLog");
-  autocompleteKeyWords.addOnTop("UseLnAbsInsteadOfLog");
-  autocompleteKeyWords.addOnTop("CalculatorStatus");
-  autocompleteKeyWords.addOnTop("FullTree");
-  autocompleteKeyWords.addOnTop("HideLHS");
+  keyWordsWithDigits.addOnTop("Plot2D");
+  keyWordsWithDigits.addOnTop("ToUTF8String");
 }
 
 std::string SyntacticElement::toStringHumanReadable(
@@ -368,7 +350,7 @@ std::string SyntacticElement::toStringHumanReadable(
     this->syntacticRole == SyntacticElement::VARIABLE ||
     this->syntacticRole == SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT ||
     this->syntacticRole == SyntacticElement::INTEGRAL_WITH_SUBSCRIPT ||
-    this->syntacticRole == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT
+    this->syntacticRole == SyntacticElement::INTEGRAL_OPERATOR
   ) {
     makeTable = true;
   }
@@ -411,6 +393,79 @@ void CalculatorParser::rationalFromIntegerDotInteger(
   result += afterDecimalPointInteger;
   result /= denominator;
   output.assignValue(*this->owner, result);
+}
+
+void CalculatorParser::initialize(Calculator* inputOwner) {
+  this->owner = inputOwner;
+  this->addFlagDescription("LogParsing", &this->flagLogSyntaxRules);
+  this->addFlagDescription("LogFull", &this->owner->flagLogFullTreeCrunching);
+  this->addFlagDescription(
+    "NumberColors",
+    &this->owner->flagUseNumberColors,
+    "<span style='color:blue'>Floating point numbers</span> "
+    "are displayed in "
+    "<span style='color:blue'>blue</span>."
+    "<br><span style='color:red'>Algebraic numbers</span> "
+    "are displayed in <span style='color:red'>red</span>. "
+    "<br>Rational numbers are displayed in default color.<br>"
+  );
+  this->addFlagDescription(
+    "PlotShowJavascriptOnly", &this->owner->flagPlotShowJavascriptOnly
+  );
+  this->addFlagDescription("PlotDetails", &this->owner->flagPlotNoControls);
+  this->addFlagDescription(
+    "UseMathML",
+    &this->owner->flagUseMathML,
+    "<b style='color:red'>WORK IN PROGRESS.</b> "
+    "Using mathML for the output.<br>"
+  );
+  this->addFlagDescription(
+    "UseBracketForIntervals",
+    &this->owner->flagUseBracketsForIntervals,
+    "Using brackets for intervals. "
+  );
+  this->addFlagDescription(
+    "DontUsePredefinedWordSplits",
+    &this->owner->flagUsePredefinedWordSplits,
+    "Predefined word splits are OFF. xy will *not* be replaced by x*y. "
+  );
+  this->addFlagDescription(
+    "WriteLatexDetails", &this->owner->flagWriteLatexPlots
+  );
+  this->addFlagDescription(
+    "HidePolynomialDataStructure",
+    &this->owner->flagHidePolynomialBuiltInTypeIndicator
+  );
+  this->addFlagDescription("LogEvaluation", &this->owner->flagLogEvaluation);
+  this->addFlagDescription(
+    "UseLnInsteadOfLog",
+    &this->owner->flagUseLnInsteadOfLog,
+    "Displaying complex logarithms as ln. "
+  );
+  this->addFlagDescription(
+    "UseLnAbsInsteadOfLog",
+    &this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation
+  );
+  this->addFlagDescription("LogCache", &this->owner->flagLogCache);
+  this->addFlagDescription("LogRules", &this->owner->flagLogRules);
+  this->addFlagDescription("ShowContext", &this->owner->flagDisplayContext);
+  this->addFlagDescription("SkipEvaluation", &this->owner->flagSkipEvaluation);
+
+  this->addFlagDescription("FullTree", &this->owner->flagDisplayFullExpressionTree );
+  this->addFlagDescription("HideLHS", &this->owner->flagHideLHS);
+  this->addFlagDescription("NoFrac", &this->owner->flagDontUseFracInRational);
+
+}
+
+void CalculatorParser::addFlagDescription(
+  const std::string& keyWord,
+  bool* inputFlagLocation,
+  const std::string& inputDescription
+) {
+  CalculatorParser::FlagDescription flagDescription;
+  flagDescription.flagLocation = inputFlagLocation;
+  flagDescription.description = inputDescription;
+  this->modifyableFlags.setKeyValue(keyWord, flagDescription);
 }
 
 void CalculatorParser::reset() {
@@ -646,6 +701,7 @@ void Calculator::reset() {
   this->ruleCollectionId = 0;
   this->mode = Calculator::Mode::full;
   this->maximumAlgebraicTransformationsPerExpression = 100;
+  int doNotSubmit;
   this->maximumRecursionDepth = 10000;
   this->recursionDepth = 0;
   this->depthRecursionReached = 0;
@@ -660,7 +716,7 @@ void Calculator::reset() {
   this->flagNewContextNeeded = true;
   this->flagDisplayFullExpressionTree = false;
   this->flagHidePolynomialBuiltInTypeIndicator = false;
-  this->flagUseFracInRationalLaTeX = true;
+  this->flagDontUseFracInRational = false;
   this->flagForkingprocessAllowed = true;
   this->flagUsePredefinedWordSplits = true;
   this->flagPlotNoControls = true;
@@ -668,6 +724,7 @@ void Calculator::reset() {
   this->flagHasGraphics = false;
   this->flagUseBracketsForIntervals = false;
   this->flagUseMathML = false;
+  this->flagSkipEvaluation = false;
   this->maximumLatexChars = 2000;
   this->objectContainer.reset();
   this->operations.clear();
@@ -2201,6 +2258,7 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
   this->owner->statistics.lastStopwatchParsing =
   this->owner->statistics.startParsing;
   ProgressReport report;
+  bool currentLogEvaluation = this->owner->flagLogEvaluation;
   for (
     this->counterInToBeParsed = 0; this->counterInToBeParsed < (
       *this->currrentlyParsed
@@ -2230,12 +2288,16 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
       ]
     );
     if (this->flagLogSyntaxRules) {
-      this->lastRuleName = "[next token]";
+      this->lastRuleName = "next token";
       this->logParsingOperation();
     }
     int totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;
     int minStackSize = this->currentSyntacticStack->size;
     while (this->applyOneRule()) {
+      if (currentLogEvaluation != this->owner->flagLogEvaluation) {
+        this->owner->logTime(this->owner->statistics.lastStopwatchParsing);
+        currentLogEvaluation = this->owner->flagLogEvaluation;
+      }
       this->logParsingOperation();
       if (this->currentSyntacticStack->size < minStackSize) {
         totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;
@@ -2418,9 +2480,11 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastRole != SyntacticElement::PERCENT &&
     secondToLastExpression.syntacticRole == SyntacticElement::LETTERS &&
     lastExpression.syntacticRole == SyntacticElement::LETTERS &&
-    secondToLastExpression.source + lastExpression.source == "Plot2D"
+    this->keyWordsWithDigits.contains(
+      secondToLastExpression.source + lastExpression.source
+    )
   ) {
-    secondToLastExpression.source = "Plot2D";
+    secondToLastExpression.source += lastExpression.source;
     this->lastRuleName = "merge known letter combinations";
     return this->popTopSyntacticStack();
   }
@@ -2530,183 +2594,21 @@ bool CalculatorParser::applyOneRule() {
   if (
     secondToLastRole == SyntacticElement::PERCENT &&
     lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "LogParsing"
+    this->modifyableFlags.contains(lastExpression.source)
   ) {
-    this->flagLogSyntaxRules = true;
-    this->lastRuleName = "log parsing";
-    return this->decreaseStack(2);
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "LogFull"
-  ) {
-    this->owner->comments
-    << "<hr>Requested a full log of the evaluation process.<hr>";
-    this->owner->flagLogFullTreeCrunching = true;
-    this->popTopSyntacticStack();
-    this->lastRuleName = "log full";
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "UseMathML"
-  ) {
-    this->owner->comments
-    << "<b style='color:red'>WORK IN PROGRESS.</b> "
-    << "Using mathML for the output.<br>";
-    this->owner->flagUseMathML = true;
-    this->lastRuleName = "use mathML";
-    return this->decreaseStack(2);
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "UseBracketForIntervals"
-  ) {
-    this->owner->flagUseBracketsForIntervals = true;
-    this->owner->comments << "Using brackets for intervals. ";
-    this->popTopSyntacticStack();
-    this->lastRuleName = "use brackets for intervals";
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "DontUsePredefinedWordSplits"
-  ) {
-    this->owner->flagUsePredefinedWordSplits = false;
-    this->owner->comments
-    << "Predefined word splits are OFF. xy will *not* be replaced by x*y. ";
-    this->popTopSyntacticStack();
-    this->lastRuleName = "predefined word splits off";
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "WriteLatexDetails"
-  ) {
-    this->owner->flagWriteLatexPlots = true;
-    this->owner->comments << "Creating LaTeX files.";
-    this->lastRuleName = "create latex outputs";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "PlotShowJavascriptOnly"
-  ) {
-    this->owner->flagPlotShowJavascriptOnly = true;
-    this->owner->comments << "Plots show javascript only. ";
-    this->lastRuleName = "Plot javascript only";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "PlotDetails"
-  ) {
-    this->owner->flagPlotNoControls = false;
-    this->owner->comments << "Plot details on. ";
-    this->lastRuleName = "Plot details on";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "HidePolynomialDataStructure"
-  ) {
-    this->owner->flagHidePolynomialBuiltInTypeIndicator = true;
-    this->lastRuleName = "Hide polynomial data structure";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "LogEvaluation"
-  ) {
-    this->owner->flagLogEvaluation = true;
-    *(this->owner) << "Log evaluation start. ";
-    this->owner->logTime(this->owner->statistics.lastStopwatchParsing);
-    this->lastRuleName = "Log evaluation";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "UseLnInsteadOfLog"
-  ) {
-    this->owner->comments << "Displaying complex logarithms as ln. ";
-    this->owner->flagUseLnInsteadOfLog = true;
-    this->lastRuleName = "use ln instead of log";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "UseLnAbsInsteadOfLog"
-  ) {
-    this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation = true;
-    this->lastRuleName = "use ln|| instead of log";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "NumberColors"
-  ) {
-    if (!this->owner->flagUseNumberColors) {
-      *this->owner
-      << "<span style='color:blue'>Floating point numbers</span> "
-      << "are displayed in "
-      << "<span style='color:blue'>blue</span>."
-      << "<br><span style='color:red'>Algebraic numbers</span> "
-      << "are displayed in <span style='color:red'>red</span>. "
-      << "<br>Rational numbers are displayed in default color.";
+    const CalculatorParser::FlagDescription& flagDescription =
+    this->modifyableFlags.getValueNoFail(lastExpression.source);
+    *flagDescription.flagLocation = true;
+    if (flagDescription.description.empty()) {
+      this->owner->comments
+      << "User set flag <b style='color:blue'>"
+      << lastExpression.source
+      << "</b> to true.<br>";
+    } else {
+      this->owner->comments << flagDescription.description;
     }
-    this->owner->flagUseNumberColors = true;
-    this->lastRuleName = "use number colors";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "LogCache"
-  ) {
-    this->owner->flagLogCache = true;
-    this->lastRuleName = "log cache";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "LogRules"
-  ) {
-    this->owner->flagLogRules = true;
-    this->lastRuleName = "log rules";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "ShowContext"
-  ) {
-    this->owner->flagDisplayContext = true;
-    this->lastRuleName = "show context";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
+    this->lastRuleName = "modifyable flag";
+    return this->decreaseStack(2);
   }
   if (
     secondToLastRole == SyntacticElement::PERCENT &&
@@ -2719,36 +2621,7 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "FullTree"
-  ) {
-    this->owner->flagDisplayFullExpressionTree = true;
-    this->lastRuleName = "full tree expression printout";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "HideLHS"
-  ) {
-    this->owner->flagHideLHS = true;
-    this->lastRuleName = "hide the left hand side";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
-  if (
-    secondToLastRole == SyntacticElement::PERCENT &&
-    lastRole == SyntacticElement::LETTERS &&
-    lastExpression.source == "NoFrac"
-  ) {
-    this->owner->flagUseFracInRationalLaTeX = false;
-    this->lastRuleName = "no frac use";
-    this->popTopSyntacticStack();
-    return this->popTopSyntacticStack();
-  }
+
   if (
     thirdToLastRole == SyntacticElement::PERCENT &&
     lastRole == SyntacticElement::SEMICOLON
@@ -2775,7 +2648,7 @@ bool CalculatorParser::applyOneRule() {
     return this->popBelowStackTop();
   }
   if (
-    secondToLastRole == SyntacticElement::BACKSLASH_INT &&
+    secondToLastRole == SyntacticElement::INTEGRAL_SIGN &&
     lastRole == SyntacticElement::EXPRESSION
   ) {
     secondToLastExpression.data.makeAtom(
@@ -2786,20 +2659,28 @@ bool CalculatorParser::applyOneRule() {
     return true;
   }
   if (
-    thirdToLastRole == SyntacticElement::BACKSLASH_INT &&
+    thirdToLastRole == SyntacticElement::INTEGRAL_SIGN &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
-    return this->replaceOXXByEXX();
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName =
+      "integral expression any to expression expression any";
+    }
+    thirdToLastExpression.data.makeAtom(
+      *this->owner, thirdToLastExpression.source
+    );
+    thirdToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_OPERATOR;
+    return true;
   }
   if (
-    secondToLastRole == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT &&
+    secondToLastRole == SyntacticElement::INTEGRAL_OPERATOR &&
     lastRole == SyntacticElement::EXPRESSION
   ) {
     secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
     return true;
   }
   if (
-    thirdToLastRole == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT &&
+    thirdToLastRole == SyntacticElement::INTEGRAL_OPERATOR &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
@@ -2814,7 +2695,7 @@ bool CalculatorParser::applyOneRule() {
     return true;
   }
   if ((
-      fifthToLastRole == SyntacticElement::BACKSLASH_INT ||
+      fifthToLastRole == SyntacticElement::INTEGRAL_SIGN ||
       this->isDefiniteIntegral(fifthToLastRole)
     ) &&
     fourthToLastRole == SyntacticElement::EXPRESSION && (
@@ -2828,7 +2709,7 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceEOEXByEX(this->owner->opPlus());
   }
   if (
-    fourthToLastRole == SyntacticElement::BACKSLASH_INT &&
+    fourthToLastRole == SyntacticElement::INTEGRAL_SIGN &&
     thirdToLastRole == SyntacticElement::UNDERSCORE &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
@@ -2845,7 +2726,7 @@ bool CalculatorParser::applyOneRule() {
     return this->decreaseStackExceptLast(2);
   }
   if (
-    fourthToLastRole == SyntacticElement::BACKSLASH_INT &&
+    fourthToLastRole == SyntacticElement::INTEGRAL_SIGN &&
     thirdToLastRole == SyntacticElement::UPPER_CARET &&
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
@@ -2873,8 +2754,7 @@ bool CalculatorParser::applyOneRule() {
       thirdToLastExpression.data,
       lastExpression.data
     );
-    thirdToLastExpression.syntacticRole =
-    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+    thirdToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_OPERATOR;
     this->lastRuleName = "int_{*}^{**}";
     return this->decreaseStack(2);
   }
@@ -2889,8 +2769,7 @@ bool CalculatorParser::applyOneRule() {
       fourthToLastExpression.data,
       secondToLastExpression.data
     );
-    fourthToLastExpression.syntacticRole =
-    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+    fourthToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_OPERATOR;
     this->lastRuleName = "int_{*} ^ {**} to int_{*}^{**}";
     return this->decreaseStackExceptLast(2);
   }
@@ -2906,8 +2785,7 @@ bool CalculatorParser::applyOneRule() {
       lastExpression.data
     );
     this->lastRuleName = "[\\int^{*}_{**}]";
-    thirdToLastExpression.syntacticRole =
-    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+    thirdToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_OPERATOR;
     return this->decreaseStack(2);
   }
   if (
@@ -2922,8 +2800,7 @@ bool CalculatorParser::applyOneRule() {
       secondToLastExpression.data
     );
     this->lastRuleName = "\\int^{*} _ Expression to \\int^{*}_{**}";
-    fourthToLastExpression.syntacticRole =
-    SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+    fourthToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_OPERATOR;
     return this->decreaseStackExceptLast(2);
   }
   if (this->owner->flagUsePredefinedWordSplits) {
@@ -3160,7 +3037,7 @@ bool CalculatorParser::applyOneRule() {
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
-    this->allowsApplyFunctionInPreceding(lastRole)
+      this->allowsApplyFunctionInPreceding(lastRole) && !fourthToLastExpression.data.isTypeAtom()
   ) {
     this->lastRuleName = "e circ e any to e of e any";
     Expression result(*this->owner);
@@ -3236,6 +3113,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastRole == SyntacticElement::UPPER_CARET &&
     fourthToLastRole == SyntacticElement::EXPRESSION &&
+    !this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.
+    contains(fourthToLastExpression.source) &&
     this->allowsPowerInPreceding(lastRole) &&
     this->allowsPowerInNext(fifthToLastRole)
   ) {
@@ -3303,11 +3182,13 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastRole == SyntacticElement::MINUS &&
     secondToLastRole == SyntacticElement::EXPRESSION && (
       lastRole == SyntacticElement::EXPRESSION ||
-      lastRole == SyntacticElement::VARIABLE
+      lastRole == SyntacticElement::VARIABLE ||
+      lastRole == SyntacticElement::LETTERS
     )
   ) {
     if (this->flagLogSyntaxRules) {
-      this->lastRuleName = "[Rule: Calculator::replaceEPowerMinusEXByEX]";
+      this->lastRuleName =
+      "expression power minus expression x to expression x";
     }
     Expression exponent;
     exponent.makeOX(
@@ -4283,5 +4164,5 @@ bool CalculatorParser::isDefiniteIntegral(SyntacticElement::Role role) {
   return
   role == SyntacticElement::INTEGRAL_WITH_SUBSCRIPT ||
   role == SyntacticElement::INTEGRAL_WITH_SUPERSCRIPT ||
-  role == SyntacticElement::INTEGRAL_WITH_SUB_AND_SUPERSCRIPT;
+  role == SyntacticElement::INTEGRAL_OPERATOR;
 }

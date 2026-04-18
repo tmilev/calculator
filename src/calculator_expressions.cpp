@@ -2579,7 +2579,7 @@ bool Expression::toStringBuiltIn<Rational>(
   std::string rationalString;
   const Rational inputValue = input.getValue<Rational>();
   inputValue.computeFormattingProperties(format, outputProperties);
-  if (!input.owner->flagUseFracInRationalLaTeX) {
+  if (input.owner->flagDontUseFracInRational) {
     rationalString = inputValue.toString();
   } else {
     rationalString = inputValue.toStringFrac();
@@ -3253,9 +3253,7 @@ bool Expression::toStringBuiltIn<AlgebraicNumber>(
   MathExpressionFormattingProperties* outputProperties
 ) {
   FormatExpressions formatLocal;
-  if (input.owner->flagUseFracInRationalLaTeX) {
-    formatLocal.flagUseFrac = true;
-  }
+  formatLocal.flagUseFrac = !input.owner->flagDontUseFracInRational;
   input.getValue<AlgebraicNumber>().computeFormattingProperties(
     format, outputProperties
   );
@@ -3979,7 +3977,7 @@ bool Expression::toStringDivide(
       outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
     }
   }
-  bool doUseFrac = commands.flagUseFracInRationalLaTeX;
+  bool doUseFrac =! commands.flagDontUseFracInRational;
   if (
     doUseFrac && (
       input[1].startsWith(commands.opTimes()) ||
@@ -4427,7 +4425,7 @@ bool Expression::toStringPlus(
   if (format != nullptr) {
     allowNewLine = format->flagExpressionNewLineAllowed;
   }
-  bool useFrac = input.owner->flagUseFracInRationalLaTeX;
+  bool useFrac = !input.owner->flagDontUseFracInRational;
   if (
     allowNewLine &&
     !useFrac &&
@@ -4481,7 +4479,7 @@ bool Expression::toStringDirectSum(
   if (format != nullptr) {
     allowNewLine = format->flagExpressionNewLineAllowed;
   }
-  bool useFrac = input.owner->flagUseFracInRationalLaTeX;
+  bool useFrac = !input.owner->flagDontUseFracInRational;
   if (
     allowNewLine &&
     !useFrac &&
@@ -6242,6 +6240,17 @@ bool Expression::isElementaryObject() const {
     return true;
   }
   return false;
+}
+
+bool Expression::isTypeAtom() const {
+  if (this->owner==nullptr){
+    return false;
+  }
+  std::string typeString;
+  if (!this->isOperation(&typeString)){
+    return false;
+  }
+  return this->owner->allBuiltInTypes.contains(typeString);
 }
 
 bool Expression::isBuiltInType(std::string* outputWhichOperation) const {

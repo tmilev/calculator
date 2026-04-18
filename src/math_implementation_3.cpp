@@ -2589,7 +2589,7 @@ std::string StringRoutines::Differ::differenceHTMLPartTwo(
   << labelLeft
   << "</b><br>";
   out << outputLeft;
-  out << "<hr><b>" << labelRight << "</b><br>";
+  out << "<br><b>" << labelRight << "</b><br>";
   out << outputRight;
   out << "</span>";
   return out.str();

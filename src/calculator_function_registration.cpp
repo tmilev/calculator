@@ -6060,8 +6060,6 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   this->addOperationNoRepetitionAllowed("\\log");
   // additional operations with the same status as user-input expressions.
   this->addOperationNoRepetitionAllowed("\\emptyset");
-  this->addOperationNoRepetitionAllowed("\\pi");
-  this->addOperationNoRepetitionAllowed("e");
   this->addOperationNoRepetitionAllowed("i");
   this->addOperationNoRepetitionAllowed("\\arctan");
   this->addOperationNoRepetitionAllowed("\\neq");
@@ -6298,6 +6296,7 @@ void Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions() {
   this->addKnownDoubleConstant("e", MathRoutines::E());
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\int");
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("i");
+  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetition(this->allBuiltInTypes);
 }
 
 void CalculatorParser::addTrigonometricSplit(

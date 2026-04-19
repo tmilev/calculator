@@ -792,7 +792,7 @@ bool Expression::toMathMLBuiltIn<AlgebraicNumber>(
   (void) format;
   (void) outputProperties;
   FormatExpressions formatLocal;
-    formatLocal.flagUseFrac = !input.owner->flagDontUseFracInRational;
+  formatLocal.flagUseFrac = !input.owner->flagDontUseFracInRational;
   MathExpressionFormattingProperties properties;
   std::string currentString =
   input.getValue<AlgebraicNumber>().toMathML(&formatLocal, &properties);

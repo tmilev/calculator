@@ -3875,7 +3875,7 @@ bool CalculatorFunctions::getFreeVariablesExcludeNamedConstants(
 bool CalculatorFunctions::Test::checkSorting(
   const List<Expression>& mustBeSorted
 ) {
-  if (mustBeSorted.size < 5) {
+  if (mustBeSorted.size > 5) {
     // too many elements, bail out.
     return true;
   }
@@ -3911,10 +3911,11 @@ bool CalculatorFunctions::addTermsInChild(
   ) {
     return false;
   }
-  return
+  bool result =
   CalculatorFunctions::addTerms(
     calculator, inputParent[childIndex], outputChild
   );
+  return result;
 }
 
 bool CalculatorFunctions::addTerms(
@@ -8560,7 +8561,11 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << "Failed to evaluate your input at the left endpoint. ";
   }
   if (!plot.parameterHighExpression.evaluatesToDouble(&plot.paramHigh, true)) {
-    return calculator << "Failed to evaluate your input at right endpoints. ";
+    return
+    calculator
+    << "Failed to evaluate the right endpoint: "
+    << plot.parameterHighExpression.toString()
+    << ".";
   }
   Vectors<double> xCoordinates;
   Vectors<double> yCoordinates;
@@ -9332,7 +9337,7 @@ public:
     double* whichDouble,
     bool evaluateInputBoxes
   ) const;
-  bool isBinary(
+  bool isComparison(
     const Expression& input,
     const HashedList<Expression>& knownExpressions,
     const List<double>& knownValues,
@@ -9413,11 +9418,20 @@ bool ExpressionToDoubleComputer::evaluatesToDoubleUnderSubstitutionsWithCache(
       evaluateInputBoxes
     );
   }
-  Calculator::GlobalCache cache =
+  Calculator::GlobalCache& cache =
   calculator.globalCache.getValueCreateEmpty(input);
-  if (cache.flagIsDouble.isZeroPointer()) {
-    double value = 0;
-    cache.flagIsDouble.getElement() =
+  MemorySaving<bool>* isDoublePointer = nullptr;
+  MemorySaving<double>* valuePointer = nullptr;
+  if (evaluateInputBoxes) {
+    isDoublePointer = &cache.isDoubleWithInputBoxes;
+    valuePointer = &cache.valueWithInputBoxes;
+  } else {
+    isDoublePointer = &cache.isDoubleWithoutInputBoxes;
+    valuePointer = &cache.valueWithoutInputBoxes;
+  }
+  if (isDoublePointer->isZeroPointer()) {
+    double value = 0.0;
+    bool isDouble =
     this->evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
       input,
       knownExpressions,
@@ -9426,15 +9440,16 @@ bool ExpressionToDoubleComputer::evaluatesToDoubleUnderSubstitutionsWithCache(
       &value,
       evaluateInputBoxes
     );
-    if (cache.flagIsDouble.getElement()) {
-      cache.doubleValue.getElement() = value;
+    isDoublePointer->getElement() = isDouble;
+    if (isDouble) {
+      valuePointer->getElement() = value;
     }
   }
-  bool result = cache.flagIsDouble.getElement();
-  if (result && whichDouble != nullptr) {
-    *whichDouble = cache.doubleValue.getElement();
+  bool isDouble = isDoublePointer->getElement();
+  if (isDouble && whichDouble != nullptr) {
+    *whichDouble = valuePointer->getElement();
   }
-  return result;
+  return isDouble;
 }
 
 bool ExpressionToDoubleComputer::
@@ -9505,7 +9520,7 @@ evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
     return true;
   }
   if (
-    this->isBinary(
+    this->isComparison(
       input,
       knownExpressions,
       knownValues,
@@ -9543,7 +9558,7 @@ evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
   return false;
 }
 
-bool ExpressionToDoubleComputer::isBinary(
+bool ExpressionToDoubleComputer::isComparison(
   const Expression& input,
   const HashedList<Expression>& knownExpressions,
   const List<double>& knownValues,
@@ -9567,8 +9582,8 @@ bool ExpressionToDoubleComputer::isBinary(
   ) {
     return false;
   }
-  double leftDouble = 0;
-  double rightDouble = 0;
+  double leftDouble = 0.0;
+  double rightDouble = 0.0;
   if (
     !this->evaluatesToDoubleUnderSubstitutionsWithCache(
       input[1],
@@ -9607,9 +9622,9 @@ bool ExpressionToDoubleComputer::isBinary(
   }
   if (operation == "<") {
     if (leftDouble < rightDouble) {
-      *whichDouble = 1;
+      *whichDouble = 1.0;
     } else {
-      *whichDouble = 0;
+      *whichDouble = 0.0;
     }
     return true;
   }
@@ -9668,7 +9683,7 @@ bool ExpressionToDoubleComputer::isTernary(
   ) {
     return false;
   }
-  if (truth == 1) {
+  if (truth == 1.0) {
     return
     this->evaluatesToDoubleUnderSubstitutionsWithCache(
       input[2],
@@ -9679,7 +9694,7 @@ bool ExpressionToDoubleComputer::isTernary(
       evaluateInputBoxes
     );
   }
-  if (truth == 0) {
+  if (truth == 0.0) {
     return
     this->evaluatesToDoubleUnderSubstitutionsWithCache(
       input[3],
@@ -10562,24 +10577,40 @@ void Calculator::Test::initializeLoadTestCases() {
   }
 }
 
+void Calculator::Test::addOneTest(
+  const std::string& input, int maximumRuntimeMilliseconds
+) {
+  Calculator::Test::OneTest oneTest;
+  oneTest.requresAdminAccess = false;
+  oneTest.command = input;
+  oneTest.atom = "[built in test]";
+  oneTest.functionAdditionalIdentifier = "[built in test]";
+  oneTest.maximumRuntimeMilliseconds = maximumRuntimeMilliseconds;
+  this->commands.setKeyValue(oneTest.command, oneTest);
+}
+
 void Calculator::Test::initialize() {
   STACK_TRACE("Calculator::Test::initialize");
   if (this->owner == nullptr) {
     global.fatal << "Non-initialized calculator test. " << global.fatal;
   }
   this->commands.clear();
-  List<std::string> exampleFolders = List<std::string>({"examples/", "examples/internal/"});
-  for (const std::string& exampleFolder: exampleFolders){
-  JSData examples = this->owner->examples.toJSONExamples(exampleFolder);
-  for (int i = 0; i < examples.objects.size(); i ++) {
-    Calculator::Test::OneTest oneTest;
-    oneTest.requresAdminAccess = false;
-    std::string name = examples.objects.keys[i];
-    oneTest.command = examples.objects.values[i].stringValue;
-    oneTest.atom = name;
-    oneTest.functionAdditionalIdentifier = name;
-    this->commands.setKeyValue(oneTest.command, oneTest);
-  }
+  // TODO: This needs to run much faster than 20000 milliseconds.
+  this->addOneTest("f{}0 = g{}0;f{}{{n}} = f{}(n-1)+g{}n;\nf{}1000;", 20000);
+  List<std::string> exampleFolders = List<std::string>(
+    {"examples/", "examples/internal/"}
+  );
+  for (const std::string& exampleFolder : exampleFolders) {
+    JSData examples = this->owner->examples.toJSONExamples(exampleFolder);
+    for (int i = 0; i < examples.objects.size(); i ++) {
+      Calculator::Test::OneTest oneTest;
+      oneTest.requresAdminAccess = false;
+      std::string name = examples.objects.keys[i];
+      oneTest.command = examples.objects.values[i].stringValue;
+      oneTest.atom = name;
+      oneTest.functionAdditionalIdentifier = name;
+      this->commands.setKeyValue(oneTest.command, oneTest);
+    }
   }
   this->initializeLoadTestCases();
   for (int i = 0; i < this->owner->numberOfPredefinedAtoms; i ++) {
@@ -10657,12 +10688,21 @@ bool Calculator::Test::calculatorTestRun() {
     report.report(reportStream.str());
     tester.initialize(Calculator::Mode::full);
     tester.checkConsistencyAfterInitialization();
+    int64_t caseStartTime = global.getElapsedMilliseconds();
     tester.evaluate(currentTest.command);
     FormatExpressions format;
     JSData unused;
     currentTest.actualResult = tester.programExpression.toString(&format);
     currentTest.actualResultMathML =
     tester.programExpression.toMathML(&format);
+    currentTest.actualDuration =
+    global.getElapsedMilliseconds() - caseStartTime;
+    global
+    << "Done in: "
+    << Logger::purple
+    << currentTest.actualDuration
+    << " milliseconds. "
+    << Logger::endL;
     reportStream << "<br>Result: " << currentTest.actualResult;
     reportStream
     << "<br>Done in: "

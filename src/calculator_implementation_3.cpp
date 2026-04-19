@@ -829,6 +829,7 @@ Calculator::Test::Test(Calculator& inputOwner) {
   this->noTestSkips = 0;
   this->numberOfTests = 0;
   this->lastIndexNotTested = 0;
+  this->totalSpeedRegressions = 0;
   this->owner = &inputOwner;
   this->flagTestResultsExist = true;
 }
@@ -944,6 +945,19 @@ bool Calculator::Test::processResults() {
     << "</td>";
     bool isBad = false;
     bool isUnknown = false;
+    currentLine << "<td>Run time: " << currentTest.actualDuration << " ms.";
+    if (
+      currentTest.maximumRuntimeMilliseconds > 0 &&
+      currentTest.actualDuration > currentTest.maximumRuntimeMilliseconds
+    ) {
+      this->totalSpeedRegressions ++;
+      isBad = true;
+      currentLine
+      << " <b style='color:red'>Maximum run time: "
+      << currentTest.maximumRuntimeMilliseconds
+      << " ms.</b>";
+    }
+    currentLine << "</td>";
     if (currentTest.actualResult == currentTest.expectedResult) {
       currentLine
       << "<td style='min-width:30px;'><b style='color:green;'>OK</b></td>";

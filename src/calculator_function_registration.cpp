@@ -6296,7 +6296,9 @@ void Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions() {
   this->addKnownDoubleConstant("e", MathRoutines::E());
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\int");
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("i");
-  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetition(this->allBuiltInTypes);
+  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetition(
+    this->allBuiltInTypes
+  );
 }
 
 void CalculatorParser::addTrigonometricSplit(

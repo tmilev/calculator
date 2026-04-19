@@ -219,6 +219,8 @@ bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
 
 Calculator::Test::OneTest::OneTest() {
   this->requresAdminAccess = false;
+  this->maximumRuntimeMilliseconds = 0;
+  this->actualDuration = 0;
 }
 
 bool Calculator::Test::builtInFunctionsABTest(
@@ -249,9 +251,11 @@ bool Calculator::Test::builtInFunctionsABTest(
     << crashFileWriteReport.str()
     << "Calculator AB test failed with "
     << test.inconsistencies
-    << " inconsistencies and "
+    << " inconsistencies,  "
     << test.inconsistenciesMathML
-    << " mathML inconsistencies. "
+    << " mathML inconsistencies and "
+    << test.totalSpeedRegressions
+    << " performance regressions. "
     << "See report html in file:\n"
     << "https://localhost:8166/output/crash_test.html\n"
     << global.fatal;

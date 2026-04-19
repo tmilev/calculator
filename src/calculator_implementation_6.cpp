@@ -2111,7 +2111,6 @@ bool CalculatorFunctions::newtonsMethod(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctions::newtonsMethod");
-  global.comments << "DEBUG: got to here!";
   if (input.size() != 4) {
     return false;
   }
@@ -2165,10 +2164,6 @@ bool CalculatorFunctions::newtonsMethod(
     << "to be a number between 1 and 50. ";
     return output.assignError(calculator, errorStream.str());
   }
-  global.comments
-  << "DEBUG: got to before assignstringparsed!!!!"
-  << calculator.parser.parsingLog
-  << "<hr>";
   MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >
   substitution;
   substitution.setKeyValue("x", variables[0]);

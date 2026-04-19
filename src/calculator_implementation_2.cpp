@@ -36,9 +36,11 @@ JSData Calculator::Examples::toJSONFunctionHandlersAndExamples() {
   return result;
 }
 
-JSData Calculator::Examples::toJSONExamples(const std::string& examplesFolder) {
+JSData Calculator::Examples::toJSONExamples(
+  const std::string& examplesFolder
+) {
   std::string folder = examplesFolder;
-  if (folder.empty()){
+  if (folder.empty()) {
     folder = "examples/";
   }
   JSData result;
@@ -1292,7 +1294,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
       )
     ) {
       std::stringstream substitutionComment;
-      if (this->history == nullptr) {
+      if (this->history != nullptr) {
         substitutionComment
         << "User-defined substition: "
         << currentPattern.toString();

@@ -1395,7 +1395,6 @@ bool Expression::assignStringParsed(
   Calculator& owner
 ) {
   STACK_TRACE("Expression::assignStringParsed");
-  global.comments << "DEBUG: about to parse:<hr>" << input << "<hr>";
   Expression commands;
   Expression result;
   List<SyntacticElement> outputSyntacticSoup;

@@ -281,11 +281,8 @@ bool Expression::hasInputBoxVariables(
     return false;
   }
   RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
-  if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
-    global.fatal
-    << "Function hasInputBoxVariables has exceeded "
-    << "recursion depth limit. "
-    << global.fatal;
+  if (this->owner->recursionDepth >= this->owner->maximumRecursionDepth) {
+    return false;
   }
   InputBox box;
   if (this->isOfType<InputBox>(&box)) {
@@ -2033,7 +2030,7 @@ void Calculator::computeAutoCompleteKeyWords() {
   );
   this->addAutoCompleteKeyWords(this->parser.modifyableFlags.keys);
   this->addAutoCompleteKeyWords(this->operations.keys);
-  for (const std::string& builtInType: this->allBuiltInTypes){
+  for (const std::string& builtInType : this->allBuiltInTypes) {
     this->autoCompleteKeyWords.removeFirstOccurenceSwapWithLast(builtInType);
   }
 }

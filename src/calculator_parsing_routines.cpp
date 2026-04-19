@@ -307,6 +307,7 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\\oplus", SyntacticElement::OPLUS);
   registerKeyword("\\times", SyntacticElement::TIMES_X_SIGN);
   registerKeyword("MakeSequence", SyntacticElement::MAKE_SEQUENCE);
+  registerKeyword("Sequence", SyntacticElement::MAKE_SEQUENCE);
   registerKeyword("\\text", SyntacticElement::TEXT);
   registerKeyword("\\in", SyntacticElement::IN);
   registerKeyword("\\mod", SyntacticElement::MOD);
@@ -335,6 +336,22 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   keyWordAutocorrections.setKeyValue("mod", "\\mod");
   keyWordsWithDigits.addOnTop("Plot2D");
   keyWordsWithDigits.addOnTop("ToUTF8String");
+  keyWordsWithDigits.addOnTop("Plot2DWithBars");
+  keyWordsWithDigits.addOnTop("ConvertBase64ToHex");
+  keyWordsWithDigits.addOnTop("ConvertBase58ToHex");
+  keyWordsWithDigits.addOnTop("AppendDoubleSha256Check");
+  keyWordsWithDigits.addOnTop("ConvertBase64ToString");
+  keyWordsWithDigits.addOnTop("Base64ToHex");
+  keyWordsWithDigits.addOnTop("TestASN1Decode");
+  keyWordsWithDigits.addOnTop("X509CertificateDecode");
+  keyWordsWithDigits.addOnTop("Sha256Verbose");
+  keyWordsWithDigits.addOnTop("HmmG2inB3");
+  keyWordsWithDigits.addOnTop("HmmG2inB");
+  keyWordsWithDigits.addOnTop("SplitFDpartB3overG");
+  keyWordsWithDigits.addOnTop("SplitFDpartB3overG2");
+  keyWordsWithDigits.addOnTop("SplitFDpartB3overG2CharsOnly");
+  keyWordsWithDigits.addOnTop("PrintB3G2branchingTable");
+  keyWordsWithDigits.addOnTop("PrintB3G2branchingTableCharsOnly");
 }
 
 std::string SyntacticElement::toStringHumanReadable(
@@ -426,7 +443,7 @@ void CalculatorParser::initialize(Calculator* inputOwner) {
   );
   this->addFlagDescription(
     "DontUsePredefinedWordSplits",
-    &this->owner->flagUsePredefinedWordSplits,
+    &this->owner->flagDontUsePredefinedWordSplits,
     "Predefined word splits are OFF. xy will *not* be replaced by x*y. "
   );
   this->addFlagDescription(
@@ -450,11 +467,11 @@ void CalculatorParser::initialize(Calculator* inputOwner) {
   this->addFlagDescription("LogRules", &this->owner->flagLogRules);
   this->addFlagDescription("ShowContext", &this->owner->flagDisplayContext);
   this->addFlagDescription("SkipEvaluation", &this->owner->flagSkipEvaluation);
-
-  this->addFlagDescription("FullTree", &this->owner->flagDisplayFullExpressionTree );
+  this->addFlagDescription(
+    "FullTree", &this->owner->flagDisplayFullExpressionTree
+  );
   this->addFlagDescription("HideLHS", &this->owner->flagHideLHS);
   this->addFlagDescription("NoFrac", &this->owner->flagDontUseFracInRational);
-
 }
 
 void CalculatorParser::addFlagDescription(
@@ -701,8 +718,7 @@ void Calculator::reset() {
   this->ruleCollectionId = 0;
   this->mode = Calculator::Mode::full;
   this->maximumAlgebraicTransformationsPerExpression = 100;
-  int doNotSubmit;
-  this->maximumRecursionDepth = 10000;
+  this->maximumRecursionDepth = 3000;
   this->recursionDepth = 0;
   this->depthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
@@ -718,7 +734,7 @@ void Calculator::reset() {
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagDontUseFracInRational = false;
   this->flagForkingprocessAllowed = true;
-  this->flagUsePredefinedWordSplits = true;
+  this->flagDontUsePredefinedWordSplits = false;
   this->flagPlotNoControls = true;
   this->flagPlotShowJavascriptOnly = false;
   this->flagHasGraphics = false;
@@ -1725,14 +1741,6 @@ bool CalculatorParser::replaceYBySequenceY() {
   return true;
 }
 
-bool CalculatorParser::replaceXXYXBySequenceYX() {
-  this->replaceYXdotsXBySequenceYXdotsX(1);
-  this->replaceXXYXByYX();
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceXXYXBySequenceYX]";
-  }
-  return true;
-}
 
 bool CalculatorParser::replaceYXdotsXBySequenceYXdotsX(int numberOfXs) {
   SyntacticElement& main = (*this->currentSyntacticStack)[(
@@ -1797,10 +1805,10 @@ bool CalculatorParser::replaceVByVDotsVWith(const List<std::string>& variables)
   this->popTopSyntacticStack();
   for (int i = 0; i < variables.size; i ++) {
     newElement.data.makeAtom(
-      *this->owner,
-      this->owner->addOperationNoRepetitionOrReturnIndexFirst(variables[i])
+      *this->owner,variables[i]
     );
     newElement.source = variables[i];
+    newElement.syntacticRole=SyntacticElement::VARIABLE;
     (*this->currentSyntacticStack).addOnTop(newElement);
   }
   return true;
@@ -2621,7 +2629,6 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
-
   if (
     thirdToLastRole == SyntacticElement::PERCENT &&
     lastRole == SyntacticElement::SEMICOLON
@@ -2803,10 +2810,9 @@ bool CalculatorParser::applyOneRule() {
     fourthToLastExpression.syntacticRole = SyntacticElement::INTEGRAL_OPERATOR;
     return this->decreaseStackExceptLast(2);
   }
-  if (this->owner->flagUsePredefinedWordSplits) {
-    if (lastRole == SyntacticElement::VARIABLE) {
-      const std::string& currentVariable =
-      this->owner->operations.keys[lastExpression.data.data];
+  if (!this->owner->flagDontUsePredefinedWordSplits) {
+    if (lastRole==SyntacticElement::LETTERS) {
+      const std::string& currentVariable = lastExpression.source;
       bool replaced =
       this->replaceVbyVdotsVAccordingToPredefinedWordSplits(currentVariable);
       if (replaced) {
@@ -3037,7 +3043,8 @@ bool CalculatorParser::applyOneRule() {
     fourthToLastRole == SyntacticElement::EXPRESSION &&
     thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE &&
     secondToLastRole == SyntacticElement::EXPRESSION &&
-      this->allowsApplyFunctionInPreceding(lastRole) && !fourthToLastExpression.data.isTypeAtom()
+    this->allowsApplyFunctionInPreceding(lastRole) &&
+    !fourthToLastExpression.data.isTypeAtom()
   ) {
     this->lastRuleName = "e circ e any to e of e any";
     Expression result(*this->owner);
@@ -3853,8 +3860,8 @@ bool CalculatorParser::applyOneRule() {
     return this->decreaseStackExceptLast(2);
   }
   if ((
-      fourthToLastRole != SyntacticElement::MAKE_SEQUENCE ||
-      thirdToLastRole == SyntacticElement::LEFT_RIGHT_CURLY_BRACE
+          fourthToLastRole != SyntacticElement::MAKE_SEQUENCE  ||
+      thirdToLastRole != SyntacticElement::LEFT_RIGHT_CURLY_BRACE
     ) && (
       thirdToLastRole != SyntacticElement::LEFT_BRACKET ||
       this->owner->flagUseBracketsForIntervals

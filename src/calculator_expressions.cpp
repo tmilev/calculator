@@ -3977,7 +3977,7 @@ bool Expression::toStringDivide(
       outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
     }
   }
-  bool doUseFrac =! commands.flagDontUseFracInRational;
+  bool doUseFrac = !commands.flagDontUseFracInRational;
   if (
     doUseFrac && (
       input[1].startsWith(commands.opTimes()) ||
@@ -6243,11 +6243,11 @@ bool Expression::isElementaryObject() const {
 }
 
 bool Expression::isTypeAtom() const {
-  if (this->owner==nullptr){
+  if (this->owner == nullptr) {
     return false;
   }
   std::string typeString;
-  if (!this->isOperation(&typeString)){
+  if (!this->isOperation(&typeString)) {
     return false;
   }
   return this->owner->allBuiltInTypes.contains(typeString);

@@ -279,7 +279,6 @@ public:
   bool isBuiltInScalar() const;
   bool isElementaryObject() const;
   bool isTypeAtom() const;
-
   bool isBuiltInType(std::string* outputWhichOperation = nullptr) const;
   bool isBuiltInType(int* outputWhichType) const;
   bool isIntervalRealLine() const;
@@ -1425,7 +1424,6 @@ public:
   bool operator!=(const Expression& other) const {
     return !(*this == other);
   }
-  // void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
   bool greaterThanNoCoefficient(const Expression& other) const;
   void substituteRecursively(MapList<Expression, Expression>& substitutions);
@@ -2473,7 +2471,6 @@ private:
   bool replaceELimitsPowerEUnderscoreEByE();
   bool replaceECByC();
   bool replaceYBySequenceY();
-  bool replaceXXYXBySequenceYX();
   bool replaceYXdotsXBySequenceYXdotsX(int numberOfXs = 0);
   bool replaceCEByC();
   bool replaceCCByC();
@@ -2856,7 +2853,7 @@ public:
   bool flagMaxRecursionErrorEncountered;
   bool flagMaxTransformationsErrorEncountered;
   bool flagNewContextNeeded;
-  bool flagUsePredefinedWordSplits;
+  bool flagDontUsePredefinedWordSplits;
   bool flagPlotShowJavascriptOnly;
   bool flagPlotNoControls;
   bool flagUseLnInsteadOfLog;
@@ -2907,8 +2904,10 @@ public:
     };
 
     MemorySaving<bool> flagIsScalar;
-    MemorySaving<bool> flagIsDouble;
-    MemorySaving<double> doubleValue;
+    MemorySaving<bool> isDoubleWithInputBoxes;
+    MemorySaving<bool> isDoubleWithoutInputBoxes;
+    MemorySaving<double> valueWithInputBoxes;
+    MemorySaving<double> valueWithoutInputBoxes;
     MemorySaving<bool> flagContainsMatrixOrSequence;
     MemorySaving<BuiltInTransformation> builtInTransformations;
     GlobalCache();
@@ -3508,6 +3507,9 @@ public:
   public:
     class OneTest {
     public:
+      // Maximum run time in milliseconds, zero or negative for none.
+      int64_t maximumRuntimeMilliseconds;
+      int64_t actualDuration;
       std::string atom;
       std::string functionAdditionalIdentifier;
       std::string command;
@@ -3529,6 +3531,7 @@ public:
     int lastIndexNotTested;
     int inconsistencies;
     int inconsistenciesMathML;
+    int totalSpeedRegressions;
     int unknown;
     int unknownMathML;
     // see FunctionOptions
@@ -3567,6 +3570,9 @@ public:
       Calculator& ownerInitialized, bool updateABTestFile
     );
     static bool checkBuiltInInitializations(Calculator& ownerInitialized);
+    void addOneTest(
+      const std::string& input, int maximumRuntimeMilliseconds = 0
+    );
     void initialize();
     void initializeLoadTestCases();
     bool calculatorTestRun();

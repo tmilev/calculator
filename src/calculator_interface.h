@@ -2368,10 +2368,14 @@ private:
   int numberOfEmptyTokensStart;
   int counterInToBeParsed;
   bool flagEncounteredSplit;
-  List<SyntacticElement> toBeParsed;
-  List<SyntacticElement> syntacticStack;
-  List<SyntacticElement>* currrentlyParsed;
-  List<SyntacticElement>* currentSyntacticStack;
+  // Backup container when the caller doesn't provide toBeParsed contaienr.
+  List<SyntacticElement> toBeParsedContainer;
+  // Backup container when the caller doesn't provide syntacticStack container.
+  List<SyntacticElement> syntacticStackContainer;
+  // Caller-provided container for the currently parsed syntactic elements.
+  List<SyntacticElement>* toBeParsed;
+  // Caller-provided container for the current syntactic stack.
+  List<SyntacticElement>* syntacticStack;
   HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
   HashedList<std::string> stringsThatSplitIfFollowedByDigit;
@@ -2436,16 +2440,11 @@ private:
   );
   bool decreaseStackSetCharacterRanges(int decrease);
   bool popTopSyntacticStack() {
-    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
-      -
-      1
-    );
+    (*this->syntacticStack).setSize((*this->syntacticStack).size - 1);
     return true;
   }
   bool popBelowStackTop() {
-    (*this->currentSyntacticStack).removeIndexShiftDown((
-        *this->currentSyntacticStack
-      ).size -
+    (*this->syntacticStack).removeIndexShiftDown((*this->syntacticStack).size -
       2
     );
     return true;
@@ -2479,56 +2478,44 @@ private:
   bool replaceMatrixXByE();
   bool replaceElementsByMatrixStart(int numberOfXs);
   bool replaceXXYByY() {
-    (*this->currentSyntacticStack)[this->currentSyntacticStack->size - 3] = (
-      *this->currentSyntacticStack
-    )[this->currentSyntacticStack->size - 1];
-    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
-      -
-      2
-    );
+    (*this->syntacticStack)[this->syntacticStack->size - 3] = (
+      *this->syntacticStack
+    )[this->syntacticStack->size - 1];
+    (*this->syntacticStack).setSize((*this->syntacticStack).size - 2);
     return true;
   }
   bool replaceXXYXByYX() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4] = (
-      *this->currentSyntacticStack
-    )[(*this->currentSyntacticStack).size - 2];
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] = (
-      *this->currentSyntacticStack
-    )[(*this->currentSyntacticStack).size - 1];
-    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
-      -
-      2
-    );
+    (*this->syntacticStack)[(*this->syntacticStack).size - 4] = (
+      *this->syntacticStack
+    )[(*this->syntacticStack).size - 2];
+    (*this->syntacticStack)[(*this->syntacticStack).size - 3] = (
+      *this->syntacticStack
+    )[(*this->syntacticStack).size - 1];
+    (*this->syntacticStack).setSize((*this->syntacticStack).size - 2);
     return true;
   }
   bool replaceXYYXByYY() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4] = (
-      *this->currentSyntacticStack
-    )[(*this->currentSyntacticStack).size - 3];
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] = (
-      *this->currentSyntacticStack
-    )[(*this->currentSyntacticStack).size - 2];
-    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
-      -
-      2
-    );
+    (*this->syntacticStack)[(*this->syntacticStack).size - 4] = (
+      *this->syntacticStack
+    )[(*this->syntacticStack).size - 3];
+    (*this->syntacticStack)[(*this->syntacticStack).size - 3] = (
+      *this->syntacticStack
+    )[(*this->syntacticStack).size - 2];
+    (*this->syntacticStack).setSize((*this->syntacticStack).size - 2);
     return true;
   }
   bool replaceXYXByY() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] = (
-      *this->currentSyntacticStack
-    )[(*this->currentSyntacticStack).size - 2];
+    (*this->syntacticStack)[(*this->syntacticStack).size - 3] = (
+      *this->syntacticStack
+    )[(*this->syntacticStack).size - 2];
     this->decreaseStackSetCharacterRanges(2);
     return true;
   }
   bool replaceXYByY() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2] = (
-      *this->currentSyntacticStack
-    )[(*this->currentSyntacticStack).size - 1];
-    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
-      -
-      1
-    );
+    (*this->syntacticStack)[(*this->syntacticStack).size - 2] = (
+      *this->syntacticStack
+    )[(*this->syntacticStack).size - 1];
+    (*this->syntacticStack).setSize((*this->syntacticStack).size - 1);
     return true;
   }
   bool replaceVbyVdotsVAccordingToPredefinedWordSplits(
@@ -2547,7 +2534,7 @@ private:
   bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   void resetStack() {
     SyntacticElement emptyElement = this->getStartFillerElement();
-    (*this->currentSyntacticStack).initializeFillInObject(
+    (*this->syntacticStack).initializeFillInObject(
       this->numberOfEmptyTokensStart, emptyElement
     );
   }
@@ -2610,7 +2597,6 @@ public:
     const std::string& keyWord, SyntacticElement::Role role
   );
   void initialize(Calculator* inputOwner);
-  void initializeControlSequences();
   void initializeStringsThatSplitIfFollowedByDigit();
   void initializePredefinedWordSplits();
   std::string toStringSyntacticStackHTMLSimple();

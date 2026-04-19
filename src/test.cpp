@@ -148,7 +148,7 @@ void Test::run() {
         << comments.str()
         << global.fatal;
       }
-      global << Logger::blue << " test file deleted. " << Logger::endL;
+      global << Logger::blue << "Test file deleted. " << Logger::endL;
     }
     Calculator::Examples::Test::all();
     Calculator::Test::all(Test::flagUpdateABTests);

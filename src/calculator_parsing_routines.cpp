@@ -350,6 +350,8 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   keyWordsWithDigits.addOnTop("SplitFDpartB3overG");
   keyWordsWithDigits.addOnTop("SplitFDpartB3overG2");
   keyWordsWithDigits.addOnTop("SplitFDpartB3overG2CharsOnly");
+  keyWordsWithDigits.addOnTop("PrintB3G");
+  keyWordsWithDigits.addOnTop("PrintB3G2");
   keyWordsWithDigits.addOnTop("PrintB3G2branchingTable");
   keyWordsWithDigits.addOnTop("PrintB3G2branchingTableCharsOnly");
 }
@@ -489,11 +491,11 @@ void CalculatorParser::reset() {
   this->numberOfEmptyTokensStart = 9;
   this->flagLogSyntaxRules = false;
   this->flagEncounteredSplit = false;
-  this->toBeParsed.setSize(0);
-  this->syntacticStack.setSize(0);
+  this->toBeParsedContainer.setSize(0);
+  this->syntacticStackContainer.setSize(0);
   this->syntaxErrors = "";
-  this->currentSyntacticStack = &this->syntacticStack;
-  this->currrentlyParsed = &this->toBeParsed;
+  this->syntacticStack = &this->syntacticStackContainer;
+  this->toBeParsed = &this->toBeParsedContainer;
   this->stringsThatSplitIfFollowedByDigit.clear();
 }
 
@@ -501,12 +503,10 @@ bool CalculatorParser::decreaseStackSetCharacterRanges(int decrease) {
   if (decrease <= 0) {
     return true;
   }
-  if ((*this->currentSyntacticStack).size - decrease <= 0) {
+  if ((*this->syntacticStack).size - decrease <= 0) {
     global.fatal << "Bad stack decrease. " << global.fatal;
   }
-  (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size -
-    decrease
-  );
+  (*this->syntacticStack).setSize((*this->syntacticStack).size - decrease);
   return true;
 }
 
@@ -515,7 +515,11 @@ bool CalculatorParser::parse(
 ) {
   if (
     !this->parseAndExtractExpressions(
-      input, output, this->toBeParsed, this->syntacticStack, nullptr
+      input,
+      output,
+      this->toBeParsedContainer,
+      this->syntacticStackContainer,
+      nullptr
     )
   ) {
     return false;
@@ -555,14 +559,16 @@ void CalculatorParser::registerKeyword(
   keyWordsToSyntacticRoles.setKeyValue(keyWord, role);
 }
 
-void CalculatorParser::initializeControlSequences() {}
-
 bool CalculatorParser::parseAndExtractExpressionsDefault(
   const std::string& input, Expression& output
 ) {
   return
   this->parseAndExtractExpressions(
-    input, output, this->toBeParsed, this->syntacticStack, &this->syntaxErrors
+    input,
+    output,
+    this->toBeParsedContainer,
+    this->syntacticStackContainer,
+    &this->syntaxErrors
   );
 }
 
@@ -574,43 +580,41 @@ bool CalculatorParser::parseAndExtractExpressions(
   std::string* outputSyntacticErrors
 ) {
   STACK_TRACE("CalculatorParser::parseAndExtractExpressions");
-  this->currentSyntacticStack = &outputSyntacticStack;
-  this->currrentlyParsed = &outputAllSyntacticElements;
+  this->syntacticStack = &outputSyntacticStack;
+  this->toBeParsed = &outputAllSyntacticElements;
   this->extractSyntacticElementsDefaultOutput(input);
   bool result =
   this->extractExpressionsFromPreprocessed(output, outputSyntacticErrors);
-  this->currentSyntacticStack = &this->syntacticStack;
-  this->currrentlyParsed = &this->toBeParsed;
+  this->syntacticStack = &this->syntacticStackContainer;
+  this->toBeParsed = &this->toBeParsedContainer;
   return result;
 }
 
 std::string CalculatorParser::toStringSyntacticStackHTMLSimple() {
   STACK_TRACE("CalculatorParser::toStringSyntacticStackHTMLSimple");
-  if (this->currentSyntacticStack->size == 0) {
+  if (this->syntacticStack->size == 0) {
     global.fatal << "Unexpected empty syntactic stack." << global.fatal;
   }
   std::stringstream out;
-  bool isBad = ((*this->currentSyntacticStack).size >
+  bool isBad = ((*this->syntacticStack).size >
     this->numberOfEmptyTokensStart + 1
   );
   SyntacticElement& lastSyntacticElement =
-  *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1
-  ) {
+  *(*this->syntacticStack).lastObject();
+  if ((*this->syntacticStack).size == this->numberOfEmptyTokensStart + 1) {
     if (lastSyntacticElement.syntacticRole != SyntacticElement::EXPRESSION) {
       isBad = true;
     }
   }
   if (!isBad) {
-    out << this->currentSyntacticStack->lastObject()->data.toString();
+    out << this->syntacticStack->lastObject()->data.toString();
     return out.str();
   }
   for (
-    int i = this->numberOfEmptyTokensStart; i < (
-      *this->currentSyntacticStack
-    ).size; i ++
+    int i = this->numberOfEmptyTokensStart; i < (*this->syntacticStack).size;
+    i ++
   ) {
-    SyntacticElement& currentElement = (*this->currentSyntacticStack)[i];
+    SyntacticElement& currentElement = (*this->syntacticStack)[i];
     if (currentElement.isCommandEnclosure()) {
       continue;
     }
@@ -899,7 +903,6 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addOperationNoRepetitionAllowed("\\int");
   this->initializeBuiltInTypes();
   this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
-  this->parser.initializeControlSequences();
   this->initializePredefinedStandardOperationsWithoutHandler();
   this->initializeBuiltInsFreezeArguments();
   this->initializeFunctionsStandard();
@@ -968,7 +971,7 @@ void Calculator::logPublicError(const std::string& error) {
 }
 
 bool CalculatorParser::decreaseStack(int decrease) {
-  this->syntacticStack.setSize(this->syntacticStack.size - decrease);
+  (*this->syntacticStack).setSize(this->syntacticStack->size - decrease);
   return true;
 }
 
@@ -976,17 +979,12 @@ bool CalculatorParser::decreaseStackExceptLast(int decrease) {
   if (decrease <= 0) {
     return true;
   }
-  if ((*this->currentSyntacticStack).size - decrease <= 0) {
+  if ((*this->syntacticStack).size - decrease <= 0) {
     global.fatal << "Bad stack decrease amount. " << global.fatal;
   }
-  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size -
-    decrease -
-    1
-  ] =
-  *this->currentSyntacticStack->lastObject();
-  (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size -
-    decrease
-  );
+  (*this->syntacticStack)[(*this->syntacticStack).size - decrease - 1] =
+  *this->syntacticStack->lastObject();
+  (*this->syntacticStack).setSize((*this->syntacticStack).size - decrease);
   return true;
 }
 
@@ -994,21 +992,15 @@ bool CalculatorParser::decreaseStackExceptLastTwo(int decrease) {
   if (decrease <= 0) {
     return true;
   }
-  if ((*this->currentSyntacticStack).size - decrease <= 0) {
+  if ((*this->syntacticStack).size - decrease <= 0) {
     global.fatal << "Bad stack decrease amount. " << global.fatal;
   }
-  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size -
-    decrease -
-    2
-  ] = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size -
-    decrease -
-    1
-  ] =
-  *this->currentSyntacticStack->lastObject();
-  (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size -
-    decrease
-  );
+  (*this->syntacticStack)[(*this->syntacticStack).size - decrease - 2] = (
+    *this->syntacticStack
+  )[(*this->syntacticStack).size - 2];
+  (*this->syntacticStack)[(*this->syntacticStack).size - decrease - 1] =
+  *this->syntacticStack->lastObject();
+  (*this->syntacticStack).setSize((*this->syntacticStack).size - decrease);
   return true;
 }
 
@@ -1036,9 +1028,8 @@ bool CalculatorParser::canBeRegardedAsDifferentialForm(
 }
 
 bool CalculatorParser::replaceOXXByEXX() {
-  SyntacticElement& left = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& left = (*this->syntacticStack)[(*this->syntacticStack).size
+    -
     3
   ];
   if (this->flagLogSyntaxRules) {
@@ -1245,11 +1236,11 @@ void CalculatorParser::extractSyntacticElementsDefaultOutput(
   ListReferences<SyntacticElement> contiguousWords;
   this->initializeStatic();
   this->extractContiguousWords(input, contiguousWords);
-  *this->currrentlyParsed = contiguousWords;
+  *this->toBeParsed = contiguousWords;
   SyntacticElement currentElement;
   currentElement.data.reset(*this->owner);
   currentElement.syntacticRole = SyntacticElement::END_PROGRAM;
-  (*this->currrentlyParsed).addOnTop(currentElement);
+  (*this->toBeParsed).addOnTop(currentElement);
 }
 
 bool CalculatorParser::shouldSplitOutsideQuotes(
@@ -1467,13 +1458,13 @@ int CalculatorParser::getOperationIndexNoFail(const std::string& operation) {
 
 bool CalculatorParser::
 replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
-  SyntacticElement& sequenceElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& sequenceElement = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     2
   ];
-  SyntacticElement& functionExpressionlt = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& functionExpressionlt = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     5
   ];
@@ -1494,13 +1485,13 @@ replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
 }
 
 bool CalculatorParser::replaceXEXByEContainingOE(int inputOpIndex) {
-  SyntacticElement& outputElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& outputElement = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     3
   ];
-  SyntacticElement& inputElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& inputElement = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     2
   ];
@@ -1531,9 +1522,8 @@ bool CalculatorParser::setLastRuleName(const std::string& ruleName) {
 }
 
 bool CalculatorParser::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {
-  SyntacticElement& element = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& element = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     numberOfXs -
     1
   ];
@@ -1564,9 +1554,8 @@ bool CalculatorParser::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {
 }
 
 bool CalculatorParser::replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs) {
-  SyntacticElement& element = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& element = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     1 -
     numberOfXs
   ];
@@ -1586,8 +1575,8 @@ bool CalculatorParser::replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs) {
 }
 
 bool CalculatorParser::replaceElementsByMatrixStart(int numberOfXs) {
-  SyntacticElement& currentElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& currentElement = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     numberOfXs
   ];
@@ -1599,8 +1588,8 @@ bool CalculatorParser::replaceElementsByMatrixStart(int numberOfXs) {
 }
 
 bool CalculatorParser::replaceMatrixXByE() {
-  SyntacticElement& matrixElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& matrixElement = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     2
   ];
@@ -1650,14 +1639,13 @@ bool CalculatorParser::replaceMatrixXByE() {
 }
 
 bool CalculatorParser::replaceMatrixEXByMatrixNewRow() {
-  SyntacticElement& matrixElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& matrixElement = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     3
   ];
-  SyntacticElement& element = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& element = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     2
   ];
   matrixElement.dataList.lastObject()->addChildOnTop(element.data);
@@ -1670,14 +1658,13 @@ bool CalculatorParser::replaceMatrixEXByMatrixNewRow() {
 }
 
 bool CalculatorParser::replaceMatrixEXByMatrix() {
-  SyntacticElement& matrixElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& matrixElement = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     3
   ];
-  SyntacticElement& element = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& element = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     2
   ];
   matrixElement.dataList.lastObject()->addChildOnTop(element.data);
@@ -1741,11 +1728,9 @@ bool CalculatorParser::replaceYBySequenceY() {
   return true;
 }
 
-
 bool CalculatorParser::replaceYXdotsXBySequenceYXdotsX(int numberOfXs) {
-  SyntacticElement& main = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& main = (*this->syntacticStack)[(*this->syntacticStack).size
+    -
     numberOfXs -
     1
   ];
@@ -1804,12 +1789,10 @@ bool CalculatorParser::replaceVByVDotsVWith(const List<std::string>& variables)
   SyntacticElement newElement;
   this->popTopSyntacticStack();
   for (int i = 0; i < variables.size; i ++) {
-    newElement.data.makeAtom(
-      *this->owner,variables[i]
-    );
+    newElement.data.makeAtom(*this->owner, variables[i]);
     newElement.source = variables[i];
-    newElement.syntacticRole=SyntacticElement::VARIABLE;
-    (*this->currentSyntacticStack).addOnTop(newElement);
+    newElement.syntacticRole = SyntacticElement::VARIABLE;
+    (*this->syntacticStack).addOnTop(newElement);
   }
   return true;
 }
@@ -1847,18 +1830,14 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits(
 }
 
 bool CalculatorParser::replaceEXdotsXbySsXdotsX(int numberOfDots) {
-  SyntacticElement& left = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& left = (*this->syntacticStack)[(*this->syntacticStack).size
+    -
     numberOfDots -
     1
   ];
   bool found = false;
-  for (
-    int i = (*this->currentSyntacticStack).size - numberOfDots - 2; i >= 0; i
-    --
-  ) {
-    SyntacticElement& current = (*this->currentSyntacticStack)[i];
+  for (int i = (*this->syntacticStack).size - numberOfDots - 2; i >= 0; i --) {
+    SyntacticElement& current = (*this->syntacticStack)[i];
     if (
       current.totalBoundVariablesInherited >= 0 &&
       current.totalNonBoundVariablesInherited >= 0
@@ -1888,15 +1867,13 @@ bool CalculatorParser::replaceEXdotsXbySsXdotsX(int numberOfDots) {
 }
 
 bool CalculatorParser::replaceSsSsXdotsXbySsXdotsX(int numberOfDots) {
-  SyntacticElement& left = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& left = (*this->syntacticStack)[(*this->syntacticStack).size
+    -
     numberOfDots -
     2
   ];
-  SyntacticElement& right = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& right = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     numberOfDots -
     1
   ];
@@ -1911,9 +1888,7 @@ bool CalculatorParser::replaceSsSsXdotsXbySsXdotsX(int numberOfDots) {
     left.data.addChildOnTop(right.data[i]);
   }
   left.syntacticRole = SyntacticElement::SEQUENCE_STATEMENTS;
-  (*this->currentSyntacticStack).popIndexShiftDown((
-      *this->currentSyntacticStack
-    ).size -
+  (*this->syntacticStack).popIndexShiftDown((*this->syntacticStack).size -
     numberOfDots -
     1
   );
@@ -1924,14 +1899,12 @@ bool CalculatorParser::replaceSsSsXdotsXbySsXdotsX(int numberOfDots) {
 }
 
 bool CalculatorParser::replaceEOEXByEX(int operationIndex) {
-  SyntacticElement& left = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& left = (*this->syntacticStack)[(*this->syntacticStack).size
+    -
     4
   ];
-  SyntacticElement& right = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& right = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     2
   ];
   left.data.makeXOX(*this->owner, operationIndex, left.data, right.data);
@@ -1940,19 +1913,16 @@ bool CalculatorParser::replaceEOEXByEX(int operationIndex) {
 }
 
 bool CalculatorParser::replaceEXEXBy_OofEE_X(int operation) {
-  SyntacticElement& middle = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& middle = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     3
   ];
-  SyntacticElement& left = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& left = (*this->syntacticStack)[(*this->syntacticStack).size
+    -
     4
   ];
-  SyntacticElement& right = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
+  SyntacticElement& right = (*this->syntacticStack)[(*this->syntacticStack).
+    size -
     2
   ];
   Expression newExpression;
@@ -1961,7 +1931,7 @@ bool CalculatorParser::replaceEXEXBy_OofEE_X(int operation) {
   newExpression.addChildOnTop(left.data);
   newExpression.addChildOnTop(right.data);
   left.data = newExpression;
-  middle = *(*this->currentSyntacticStack).lastObject();
+  middle = *(*this->syntacticStack).lastObject();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceEXEXBy_OofEE_X]";
   }
@@ -2063,6 +2033,9 @@ bool CalculatorParser::allowsTimesInPreceding(
   if (!preceding.data.isBuiltInAtom()) {
     return this->allowsTimesInPreceding(lookAhead);
   }
+  if (lookAhead.syntacticRole == SyntacticElement::BACKSLASH) {
+    return false;
+  }
   return
   lookAhead.syntacticRole == SyntacticElement::PLUS ||
   lookAhead.syntacticRole == SyntacticElement::MINUS ||
@@ -2121,7 +2094,7 @@ bool CalculatorParser::allowsTimesInPreceding(
   role == SyntacticElement::MATRIX_END ||
   role == SyntacticElement::OR ||
   role == SyntacticElement::AND ||
-  role == SyntacticElement::BACKSLASH ||
+  role == SyntacticElement::DOUBLE_BACKSLASH ||
   role == SyntacticElement::SQRT ||
   role == SyntacticElement::END_PROGRAM;
 }
@@ -2248,12 +2221,12 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
 ) {
   STACK_TRACE("CalculatorParser::extractExpressionsFromPreprocessed");
   std::stringstream errorLog;
-  (*this->currentSyntacticStack).reserve((*this->currrentlyParsed).size +
+  (*this->syntacticStack).reserve((*this->toBeParsed).size +
     this->numberOfEmptyTokensStart
   );
-  (*this->currentSyntacticStack).setSize(this->numberOfEmptyTokensStart);
+  (*this->syntacticStack).setSize(this->numberOfEmptyTokensStart);
   for (int i = 0; i < this->numberOfEmptyTokensStart; i ++) {
-    (*this->currentSyntacticStack)[i] = this->getStartFillerElement();
+    (*this->syntacticStack)[i] = this->getStartFillerElement();
   }
   this->parsingLog = "";
   this->nonBoundVariablesInContext.clear();
@@ -2269,7 +2242,7 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
   bool currentLogEvaluation = this->owner->flagLogEvaluation;
   for (
     this->counterInToBeParsed = 0; this->counterInToBeParsed < (
-      *this->currrentlyParsed
+      *this->toBeParsed
     ).size; this->counterInToBeParsed ++
   ) {
     counterReport ++;
@@ -2286,12 +2259,12 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
         << "Processed "
         << this->counterInToBeParsed
         << " out of "
-        << (*this->currrentlyParsed).size
+        << (*this->toBeParsed).size
         << " syntactic elements. ";
         report.report(reportStream.str());
       }
     }
-    (*this->currentSyntacticStack).addOnTop((*this->currrentlyParsed)[
+    (*this->syntacticStack).addOnTop((*this->toBeParsed)[
         this->counterInToBeParsed
       ]
     );
@@ -2300,16 +2273,16 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
       this->logParsingOperation();
     }
     int totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;
-    int minStackSize = this->currentSyntacticStack->size;
+    int minStackSize = this->syntacticStack->size;
     while (this->applyOneRule()) {
       if (currentLogEvaluation != this->owner->flagLogEvaluation) {
         this->owner->logTime(this->owner->statistics.lastStopwatchParsing);
         currentLogEvaluation = this->owner->flagLogEvaluation;
       }
       this->logParsingOperation();
-      if (this->currentSyntacticStack->size < minStackSize) {
+      if (this->syntacticStack->size < minStackSize) {
         totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;
-        minStackSize = this->currentSyntacticStack->size;
+        minStackSize = this->syntacticStack->size;
       } else {
         totalTimesRulesCanBeAppliedWithoutStackDecrease ++;
       }
@@ -2332,14 +2305,13 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
     }
   }
   bool success = false;
-  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart) {
+  if ((*this->syntacticStack).size == this->numberOfEmptyTokensStart) {
     errorLog
     << "Non-meaningful/empty input detected "
     << "(spacebar, enter characters only?).";
-  } else if ((*this->currentSyntacticStack).size ==
-    this->numberOfEmptyTokensStart + 1
+  } else if ((*this->syntacticStack).size == this->numberOfEmptyTokensStart + 1
   ) {
-    SyntacticElement& result = (*this->currentSyntacticStack)[
+    SyntacticElement& result = (*this->syntacticStack)[
       this->numberOfEmptyTokensStart
     ];
     if (
@@ -2390,17 +2362,17 @@ void CalculatorParser::logParsingOperation() {
 
 bool CalculatorParser::applyOneRule() {
   STACK_TRACE("CalculatorParser::applyOneRule");
-  if (this->currentSyntacticStack->size <= this->numberOfEmptyTokensStart) {
+  if (this->syntacticStack->size <= this->numberOfEmptyTokensStart) {
     return false;
   }
-  SyntacticElement& lastExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& lastExpression = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     1
   ];
   SyntacticElement::Role lastRole = lastExpression.syntacticRole;
-  SyntacticElement& secondToLastExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& secondToLastExpression = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     2
   ];
@@ -2458,8 +2430,8 @@ bool CalculatorParser::applyOneRule() {
       return this->popTopSyntacticStack();
     }
   }
-  SyntacticElement& thirdToLastExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& thirdToLastExpression = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     3
   ];
@@ -2539,7 +2511,7 @@ bool CalculatorParser::applyOneRule() {
     lastRole == SyntacticElement::WHITE_SPACE &&
     lastExpression.source == " " &&
     secondToLastRole == SyntacticElement::BACKSLASH &&
-    this->currentSyntacticStack->size >= this->numberOfEmptyTokensStart + 2
+    this->syntacticStack->size >= this->numberOfEmptyTokensStart + 2
   ) {
     this->popTopSyntacticStack();
     if (this->flagLogSyntaxRules) {
@@ -2560,39 +2532,39 @@ bool CalculatorParser::applyOneRule() {
     lastRole == SyntacticElement::LEFT_PARENTHESIS ||
     lastRole == SyntacticElement::LEFT_CURLY_BRACE
   ) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].
+    (*this->syntacticStack)[(*this->syntacticStack).size - 1].
     totalNonBoundVariablesInherited =
     this->nonBoundVariablesInContext.size;
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].
+    (*this->syntacticStack)[(*this->syntacticStack).size - 1].
     totalBoundVariablesInherited =
     this->boundVariablesInContext.size;
   }
-  SyntacticElement& fourthToLastExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& fourthToLastExpression = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     4
   ];
   SyntacticElement::Role fourthToLastRole =
   fourthToLastExpression.syntacticRole;
-  SyntacticElement& fifthToLastE = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& fifthToLastE = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     5
   ];
   SyntacticElement::Role fifthToLastRole = fifthToLastE.syntacticRole;
-  SyntacticElement& sixthToLastExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& sixthToLastExpression = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     6
   ];
   SyntacticElement::Role sixthToLastRole = sixthToLastExpression.syntacticRole;
-  SyntacticElement& seventhToLastExpression = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& seventhToLastExpression = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     7
   ];
-  SyntacticElement& eighthToLastE = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
+  SyntacticElement& eighthToLastE = (*this->syntacticStack)[(
+      *this->syntacticStack
     ).size -
     8
   ];
@@ -2684,6 +2656,8 @@ bool CalculatorParser::applyOneRule() {
     lastRole == SyntacticElement::EXPRESSION
   ) {
     secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    this->lastRuleName =
+    "integral operator expression to expression expression";
     return true;
   }
   if (
@@ -2691,6 +2665,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION
   ) {
     thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    this->lastRuleName =
+    "integral operator expression any to expression expression any";
     return true;
   }
   if (
@@ -2699,6 +2675,7 @@ bool CalculatorParser::applyOneRule() {
     this->canBeRegardedAsDifferentialForm(lastExpression)
   ) {
     thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    this->lastRuleName = "definite integral Ed definite_integral Ed";
     return true;
   }
   if ((
@@ -2811,7 +2788,7 @@ bool CalculatorParser::applyOneRule() {
     return this->decreaseStackExceptLast(2);
   }
   if (!this->owner->flagDontUsePredefinedWordSplits) {
-    if (lastRole==SyntacticElement::LETTERS) {
+    if (lastRole == SyntacticElement::LETTERS) {
       const std::string& currentVariable = lastExpression.source;
       bool replaced =
       this->replaceVbyVdotsVAccordingToPredefinedWordSplits(currentVariable);
@@ -2992,31 +2969,31 @@ bool CalculatorParser::applyOneRule() {
       lastRole == SyntacticElement::LETTERS ||
       lastRole == SyntacticElement::VARIABLE ||
       lastRole == SyntacticElement::EXPRESSION
-    )
+    ) &&
+    lastExpression.data.isOperationGiven("d")
   ) {
-    if (lastExpression.data.isOperationGiven("d")) {
-      secondToLastExpression.data.makeAtom(
-        *this->owner, this->owner->opDifferential()
-      );
-      secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
-      if (this->flagLogSyntaxRules) {
-        this->lastRuleName = "\\text d to differential";
-      }
-      return this->decreaseStackSetCharacterRanges(1);
+    secondToLastExpression.data.makeAtom(
+      *this->owner, this->owner->opDifferential()
+    );
+    secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName = "\\text d to differential";
     }
+    return this->decreaseStackSetCharacterRanges(1);
   }
   if (
     thirdToLastRole == SyntacticElement::TEXT &&
-    secondToLastRole == SyntacticElement::EXPRESSION
+    secondToLastRole == SyntacticElement::EXPRESSION &&
+    secondToLastExpression.data.isOperationGiven("d")
   ) {
-    if (secondToLastExpression.data.isOperationGiven("d")) {
-      thirdToLastExpression.data.makeAtom(*this->owner, "\\text{d}");
-      thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
-      if (this->flagLogSyntaxRules) {
-        this->lastRuleName = "[Rule: Calculator::replaceXXYbyOY]";
-      }
-      return this->decreaseStackExceptLast(1);
+    thirdToLastExpression.data.makeAtom(
+      *this->owner, this->owner->opDifferential()
+    );
+    thirdToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName = "text expression any to expression any";
     }
+    return this->decreaseStackExceptLast(1);
   }
   if (
     thirdToLastRole == SyntacticElement::DIGITS &&
@@ -3447,13 +3424,13 @@ bool CalculatorParser::applyOneRule() {
       thirdToLastExpression.data,
       secondToLastExpression.data
     );
-    Expression impliedFunApplication;
+    Expression impliedFunctionApplication;
     if (
       CalculatorBasics::timesToFunctionApplication(
-        *this->owner, thirdToLastExpression.data, impliedFunApplication
+        *this->owner, thirdToLastExpression.data, impliedFunctionApplication
       )
     ) {
-      thirdToLastExpression.data = impliedFunApplication;
+      thirdToLastExpression.data = impliedFunctionApplication;
       if (this->flagLogSyntaxRules) {
         this->lastRuleName =
         "(expression expression any) to (expression of expression any)";
@@ -3860,7 +3837,7 @@ bool CalculatorParser::applyOneRule() {
     return this->decreaseStackExceptLast(2);
   }
   if ((
-          fourthToLastRole != SyntacticElement::MAKE_SEQUENCE  ||
+      fourthToLastRole != SyntacticElement::MAKE_SEQUENCE ||
       thirdToLastRole != SyntacticElement::LEFT_RIGHT_CURLY_BRACE
     ) && (
       thirdToLastRole != SyntacticElement::LEFT_BRACKET ||

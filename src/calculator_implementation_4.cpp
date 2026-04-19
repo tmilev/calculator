@@ -2391,23 +2391,22 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
 ) {
   STACK_TRACE("CalculatorParser::toStringSyntacticStackHTMLTable");
   std::stringstream out;
-  if ((*this->currentSyntacticStack).size < this->numberOfEmptyTokensStart) {
+  if ((*this->syntacticStack).size < this->numberOfEmptyTokensStart) {
     return "Not enough empty tokens in the start of the syntactic stack.";
   }
-  bool isBad = ((*this->currentSyntacticStack).size >
+  bool isBad = ((*this->syntacticStack).size >
     this->numberOfEmptyTokensStart + 1
   );
   SyntacticElement& lastSyntacticElement =
-  *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1
-  ) {
+  *(*this->syntacticStack).lastObject();
+  if ((*this->syntacticStack).size == this->numberOfEmptyTokensStart + 1) {
     if (lastSyntacticElement.syntacticRole != SyntacticElement::EXPRESSION) {
       isBad = true;
     }
   }
   if (!isBad) {
     out
-    << this->currentSyntacticStack->lastObject()->toStringHumanReadable(
+    << this->syntacticStack->lastObject()->toStringHumanReadable(
       includeLispifiedExpressions
     );
     return out.str();
@@ -2415,11 +2414,10 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   out << "<table style='vertical-align:top;border-spacing:0px 0px;'><tr>";
   int counter = 0;
   for (
-    int i = this->numberOfEmptyTokensStart; i < (
-      *this->currentSyntacticStack
-    ).size; i ++
+    int i = this->numberOfEmptyTokensStart; i < (*this->syntacticStack).size;
+    i ++
   ) {
-    SyntacticElement& currentElement = (*this->currentSyntacticStack)[i];
+    SyntacticElement& currentElement = (*this->syntacticStack)[i];
     if (ignoreCommandEnclosures) {
       if (currentElement.isCommandEnclosure()) {
         continue;

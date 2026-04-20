@@ -585,6 +585,19 @@ class MathNodeFactory {
     return result;
   }
 
+  textEnvironment(
+    /** @type {EquationEditor!} */
+    equationEditor,
+    /** @type {string} */
+    content
+  ) {
+    const mathNodeText = this.atom(equationEditor, content);
+    return mathNodeFactory.genericMathBox(
+      equationEditor, mathNodeText, {
+      isTextEnvironment: true
+    });
+  }
+
   /**
    * Constructs a generic math box.
    * @return {MathNodeGenericBox!}
@@ -594,7 +607,7 @@ class MathNodeFactory {
     equationEditor,
     /** @type {MathNode?} */
     content,
-    /** @type {{color: string|undefined, isMathbf: boolean|undefined }} */
+    /** @type {{color: string|undefined, isMathbf: boolean|undefined , isTextEnvironment: boolean|undefined}} */
     properties
   ) {
     const result = new MathNodeGenericBox(equationEditor);
@@ -603,6 +616,9 @@ class MathNodeFactory {
     }
     if (properties.isMathbf !== undefined && properties.isMathbf !== null) {
       result.isMathbf = properties.isMathbf;
+    }
+    if (properties.isTextEnvironment === true) {
+      result.isTextEnvironment = true;
     }
     result.appendChild(this.horizontalMath(equationEditor, content));
     return result;
@@ -1720,6 +1736,7 @@ class LaTeXConstants {
       '[': '[',
       ']': ']',
       '|': '|',
+      '$': '$',
     };
     /** @type {Object.<string, string>!} */
     this.latexBackslashCommands = {
@@ -1764,6 +1781,7 @@ class LaTeXConstants {
       'color': '\\color',
       'mathbf': '\\mathbf',
       'hline': '\\hline',
+      'text': '\\text',
     };
     /** @type {Object.<string, string>!} */
     this.latexBackslashOperators = {
@@ -2023,7 +2041,6 @@ class LaTeXConstants {
     };
     this.latexCommandsIgnored = {
       'displaystyle': true,
-      'text': true,
       'mathrm': true,
       'phantom': true,
       'limits': true,
@@ -2496,6 +2513,18 @@ class LaTeXParser {
   }
 
   /** @return {boolean} */
+  decreaseBelowParsingStackTop(
+    /** @type {number} */
+    elementsToRemove,
+  ) {
+    this.parsingStack[
+      this.parsingStack.length - 1 - elementsToRemove
+    ] = this.parsingStack[this.parsingStack.length - 1];
+    this.parsingStack.length = this.parsingStack.length - elementsToRemove;
+    return true;
+  }
+
+  /** @return {boolean} */
   replaceParsingStackTop(
     /** @type {MathNode?} */
     node,
@@ -2601,7 +2630,11 @@ class LaTeXParser {
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
     let secondToLast = this.parsingStack[this.parsingStack.length - 2];
-    if (secondToLast.syntacticRole === '\\' && last.syntacticRole === '' && last.content in latexConstants.escapedAsWhitespace) {
+    if (
+      secondToLast.syntacticRole === '\\' &&
+      last.syntacticRole === '' &&
+      last.content in latexConstants.escapedAsWhitespace
+    ) {
       this.lastRuleName = 'escaped whitespace';
       let node = mathNodeFactory.atom(
         this.equationEditor,
@@ -2609,7 +2642,11 @@ class LaTeXParser {
       );
       return this.replaceParsingStackTop(node, '', -2);
     }
-    if (latexConstants.isWhiteSpace(last.content)) {
+    if (
+      secondToLast.syntacticRole !== '\\text{' &&
+      last.syntacticRole === '' &&
+      latexConstants.isWhiteSpace(last.content)
+    ) {
       if (latexConstants.isWhiteSpaceIgnored(last.content)) {
         this.lastRuleName = 'clean whitespace';
         this.parsingStack.length = this.parsingStack.length - 1;
@@ -2625,7 +2662,62 @@ class LaTeXParser {
       return this.replaceParsingStackTop(
         null, latexConstants.latexSyntacticValues[last.content], -1);
     }
-
+    if (
+      secondToLast.syntacticRole === '\\text' &&
+      last.syntacticRole === '{'
+    ) {
+      secondToLast.syntacticRole = '\\text{';
+      this.lastRuleName = 'text and left curly brace';
+      return this.decreaseParsingStack(1);
+    }
+    if (
+      secondToLast.syntacticRole === '\\text' &&
+      !latexConstants.isWhiteSpace() &&
+      !last.isExpression()
+    ) {
+      this.lastRuleName = "finalize text no curly braces";
+      const generalBox = mathNodeFactory.textEnvironment(
+        this.equationEditor, last.content
+      );
+      this.decreaseParsingStack(1);
+      return this.replaceParsingStackTop(generalBox, '', -1);
+    }
+    if (
+      secondToLast.syntacticRole === '\\text{' && (
+        latexConstants.isWhiteSpace(last.content) || (
+          last.isExpression() &&
+          last.node.isAtomic() &&
+          last.node.contentIfAtomic() === " "
+        )
+      )
+    ) {
+      secondToLast.content += ' ';
+      this.lastRuleName = "text{ absorbs white space";
+      return this.decreaseParsingStack(1);
+    }
+    if (
+      secondToLast.syntacticRole === '\\text{' &&
+      last.syntacticRole !== '\\' &&
+      last.syntacticRole !== '$' &&
+      last.syntacticRole !== '}' &&
+      last.syntacticRole !== '~' &&
+      !last.isExpression()
+    ) {
+      secondToLast.content += last.content;
+      this.lastRuleName = "text{ absorbs content";
+      return this.decreaseParsingStack(1);
+    }
+    if (
+      secondToLast.syntacticRole === '\\text{' &&
+      last.syntacticRole === '}'
+    ) {
+      this.decreaseParsingStack(1);
+      this.lastRuleName = "finalize text";
+      const generalBox = mathNodeFactory.textEnvironment(
+        this.equationEditor, secondToLast.content
+      );
+      return this.replaceParsingStackTop(generalBox, '', -1);
+    }
     if (secondToLast.syntacticRole === '\\') {
       if (last.syntacticRole === '\\') {
         this.lastRuleName = 'double backslash';
@@ -2641,6 +2733,14 @@ class LaTeXParser {
       }
     }
     let thirdToLast = this.parsingStack[this.parsingStack.length - 3];
+    if (
+      thirdToLast.syntacticRole === '\\text{' &&
+      secondToLast.syntacticRole === '\\'
+    ) {
+      thirdToLast.content += '\\';
+      this.lastRuleName = "text{ absorbs backslash";
+      return this.decreaseBelowParsingStackTop(1);
+    }
     let fourthToLast = this.parsingStack[this.parsingStack.length - 4];
     if (secondToLast.syntacticRole === '{' && last.isExpression()) {
       if (last.node.type.type !== knownTypes.horizontalMath.type) {
@@ -3205,6 +3305,21 @@ class LaTeXParser {
           this.equationEditor, [thirdToLast.node, secondToLast.node]);
         return this.replaceParsingStackRange(node, '', -3, -2);
       }
+    }
+    if (
+      fourthToLast.syntacticRole === '\\text{' &&
+      thirdToLast.syntacticRole === '$' &&
+      secondToLast.isExpression() &&
+      last.syntacticRole === '$'
+    ) {
+      const finalizedTextNode = mathNodeFactory.textEnvironment(
+        this.equationEditor, fourthToLast.content
+      );
+      fourthToLast.syntacticRole = '';
+      fourthToLast.node = finalizedTextNode;
+      this.parsingStack[this.parsingStack.length - 3] = secondToLast;
+      this.decreaseParsingStack(1);
+      return this.replaceParsingStackTop(null, '\\text{', -1);
     }
     return false;
   }
@@ -10027,6 +10142,7 @@ class MathNodeGenericBox extends MathNode {
     super(equationEditor, knownTypes.genericMathBox);
     this.isMathbf = false;
     this.color = '';
+    this.isTextEnvironment = false;
   }
 
   /** @return {LatexWithAnnotation!} */
@@ -10040,6 +10156,9 @@ class MathNodeGenericBox extends MathNode {
     }
     if (this.isMathbf) {
       return new LatexWithAnnotation(`{\\mathbf{${childLatex.latex}}}`);
+    }
+    if (this.isTextEnvironment) {
+      return new LatexWithAnnotation(`\\text{${childLatex.latex}}`);
     }
     return new LatexWithAnnotation(`{${childLatex.latex}}`);
   }

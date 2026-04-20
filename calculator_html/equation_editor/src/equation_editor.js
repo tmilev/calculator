@@ -3278,7 +3278,10 @@ class LaTeXParser {
         2, mathNodeFactory.rightDelimiter(this.equationEditor, '', false));
       return this.replaceParsingStackTop(node, '', -3);
     }
-    if (last.content in latexConstants.operatorsNormalized) {
+    if (
+      last.syntacticRole !== '\\text{' &&
+      last.content in latexConstants.operatorsNormalized
+    ) {
       this.lastRuleName = 'atom immutable';
       let node = mathNodeFactory.atomImmutable(
         this.equationEditor,
@@ -10991,6 +10994,20 @@ class MathNodeOverBrace extends MathNode {
     let superscript = this.children[2].toLatexWithAnnotation(options);
     return new LatexWithAnnotation(
       `\\overbrace{${base.latex}}^${superscript.latex}`);
+  }
+
+  toMathML() {
+    let base = this.children[0].stripRedundantHorizontalMath();
+    let superscript = this.children[2].stripRedundantHorizontalMath();
+    let baseMathML = base.toMathML();
+    let superscriptMathML = superscript.toMathML();
+    const overbraceMathML = this.createMathMLElement('mo');
+    overbraceMathML.textContent = "\u23DE";
+    const result = this.createMathMLElement('munderover');
+    result.appendChild(overbraceMathML);
+    result.appendChild(baseMathML);
+    result.appendChild(superscriptMathML);
+    return result;
   }
 }
 

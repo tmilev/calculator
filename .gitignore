@@ -25,6 +25,7 @@ LogFiles*
 database_backups*
 database/*
 test/test_database.json
+test/failedinterpretation.html
 
 bin/*
 calculator

@@ -7,6 +7,8 @@
 
 std::string CalculatorHTML::Test::filenameFullOutput =
 "test/alltestedproblems.txt";
+std::string CalculatorHTML::Test::filenameFailedInterpretation =
+"test/failedinterpretation.html";
 
 CalculatorHTML::Test::Test() {
   this->filesToInterpret = 0;
@@ -651,10 +653,17 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
       0, 0, 0, 3, &actualOutput, &comments
     )
   ) {
-    global.fatal
-    << "Built-in problem tests failed. "
-    << comments.str()
-    << global.fatal;
+    FileOperations::writeFileVirtual(
+      CalculatorHTML::Test::filenameFailedInterpretation,
+      comments.str(),
+      nullptr
+    );
+    global
+    << "Error report dumped in:\n"
+    << "https://localhost:8166/" +
+    CalculatorHTML::Test::filenameFailedInterpretation
+    << Logger::endL;
+    global.fatal << "Built-in problem tests failed. " << global.fatal;
   }
   std::string actualOutputString = actualOutput.toStringPretty();
   if (actualOutputString != desiredOutputString) {

@@ -615,6 +615,7 @@ public:
     };
 
     static std::string filenameFullOutput;
+    static std::string filenameFailedInterpretation;
     int filesToInterpret;
     int firstFileIndex;
     int randomSeed;

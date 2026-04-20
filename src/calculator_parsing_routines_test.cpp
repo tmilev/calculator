@@ -6,7 +6,6 @@
 bool Calculator::Test::all(bool updateABTestFile) {
   Calculator tester;
   tester.initialize(Calculator::Mode::full);
-  Calculator::Test::parseConsumeQuote(tester);
   Calculator::Test::parseQuotes(tester);
   Calculator::Test::cacheWorks();
   Calculator::Test::loopDetection();
@@ -135,34 +134,6 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
         << global.fatal;
       }
     }
-  }
-  return true;
-}
-
-bool Calculator::Test::parseConsumeQuote(Calculator& ownerInitialized) {
-  std::string input = "\"\\\"\\\\\\\"\"";
-  List<SyntacticElement> output;
-  unsigned int index = 0;
-  ownerInitialized.parser.parseConsumeQuote(input, index, output);
-  if (output.size != 3) {
-    global.fatal
-    << "Expected 3 output elements in parseConsumeQuote, got: "
-    << output.size
-    << ". Input: "
-    << input
-    << global.fatal;
-  }
-  std::string result = output[1].data.toString();
-  std::string expected = "\\\"\\\\\\\"";
-  if (result != expected) {
-    global.fatal
-    << "Input: "
-    << input
-    << "; unexpected content of consumed quote:\n"
-    << result
-    << "\nexpected:\n"
-    << expected
-    << global.fatal;
   }
   return true;
 }

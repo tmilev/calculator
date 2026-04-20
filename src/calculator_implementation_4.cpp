@@ -2394,22 +2394,19 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   if ((*this->syntacticStack).size < this->numberOfEmptyTokensStart) {
     return "Not enough empty tokens in the start of the syntactic stack.";
   }
-  bool isBad = ((*this->syntacticStack).size >
-    this->numberOfEmptyTokensStart + 1
-  );
   SyntacticElement& lastSyntacticElement =
   *(*this->syntacticStack).lastObject();
-  if ((*this->syntacticStack).size == this->numberOfEmptyTokensStart + 1) {
-    if (lastSyntacticElement.syntacticRole != SyntacticElement::EXPRESSION) {
-      isBad = true;
-    }
-  }
-  if (!isBad) {
+  if ((*this->syntacticStack).size == this->numberOfEmptyTokensStart + 1 &&
+    lastSyntacticElement.syntacticRole == SyntacticElement::EXPRESSION
+  ) {
     out
     << this->syntacticStack->lastObject()->toStringHumanReadable(
       includeLispifiedExpressions
     );
     return out.str();
+  }
+  if ((*this->syntacticStack).size == this->numberOfEmptyTokensStart) {
+    return "[Empty stack]";
   }
   out << "<table style='vertical-align:top;border-spacing:0px 0px;'><tr>";
   int counter = 0;

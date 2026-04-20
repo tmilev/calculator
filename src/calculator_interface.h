@@ -1777,6 +1777,7 @@ public:
     QUOTE,
     PERCENT,
     WHITE_SPACE,
+    IGNORED_KEYWORD,
     TILDE,
     EQUALS_COLON,
     SET_MINUS,
@@ -2409,7 +2410,6 @@ private:
     bool* inputFlagLocation,
     const std::string& inputDescription = ""
   );
-  bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftForDefinition(SyntacticElement::Role role);
   bool isBoundVariableInContext(int inputOperation);
@@ -2580,11 +2580,6 @@ public:
   // and trims them away in-place if they form non-standard white space.
   // When trimming happens, returns true, otherwise returns false.
   bool trimNonStandardWhiteSpaceFromEnd(std::string& inputOutput);
-  // This function is intended for calculator function use.
-  // The internal parser uses extractContiguousWords instead.
-  void stringToSyntacticElements(
-    const std::string& input, List<SyntacticElement>& output
-  );
   // Initialization function.
   // Must be called once per executable. Not thread safe.
   static void initializeStatic();
@@ -3551,7 +3546,6 @@ public:
     static bool parseDecimal(Calculator& ownerInitialized);
     static bool parseQuotes(Calculator& ownerInitialized);
     static bool parseAllExamples(Calculator& ownerInitialized);
-    static bool parseConsumeQuote(Calculator& ownerInitialized);
     static bool builtInFunctionsABTest(
       Calculator& ownerInitialized, bool updateABTestFile
     );

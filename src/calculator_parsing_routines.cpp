@@ -182,7 +182,7 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
   case SyntacticElement::LESS_THAN_LIKE:
     return "LESS_THAN_LIKE";
   case SyntacticElement::GREATER_THAN_LIKE:
-    return "GREATER_THAN";
+    return "GREATER_THAN_LIKE";
   case SyntacticElement::PIPE:
     return "PIPE";
   case UNDERSCORE:
@@ -219,6 +219,8 @@ std::string SyntacticElement::syntaxRoleToString(SyntacticElement::Role role) {
     return "BINOM";
   case LIM:
     return "LIM";
+  case IGNORED_KEYWORD:
+    return "IGNORED_KEYWORD";
   }
   return "SHOULD_BE_UNREACHABLE";
 }
@@ -294,7 +296,7 @@ void CalculatorParser::initializeKeyWordsToSyntacticRoles() {
   registerKeyword("\u00F7", SyntacticElement::DIVISION_SIGN);
   registerKeyword("\\to", SyntacticElement::TO);
   registerKeyword("\\leq", SyntacticElement::LESS_THAN_LIKE);
-  registerKeyword("\\displaystyle", SyntacticElement::WHITE_SPACE);
+  registerKeyword("\\displaystyle", SyntacticElement::IGNORED_KEYWORD);
   registerKeyword("\\geq", SyntacticElement::GREATER_THAN_LIKE);
   registerKeyword("\\circ", SyntacticElement::CIRC);
   registerKeyword("\\int", SyntacticElement::INTEGRAL_SIGN);
@@ -440,6 +442,11 @@ void CalculatorParser::initialize(Calculator* inputOwner) {
   );
   this->addFlagDescription(
     "UseBracketForIntervals",
+    &this->owner->flagUseBracketsForIntervals,
+    "Using brackets for intervals. "
+  );
+  this->addFlagDescription(
+    "UseBracketsForIntervals",
     &this->owner->flagUseBracketsForIntervals,
     "Using brackets for intervals. "
   );
@@ -1187,13 +1194,6 @@ const HashedList<std::string>& CalculatorParser::whitespaceContainer() {
   return result;
 }
 
-bool CalculatorParser::isInterpretedAsEmptySpace(const std::string& input) {
-  if (input.size() != 1) {
-    return false;
-  }
-  return this->isInterpretedAsEmptySpace(static_cast<unsigned char>(input[0]));
-}
-
 bool CalculatorParser::isInterpretedAsEmptySpace(unsigned char input) {
   switch (input) {
   case '\n':
@@ -1280,39 +1280,6 @@ bool CalculatorParser::shouldSplitOutsideQuotes(
   return false;
 }
 
-void CalculatorParser::parseConsumeQuote(
-  const std::string& input,
-  unsigned int& indexOfLast,
-  List<SyntacticElement>& output
-) {
-  SyntacticElement quoteStart;
-  SyntacticElement quoteEnd;
-  SyntacticElement content;
-  quoteStart.syntacticRole = SyntacticElement::QUOTE;
-  quoteEnd = quoteStart;
-  content.syntacticRole = SyntacticElement::EXPRESSION;
-  output.addOnTop(quoteStart);
-  bool previousIsUnescapedBackslash = false;
-  std::string consumed;
-  for (indexOfLast ++; indexOfLast < input.size(); indexOfLast ++) {
-    char current = input[indexOfLast];
-    if (current == '"' && !previousIsUnescapedBackslash) {
-      content.data.makeAtom(*this->owner, consumed);
-      output.addOnTop(content);
-      output.addOnTop(quoteEnd);
-      return;
-    }
-    if (current == '\\') {
-      previousIsUnescapedBackslash = !previousIsUnescapedBackslash;
-    } else {
-      previousIsUnescapedBackslash = false;
-    }
-    consumed.push_back(current);
-  }
-  content.data.makeAtom(*this->owner, consumed);
-  output.addOnTop(content);
-}
-
 bool CalculatorParser::parseNoEmbeddingInCommand(
   const std::string& input, Expression& output
 ) {
@@ -1393,62 +1360,6 @@ void CalculatorParser::extractContiguousWords(
       output.addOnTop(maybeNext);
       previous = &output.lastObject();
     }
-  }
-}
-
-void CalculatorParser::stringToSyntacticElements(
-  const std::string& input, List<SyntacticElement>& output
-) {
-  STACK_TRACE("CalculatorParser::stringToSyntacticElements");
-  std::string current;
-  output.reserve(static_cast<signed>(input.size()));
-  output.setSize(0);
-  char lookAheadChar;
-  SyntacticElement currentElement;
-  for (unsigned i = 0; i < input.size(); i ++) {
-    char currentCharacter = input[i];
-    if (currentCharacter == '"') {
-      this->parseConsumeQuote(input, i, output);
-      continue;
-    }
-    current.push_back(currentCharacter);
-    if (i + 1 < input.size()) {
-      lookAheadChar = input[i + 1];
-    } else {
-      lookAheadChar = ' ';
-    }
-    bool nonStandardWhitespaceTrimmedFromEnd =
-    this->trimNonStandardWhiteSpaceFromEnd(current);
-    if (current == "") {
-      continue;
-    }
-    if (this->isInterpretedAsEmptySpace(current)) {
-      current = " ";
-    }
-    if (!nonStandardWhitespaceTrimmedFromEnd) {
-      if (!this->shouldSplitOutsideQuotes(current, lookAheadChar)) {
-        continue;
-      }
-    }
-    if (this->keyWordsToSyntacticRoles.contains(current)) {
-      currentElement.data.reset(*this->owner);
-      currentElement.syntacticRole =
-      this->keyWordsToSyntacticRoles.getValue(
-        current, SyntacticElement::UNKNOWN
-      );
-      currentElement.source = current;
-      output.addOnTop(currentElement);
-    } else if (MathRoutines::hasDecimalDigitsOnly(current)) {
-      currentElement.data.assignValue(*this->owner, current);
-      currentElement.syntacticRole = SyntacticElement::DIGITS;
-      output.addOnTop(currentElement);
-    } else {
-      currentElement.syntacticRole = SyntacticElement::LETTERS;
-      currentElement.source = current;
-      currentElement.data.makeAtom(*this->owner, current);
-      output.addOnTop(currentElement);
-    }
-    current = "";
   }
 }
 
@@ -2519,6 +2430,10 @@ bool CalculatorParser::applyOneRule() {
     }
     return this->popTopSyntacticStack();
   }
+  if (secondToLastRole == SyntacticElement::IGNORED_KEYWORD) {
+    this->lastRuleName = "ignore any to any";
+    return this->popBelowStackTop();
+  }
   if (
     lastRole == SyntacticElement::WHITE_SPACE ||
     lastRole == SyntacticElement::TILDE
@@ -3440,8 +3355,16 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastExpression.source = "";
     return this->decreaseStackExceptLast(1);
   }
-  if ((lastExpression.source == ">" && secondToLastExpression.source == "=") ||
-    (lastExpression.source == "=" && secondToLastExpression.source == ">")
+  if ((
+      lastExpression.source == ">" &&
+      lastExpression.syntacticRole == SyntacticElement::GREATER_THAN_LIKE &&
+      secondToLastExpression.syntacticRole == SyntacticElement::EQUALS
+    ) || (
+      lastExpression.syntacticRole == SyntacticElement::EQUALS &&
+      secondToLastExpression.source == ">" &&
+      secondToLastExpression.syntacticRole ==
+      SyntacticElement::GREATER_THAN_LIKE
+    )
   ) {
     secondToLastExpression.syntacticRole = SyntacticElement::GREATER_THAN_LIKE;
     secondToLastExpression.source = "\\geq";
@@ -3755,6 +3678,17 @@ bool CalculatorParser::applyOneRule() {
     return this->decreaseStackExceptLast(2);
   }
   if (
+    thirdToLastRole == SyntacticElement::LEFT_CURLY_BRACE &&
+    lastRole == SyntacticElement::RIGHT_CURLY_BRACE &&
+    secondToLastExpression.syntacticRole != SyntacticElement::EXPRESSION &&
+    this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.contains
+    (secondToLastExpression.source)
+  ) {
+    this->lastRuleName = "{ known operator }  to known operator";
+    this->popTopSyntacticStack();
+    return this->popBelowStackTop();
+  }
+  if (
     this->owner->knownOperationsInterpretedAsFunctionsMultiplicatively.contains
     (secondToLastExpression.source) &&
     secondToLastExpression.syntacticRole != SyntacticElement::EXPRESSION &&
@@ -3764,7 +3698,7 @@ bool CalculatorParser::applyOneRule() {
       *this->owner, secondToLastExpression.source
     );
     secondToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
-    this->lastRuleName = "known operation to atom ";
+    this->lastRuleName = "known operation to atom";
     secondToLastExpression.source = "";
     return true;
   }

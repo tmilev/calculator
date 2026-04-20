@@ -61,36 +61,40 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   if (!argument.isOfType(&argumentString)) {
     return false;
   }
-  List<SyntacticElement> elements;
-  calculator.parser.stringToSyntacticElements(argumentString, elements);
+  ListReferences<SyntacticElement> elements;
+  calculator.parser.extractContiguousWords(argumentString, elements);
   Expression evaluatedExpression;
   std::stringstream out;
-  bool previousWasInteger = false;
+  bool skipNextVariableInterpretation = false;
   for (int i = 0; i < elements.size; i ++) {
     SyntacticElement& currentElement = elements[i];
+    if (currentElement.syntacticRole == SyntacticElement::BACKSLASH) {
+      skipNextVariableInterpretation = !skipNextVariableInterpretation;
+      out << currentElement.source;
+      continue;
+    }
     if (currentElement.syntacticRole == SyntacticElement::LETTERS) {
-      calculator.evaluateExpression(
-        calculator, currentElement.data, evaluatedExpression
-      );
+      if (skipNextVariableInterpretation) {
+        skipNextVariableInterpretation = false;
+        out << currentElement.source;
+        continue;
+      }
+      Expression atom;
+      atom.makeAtom(calculator, currentElement.source);
+      calculator.evaluateExpression(calculator, atom, evaluatedExpression);
       out << evaluatedExpression.toString();
       continue;
     }
-    if (currentElement.syntacticRole == SyntacticElement::DIGITS_RAW) {
-      if (!previousWasInteger) {
-        out << "{";
-      }
-      out << currentElement.data.toString();
-      previousWasInteger = true;
+    if (
+      currentElement.syntacticRole == SyntacticElement::DIGITS_RAW ||
+      currentElement.syntacticRole == SyntacticElement::DIGITS
+    ) {
+      out << "{";
+      out << currentElement.source;
+      out << "}";
       continue;
     }
-    if (previousWasInteger) {
-      out << "}";
-    }
-    previousWasInteger = false;
     out << currentElement.source;
-  }
-  if (previousWasInteger) {
-    out << "}";
   }
   return output.assignValue(calculator, out.str());
 }

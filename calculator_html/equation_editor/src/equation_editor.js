@@ -11046,6 +11046,20 @@ class MathNodeUnderBrace extends MathNode {
     return new LatexWithAnnotation(
       `\\underbrace{${base.latex}}_${subscript.latex}`);
   }
+
+  toMathML() {
+    let base = this.children[0].stripRedundantHorizontalMath();
+    let subscript = this.children[2].stripRedundantHorizontalMath();
+    let baseMathML = base.toMathML();
+    let subscriptMathML = subscript.toMathML();
+    const underbraceMathML = this.createMathMLElement('mo');
+    underbraceMathML.textContent = "\u23DF";
+    const result = this.createMathMLElement('munderover');
+    result.appendChild(underbraceMathML);
+    result.appendChild(subscriptMathML);
+    result.appendChild(baseMathML);
+    return result;
+  }
 }
 
 class MathNodeExponent extends MathNode {

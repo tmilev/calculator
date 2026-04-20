@@ -55,7 +55,9 @@ const allLatexSnippets = [
   `\\begin{pmatrix}\\end{pmatrix}`,
   // Support the \choose syntax.
   `n \\choose k`,
-  '\\mathbf{x} + \\mathbf y + \\mathcal A + \\mathbb H'
+  '\\mathbf{x} + \\mathbf y + \\mathcal A + \\mathbb H',
+  `\\underbrace{x}_y`,
+  `\\overbrace{x}^y`,
 ];
 
 /** @type {Object.<string, string>} */

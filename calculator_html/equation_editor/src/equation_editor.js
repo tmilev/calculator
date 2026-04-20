@@ -9209,8 +9209,17 @@ class MathNode {
     const hasDigitsOnly = latexConstants.isDigitsNonEmpty(content);
     if (hasDigitsOnly) {
       return this.toMathMLDigits(content);
-    } else if (content.length === 1 || latexConstants.isTextLike(content)) {
+    } else if (content.length === 1) {
       result = this.createMathMLElement("mi");
+      result.textContent = content;
+    } else if (latexConstants.isTextLike(content)) {
+      result = this.createMathMLElement("ms");
+      if (content.startsWith(' ')) {
+        content = "\u2009" + content.slice(1);
+      }
+      if (content.endsWith(' ')) {
+        content = content.slice(0, content.length - 1) + "\u2009";
+      }
       result.textContent = content;
     } else {
       result = this.createMathMLElement("mrow");

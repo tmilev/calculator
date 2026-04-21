@@ -476,6 +476,11 @@ public:
     Calculator& owner, int operation, const List<Expression>& opands
   );
   bool makeOX(Calculator& owner, int operation, const Expression& opArgument);
+  bool makeOX(
+    Calculator& owner,
+    const std::string& operation,
+    const Expression& opArgument
+  );
   bool sequencefy();
   bool isSuitableForSubstitution() const;
   bool isSuitableForRecursion() const;
@@ -5060,7 +5065,7 @@ bool Expression::makeMatrix(
   STACK_TRACE("Expression::makeMatrix");
   Matrix<Expression> matrixExpressions;
   matrixExpressions.initialize(input.numberOfRows, input.numberOfColumns);
-  Expression currentElement;
+  Expression currentElement(owner);
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
       if (inputContext == nullptr) {

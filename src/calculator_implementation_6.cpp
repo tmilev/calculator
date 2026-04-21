@@ -2873,13 +2873,18 @@ bool CalculatorFunctionsLinearAlgebra::exponentOfMatrix(
   eigenMatrixInvertedExpression.makeMatrix(
     calculator, jordanNormalForm.rightMatrixBasisInverted
   );
+  // A = B D B^-1
+  // =>
+  // D = B^-1 A B
+  // e^D = B^-1 e^A B
+  // B e^D B^-1 = e^A
   return
   output.makeProduct(
     calculator,
     List<Expression>({
         eigenMatrixExpression,
         exponentOfJordanNormalForm,
-        eigenMatrixInvertedExpression
+        eigenMatrixInvertedExpression,
       })
   );
 }
@@ -2928,9 +2933,16 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
   eigenMatrixInvertedExpression.makeMatrix(
     calculator, formResult.rightMatrixBasisInverted
   );
+  int doNotSubmit;
+  eigenMatrixInvertedExpression.checkConsistencyRecursively();
+  jordanNormalFormExpression.checkConsistencyRecursively();
+  eigenMatrixInvertedExpression.checkConsistencyRecursively();
   result.addOnTop(eigenMatrixExpression);
   result.addOnTop(jordanNormalFormExpression);
   result.addOnTop(eigenMatrixInvertedExpression);
+  // Here, we have
+  // A = B D B^-1
+  // where B is the matrix formed by the column-eigenvectors.
   return output.makeSequence(calculator, &result);
 }
 

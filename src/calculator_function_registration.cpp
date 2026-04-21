@@ -1587,6 +1587,32 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "DoubleValue",
+    CalculatorFunctions::matrixEntriesToDoubles,
+    "",
+    "Applies the floating point conversion (DoubleValue)"
+    "to all elements of a matrix. "
+    "Uses the built-in C++ floating point library. "
+    "Will apply to every element of a matrix argument. ",
+    "f{}(0, {{X}}) = DoubleValue MakeMatrix ((1,0,0), (0,1,0),(0,0,1));\n"
+    "f{}({{n}}, {{X}}) :if (n>0)= (DoubleValue{}X)^n/n!+ f{}(n-1,  X);\n"
+    "A= MakeMatrix((1,2,1), (0,1,0), (0,0,2));\n"
+    "DoubleValue{}A;\n"
+    "DoubleValue e^A;\n"
+    "f{}(11,A);\n"
+    "B= MakeMatrix((-1,0,1), (0,1,2), (1,2,3));\n"
+    "C=e^B;\n"
+    "DoubleValue C;\n"
+    "f{}(11, B);\n"
+    "entries= DiagonalizeMatrix B;\n"
+    "jordanForm = DoubleValue entries_2;\n"
+    "exponentOfJordanForm= f{}(11, jordanForm);\n"
+    "exponentOfB=DoubleValue (entries_1 exponentOfJordanForm entries_3);\n ",
+    "CalculatorFunctions::matrixEntriesToDoubles",
+    "MatrixEntriesToDoubles",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "DoubleValue",
     CalculatorFunctions::evaluateToDoubleWithFixedDigits,
     "",
     "Round the floating point value of "

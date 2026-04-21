@@ -6509,6 +6509,19 @@ bool Expression::makeOX(
   return this->addChildOnTop(opArgument);
 }
 
+bool Expression::makeOX(
+  Calculator& owner, const std::string& operation, const Expression& opArgument
+) {
+  if (&opArgument == this) {
+    Expression copyExpression = opArgument;
+    return this->makeOX(owner, operation, copyExpression);
+  }
+  this->reset(owner);
+  this->data = owner.opList();
+  this->addChildAtomOnTop(operation);
+  return this->addChildOnTop(opArgument);
+}
+
 bool Expression::sequencefy() {
   this->checkInitialization();
   if (this->isSequenceNElements()) {

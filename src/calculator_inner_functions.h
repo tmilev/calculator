@@ -1189,6 +1189,9 @@ public:
   static bool evaluateToDouble(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool matrixEntriesToDoubles(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool evaluateToDoubleWithRounding(
     Calculator& calculator, const Expression& input, Expression& output
   );

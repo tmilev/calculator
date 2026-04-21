@@ -8730,6 +8730,38 @@ bool CalculatorFunctions::evaluateToDouble(
   return output.assignValue(calculator, value);
 }
 
+bool CalculatorFunctions::matrixEntriesToDoubles(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::matrixEntriesToDoubles");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& inputMatrix = input[1];
+  Matrix<Expression> startingElements;
+  if (!calculator.getMatrixExpressions(inputMatrix, startingElements)) {
+    return false;
+  }
+  if (
+    startingElements.numberOfColumns <= 1 && startingElements.numberOfRows <= 1
+  ) {
+    return false;
+  }
+  Matrix<Expression> result;
+  result.resize(
+    startingElements.numberOfRows, startingElements.numberOfColumns, false
+  );
+  for (int i = 0; i < startingElements.numberOfRows; i ++) {
+    for (int j = 0; j < startingElements.numberOfColumns; j ++) {
+      result(i, j).makeOX(calculator, "DoubleValue", startingElements(i, j));
+    }
+  }
+  output.makeMatrix(&result, calculator);
+  int doNotSubmit;
+  output.checkConsistencyRecursively();
+  return true;
+}
+
 bool CalculatorFunctions::evaluateToDoubleWithFixedDigits(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

@@ -2828,9 +2828,20 @@ bool CalculatorFunctionsLinearAlgebra::exponentOfMatrix(
     << "Failed to compute the Jordan normal form."
     << comments.str();
   }
+  return
+  CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
+    calculator, jordanNormalForm, output
+  );
+}
+
+bool CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
+  Calculator& calculator,
+  JordanNormalFormResult& jordanNormalForm,
+  Expression& output
+) {
   Expression eigenMatrixExpression;
   Matrix<Expression> exponentOfJordanNormalFormMatrix;
-  int dimension = matrix.numberOfRows;
+  int dimension = jordanNormalForm.diagonalizedJordanNormalForm.numberOfRows;
   exponentOfJordanNormalFormMatrix.makeZeroMatrix(
     dimension, calculator.expressionZero()
   );

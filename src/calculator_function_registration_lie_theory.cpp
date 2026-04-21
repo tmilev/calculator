@@ -317,7 +317,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "ExponentOfAdjointOf{}(F_4, "
     "-5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), "
     "g_{14}+g_{22}+g_{20});\n"
-    "ExponentOfAdjointOf{}(F_4, "
+    "ExponentOfAdjointOf{}(A_2, "
     "g_1+g_-1, "
     "h_1);\n",
     "CalculatorLieTheory::exponentOfAdjointOf",

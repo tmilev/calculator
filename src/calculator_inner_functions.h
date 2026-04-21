@@ -673,6 +673,11 @@ public:
   static bool exponentOfMatrix(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool exponentOfMatrixInJordanNormalForm(
+    Calculator& calculator,
+    JordanNormalFormResult& jordanNormalForm,
+    Expression& output
+  );
 };
 
 class CalculatorFunctionsComplexDynamics {

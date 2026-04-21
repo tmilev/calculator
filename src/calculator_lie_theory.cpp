@@ -1,3 +1,4 @@
+#include "calculator_inner_functions.h"
 #include "calculator_lie_theory.h"
 #include "general_file_operations_encodings.h"
 #include "math_extra_differential_operators.h"
@@ -2975,7 +2976,22 @@ bool CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
   << jordanNormalForm.leftMatrixBasis.toMathMLFinal()
   << jordanNormalForm.diagonalizedJordanNormalForm.toMathMLFinal()
   << jordanNormalForm.rightMatrixBasisInverted.toMathMLFinal();
-  return output.assignValue(calculator, out.str());
+  Expression exponentOfMatrix;
+  CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
+    calculator, jordanNormalForm, exponentOfMatrix
+  );
+  Vector<AlgebraicNumber> coordinatesOfB;
+  elementB.toVectorNegativeRootSpacesFirst(
+    coordinatesOfB, owner, calculator.objectContainer.algebraicClosure.zero()
+  );
+  Matrix<AlgebraicNumber> coordinatesOfBMatrix;
+  coordinatesOfBMatrix.assignVectorColumn(coordinatesOfB);
+  Expression coordinatesOfBMatrixExpression;
+  coordinatesOfBMatrixExpression.makeMatrix(calculator, coordinatesOfBMatrix);
+  return
+  output.makeProduct(
+    calculator, exponentOfMatrix, coordinatesOfBMatrixExpression
+  );
 }
 
 bool CalculatorLieTheory::exponentOfAdjointOf(

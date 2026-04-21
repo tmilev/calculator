@@ -1555,7 +1555,7 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
   for (int i = 0; i < currentRange.size; i ++) {
     currentDomain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     currentRange[i].toVectorNegativeRootSpacesFirst(
-      vectorsRight[i], this->coDomainAlgebra()
+      vectorsRight[i], this->coDomainAlgebra(), 0
     );
   }
   Matrix<Rational> linearSpaceMap;
@@ -1901,7 +1901,7 @@ bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
   roots.setSize(this->imagesAllChevalleyGenerators.size);
   for (int i = 0; i < roots.size; i ++) {
     this->imagesAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(
-      roots[i], this->coDomainAlgebra()
+      roots[i], this->coDomainAlgebra(), 0
     );
   }
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {

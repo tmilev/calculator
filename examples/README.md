@@ -5312,10 +5312,10 @@ AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}
 Computes common eigenspace of the adjoint action of semisimple Lie algebra elements inside the semisimple Lie algebra. 
 
 *ExponentOfAdjointOf* [ExponentOfAdjointOf] {CalculatorLieTheory::exponentOfAdjointOf}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExponentOfAdjointOf%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%3b%5cnExponentOfAdjointOf%7b%7d%28F_4%2c%20g_1%2bg_-1%2c%20h_1%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExponentOfAdjointOf%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%3b%5cnExponentOfAdjointOf%7b%7d%28A_2%2c%20g_1%2bg_-1%2c%20h_1%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ExponentOfAdjointOf{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20});
-ExponentOfAdjointOf{}(F_4, g_1+g_-1, h_1);
+ExponentOfAdjointOf{}(A_2, g_1+g_-1, h_1);
 
 ```
 Computes e^(ad a)(b) where a and b are elements of a semisimple Lie algebra. Will succeed if (ad a) has nilpotent action on b. If ad a does not act nilpotently on b, will attempt to exponentiate by computing the jordan normal form of the operator.The first element is the type of the semisimple Lie algebra, the second argument is a and the third argument is b. The first element can be omitted if the remaining two arguments can be converted to a elements of a common semisimple Lie algebra - in this case, the two arguments would be linear elements without constant terms of a common Universal Enveloping Algebra. We recall that (ad a) has nilpotent action on b if there exists N for which  \((ad a)^N (b) = 0\).We recall that (ad a)(b) stands for the Lie bracket [a,b]. We also recall that \(e^A = \sum_{i=0}^\infty A^n/n!\), where A stands for the linear operator (ad a). If ad a has nilpotent action on b, then the sum above becomes finite. 

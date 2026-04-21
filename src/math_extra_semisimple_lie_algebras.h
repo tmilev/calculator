@@ -50,7 +50,9 @@ public:
   );
   void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void toVectorNegativeRootSpacesFirst(
-    Vector<Coefficient>& output, SemisimpleLieAlgebra& owner
+    Vector<Coefficient>& output,
+    SemisimpleLieAlgebra& owner,
+    const Coefficient& zero
   ) const;
   void assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
     const Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
@@ -1674,10 +1676,12 @@ const {
 
 template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::toVectorNegativeRootSpacesFirst(
-  Vector<Coefficient>& output, SemisimpleLieAlgebra& owner
+  Vector<Coefficient>& output,
+  SemisimpleLieAlgebra& owner,
+  const Coefficient& zero
 ) const {
   if (this->isEqualToZero()) {
-    output.makeZero(owner.getNumberOfGenerators());
+    output.makeZero(owner.getNumberOfGenerators(), zero);
     return;
   }
   return this->toVectorNegativeRootSpacesFirst(output);

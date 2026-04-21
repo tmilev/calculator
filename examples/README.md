@@ -3102,7 +3102,7 @@ Round(3/7)
 ```
 Round function.
 
-Operator or function DoubleValue is overloaded with 2 total handlers.
+Operator or function DoubleValue is overloaded with 3 total handlers.
 
 *DoubleValue* [DoubleValue] {CalculatorFunctions::evaluateToDouble}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%29%3b%5cnDoubleValue%7b%7d%2813%21%2b0.1%2c0%29%3b%5cnDoubleValue%5c%5cbegin%7bpmatrix%7de%5e2%26e%5c%5c%5c%5c-e%26%203e%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3112,6 +3112,27 @@ DoubleValue{}(13!+0.1,0);
 DoubleValue\begin{pmatrix}e^2&e\\-e& 3e\end{pmatrix}
 ```
 Floating point value of a number. Uses the built-in C++ floating point library. Will apply to every element of a matrix argument. 
+
+*DoubleValue* [MatrixEntriesToDoubles] {CalculatorFunctions::matrixEntriesToDoubles}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%280%2c%20%7b%7bX%7d%7d%29%20%3d%20DoubleValue%20MakeMatrix%20%28%281%2c0%2c0%29%2c%20%280%2c1%2c0%29%2c%280%2c0%2c1%29%29%3b%5cnf%7b%7d%28%7b%7bn%7d%7d%2c%20%7b%7bX%7d%7d%29%20%3aif%20%28n%3e0%29%3d%20%28DoubleValue%7b%7dX%29%5en%2fn%21%2b%20f%7b%7d%28n-1%2c%20%20X%29%3b%5cnA%3d%20MakeMatrix%28%281%2c2%2c1%29%2c%20%280%2c1%2c0%29%2c%20%280%2c0%2c2%29%29%3b%5cnDoubleValue%7b%7dA%3b%5cnDoubleValue%20e%5eA%3b%5cnf%7b%7d%2811%2cA%29%3b%5cnB%3d%20MakeMatrix%28%28-1%2c0%2c1%29%2c%20%280%2c1%2c2%29%2c%20%281%2c2%2c3%29%29%3b%5cnC%3de%5eB%3b%5cnDoubleValue%20C%3b%5cnf%7b%7d%2811%2c%20B%29%3b%5cnentries%3d%20DiagonalizeMatrix%20B%3b%5cnjordanForm%20%3d%20DoubleValue%20entries_2%3b%5cnexponentOfJordanForm%3d%20f%7b%7d%2811%2c%20jordanForm%29%3b%5cnexponentOfB%3dDoubleValue%20%28entries_1%20exponentOfJordanForm%20entries_3%29%3b%5cn%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+f{}(0, {{X}}) = DoubleValue MakeMatrix ((1,0,0), (0,1,0),(0,0,1));
+f{}({{n}}, {{X}}) :if (n>0)= (DoubleValue{}X)^n/n!+ f{}(n-1,  X);
+A= MakeMatrix((1,2,1), (0,1,0), (0,0,2));
+DoubleValue{}A;
+DoubleValue e^A;
+f{}(11,A);
+B= MakeMatrix((-1,0,1), (0,1,2), (1,2,3));
+C=e^B;
+DoubleValue C;
+f{}(11, B);
+entries= DiagonalizeMatrix B;
+jordanForm = DoubleValue entries_2;
+exponentOfJordanForm= f{}(11, jordanForm);
+exponentOfB=DoubleValue (entries_1 exponentOfJordanForm entries_3);
+ 
+```
+Applies the floating point conversion (DoubleValue)to all elements of a matrix. Uses the built-in C++ floating point library. Will apply to every element of a matrix argument. 
 
 *DoubleValue* [DoubleValueWithRounding] {CalculatorFunctions::evaluateToDoubleWithRounding}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%2c3%29%3b%5cnDoubleValue%7b%7d%283%2f7777777%2c2%29%3b%5cnDoubleValue%7b%7d%280.0030%2c2%29%3b%5cnDoubleValue%7b%7d%283.0030%2c2%29%3b%5cnDoubleValue%7b%7d%283%2f7777777%2c0%29%3b%5cnDoubleValue%7b%7d%2813%21%2b0.1%2c0%29%3b%5cnDoubleValue%7b%7d%283%2f7%2c100%29%3b%5cnDoubleValue%7b%7d%283%2f7%2c-5%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)

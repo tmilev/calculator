@@ -8756,10 +8756,7 @@ bool CalculatorFunctions::matrixEntriesToDoubles(
       result(i, j).makeOX(calculator, "DoubleValue", startingElements(i, j));
     }
   }
-  output.makeMatrix(&result, calculator);
-  int doNotSubmit;
-  output.checkConsistencyRecursively();
-  return true;
+  return output.makeMatrix(&result, calculator);
 }
 
 bool CalculatorFunctions::evaluateToDoubleWithFixedDigits(

@@ -2933,10 +2933,6 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
   eigenMatrixInvertedExpression.makeMatrix(
     calculator, formResult.rightMatrixBasisInverted
   );
-  int doNotSubmit;
-  eigenMatrixInvertedExpression.checkConsistencyRecursively();
-  jordanNormalFormExpression.checkConsistencyRecursively();
-  eigenMatrixInvertedExpression.checkConsistencyRecursively();
   result.addOnTop(eigenMatrixExpression);
   result.addOnTop(jordanNormalFormExpression);
   result.addOnTop(eigenMatrixInvertedExpression);

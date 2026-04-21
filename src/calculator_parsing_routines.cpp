@@ -729,7 +729,7 @@ void Calculator::reset() {
   this->ruleCollectionId = 0;
   this->mode = Calculator::Mode::full;
   this->maximumAlgebraicTransformationsPerExpression = 100;
-  this->maximumRecursionDepth = 3000;
+  this->maximumRecursionDepth = 1500;
   this->recursionDepth = 0;
   this->depthRecursionReached = 0;
   this->flagWriteLatexPlots = false;

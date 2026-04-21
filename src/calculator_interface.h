@@ -1425,6 +1425,7 @@ public:
     return !(*this == other);
   }
   bool operator>(const Expression& other) const;
+  bool greaterThan(const Expression& other) const;
   bool greaterThanNoCoefficient(const Expression& other) const;
   void substituteRecursively(MapList<Expression, Expression>& substitutions);
   void substituteRecursivelyInChildren(

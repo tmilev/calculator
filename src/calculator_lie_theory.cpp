@@ -2978,7 +2978,7 @@ bool CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
   << jordanNormalForm.rightMatrixBasisInverted.toMathMLFinal();
   Expression exponentOfMatrix;
   CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
-    calculator, jordanNormalForm, exponentOfMatrix
+    calculator, jordanNormalForm, nullptr, exponentOfMatrix
   );
   Vector<AlgebraicNumber> coordinatesOfB;
   elementB.toVectorNegativeRootSpacesFirst(

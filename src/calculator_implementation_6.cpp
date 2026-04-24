@@ -2830,13 +2830,75 @@ bool CalculatorFunctionsLinearAlgebra::exponentOfMatrix(
   }
   return
   CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
-    calculator, jordanNormalForm, output
+    calculator, jordanNormalForm, nullptr, output
+  );
+}
+
+bool CalculatorFunctionsLinearAlgebra::exponentOfConstantTimesMatrix(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsLinearAlgebra::exponentOfConstantTimesMatrix"
+  );
+  if (input.size() != 3) {
+    return false;
+  }
+  if (input[1] != calculator.expressionEulersNumber()) {
+    return false;
+  }
+  const Expression& power = input[2];
+  List<Expression> multiplicands;
+  power.getMultiplicandsRecursive(multiplicands);
+  if (multiplicands.size <= 1) {
+    return false;
+  }
+  Expression& matrixExpression = *multiplicands.lastObject();
+  if (!matrixExpression.isMatrix()) {
+    return false;
+  }
+  List<Expression> multiplicandsExceptMatrix = multiplicands;
+  multiplicandsExceptMatrix.setSize(multiplicandsExceptMatrix.size - 1);
+  Expression productExceptMatrix;
+  productExceptMatrix.makeProduct(calculator, multiplicandsExceptMatrix);
+  if (!productExceptMatrix.evaluatesToDouble(nullptr)) {
+    return false;
+  }
+  Matrix<AlgebraicNumber> matrix;
+  if (
+    !CalculatorConversions::functionGetMatrix(
+      calculator, matrixExpression, matrix, false
+    )
+  ) {
+    return false;
+  }
+  if (!matrix.isSquare()) {
+    return
+    calculator
+    << "Diagonalization (Jordan normal form) "
+    << "is allowed only for square matrices. ";
+  }
+  JordanNormalFormResult jordanNormalForm;
+  std::stringstream comments;
+  if (
+    !matrix.jordanNormalForm(
+      calculator.objectContainer.algebraicClosure, jordanNormalForm, &comments
+    )
+  ) {
+    return
+    calculator
+    << "Failed to compute the Jordan normal form."
+    << comments.str();
+  }
+  return
+  CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
+    calculator, jordanNormalForm, &productExceptMatrix, output
   );
 }
 
 bool CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
   Calculator& calculator,
   JordanNormalFormResult& jordanNormalForm,
+  Expression* extraCoefficient,
   Expression& output
 ) {
   Expression eigenMatrixExpression;
@@ -2854,6 +2916,11 @@ bool CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
     for (int j = 0; j < fittingSpace.size; j ++) {
       Expression eigenvalueExpression;
       eigenvalueExpression.assignValue(calculator, eigenvalue);
+      if (extraCoefficient != nullptr) {
+        eigenvalueExpression.makeProduct(
+          calculator, *extraCoefficient, eigenvalueExpression
+        );
+      }
       Expression exponentOfEigenvalue;
       exponentOfEigenvalue.makeXOX(
         calculator,

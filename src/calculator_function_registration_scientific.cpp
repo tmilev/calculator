@@ -845,6 +845,18 @@ void Calculator::initializeFunctionsScientificBasic() {
     "ExponentOfMatrix",
     innerStandard
   );
+  this->addOperationHandler(
+    "^",
+    CalculatorFunctionsLinearAlgebra::exponentOfConstantTimesMatrix,
+    "",
+    "Similar to ExponentOfMatrix, but takes as input a power of the form. "
+    "constant times a matrix. ",
+    "A=\\begin{pmatrix}0&-1  \\\\ 1&0  \\end{pmatrix};\n"
+    "e^{\\sqrt{-1}pi A}",
+    "CalculatorFunctionsLinearAlgebra::exponentOfConstantTimesMatrix",
+    "ExponentOfMatrixTimesConstant",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger,

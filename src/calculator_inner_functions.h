@@ -670,12 +670,19 @@ public:
   static bool diagonalizeMatrix(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool exponentOfConstantTimesMatrix(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool exponentOfMatrix(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  // Computes the exponent of a matrix in jordan normal form, multiplied by
+  // an extra coefficient. When missing, the extraCoefficient is assumed
+  // to be one.
   static bool exponentOfMatrixInJordanNormalForm(
     Calculator& calculator,
     JordanNormalFormResult& jordanNormalForm,
+    Expression* extraCoefficient,
     Expression& output
   );
 };

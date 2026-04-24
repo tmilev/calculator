@@ -187,26 +187,41 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
     return false;
   }
   Expression coefficientOfI;
-  Expression currentE;
-  Expression iE;
-  iE.makeAtom(calculator, calculator.opImaginaryUnit());
-  currentE.reset(calculator, 3);
-  currentE.addChildAtomOnTop(calculator.opCoefficientOf());
-  currentE.addChildOnTop(iE);
-  currentE.addChildOnTop(input[2]);
+  Expression currentExpression;
+  Expression iExpression;
+  iExpression.makeAtom(calculator, calculator.opImaginaryUnit());
+  currentExpression.reset(calculator, 3);
+  currentExpression.addChildAtomOnTop(calculator.opCoefficientOf());
+  currentExpression.addChildOnTop(iExpression);
+  currentExpression.addChildOnTop(input[2]);
   if (
-    !CalculatorFunctions::coefficientOf(calculator, currentE, coefficientOfI)
+    !CalculatorFunctions::coefficientOf(
+      calculator, currentExpression, coefficientOfI
+    )
   ) {
     return false;
   }
   if (coefficientOfI.isEqualToZero()) {
-    return false;
+    iExpression.assignValue(
+      calculator, calculator.objectContainer.algebraicClosure.imaginaryUnit()
+    );
+    currentExpression.setChild(1, iExpression);
+    if (
+      !CalculatorFunctions::coefficientOf(
+        calculator, currentExpression, coefficientOfI
+      )
+    ) {
+      return false;
+    }
+    if (coefficientOfI.isEqualToZero()) {
+      return false;
+    }
   }
-  Expression cosE;
-  Expression sinE;
-  cosE.makeOX(calculator, calculator.opCos(), coefficientOfI);
-  sinE.makeOX(calculator, calculator.opSin(), coefficientOfI);
-  output = cosE + iE * sinE;
+  Expression cosExpression;
+  Expression sinExpression;
+  cosExpression.makeOX(calculator, calculator.opCos(), coefficientOfI);
+  sinExpression.makeOX(calculator, calculator.opSin(), coefficientOfI);
+  output = cosExpression + iExpression * sinExpression;
   return true;
 }
 

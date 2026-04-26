@@ -2922,7 +2922,6 @@ bool CalculatorLieTheory::convertsToAlgebraicAsPossibleMultipleOfPi(
     "convertsToAlgebraicAsPossibleMultipleOfPi"
   );
   outputHasPiMultiple = false;
-  bool foundPi = false;
   bool foundConstantWithoutPi = false;
   outputWhichElement.makeZero();
   AlgebraicNumber converter;
@@ -2934,7 +2933,7 @@ bool CalculatorLieTheory::convertsToAlgebraicAsPossibleMultipleOfPi(
     elementPiAlgebraic.coefficients[i];
     if (currentCoefficient.isConstant(&converter)) {
       // We have a coefficient that is a regular number not containing pi.
-      if (foundPi) {
+      if (outputHasPiMultiple) {
         if (commentsOnError != nullptr) {
           *commentsOnError
           << "In elementPiAlgebraic equal to: "
@@ -2949,7 +2948,7 @@ bool CalculatorLieTheory::convertsToAlgebraicAsPossibleMultipleOfPi(
     }
     // From here on, the coefficient is not a
     // constant so it must be a multiple of pi.
-    foundPi = true;
+    outputHasPiMultiple = true;
     if (foundConstantWithoutPi) {
       if (commentsOnError != nullptr) {
         *commentsOnError
@@ -3447,7 +3446,7 @@ bool CalculatorLieTheory::exponentOfAdjointOf(
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> result;
   if (
-    !multiplyAByPi &&
+  multiplyAByPi||
     !ownerSemisimple->exponentOfAdXIfNilpotent(
       elementA, elementB, result, &commentsOnError
     )

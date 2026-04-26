@@ -334,7 +334,7 @@ toStringExpressionHistoryMerged() {
         }
       }
       currentRules.setSize(0);
-      out << "\\\\";
+      out << "\\\\\n";
       out << "=";
     }
     out << "&\n" << currentEstring;

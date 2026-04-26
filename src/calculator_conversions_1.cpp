@@ -2296,18 +2296,124 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   SemisimpleLieAlgebra& owner
 ) {
   STACK_TRACE(
-    "CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers"
+    "CalculatorConversions::"
+    "loadElementSemisimpleLieAlgebraAlgebraicNumbers"
   );
-  ElementUniversalEnveloping<AlgebraicNumber> outputUniversalEnveloping;
+  ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >
+  outputUniversalEnveloping;
   if (
     !CalculatorLieTheory::
-    evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+    evaluatesToElementUniversalEnvelopingAlgebraPiAlgebraicNumbers(
       calculator, input, outputUniversalEnveloping, owner
     )
   ) {
     return false;
   }
-  return outputUniversalEnveloping.isLieAlgebraElement(output);
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > outputPiAlgebraic;
+  if (!outputUniversalEnveloping.isLieAlgebraElement(outputPiAlgebraic)) {
+    return false;
+  }
+  return
+  CalculatorConversions::
+  convertElementSemisimpleLieAlgebraFromPiAlgebraicNumbers(
+    outputPiAlgebraic, output
+  );
+}
+
+bool CalculatorConversions::
+convertElementSemisimpleLieAlgebraFromPiAlgebraicNumbers(
+  const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+  piAlgebraicInput,
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& output
+) {
+  output.makeZero();
+  AlgebraicNumber converter;
+  for (int i = 0; i < piAlgebraicInput.size(); i ++) {
+    if (!piAlgebraicInput.coefficients[i].isConstant(&converter)) {
+      return false;
+    }
+    output.addMonomial(piAlgebraicInput.monomials[i], converter);
+  }
+  return true;
+}
+
+bool CalculatorConversions::convertElementSemisimpleLieAlgebraToPiAlgebraic(
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input,
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& outputPiAlgebraic
+) {
+  STACK_TRACE(
+    "CalculatorConversions::"
+    "convertElementSemisimpleLieAlgebraToPiAlgebraic"
+  );
+  outputPiAlgebraic.makeZero();
+  Polynomial<AlgebraicNumber> converter;
+  for (int i = 0; i < input.size(); i ++) {
+    converter.makeConstant(input.coefficients[i]);
+    outputPiAlgebraic.addMonomial(input.monomials[i], converter);
+  }
+  return true;
+}
+
+bool CalculatorConversions::
+convertElementUniversalEnvelopingFromPiAlgebraicNumbers(
+  const ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >&
+  inputPiAlgebraic,
+  ElementUniversalEnveloping<AlgebraicNumber>& output
+) {
+  STACK_TRACE(
+    "CalculatorConversions::"
+    "convertElementUniversalEnvelopingFromPiAlgebraicNumbers"
+  );
+  if (inputPiAlgebraic.owner == nullptr) {
+    global.fatal << "Unitialized element" << global.fatal;
+  }
+  output.makeZero(inputPiAlgebraic.getOwner());
+  AlgebraicNumber converter;
+  for (int i = 0; i < inputPiAlgebraic.size(); i ++) {
+    const MonomialUniversalEnveloping<Polynomial<AlgebraicNumber> >& monomial =
+    inputPiAlgebraic.monomials[i];
+    MonomialUniversalEnveloping<AlgebraicNumber> outputMonomial;
+    outputMonomial.owner = monomial.owner;
+    outputMonomial.generatorsIndices = monomial.generatorsIndices;
+    for (const Polynomial<AlgebraicNumber>& power : monomial.powers) {
+      if (!power.isConstant(&converter)) {
+        return false;
+      }
+      outputMonomial.powers.addOnTop(converter);
+    }
+    if (!inputPiAlgebraic.coefficients[i].isConstant(&converter)) {
+      return false;
+    }
+    output.addMonomial(outputMonomial, converter);
+  }
+  return true;
+}
+
+bool CalculatorConversions::convertElementUniversalEnvelopingPiAlgebraicNumbers
+(
+  const ElementUniversalEnveloping<AlgebraicNumber>& input,
+  ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >& outputPiAlgebraic
+) {
+  STACK_TRACE(
+    "CalculatorConversions::"
+    "convertElementUniversalEnvelopingFromPiAlgebraicNumbers"
+  );
+  if (input.owner == nullptr) {
+    global.fatal << "Unitialized element" << global.fatal;
+  }
+  outputPiAlgebraic.makeZero(input.getOwner());
+  Polynomial<AlgebraicNumber> converter;
+  for (int i = 0; i < input.size(); i ++) {
+    const MonomialUniversalEnveloping<AlgebraicNumber>& monomial =
+    input.monomials[i];
+    MonomialUniversalEnveloping<Polynomial<AlgebraicNumber> > outputMonomial;
+    outputMonomial.owner = monomial.owner;
+    outputMonomial.generatorsIndices = monomial.generatorsIndices;
+    outputMonomial.powers = monomial.powers;
+    converter = input.coefficients[i];
+    outputPiAlgebraic.addMonomial(outputMonomial, converter);
+  }
+  return true;
 }
 
 bool CalculatorConversions::elementUniversalEnveloping(

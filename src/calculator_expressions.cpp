@@ -20,6 +20,14 @@ const List<Expression>::Comparator* FormatExpressions::getMonomialOrder<
 }
 
 template < >
+const List<MonomialUniversalEnveloping<Polynomial<AlgebraicNumber> > >::
+Comparator* FormatExpressions::getMonomialOrder<
+  MonomialUniversalEnveloping<Polynomial<AlgebraicNumber> >
+>() const {
+  return nullptr;
+}
+
+template < >
 const List<MonomialUniversalEnveloping<AlgebraicNumber> >::Comparator*
 FormatExpressions::getMonomialOrder<
   MonomialUniversalEnveloping<AlgebraicNumber>

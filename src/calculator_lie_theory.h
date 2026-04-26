@@ -5,18 +5,29 @@
 
 class CalculatorLieTheory {
 private:
+  // If multiplyAByPi is true, then elementA will be multiplied by pi.
   static bool exponentOfAdjointOfThroughDiagonalization(
     Calculator& calculator,
     SemisimpleLieAlgebra& owner,
     const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementA,
     const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementB,
+    bool multiplyAByPi,
     Expression& output
   );
 public:
-  static bool evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+  // Converts the input to an element of universal enveloping algebra
+  // of the given Sesmisimple lie algebra as follows.
+  // - g_i, h_i subexpressions will be converted to Chevalley/Cartan
+  // generators.
+  // - Algebraic numbers will be respected.
+  // - The constant \pi will be converted to the anonymous variable x_1 in
+  //   the polynomial ring Polynomial<AlgebraicNumber>.
+  //   So, 2\pi g_1^2 g_2 will be converted to the
+  //   universal enveloping algebra element g_1^2 g_2 with coefficient 2x_1.
+  static bool evaluatesToElementUniversalEnvelopingAlgebraPiAlgebraicNumbers(
     Calculator& calculator,
     const Expression& input,
-    ElementUniversalEnveloping<AlgebraicNumber>& output,
+    ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >& output,
     SemisimpleLieAlgebra& owner
   );
   static bool
@@ -24,6 +35,22 @@ public:
     ElementUniversalEnveloping<RationalFraction<Rational> >& input,
     ElementUniversalEnveloping<AlgebraicNumber>& output,
     SemisimpleLieAlgebra& owner,
+    std::stringstream* commentsOnError
+  );
+  // Returns true if a given element of a lie algebra is
+  // - a product of pi and an algebraic element
+  // - algebraic element that doesn't contain pi.
+  // When the element is a multiple of pi, the element with
+  // pi factored out will be written in the outputWhichElement variable,
+  // and outputHasPiMultiple will be set to true.
+  // In th other case, outputHasPiMultiple will be set to false
+  // and the element will be type-converted and in turn
+  // written to outputWhichElement.
+  static bool convertsToAlgebraicAsPossibleMultipleOfPi(
+    const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+    elementPiAlgebraic,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputWhichElement,
+    bool& outputHasPiMultiple,
     std::stringstream* commentsOnError
   );
   static bool killingForm(
@@ -312,30 +339,35 @@ public:
   static bool elementsInLieAlgebraImpliedLieAlgebra(
     Calculator& calculator,
     const List<Expression>& inputElements,
-    Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
   );
   static bool elementsInUniversalEnvelopingAlgebraImpliedLieAlgebra(
     Calculator& calculator,
     const List<Expression>& inputElements,
-    Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
-    List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
+    List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >&
+    outputElementsPiAlgebraic
   );
   static bool elementsInSameLieAlgebra(
     Calculator& calculator,
     const Expression& input,
-    Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
+  static bool elementsInSameLieAlgebraPiAlgebraic(
+    Calculator& calculator,
+    const Expression& input,
+    SemisimpleLieAlgebra*& outputOwner,
+    List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > >&
+    outputElements
   );
   static bool elementsInSameUniversalEnvelopingAlgebra(
     Calculator& calculator,
     const Expression& input,
-    Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
-    List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
+    List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >&
+    outputElementsPiAlgebraic
   );
   static bool elementsInLieAlgebraExplicitLieAlgebra(
     Calculator& calculator,
@@ -349,9 +381,9 @@ public:
     Calculator& calculator,
     const Expression& inputAlgebra,
     const List<Expression>& inputElements,
-    Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
-    List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
+    List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >&
+    outputElements
   );
   static bool cartanInvolutionInternal(
     Calculator& calculator, const Expression& input, CartanInvolution& output
@@ -454,6 +486,9 @@ public:
   );
   static bool rootSubsystem(
     Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool allGeneratorsAsMatrixRow(
+    Calculator& calculator, SemisimpleLieAlgebra& owner, Expression& output
   );
 };
 

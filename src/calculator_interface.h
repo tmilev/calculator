@@ -4145,6 +4145,25 @@ public:
     ElementSemisimpleLieAlgebra<Rational>& output,
     SemisimpleLieAlgebra& owner
   );
+  static bool convertElementSemisimpleLieAlgebraFromPiAlgebraicNumbers(
+    const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+    piAlgebraicInput,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& output
+  );
+  static bool convertElementSemisimpleLieAlgebraToPiAlgebraic(
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input,
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+    outputPiAlgebraic
+  );
+  static bool convertElementUniversalEnvelopingPiAlgebraicNumbers(
+    const ElementUniversalEnveloping<AlgebraicNumber>& input,
+    ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >& outputPiAlgebraic
+  );
+  static bool convertElementUniversalEnvelopingFromPiAlgebraicNumbers(
+    const ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >&
+    inputPiAlgebraic,
+    ElementUniversalEnveloping<AlgebraicNumber>& output
+  );
   static bool loadElementSemisimpleLieAlgebraAlgebraicNumbers(
     Calculator& calculator,
     const Expression& input,

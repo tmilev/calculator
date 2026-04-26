@@ -2734,25 +2734,25 @@ bool CalculatorLieTheory::elementsInUniversalEnvelopingAlgebraImpliedLieAlgebra
 (
   Calculator& calculator,
   const List<Expression>& inputElements,
-  Expression& outputOnError,
   SemisimpleLieAlgebra*& outputOwner,
-  List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
+  List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >&
+  outputElementsPiAlgebraic
 ) {
   STACK_TRACE("CalculatorLieTheory::elementsInLieAlgebraImpliedLieAlgebra");
-  outputElements.clear();
+  outputElementsPiAlgebraic.clear();
   outputOwner = nullptr;
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
   universalEnvelopingElement;
   ElementUniversalEnveloping<AlgebraicNumber> converterAlgebraic;
+  ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >
+  converterPiAlgebraic;
   Rational converterCoefficient;
   for (const Expression& element : inputElements) {
     if (!element.isOfTypeWithContext(&universalEnvelopingElement)) {
-      outputOnError.assignError(
-        calculator,
-        "Failed to extract element Universal Enveloping from " +
-        element.toString()
-      );
-      return false;
+      return
+      calculator
+      << "Failed to extract element Universal Enveloping from " +
+      element.toString();
     }
     SemisimpleLieAlgebra * currentOwner =
     universalEnvelopingElement.context.getAmbientSemisimpleLieAlgebra();
@@ -2760,22 +2760,19 @@ bool CalculatorLieTheory::elementsInUniversalEnvelopingAlgebraImpliedLieAlgebra
       outputOwner = currentOwner;
     }
     if (currentOwner == nullptr) {
-      outputOnError.assignError(
-        calculator,
-        "Failed to extract Lie algebra context from " + element.toString()
-      );
-      return false;
+      return
+      calculator
+      << "Failed to extract Lie algebra context from "
+      << element.toString();
     }
     if (currentOwner != outputOwner) {
-      outputOnError.assignError(
-        calculator,
-        "Got inputs of two different Lie algebras: " +
-        currentOwner->toStringLieAlgebraName() +
-        " and " +
-        outputOwner->toStringLieAlgebraName() +
-        ". "
-      );
-      return false;
+      return
+      calculator
+      << "Got inputs of two different Lie algebras: "
+      << currentOwner->toStringLieAlgebraName()
+      << " and "
+      << outputOwner->toStringLieAlgebraName()
+      << ". ";
     }
     std::stringstream commentsOnFailure;
     if (
@@ -2787,32 +2784,40 @@ bool CalculatorLieTheory::elementsInUniversalEnvelopingAlgebraImpliedLieAlgebra
         &commentsOnFailure
       )
     ) {
-      return outputOnError.assignError(calculator, commentsOnFailure.str());
+      return calculator << commentsOnFailure.str();
     }
-    outputElements.addOnTop(converterAlgebraic);
+    if (
+      !CalculatorConversions::
+      convertElementUniversalEnvelopingPiAlgebraicNumbers(
+        converterAlgebraic, converterPiAlgebraic
+      )
+    ) {
+      return false;
+    }
+    outputElementsPiAlgebraic.addOnTop(converterPiAlgebraic);
   }
   return true;
 }
 
 bool CalculatorLieTheory::
-evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+evaluatesToElementUniversalEnvelopingAlgebraPiAlgebraicNumbers(
   Calculator& calculator,
   const Expression& input,
-  ElementUniversalEnveloping<AlgebraicNumber>& output,
+  ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >& output,
   SemisimpleLieAlgebra& owner
 ) {
   STACK_TRACE(
     "CalculatorConversions::"
     "evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers"
   );
-  ElementUniversalEnveloping<AlgebraicNumber> converter;
+  ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > converter;
   if (input.startsWith(calculator.opPlus())) {
     output.makeZero(owner);
     for (int i = 1; i < input.size(); i ++) {
       const Expression& current = input[i];
       if (
         !CalculatorLieTheory::
-        evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+        evaluatesToElementUniversalEnvelopingAlgebraPiAlgebraicNumbers(
           calculator, current, converter, owner
         )
       ) {
@@ -2826,15 +2831,17 @@ evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
     }
     return true;
   }
+  AlgebraicNumber oneAlgebraic =
+  calculator.objectContainer.algebraicClosure.one();
+  Polynomial<AlgebraicNumber> one;
+  one.makeConstant(oneAlgebraic);
   if (input.startsWith(calculator.opTimes())) {
-    output.makeConstant(
-      calculator.objectContainer.algebraicClosure.one(), owner
-    );
+    output.makeConstant(one, owner);
     for (int i = 1; i < input.size(); i ++) {
       const Expression& current = input[i];
       if (
         !CalculatorLieTheory::
-        evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+        evaluatesToElementUniversalEnvelopingAlgebraPiAlgebraicNumbers(
           calculator, current, converter, owner
         )
       ) {
@@ -2859,7 +2866,7 @@ evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
     }
     if (
       !CalculatorLieTheory::
-      evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+      evaluatesToElementUniversalEnvelopingAlgebraPiAlgebraicNumbers(
         calculator, input[1], output, owner
       )
     ) {
@@ -2872,6 +2879,12 @@ evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
     output.raiseToPower(power);
     return true;
   }
+  if (input.isOperationGiven(calculator.opPi())) {
+    Polynomial<AlgebraicNumber> pi;
+    pi.makeMonomial(0, 1, oneAlgebraic);
+    output.makeConstant(pi, owner);
+    return true;
+  }
   if (input.startsWith(calculator.opUnderscore())) {
     ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
     if (
@@ -2881,17 +2894,92 @@ evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
     ) {
       return false;
     }
-    output.assignElementLieAlgebraArbitrary(
-      element, owner, calculator.objectContainer.algebraicClosure.one()
-    );
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
+    elementPiAlgebraic;
+    elementPiAlgebraic = element;
+    output.assignElementLieAlgebraArbitrary(elementPiAlgebraic, owner, one);
     return true;
   }
   WithContext<AlgebraicNumber> coefficient;
   if (CalculatorConversions::convert(calculator, input, coefficient)) {
-    output.makeConstant(coefficient.content, owner);
+    Polynomial<AlgebraicNumber> converter;
+    converter.makeConstant(coefficient.content);
+    output.makeConstant(converter, owner);
     return true;
   }
   return false;
+}
+
+bool CalculatorLieTheory::convertsToAlgebraicAsPossibleMultipleOfPi(
+  const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+  elementPiAlgebraic,
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputWhichElement,
+  bool& outputHasPiMultiple,
+  std::stringstream* commentsOnError
+) {
+  STACK_TRACE(
+    "CalculatorLieTheory::"
+    "convertsToAlgebraicAsPossibleMultipleOfPi"
+  );
+  outputHasPiMultiple = false;
+  bool foundPi = false;
+  bool foundConstantWithoutPi = false;
+  outputWhichElement.makeZero();
+  AlgebraicNumber converter;
+  MonomialPolynomial pi;
+  pi.makeEi(0, 1);
+  for (int i = 0; i < elementPiAlgebraic.size(); i ++) {
+    const ChevalleyGenerator& generator = elementPiAlgebraic.monomials[i];
+    Polynomial<AlgebraicNumber>& currentCoefficient =
+    elementPiAlgebraic.coefficients[i];
+    if (currentCoefficient.isConstant(&converter)) {
+      // We have a coefficient that is a regular number not containing pi.
+      if (foundPi) {
+        if (commentsOnError != nullptr) {
+          *commentsOnError
+          << "In elementPiAlgebraic equal to: "
+          << elementPiAlgebraic.toString()
+          << " found a combination of pi and non-pi coefficients. ";
+        }
+        return false;
+      }
+      foundConstantWithoutPi = true;
+      outputWhichElement.addMonomial(generator, converter);
+      continue;
+    }
+    // From here on, the coefficient is not a
+    // constant so it must be a multiple of pi.
+    foundPi = true;
+    if (foundConstantWithoutPi) {
+      if (commentsOnError != nullptr) {
+        *commentsOnError
+        << "In elementPiAlgebraic equal to: "
+        << elementPiAlgebraic.toString()
+        << " found a mix of pi and regular constants. ";
+      }
+      // We have a mix of multiples of pi and regular constants.
+      return false;
+    }
+    if (currentCoefficient.size() != 1) {
+      // At least two monomials make up the coefficient, this can't be
+      // a multiple of pi.
+      if (commentsOnError != nullptr) {
+        *commentsOnError
+        << "In elementPiAlgebraic equal to: "
+        << elementPiAlgebraic.toString()
+        << " found a mix of pi and regular constants. ";
+      }
+      return false;
+    }
+    if (currentCoefficient.monomials[0] != pi) {
+      // We have a monomial of the form pi^{power_not_equal_to_one}
+      return false;
+    }
+    outputWhichElement.addMonomial(
+      generator, currentCoefficient.coefficients[0]
+    );
+  }
+  return true;
 }
 
 bool CalculatorLieTheory::
@@ -2942,32 +3030,40 @@ convertElementUniversalEnvelopingRationalFractionToAlgebraicCoefficient(
 bool CalculatorLieTheory::elementsInLieAlgebraImpliedLieAlgebra(
   Calculator& calculator,
   const List<Expression>& inputElements,
-  Expression& outputOnError,
   SemisimpleLieAlgebra*& outputOwner,
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
   STACK_TRACE("CalculatorLieTheory::elementsInLieAlgebraImpliedLieAlgebra");
   outputElements.clear();
-  List<ElementUniversalEnveloping<AlgebraicNumber> > intermediates;
+  List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >
+  intermediates;
   if (
     !CalculatorLieTheory::elementsInUniversalEnvelopingAlgebraImpliedLieAlgebra
-    (calculator, inputElements, outputOnError, outputOwner, intermediates)
+    (calculator, inputElements, outputOwner, intermediates)
   ) {
     return false;
   }
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
+  convertedPiAlgebraic;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> converted;
   for (
-    const ElementUniversalEnveloping<AlgebraicNumber>& current :
+    const ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >& current :
     intermediates
   ) {
-    if (!current.isLieAlgebraElement(converted)) {
+    if (!current.isLieAlgebraElement(convertedPiAlgebraic)) {
       return
-      outputOnError.assignError(
-        calculator,
-        "Failed to convert: " +
-        current.toString() +
-        " to element semisimple Lie algebra. "
-      );
+      calculator
+      << "Failed to convert: "
+      << current.toString()
+      << " to element semisimple Lie algebra. ";
+    }
+    if (
+      !CalculatorConversions::
+      convertElementSemisimpleLieAlgebraFromPiAlgebraicNumbers(
+        convertedPiAlgebraic, converted
+      )
+    ) {
+      return false;
     }
     outputElements.addOnTop(converted);
   }
@@ -2977,20 +3073,19 @@ bool CalculatorLieTheory::elementsInLieAlgebraImpliedLieAlgebra(
 bool CalculatorLieTheory::elementsInSameUniversalEnvelopingAlgebra(
   Calculator& calculator,
   const Expression& input,
-  Expression& outputOnError,
   SemisimpleLieAlgebra*& outputOwner,
-  List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
+  List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >&
+  outputElementsPiAlgebraic
 ) {
   STACK_TRACE(
     "CalculatorLieTheory::"
     "elementsInSameUniversalEnvelopingAlgebra"
   );
   if (input.size() < 3) {
-    outputOnError.assignError(
-      calculator,
-      "Function elementsInSameLieAlgebra requires at least two arguments: "
-      "type and at least one element of the algebra."
-    );
+    return
+    calculator
+    << "Function elementsInSameLieAlgebra requires at least two arguments: "
+    << "type and at least one element of the algebra.";
     return false;
   }
   if (
@@ -3003,7 +3098,7 @@ bool CalculatorLieTheory::elementsInSameUniversalEnvelopingAlgebra(
     }
     return
     CalculatorLieTheory::elementsInUniversalEnvelopingAlgebraImpliedLieAlgebra(
-      calculator, toBeConverted, outputOnError, outputOwner, outputElements
+      calculator, toBeConverted, outputOwner, outputElementsPiAlgebraic
     );
   }
   List<Expression> toBeConverted;
@@ -3012,57 +3107,85 @@ bool CalculatorLieTheory::elementsInSameUniversalEnvelopingAlgebra(
   }
   return
   CalculatorLieTheory::elementsInUniversalEnvelopingAlgebraExplicitLieAlgebra(
-    calculator,
-    input[1],
-    toBeConverted,
-    outputOnError,
-    outputOwner,
-    outputElements
+    calculator, input[1], toBeConverted, outputOwner, outputElementsPiAlgebraic
   );
 }
 
 bool CalculatorLieTheory::elementsInSameLieAlgebra(
   Calculator& calculator,
   const Expression& input,
-  Expression& outputOnError,
   SemisimpleLieAlgebra*& outputOwner,
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
   STACK_TRACE("CalculatorLieTheory::elementsInSameLieAlgebra");
-  if (input.size() < 3) {
-    outputOnError.assignError(
-      calculator,
-      "Function elementsInSameLieAlgebra requires at least two arguments: "
-      "type and at least one element of the algebra."
-    );
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > >
+  outputElementsPiAlgebraic;
+  if (
+    !CalculatorLieTheory::elementsInSameLieAlgebraPiAlgebraic(
+      calculator, input, outputOwner, outputElementsPiAlgebraic
+    )
+  ) {
     return false;
   }
-  if (
-    input[1].isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >
-    ()
+  outputElements.clear();
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> converter;
+  for (
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& toBeConverted
+    :
+    outputElementsPiAlgebraic
   ) {
-    List<Expression> toBeConverted;
-    for (int i = 1; i < input.size(); i ++) {
-      toBeConverted.addOnTop(input[i]);
+    if (
+      !CalculatorConversions::
+      convertElementSemisimpleLieAlgebraFromPiAlgebraicNumbers(
+        toBeConverted, converter
+      )
+    ) {
+      return false;
     }
+    outputElements.addOnTop(converter);
+  }
+  return true;
+}
+
+bool CalculatorLieTheory::elementsInSameLieAlgebraPiAlgebraic(
+  Calculator& calculator,
+  const Expression& input,
+  SemisimpleLieAlgebra*& outputOwner,
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > >&
+  outputElements
+) {
+  STACK_TRACE("CalculatorLieTheory::elementsInSameLieAlgebraPiAlgebraic");
+  if (input.size() < 3) {
     return
-    CalculatorLieTheory::elementsInLieAlgebraImpliedLieAlgebra(
-      calculator, toBeConverted, outputOnError, outputOwner, outputElements
-    );
+    calculator
+    << "Function elementsInSameLieAlgebra requires at least two arguments: "
+    << "type and at least one element of the algebra.";
   }
-  List<Expression> toBeConverted;
-  for (int i = 2; i < input.size(); i ++) {
-    toBeConverted.addOnTop(input[i]);
+  List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >
+  universalEnvelopingElements;
+  if (
+    !CalculatorLieTheory::elementsInSameUniversalEnvelopingAlgebra(
+      calculator, input, outputOwner, universalEnvelopingElements
+    )
+  ) {
+    return false;
   }
-  return
-  CalculatorLieTheory::elementsInLieAlgebraExplicitLieAlgebra(
-    calculator,
-    input[1],
-    toBeConverted,
-    outputOnError,
-    outputOwner,
-    outputElements
-  );
+  outputElements.clear();
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > elementPiAlgebraic;
+  for (
+    ElementUniversalEnveloping<Polynomial<AlgebraicNumber> >& toBeConverted :
+    universalEnvelopingElements
+  ) {
+    if (!toBeConverted.isLieAlgebraElement(elementPiAlgebraic)) {
+      return
+      calculator
+      << "Failed to convert: "
+      << toBeConverted.toString()
+      << " to element semisimple Lie algebra. ";
+    }
+    outputElements.addOnTop(elementPiAlgebraic);
+  }
+  return true;
 }
 
 bool CalculatorLieTheory::elementsInLieAlgebraExplicitLieAlgebra(
@@ -3106,33 +3229,33 @@ elementsInUniversalEnvelopingAlgebraExplicitLieAlgebra(
   Calculator& calculator,
   const Expression& inputAlgebra,
   const List<Expression>& inputElements,
-  Expression& outputOnError,
   SemisimpleLieAlgebra*& outputOwner,
-  List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
+  List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >&
+  outputElements
 ) {
-  STACK_TRACE("CalculatorLieTheory::elementsInLieAlgebraExplicitLieAlgebra");
+  STACK_TRACE(
+    "CalculatorLieTheory::"
+    "elementsInUniversalEnvelopingAlgebraExplicitLieAlgebra"
+  );
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(calculator, inputAlgebra, algebra)) {
-    outputOnError.assignError(calculator, "Error extracting Lie algebra.");
-    return false;
+    return calculator << "Error extracting Lie algebra.";
   }
   outputOwner = algebra.content;
   outputElements.reserve(inputElements.size);
-  ElementUniversalEnveloping<AlgebraicNumber> element;
+  ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > element;
   for (const Expression& currentElement : inputElements) {
     if (
       !CalculatorLieTheory::
-      evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+      evaluatesToElementUniversalEnvelopingAlgebraPiAlgebraicNumbers(
         calculator, currentElement, element, *outputOwner
       )
     ) {
-      std::stringstream out;
-      out
+      return
+      calculator
       << "Failed to extract element of semisimple Lie algebra from: "
       << currentElement
       << ". ";
-      outputOnError.assignError(calculator, out.str());
-      return false;
     }
     outputElements.addOnTop(element);
   }
@@ -3194,6 +3317,7 @@ bool CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
   SemisimpleLieAlgebra& owner,
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementA,
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementB,
+  bool multiplyAByPi,
   Expression& output
 ) {
   STACK_TRACE(
@@ -3225,8 +3349,14 @@ bool CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
   << jordanNormalForm.diagonalizedJordanNormalForm.toMathMLFinal()
   << jordanNormalForm.rightMatrixBasisInverted.toMathMLFinal();
   Expression exponentOfMatrix;
+  Expression pi;
+  Expression* maybeCoefficient = nullptr;
+  if (multiplyAByPi) {
+    pi.makeAtom(calculator, calculator.opPi());
+    maybeCoefficient = &pi;
+  }
   CalculatorFunctionsLinearAlgebra::exponentOfMatrixInJordanNormalForm(
-    calculator, jordanNormalForm, nullptr, exponentOfMatrix
+    calculator, jordanNormalForm, maybeCoefficient, exponentOfMatrix
   );
   Vector<AlgebraicNumber> coordinatesOfB;
   elementB.toVectorNegativeRootSpacesFirst(
@@ -3236,10 +3366,35 @@ bool CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
   coordinatesOfBMatrix.assignVectorColumn(coordinatesOfB);
   Expression coordinatesOfBMatrixExpression;
   coordinatesOfBMatrixExpression.makeMatrix(calculator, coordinatesOfBMatrix);
+  Expression allGenerators;
+  if (
+    !CalculatorLieTheory::allGeneratorsAsMatrixRow(
+      calculator, owner, allGenerators
+    )
+  ) {
+    return false;
+  }
   return
   output.makeProduct(
-    calculator, exponentOfMatrix, coordinatesOfBMatrixExpression
+    calculator,
+    List<Expression>(
+      {allGenerators, exponentOfMatrix, coordinatesOfBMatrixExpression}
+    )
   );
+}
+
+bool CalculatorLieTheory::allGeneratorsAsMatrixRow(
+  Calculator& calculator, SemisimpleLieAlgebra& owner, Expression& output
+) {
+  STACK_TRACE("CalculatorLieTheory::allGeneratorsAsMatrixRow");
+  Matrix<Expression> result;
+  result.resize(1, owner.getNumberOfGenerators(), false);
+  for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
+    ElementSemisimpleLieAlgebra<AlgebraicNumber> generator;
+    generator.makeGenerator(i, owner);
+    result(0, i).assignValue(calculator, generator);
+  }
+  return output.assignMatrixExpressions(result, calculator, true, false);
 }
 
 bool CalculatorLieTheory::exponentOfAdjointOf(
@@ -3247,14 +3402,14 @@ bool CalculatorLieTheory::exponentOfAdjointOf(
 ) {
   STACK_TRACE("CalculatorLieTheory::exponentOfAdjointOf");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > inputElements;
-  Expression outputOnError;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > >
+  inputElements;
   if (
-    !CalculatorLieTheory::elementsInSameLieAlgebra(
-      calculator, input, outputOnError, ownerSemisimple, inputElements
+    !CalculatorLieTheory::elementsInSameLieAlgebraPiAlgebraic(
+      calculator, input, ownerSemisimple, inputElements
     )
   ) {
-    return calculator << outputOnError.toString();
+    return calculator << "Failed to compute exponent of adjoint. ";
   }
   if (inputElements.size != 2 || ownerSemisimple == nullptr) {
     return
@@ -3262,20 +3417,44 @@ bool CalculatorLieTheory::exponentOfAdjointOf(
     << "Function ExponentOfAdjointOf requires 3 arguments: "
     << "Lie algebra type, and two elements. ";
   }
-  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementA =
+  const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+  elementAPiAlgebraic =
   inputElements[0];
-  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementB =
+  const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+  elementBPiAlgebraic =
   inputElements[1];
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> result;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> elementB;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> elementA;
+  if (
+    !CalculatorConversions::
+    convertElementSemisimpleLieAlgebraFromPiAlgebraicNumbers(
+      elementBPiAlgebraic, elementB
+    )
+  ) {
+    return false;
+  }
+  bool multiplyAByPi = false;
   std::stringstream commentsOnError;
   if (
+    !CalculatorLieTheory::convertsToAlgebraicAsPossibleMultipleOfPi(
+      elementAPiAlgebraic, elementA, multiplyAByPi, &commentsOnError
+    )
+  ) {
+    return
+    calculator
+    << "Failed to extract the element A. "
+    << commentsOnError.str();
+  }
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> result;
+  if (
+    !multiplyAByPi &&
     !ownerSemisimple->exponentOfAdXIfNilpotent(
       elementA, elementB, result, &commentsOnError
     )
   ) {
     return
     CalculatorLieTheory::exponentOfAdjointOfThroughDiagonalization(
-      calculator, *ownerSemisimple, elementA, elementB, output
+      calculator, *ownerSemisimple, elementA, elementB, multiplyAByPi, output
     );
   }
   ElementSemisimpleLieAlgebra<Rational> resultRational;
@@ -3311,7 +3490,7 @@ bool CalculatorLieTheory::adjointCommonEigenspaces(
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > outputElements;
   if (
     !CalculatorLieTheory::elementsInSameLieAlgebra(
-      calculator, input, output, ownerSemisimple, elements
+      calculator, input, ownerSemisimple, elements
     )
   ) {
     return true;
@@ -3383,25 +3562,35 @@ bool CalculatorLieTheory::adjointMatrix(
     return calculator << "Adjoint matrix expects two or three arguments.";
   }
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
-  List<ElementUniversalEnveloping<AlgebraicNumber> > inputElements;
+  List<ElementUniversalEnveloping<Polynomial<AlgebraicNumber> > >
+  inputElementsPiAlgebraic;
   Expression outputOnError;
   if (
     !CalculatorLieTheory::elementsInSameUniversalEnvelopingAlgebra(
-      calculator, input, outputOnError, ownerSemisimple, inputElements
+      calculator, input, ownerSemisimple, inputElementsPiAlgebraic
     )
   ) {
     return calculator << outputOnError.toString();
   }
-  if (inputElements.size != 1) {
+  if (inputElementsPiAlgebraic.size != 1) {
+    return calculator << "Adjoint matrix expects one algebra element. ";
+  }
+  ElementUniversalEnveloping<AlgebraicNumber> inputElement;
+  if (
+    !CalculatorConversions::
+    convertElementUniversalEnvelopingFromPiAlgebraicNumbers(
+      inputElementsPiAlgebraic[0], inputElement
+    )
+  ) {
     return
     calculator
-    << "Adjoint matrix expects one semisimple lie algebra element. ";
+    << "Failed to get an element of universal enveloping Lie algebra.";
   }
   Matrix<AlgebraicNumber> result;
   std::stringstream commentsOnFailure;
   if (
     !ownerSemisimple->getElementAdjointRepresentationUniversalEnveloping(
-      inputElements[0], result, &commentsOnFailure
+      inputElement, result, &commentsOnFailure
     )
   ) {
     return calculator << commentsOnFailure.str();
@@ -4912,11 +5101,12 @@ bool CalculatorLieTheory::isReductiveLieSubalgebra(
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > outputElements;
   if (
     !CalculatorLieTheory::elementsInSameLieAlgebra(
-      calculator, input, output, ownerSemisimple, elements
+      calculator, input, ownerSemisimple, elements
     )
   ) {
     return true;
   }
+  (void) output;
   global.comments << "Not implemented yet.";
   return false;
 }

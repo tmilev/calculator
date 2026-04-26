@@ -163,6 +163,8 @@ std::string CodeFormatter::Element::toStringType(
     return "union";
   case CodeFormatter::Element::ClassKeyWord:
     return "class";
+  case CodeFormatter::Element::Namespace:
+    return "namespace";
   case CodeFormatter::Element::StructKeyWord:
     return "struct";
   case CodeFormatter::Element::TypenameKeyWord:
@@ -2239,6 +2241,9 @@ CodeFormatter::CodeFormatter() {
     "class", CodeFormatter::Element::ClassKeyWord
   );
   this->elementTypes.setKeyValue(
+    "namespace", CodeFormatter::Element::Namespace
+  );
+  this->elementTypes.setKeyValue(
     "struct", CodeFormatter::Element::StructKeyWord
   );
   this->elementTypes.setKeyValue(
@@ -3163,6 +3168,17 @@ bool CodeFormatter::Processor::applyOneRule() {
       CodeFormatter::Element::ClassDeclaration, thirdToLast, secondToLast
     );
     return this->removeBelowLast(1);
+  }
+  if (
+    secondToLast.type == CodeFormatter::Element::Namespace &&
+    last.type == CodeFormatter::Element::CodeBlock
+  ) {
+    this->lastRuleName = "namespace";
+    secondToLast.makeFrom2(
+      CodeFormatter::Element::FunctionDefinition, secondToLast, last
+    );
+    secondToLast.makeFrom1(CodeFormatter::Element::Command, secondToLast);
+    return this->removeLast();
   }
   if (
     thirdToLast.type == CodeFormatter::Element::TypenameKeyWord &&

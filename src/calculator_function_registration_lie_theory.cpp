@@ -322,6 +322,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "g_{14}+g_{22}+g_{20});\n"
     "ExponentOfAdjointOf{}(A_2, "
     "g_1+g_-1, "
+    "h_1);\n"
+    "ExponentOfAdjointOf{}(A_2, "
+    "g_1-g_-1, "
+    "h_1);\n"
+    "ExponentOfAdjointOf{}(A_2, "
+    "pi(g_1-g_-1), "
     "h_1);\n",
     "CalculatorLieTheory::exponentOfAdjointOf",
     "ExponentOfAdjointOf",

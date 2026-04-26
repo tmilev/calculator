@@ -197,12 +197,15 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes the adjoint matrix of element g. "
     "The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x]."
     "First element g = element of a semisimple Lie algebra. "
-    "Extended to a map on the universal enveloping algebra via: "
-    "ad(g_1, g_2) = ad(g_1)ad(g_2)",
+    "When given two arguments, the first argument "
+    "will be interpreted as the Lie algebra type.",
+    "AdjointMatrix(D_4, g_1g_-1);\n"
+    "AdjointMatrix(D_4, g_1g_-1-g_-1g_1);\n"
+    "AdjointMatrix(D_4, g_1+g_-1);\n"
     "Type = A_4;\n"
     "g_{{j}}=ChevalleyGenerator(Type, j);\n"
     "h_{{j}}=CartanGenerator(Type, j);\n"
-    "AdjointMatrix(g_2)",
+    "AdjointMatrix(g_2);\n",
     "CalculatorLieTheory::adjointMatrix",
     "AdjointMatrix",
     standardOptions
@@ -298,7 +301,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "semisimple Lie algebra. Will succeed if (ad a) "
     "has nilpotent action on b. "
     "If ad a does not act nilpotently on b, will attempt to "
-    "exponentiate by computing the jordan normal form of the operator."
+    "exponentiate by computing the jordan normal form of the operator. "
     "The first element is the type of the semisimple Lie algebra, "
     "the second argument is a and the third argument is b. "
     "The first element can be omitted if "

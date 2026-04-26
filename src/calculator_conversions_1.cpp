@@ -1,6 +1,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_interface.h"
 #include "calculator_lie_theory.h"
+#include "calculator_lie_theory.h"
 #include "general_file_operations_encodings.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep. Breaks g++ 'make optimize=1' compilation.
@@ -2154,6 +2155,66 @@ chevalleyOrCartanGeneratorFromSemisimplePolynomialForm(
   }
   Expression chevalleyGeneratorExpression =
   context.getVariable(chevalleyGeneratorIndex);
+  return
+  CalculatorConversions::chevalleyOrCartanGeneratorFromExpression(
+    calculator, chevalleyGeneratorExpression, owner, outputElement
+  );
+}
+
+bool CalculatorConversions::
+elementUniversalEnvelopingFromSemisimplePolynomialForm(
+  Calculator& calculator,
+  const MonomialPolynomial& monomial,
+  ExpressionContext& context,
+  SemisimpleLieAlgebra& owner,
+  ElementUniversalEnveloping<AlgebraicNumber>& outputElement
+) {
+  STACK_TRACE(
+    "CalculatorConversions::elementUniversalEnvelopingFromSemisimplePolynomialForm"
+  );
+  outputElement.makeZero(owner);
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentGenerator;
+  outputElement.makeConstant(
+    calculator.objectContainer.algebraicClosure.one(), owner
+  );
+  for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
+    const Rational& power = monomial[i];
+    if (power.isEqualToZero()) {
+      continue;
+    }
+    int powerInteger = 0;
+    if (!power.isSmallInteger(&powerInteger)) {
+      continue;
+    }
+    const Expression& variable = context.getVariable(i);
+    if (
+      !CalculatorConversions::chevalleyOrCartanGeneratorFromExpression(
+        calculator, variable, owner, currentGenerator
+      )
+    ) {
+      return false;
+    }
+    ElementUniversalEnveloping<AlgebraicNumber> element;
+    element.assignElementLieAlgebraArbitrary(
+      currentGenerator,
+      owner,
+      calculator.objectContainer.algebraicClosure.one()
+    );
+    element.raiseToPower(powerInteger);
+    outputElement *= element;
+  }
+  return true;
+}
+
+bool CalculatorConversions::chevalleyOrCartanGeneratorFromExpression(
+  Calculator& calculator,
+  const Expression& chevalleyGeneratorExpression,
+  SemisimpleLieAlgebra& owner,
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputElement
+) {
+  STACK_TRACE(
+    "CalculatorConversions::chevalleyOrCartanGeneratorFromExpression"
+  );
   if (!chevalleyGeneratorExpression.startsWith(calculator.opUnderscore(), 3)) {
     return
     calculator
@@ -2197,6 +2258,7 @@ chevalleyOrCartanGeneratorFromSemisimplePolynomialForm(
       << chevalleyGenerator.generatorIndex
       << ". ";
     }
+    outputElement.makeZero();
     outputElement.addMonomial(
       chevalleyGenerator, AlgebraicNumber::oneStatic()
     );
@@ -2236,46 +2298,16 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   STACK_TRACE(
     "CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers"
   );
-  WithContext<Polynomial<AlgebraicNumber> > polynomialFormWithContext;
+  ElementUniversalEnveloping<AlgebraicNumber> outputUniversalEnveloping;
   if (
-    !CalculatorConversions::functionPolynomial<AlgebraicNumber>(
-      calculator, input, polynomialFormWithContext, 300, 2, false
+    !CalculatorLieTheory::
+    evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+      calculator, input, outputUniversalEnveloping, owner
     )
   ) {
-    return
-    calculator
-    << "<hr>Failed to convert "
-    << input.toString()
-    << " to polynomial.<hr>";
+    return false;
   }
-  Polynomial<AlgebraicNumber> polynomialForm =
-  polynomialFormWithContext.content;
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElement;
-  output.makeZero();
-  if (owner.getNumberOfPositiveRoots() == 0) {
-    global.fatal
-    << "Bad number of positive roots for algebra: "
-    << owner.toStringLieAlgebraName()
-    << global.fatal;
-  }
-  ExpressionContext context = polynomialFormWithContext.context;
-  for (int j = 0; j < polynomialForm.size(); j ++) {
-    const MonomialPolynomial& monomial = polynomialForm[j];
-    bool successfulMonomialConversion =
-    CalculatorConversions::
-    chevalleyOrCartanGeneratorFromSemisimplePolynomialForm(
-      calculator, monomial, context, owner, currentElement
-    );
-    if (!successfulMonomialConversion) {
-      return
-      calculator
-      << "<hr>Failed to convert to Chevalley generator: "
-      << input.toString()
-      << ".<hr>";
-    }
-    output.addOtherTimesConst(currentElement, polynomialForm.coefficients[j]);
-  }
-  return true;
+  return outputUniversalEnveloping.isLieAlgebraElement(output);
 }
 
 bool CalculatorConversions::elementUniversalEnveloping(

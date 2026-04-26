@@ -2461,12 +2461,12 @@ bool CalculatorParser::applyOneRule() {
   ];
   SyntacticElement::Role fourthToLastRole =
   fourthToLastExpression.syntacticRole;
-  SyntacticElement& fifthToLastE = (*this->syntacticStack)[(
+  SyntacticElement& fifthToLastExpression = (*this->syntacticStack)[(
       *this->syntacticStack
     ).size -
     5
   ];
-  SyntacticElement::Role fifthToLastRole = fifthToLastE.syntacticRole;
+  SyntacticElement::Role fifthToLastRole = fifthToLastExpression.syntacticRole;
   SyntacticElement& sixthToLastExpression = (*this->syntacticStack)[(
       *this->syntacticStack
     ).size -
@@ -2954,13 +2954,13 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsLimitProcessInPreceding(lastRole)
   ) {
-    fifthToLastE.data.makeXOX(
+    fifthToLastExpression.data.makeXOX(
       *this->owner,
       this->owner->opLimit(),
       thirdToLastExpression.data,
       secondToLastExpression.data
     );
-    fifthToLastE.syntacticRole = SyntacticElement::EXPRESSION;
+    fifthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
     this->lastRuleName = "limit _ expression expression to expression";
     return this->decreaseStackExceptLast(3);
   }
@@ -3093,8 +3093,37 @@ bool CalculatorParser::applyOneRule() {
     exponent.makeOX(
       *this->owner, this->owner->opMinus(), secondToLastExpression.data
     );
-    fifthToLastE.data.makeXOX(
-      *this->owner, this->owner->opPower(), fifthToLastE.data, exponent
+    fifthToLastExpression.data.makeXOX(
+      *this->owner,
+      this->owner->opPower(),
+      fifthToLastExpression.data,
+      exponent
+    );
+    return this->decreaseStackExceptLast(3);
+  }
+  if (
+    fifthToLastRole == SyntacticElement::EXPRESSION &&
+    fourthToLastRole == SyntacticElement::UNDERSCORE &&
+    thirdToLastRole == SyntacticElement::MINUS &&
+    secondToLastRole == SyntacticElement::EXPRESSION && (
+      lastRole == SyntacticElement::EXPRESSION ||
+      lastRole == SyntacticElement::VARIABLE ||
+      lastRole == SyntacticElement::LETTERS
+    )
+  ) {
+    if (this->flagLogSyntaxRules) {
+      this->lastRuleName =
+      "expression underscore minus expression x to expression x";
+    }
+    Expression exponent;
+    exponent.makeOX(
+      *this->owner, this->owner->opMinus(), secondToLastExpression.data
+    );
+    fifthToLastExpression.data.makeXOX(
+      *this->owner,
+      this->owner->opUnderscore(),
+      fifthToLastExpression.data,
+      exponent
     );
     return this->decreaseStackExceptLast(3);
   }
@@ -3266,7 +3295,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     this->owner->atomsWhoseExponentsAreInterpretedAsFunctions.contains(
-      fifthToLastE.source
+      fifthToLastExpression.source
     ) &&
     fourthToLastRole == SyntacticElement::UPPER_CARET &&
     thirdToLastRole == SyntacticElement::EXPRESSION &&
@@ -3277,15 +3306,15 @@ bool CalculatorParser::applyOneRule() {
       this->lastRuleName = "triglike power expression expression";
     }
     Expression trigLikeFunction;
-    trigLikeFunction.makeAtom(*this->owner, fifthToLastE.source);
+    trigLikeFunction.makeAtom(*this->owner, fifthToLastExpression.source);
     Expression base(*this->owner);
     base.addChildOnTop(trigLikeFunction);
     base.addChildOnTop(secondToLastExpression.data);
-    fifthToLastE.data.makeXOX(
+    fifthToLastExpression.data.makeXOX(
       *this->owner, this->owner->opPower(), base, thirdToLastExpression.data
     );
-    fifthToLastE.source = "";
-    fifthToLastE.syntacticRole = SyntacticElement::EXPRESSION;
+    fifthToLastExpression.source = "";
+    fifthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
     return this->decreaseStackExceptLast(3);
   }
   if (
@@ -3295,14 +3324,14 @@ bool CalculatorParser::applyOneRule() {
     secondToLastRole == SyntacticElement::EXPRESSION &&
     this->allowsTimesInPreceding(lastExpression)
   ) {
-    fifthToLastE.data.makeXOX(
+    fifthToLastExpression.data.makeXOX(
       *this->owner,
       this->owner->opLogBase(),
       thirdToLastExpression.data,
       secondToLastExpression.data
     );
-    fifthToLastE.syntacticRole = SyntacticElement::EXPRESSION;
-    fifthToLastE.source = "";
+    fifthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
+    fifthToLastExpression.source = "";
     this->lastRuleName = "logarithm _ expression expression to expression";
     return this->decreaseStackExceptLast(3);
   }
@@ -3316,7 +3345,7 @@ bool CalculatorParser::applyOneRule() {
     seventhToLastExpression.data.makeXOX(
       *this->owner,
       this->owner->opSqrt(),
-      fifthToLastE.data,
+      fifthToLastExpression.data,
       thirdToLastExpression.data
     );
     seventhToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
@@ -3960,13 +3989,13 @@ bool CalculatorParser::applyOneRule() {
       secondToLastRole == SyntacticElement::EXPRESSION &&
       lastRole == SyntacticElement::RIGHT_BRACKET
     ) {
-      fifthToLastE.data.makeXOX(
+      fifthToLastExpression.data.makeXOX(
         *this->owner,
         this->owner->opLieBracket(),
         fourthToLastExpression.data,
         secondToLastExpression.data
       );
-      fifthToLastE.syntacticRole = SyntacticElement::EXPRESSION;
+      fifthToLastExpression.syntacticRole = SyntacticElement::EXPRESSION;
       if (this->flagLogSyntaxRules) {
         this->lastRuleName = "[a, b] to lie bracket of a, b";
       }

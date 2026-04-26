@@ -13,6 +13,19 @@ private:
     Expression& output
   );
 public:
+  static bool evaluatesToElementUniversalEnvelopingAlgebraAlgebraicNumbers(
+    Calculator& calculator,
+    const Expression& input,
+    ElementUniversalEnveloping<AlgebraicNumber>& output,
+    SemisimpleLieAlgebra& owner
+  );
+  static bool
+  convertElementUniversalEnvelopingRationalFractionToAlgebraicCoefficient(
+    ElementUniversalEnveloping<RationalFraction<Rational> >& input,
+    ElementUniversalEnveloping<AlgebraicNumber>& output,
+    SemisimpleLieAlgebra& owner,
+    std::stringstream* commentsOnError
+  );
   static bool killingForm(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -303,12 +316,26 @@ public:
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
   );
+  static bool elementsInUniversalEnvelopingAlgebraImpliedLieAlgebra(
+    Calculator& calculator,
+    const List<Expression>& inputElements,
+    Expression& outputOnError,
+    SemisimpleLieAlgebra*& outputOwner,
+    List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
+  );
   static bool elementsInSameLieAlgebra(
     Calculator& calculator,
     const Expression& input,
     Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
+  static bool elementsInSameUniversalEnvelopingAlgebra(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& outputOnError,
+    SemisimpleLieAlgebra*& outputOwner,
+    List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
   );
   static bool elementsInLieAlgebraExplicitLieAlgebra(
     Calculator& calculator,
@@ -317,6 +344,14 @@ public:
     Expression& outputOnError,
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
+  static bool elementsInUniversalEnvelopingAlgebraExplicitLieAlgebra(
+    Calculator& calculator,
+    const Expression& inputAlgebra,
+    const List<Expression>& inputElements,
+    Expression& outputOnError,
+    SemisimpleLieAlgebra*& outputOwner,
+    List<ElementUniversalEnveloping<AlgebraicNumber> >& outputElements
   );
   static bool cartanInvolutionInternal(
     Calculator& calculator, const Expression& input, CartanInvolution& output

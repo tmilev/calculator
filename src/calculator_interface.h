@@ -4123,7 +4123,20 @@ private:
     SemisimpleLieAlgebra& owner,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputElement
   );
+  static bool elementUniversalEnvelopingFromSemisimplePolynomialForm(
+    Calculator& calculator,
+    const MonomialPolynomial& monomial,
+    ExpressionContext& context,
+    SemisimpleLieAlgebra& owner,
+    ElementUniversalEnveloping<AlgebraicNumber>& outputElement
+  );
 public:
+  static bool chevalleyOrCartanGeneratorFromExpression(
+    Calculator& calculator,
+    const Expression& chevalleyGeneratorExpression,
+    SemisimpleLieAlgebra& owner,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputElement
+  );
   // Conversion from expression tree.
   // Conversions from expression tree to type.
   static bool loadElementSemisimpleLieAlgebraRationalCoefficients(

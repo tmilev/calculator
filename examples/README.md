@@ -1531,7 +1531,7 @@ z
 ```
 The operation =: is the "is denoted by" operation. The expression a =:b always reduces to a =b. In addition to the transformation, the pair of expressions a, b is registered in a special global "registry". This has the following effect. Every time the expression b is met, it is displayed on the screen as a. We note that subsequent occurrences of the expression a will first be replaced by b (as mandated by the a =b command), but then displayed on the screen as a.
 
-Operator or function ^ is overloaded with 36 total handlers.
+Operator or function ^ is overloaded with 37 total handlers.
 
 *^* [EulerFormula] {CalculatorFunctionsTrigonometry::eulerFormulaAsLaw}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22EulerFormula%5c%22%29%3b%5cne%5e%7bi%20x%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1822,6 +1822,14 @@ e^C;
 e^\begin{pmatrix}1&2&-1\\ -1&-2&2\\-2&1&-1\end{pmatrix}
 ```
 Computes (tries to) the exponent of a matrix. 
+
+*^* [ExponentOfMatrixTimesConstant] {CalculatorFunctionsLinearAlgebra::exponentOfConstantTimesMatrix}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%3d%5c%5cbegin%7bpmatrix%7d0%26-1%20%20%5c%5c%5c%5c%201%260%20%20%5c%5cend%7bpmatrix%7d%3b%5cne%5e%7b%5c%5csqrt%7b-1%7dpi%20A%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+A=\begin{pmatrix}0&-1  \\ 1&0  \end{pmatrix};
+e^{\sqrt{-1}pi A}
+```
+Similar to ExponentOfMatrix, but takes as input a power of the form. constant times a matrix. 
 
 *^* [PowerEllipticCurveElementRationalByInteger] {CalculatorFunctionsBinaryOps::powerEllipticCuveElementByInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g%20%3d%20ElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20-%20x%20%2b1%2c%20x%20%3d%203%2c%20y%20%3d%205%29%3b%5cng%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -5245,14 +5253,18 @@ StandardRepresentationMatrix( (g_1+g_2 - g_-1-g_-2)^2);
 Computes matrix of an element of a semisimple Lie algebra (or its universal enveloping algebra) in a 'natural' representation of the Lie algebra. Implemented for type A only at the moment.The argument should be a Chevalley generator or an element of the Universal enveloping algebra.
 
 *AdjointMatrix* [AdjointMatrix] {CalculatorLieTheory::adjointMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Type%20%3d%20A_4%3b%5cng_%7b%7bj%7d%7d%3dChevalleyGenerator%28Type%2c%20j%29%3b%5cnh_%7b%7bj%7d%7d%3dCartanGenerator%28Type%2c%20j%29%3b%5cnAdjointMatrix%28g_2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AdjointMatrix%28D_4%2c%20g_1g_-1%29%3b%5cnAdjointMatrix%28D_4%2c%20g_1g_-1-g_-1g_1%29%3b%5cnAdjointMatrix%28D_4%2c%20g_1%2bg_-1%29%3b%5cnType%20%3d%20A_4%3b%5cng_%7b%7bj%7d%7d%3dChevalleyGenerator%28Type%2c%20j%29%3b%5cnh_%7b%7bj%7d%7d%3dCartanGenerator%28Type%2c%20j%29%3b%5cnAdjointMatrix%28g_2%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
+AdjointMatrix(D_4, g_1g_-1);
+AdjointMatrix(D_4, g_1g_-1-g_-1g_1);
+AdjointMatrix(D_4, g_1+g_-1);
 Type = A_4;
 g_{{j}}=ChevalleyGenerator(Type, j);
 h_{{j}}=CartanGenerator(Type, j);
-AdjointMatrix(g_2)
+AdjointMatrix(g_2);
+
 ```
-Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].First element g = element of a semisimple Lie algebra. Extended to a map on the universal enveloping algebra via: ad(g_1, g_2) = ad(g_1)ad(g_2)
+Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].First element g = element of a semisimple Lie algebra. When given two arguments, the first argument will be interpreted as the Lie algebra type.
 
 *CartanInvolution* [CartanInvolution] {CalculatorLieTheory::cartanInvolution}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%204%29%3b%5cnCartanInvolution%28AI%2c%205%29%3b%5cnCartanInvolution%28AII%2c%204%29%3b%5cnCartanInvolution%28AII%2c%205%29%3b%5cnCartanInvolution%28AIII%2c%204%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%200%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%201%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%204%29%3b%5cnCartanInvolution%28BI%2c%204%2c%200%29%3b%5cnCartanInvolution%28BI%2c%204%2c%201%29%3b%5cnCartanInvolution%28BI%2c%204%2c%202%29%3b%5cnCartanInvolution%28BI%2c%204%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%201%29%3b%5cnCartanInvolution%28BI%2c%205%2c%202%29%3b%5cnCartanInvolution%28BI%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%204%29%3b%5cnCartanInvolution%28CI%2c%205%29%3b%5cnCartanInvolution%28CI%2c%205%2c1%29%3b%5cnCartanInvolution%28CI%2c%205%2c2%29%3b%5cnCartanInvolution%28CI%2c%205%2c%203%29%3b%5cnCartanInvolution%28CI%2c%205%2c%204%29%3b%5cnCartanInvolution%28DI%2c%205%29%3b%5cnCartanInvolution%28DI%2c%205%2c1%29%3b%5cnCartanInvolution%28DI%2c%205%2c2%29%3b%5cnCartanInvolution%28DI%2c%205%2c3%29%3b%5cnCartanInvolution%28DI%2c%205%2c4%29%3b%5cnCartanInvolution%28DI%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%205%29%3b%5cnCartanInvolution%28DII%2c%205%2c1%29%3b%5cnCartanInvolution%28DII%2c%205%2c2%29%3b%5cnCartanInvolution%28DII%2c%205%2c3%29%3b%5cnCartanInvolution%28DII%2c%205%2c4%29%3b%5cnCartanInvolution%28DII%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%203%2c1%29%3b%5cnCartanInvolution%28E_6%2c%20EI%29%3b%5cnCartanInvolution%28E_6%2c%20EII%29%3b%5cnCartanInvolution%28E_6%2c%20EIII%29%3b%5cnCartanInvolution%28E_6%2c%20EIV%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -5318,7 +5330,7 @@ ExponentOfAdjointOf{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14
 ExponentOfAdjointOf{}(A_2, g_1+g_-1, h_1);
 
 ```
-Computes e^(ad a)(b) where a and b are elements of a semisimple Lie algebra. Will succeed if (ad a) has nilpotent action on b. If ad a does not act nilpotently on b, will attempt to exponentiate by computing the jordan normal form of the operator.The first element is the type of the semisimple Lie algebra, the second argument is a and the third argument is b. The first element can be omitted if the remaining two arguments can be converted to a elements of a common semisimple Lie algebra - in this case, the two arguments would be linear elements without constant terms of a common Universal Enveloping Algebra. We recall that (ad a) has nilpotent action on b if there exists N for which  \((ad a)^N (b) = 0\).We recall that (ad a)(b) stands for the Lie bracket [a,b]. We also recall that \(e^A = \sum_{i=0}^\infty A^n/n!\), where A stands for the linear operator (ad a). If ad a has nilpotent action on b, then the sum above becomes finite. 
+Computes e^(ad a)(b) where a and b are elements of a semisimple Lie algebra. Will succeed if (ad a) has nilpotent action on b. If ad a does not act nilpotently on b, will attempt to exponentiate by computing the jordan normal form of the operator. The first element is the type of the semisimple Lie algebra, the second argument is a and the third argument is b. The first element can be omitted if the remaining two arguments can be converted to a elements of a common semisimple Lie algebra - in this case, the two arguments would be linear elements without constant terms of a common Universal Enveloping Algebra. We recall that (ad a) has nilpotent action on b if there exists N for which  \((ad a)^N (b) = 0\).We recall that (ad a)(b) stands for the Lie bracket [a,b]. We also recall that \(e^A = \sum_{i=0}^\infty A^n/n!\), where A stands for the linear operator (ad a). If ad a has nilpotent action on b, then the sum above becomes finite. 
 
 *AttemptExtendingEtoHEFwithHinCartan* [AttemptExtendingEtoHEFwithHinCartan] {Calculator::attemptExtendingEtoHEFwithHinCartan}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AttemptExtendingEtoHEFwithHinCartan%7b%7d%28F_4%2c%20g_1%2b2g_2%2b3g_3%2b4g_4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

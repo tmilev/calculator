@@ -1316,9 +1316,11 @@ ExponentOfAdjointOf{}\\left({A}_{2}, \\pi {g}_{1}-\\pi {g}_{-1}, {h}_{1}\\right)
 {Sequence{}\\left(\\frac{\\sqrt{-1}}{2} e^{-2\\sqrt{-1} \\pi} g_{-1}+\\frac{\\sqrt{-1}}{2} e^{-2\\sqrt{-1} \\pi} g_{1}-\\frac{\\sqrt{-1}}{2} e^{2\\sqrt{-1} \\pi} g_{-1}-\\frac{\\sqrt{-1}}{2} e^{2\\sqrt{-1} \\pi} g_{1}+\\frac{1}{2} e^{-2\\sqrt{-1} \\pi} h_{1}+\\frac{1}{2} e^{2\\sqrt{-1} \\pi} h_{1}\\right)}\\end{array}`,
     // Not testing svg
     skipSVG: true,
-    // Too slow to test. Perhaps needs improvement?
     skipMathML: false,
     skipEquationEditor: true,
+    // Too slow to test on Firefox.
+    // Seems to run at a good speed in Chrome.
+    // Perhaps the editor needs Firefox-specific improvements?
     skipStaticDOM: true,
   },
 ];

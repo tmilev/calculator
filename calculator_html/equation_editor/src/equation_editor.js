@@ -1619,6 +1619,24 @@ class SyntacticElement {
     return result;
   }
 
+  toStringDebug() {
+    let result = [];
+    if (this.node !== null) {
+      let next = this.node.toLatex();
+      if (next === '') {
+        next = `[${this.node.type.type}]`;
+      }
+      result.push(next);
+    }
+    if (this.content !== '') {
+      result.push(`{${this.content}}`);
+    }
+    if (this.syntacticRole !== '') {
+      result.push(`{[${this.syntacticRole}]}`);
+    }
+    return result.join('');
+  }
+
   /** @return {boolean} */
   isExpression() {
     return this.syntacticRole === '' && this.node !== null;
@@ -2562,6 +2580,14 @@ class LaTeXParser {
     }
     this.parsingStack.length -= nodesToRemove;
     return true;
+  }
+
+  toStringStackDebug() {
+    const result = [];
+    for (let i = this.dummyParsingElements; i < this.parsingStack.length; i++) {
+      result.push(this.parsingStack[i].toStringDebug());
+    }
+    return result.join("");
   }
 
   /** @return {Array.<HTMLElement!>!} */
@@ -13537,7 +13563,7 @@ class MathTagConverter {
     for (const element of slice) {
       allTextContents.push(element.textContent);
     }
-    const fullText = allTextContents.join();
+    const fullText = allTextContents.join('');
     const toBeConverted = this.extractMathTagsFromString(fullText);
     if (toBeConverted.length === 0) {
       return;

@@ -13427,7 +13427,7 @@ class MathTagConverter {
     return /** @type {HTMLElement!} */ (mathTag);
   }
 
-  convertTags(
+  writeTagsFromNode(
     /** @type {HTMLElement!} */
     toBeModified,
     /** @type {Array.<MathTagData!>!} */
@@ -13437,6 +13437,16 @@ class MathTagConverter {
       return;
     }
     let content = toBeModified.textContent;
+    this.writeTags(toBeModified, toBeConverted, content);
+  }
+
+  writeTags(
+    /** @type {HTMLElement!} */
+    toBeModified,
+    /** @type {Array.<MathTagData!>!} */
+    toBeConverted,
+    /** @type {string} */ content
+  ) {
     let newChildren = [];
     for (let i = 0; i < toBeConverted.length; i++) {
       let previousIndex = 0;
@@ -13480,17 +13490,11 @@ class MathTagConverter {
     toBeModified.parentElement.replaceChild(replacing, toBeModified);
   }
 
-  processTextContent(
-    /** @type {HTMLElement!} */
-    toBeModified,
-  ) {
-    if (toBeModified.textContent === '' || toBeModified.textContent === null) {
-      return;
-    }
-    let content = toBeModified.textContent;
-    let openIndex = -1;
+  /** @return {Array.<MathTagData!>!} */
+  extractMathTagsFromString(/** @type{string} */ content) {
     /** @type {Array.<MathTagData!>!} */
-    let toBeConverted = [];
+    let result = [];
+    let openIndex = -1;
     for (let i = 1; i < content.length; i++) {
       let previous = content[i - 1];
       let current = content[i];
@@ -13502,14 +13506,47 @@ class MathTagConverter {
           }
         } else {
           if (current === ')') {
-            toBeConverted.push(new MathTagData(
+            result.push(new MathTagData(
               openIndex - 1, openIndex + 1, i - 2, i, content));
             openIndex = -1;
           }
         }
       }
     }
-    this.convertTags(toBeModified, toBeConverted);
+    return result;
+  }
+
+  processTextContent(
+    /** @type {HTMLElement!} */
+    toBeModified,
+  ) {
+    if (toBeModified.textContent === '' || toBeModified.textContent === null) {
+      return;
+    }
+    let content = toBeModified.textContent;
+    const toBeConverted = this.extractMathTagsFromString(content);
+    this.writeTagsFromNode(toBeModified, toBeConverted);
+  }
+
+  processTextNodeSlice(/** @type{HTMLElement[]} */ slice) {
+    if (slice.length === 0) {
+      return;
+    }
+    /** @type{string[]} */
+    const allTextContents = [];
+    for (const element of slice) {
+      allTextContents.push(element.textContent);
+    }
+    const fullText = allTextContents.join();
+    const toBeConverted = this.extractMathTagsFromString(fullText);
+    if (toBeConverted.length === 0) {
+      return;
+    }
+    // Remove all except the first node:
+    for (let i = 1; i < slice.length; i++) {
+      slice[i].remove();
+    }
+    this.writeTags(slice[0], toBeConverted, fullText);
   }
 
   convertTagsRecursive(
@@ -13530,8 +13567,27 @@ class MathTagConverter {
       this.processTextContent(/** @type {HTMLElement!} */(toBeModified));
       return;
     }
+    // The chrome browser breaks up large text nodes into uniform list of 
+    // testnodes. Observation shows each chunk is 65kb in size.
+    // We collect consecutive textnodes into a large chunk.
+    let textNodeSlice = [];
+
+    /** @type {HtmlElement[][]} */
+    let slicesToBeProcessed = [];
     for (let i = 0; i < toBeModified.childNodes.length; i++) {
-      this.convertTagsRecursive(toBeModified.childNodes[i], recursionDepth + 1);
+      const child = toBeModified.childNodes[i];
+      if (child.nodeType === Node.TEXT_NODE) {
+        // Collect consecutive textNodes.
+        textNodeSlice.push(child);
+        continue;
+      }
+      slicesToBeProcessed.push(textNodeSlice);
+      textNodeSlice = [];
+      this.convertTagsRecursive(child, recursionDepth + 1);
+    }
+    slicesToBeProcessed.push(textNodeSlice);
+    for (const slice of slicesToBeProcessed) {
+      this.processTextNodeSlice(slice);
     }
   }
 

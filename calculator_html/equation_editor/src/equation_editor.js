@@ -2012,7 +2012,10 @@ class LaTeXConstants {
       'R': '\u211D',
       'Z': '\u2124',
     };
-    /** @type {Object.<string, string>!} */
+    /** 
+     * A map from a left delimiter to its internal delimiter type.
+     * @type {Object.<string, string>!} 
+     */
     this.leftDelimiters = {
       '\\left.': '',
       '\\langle': '\\langle',
@@ -2021,7 +2024,28 @@ class LaTeXConstants {
       '(': '(',
       '[': '[',
       '|': '|',
+      '\\left|': '|',
       '\\{': '{',
+    };
+    /** 
+     * The syntactic role of a delimiter 
+     * preceded by a \left command. Not 
+     * needed by unambiguous delimiters such as 
+     * (, [, etc. 
+     *   
+     * @type {Object.<string, string>!} */
+    this.leftDelimiterNormalization = {
+      '|': '\\left|',
+    };
+    /** 
+     * The syntactic role of a delimiter 
+     * preceded by a \right command. Not 
+     * needed by unambiguous delimiters such as 
+     * (, [, etc. 
+     *   
+     * @type {Object.<string, string>!} */
+    this.rightDelimiterNormalization = {
+      '|': '\\right|',
     };
     /** @type {Object.<string, string>!} */
     this.delimitersAmbiguous = {
@@ -2035,6 +2059,7 @@ class LaTeXConstants {
       '\\rceil': '\\rceil',
       ')': ')',
       '|': '|',
+      '\\right|': '|',
       ']': ']',
       '\\}': '}',
     };
@@ -2800,6 +2825,11 @@ class LaTeXParser {
     }
     if (secondToLast.syntacticRole === '\\left' &&
       last.syntacticRole in latexConstants.leftDelimiters) {
+      if (
+        last.syntacticRole in latexConstants.leftDelimiterNormalization
+      ) {
+        last.syntacticRole = latexConstants.leftDelimiterNormalization[last.syntacticRole];
+      }
       this.lastRuleName = '\\left combined with left delimiter';
       this.parsingStack[this.parsingStack.length - 2] = last;
       return this.decreaseParsingStack(1);
@@ -2831,6 +2861,9 @@ class LaTeXParser {
     }
     if (secondToLast.syntacticRole === '\\right' &&
       last.syntacticRole in latexConstants.rightDelimiters) {
+      if (last.syntacticRole in latexConstants.rightDelimiterNormalization) {
+        last.syntacticRole = latexConstants.rightDelimiterNormalization[last.syntacticRole];
+      }
       this.lastRuleName = '\\right combined with right delimiter';
       this.parsingStack[this.parsingStack.length - 2] = last;
       return this.decreaseParsingStack(1);
@@ -3205,7 +3238,7 @@ class LaTeXParser {
     }
     if (secondToLast.isExpression() &&
       this.areMatchingDelimiters(thirdToLast, last)) {
-      this.lastRuleName = 'parenthetic expression to expression';
+      this.lastRuleName = 'parenthetic expression to expression areMatchingDelimiters';
       let leftDelimiter =
         latexConstants.leftDelimiters[thirdToLast.syntacticRole];
       let rightDelimiter = latexConstants.rightDelimiters[last.syntacticRole];
@@ -3218,7 +3251,7 @@ class LaTeXParser {
       return this.replaceParsingStackTop(horizontal, '', -3);
     }
     if (secondToLast.syntacticRole in latexConstants.leftDelimiters &&
-      last.syntacticRole in latexConstants.rightDelimiters) {
+      this.areMatchingDelimiters(secondToLast, last)) {
       this.lastRuleName = 'parenthetic expression to expression';
       const leftDelimiter =
         latexConstants.leftDelimiters[secondToLast.syntacticRole];

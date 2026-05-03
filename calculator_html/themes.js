@@ -15,7 +15,7 @@ class Theme {
       "--box-shadow-buttonPreview": "none",
       "--box-shadow-buttonDefault": "none",
       "--box-shadow-buttonAnswer": "none",
-      "--box-shadow-buttonMQ": "none",
+      "--box-shadow-equationEditorProblemButton": "none",
     };
     this.themes[themeIds.radioThemeExperimental] = {
       "--main-border-radius": "0px",
@@ -25,7 +25,7 @@ class Theme {
       "--box-shadow-buttonPreview": "5px 5px 5px grey",
       "--box-shadow-buttonDefault": "5px 5px 5px grey",
       "--box-shadow-buttonAnswer": "5px 5px 5px grey",
-      "--box-shadow-buttonMQ": "3px 3px 3px grey",
+      "--box-shadow-equationEditorProblemButton": "3px 3px 3px grey",
     };
     this.buttonRadioThemeDefault =
       document.getElementById(

@@ -317,7 +317,7 @@ class ElementWithScripts {
     let content = element.textContent;
     element.textContent = "";
     let button = document.createElement("button");
-    button.className = "buttonMQ";
+    button.className = "equationEditorProblemButton";
     miscellaneous.writeHTML(button, "<tiny>L&#x1F4CB;</tiny>");
     button.addEventListener('click', () => {
       this.copyLatex(content, element);

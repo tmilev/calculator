@@ -6,7 +6,7 @@
   --box-shadow-buttonPreview: none;
   --box-shadow-buttonAnswer: none;
   --box-shadow-buttonDefault: none;
-  --box-shadow-buttonMQ: none;
+  --box-shadow-equationEditorProblemButton: none;
   --box-shadow-default: none;
 }
 
@@ -139,6 +139,7 @@ sectionSelection {
   border: none;
   color: red;
   width: 60px;
+  cursor: pointer;
 }
 
 .buttonSolution {
@@ -1411,20 +1412,21 @@ button.buttonSelectPage:hover {
   background-color: lightskyblue;
 }
 
-button.buttonMQ {
+button.equationEditorProblemButton {
   width: 25px;
   height: 21.2px;
   padding: 0;
-  box-shadow: var(--box-shadow-buttonMQ);
+  box-shadow: var(--box-shadow-equationEditorProblemButton);
   border: none;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
   transition: all 2s;
   background-color: #e8e8e8;
+  cursor: pointer;
 }
 
-button.buttonMQ:hover {
+button.equationEditorProblemButton:hover {
   background-color: silver;
 }
 

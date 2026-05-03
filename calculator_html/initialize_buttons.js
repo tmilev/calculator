@@ -19,7 +19,7 @@ class ButtonCollection {
     this.keywords = keywords;
   }
   updateFlags(
-    /** @type {Object.<string, string} */
+    /** @type {Object.<string, string>} */
     allFlags,
   ) {
     for (let keyword in this.keywords) {
@@ -79,6 +79,7 @@ class InputPanelData {
     this.flagRendered = false;
 
     this.requestedButtons = [];
+    /** @type {Object.<string, ButtonCollection>} */
     this.flagButtons = {
       noPreference: new ButtonCollection({}),
       all: new ButtonCollection({
@@ -132,6 +133,7 @@ class InputPanelData {
         "intervals": true,
         "limits": true,
         "limit": true,
+        "series": true,
       }),
       limits: new ButtonCollection({
         "limits": true,
@@ -531,7 +533,7 @@ class InputPanelData {
       }
       let cell = currentRow.insertCell();
       let button = this.buttonFactories[j].getButton(this.equationEditor);
-      button.className = "buttonMQ";
+      button.className = "equationEditorProblemButton";
       cell.appendChild(button);
     }
     let toggles = [];

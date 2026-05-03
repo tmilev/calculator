@@ -6,7 +6,7 @@
   --box-shadow-buttonPreview: none;
   --box-shadow-buttonAnswer: none;
   --box-shadow-buttonDefault: none;
-  --box-shadow-buttonMQ: none;
+  --box-shadow-equationEditorProblemButton: none;
   --default-font-family: 'Google Sans', Roboto, Arial, sans-serif;
   --default-answer-button-width: 80px;
   --default-button-letter-spacing: 0.25px;
@@ -1320,7 +1320,7 @@ button.buttonSelectPage:hover {
   background-color: lightskyblue;
 }
 
-button.buttonMQ {
+button.equationEditorProblemButton {
   width: 30px;
   height: 30px;
   border: none;
@@ -1329,11 +1329,11 @@ button.buttonMQ {
   background-color: #e8e8e8;
   padding: 4px;
   margin: 3px;
-  box-shadow: var(--box-shadow-buttonMQ);
+  box-shadow: var(--box-shadow-equationEditorProblemButton);
   font-family: var(--default-font-family);
 }
 
-button.buttonMQ:hover {
+button.equationEditorProblemButton:hover {
   background-color: silver;
 }
 

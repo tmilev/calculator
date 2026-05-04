@@ -1940,6 +1940,8 @@ class LaTeXConstants {
       'Omega': '\u03A9',
       'infty': '\u221E',
       'S': '\u00A7',
+      'angle': '\u2220',
+      'triangle': '\u25B3',
       'partial': '\u2202',
     };
     /** @type {Object.<string, string>!} */

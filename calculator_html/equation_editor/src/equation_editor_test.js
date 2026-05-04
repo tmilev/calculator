@@ -113,6 +113,7 @@ const allLatexSnippets = [
   '\\mathbf{x} + \\mathbf y + \\mathcal A + \\mathbb H',
   `\\underbrace{x}_y`,
   `\\overbrace{x}^y`,
+  `\\angle\\in \\triangle ABC`,
   {// Large example. Came up in an actual scientific computation. 
     // Must not break the editor.
     content:

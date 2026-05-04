@@ -2837,7 +2837,7 @@ class CurveThreeD {
     /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     /** @type {number} */
-    this.numSegments = inputNumberOfSegments;
+    this.numberOfSegments = inputNumberOfSegments;
     this.lineWidth = inputLineWidth;
   }
 
@@ -2851,8 +2851,9 @@ class CurveThreeD {
     let x = this.coordinateFunctions[0](argumentT);
     let y = this.coordinateFunctions[1](argumentT);
     accountBoundingBox([x, y], inputOutputBox);
-    for (let i = 0; i < this.numSegments; i++) {
-      let ratio = i / (this.numSegments - 1);
+
+    for (let i = 0; i < this.numberOfSegments; i++) {
+      let ratio = i / (this.numberOfSegments - 1);
       argumentT = this.leftPoint * (1 - ratio) + this.rightPoint * ratio;
       x = this.coordinateFunctions[0](argumentT);
       y = this.coordinateFunctions[1](argumentT);
@@ -2881,8 +2882,8 @@ class CurveThreeD {
       surface.lineTo(coordinates[0], coordinates[1]);
     }
     let skippedValues = false;
-    for (let i = 0; i < this.numSegments; i++) {
-      let ratio = i / (this.numSegments - 1);
+    for (let i = 0; i < this.numberOfSegments; i++) {
+      let ratio = i / (this.numberOfSegments - 1);
       argumentT =
         this.leftPoint * (1 - ratio) + this.rightPoint * ratio;  //<- this way of
       // computing x introduces smaller numerical errors.
@@ -3525,11 +3526,12 @@ class Canvas {
    * @param {!CurveThreeD} curve [x,y,z]-location of the label.
    */
   drawCurve(curve) {
-    let contourPoints = new Array(curve.numSegments + 1);
-    for (let i = 0; i < curve.numSegments + 1; i++) {
-      let ratio = i / curve.numSegments;
-      let leftEvaluated = this.evaluateNumberOrParameter(curve.leftPoint);
-      let rightEvaluated = this.evaluateNumberOrParameter(curve.rightPoint);
+    const numberOfSegments = curve.numberOfSegments;
+    let contourPoints = new Array(numberOfSegments + 1);
+    let leftEvaluated = this.evaluateNumberOrParameter(curve.leftPoint);
+    let rightEvaluated = this.evaluateNumberOrParameter(curve.rightPoint);
+    for (let i = 0; i < numberOfSegments + 1; i++) {
+      let ratio = i / numberOfSegments;
       let argumentValue = leftEvaluated * (1 - ratio) + rightEvaluated * ratio;
       contourPoints[i] = curve.coordinateFunctions(
         argumentValue, this.parameterValues,

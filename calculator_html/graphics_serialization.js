@@ -590,12 +590,17 @@ class GraphicsSerialization {
         let rightEvaluated = this.interpretStringToNumberOrFunction(
           variableRanges[1], parameterNames, parameterValues,
         );
+        let evaluatedNumberOfSegments = canvas.evaluateNumberOrParameter(
+          this.interpretStringToNumberOrFunction(
+            numberOfSegments, parameterNames, parameterValues
+          )
+        );
         canvas.drawCurveCreate(
           new Graphics.CurveThreeD(
             curveImmersion,
             leftEvaluated,
             rightEvaluated,
-            numberOfSegments,
+            evaluatedNumberOfSegments,
             color,
             lineWidth,
           ),

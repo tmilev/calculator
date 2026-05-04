@@ -139,6 +139,9 @@ class InputPanelData {
         "limits": true,
         "limit": true,
       }),
+      seriesconvergence: new ButtonCollection({
+        "seriesconvergence": true,
+      }),
       series: new ButtonCollection({
         "sum": true,
         "series": true,
@@ -459,6 +462,10 @@ class InputPanelData {
         "binom",
         { fontSize: "7px" },
       );
+    }
+    if (this.flagButtons.seriesconvergence.selected || noOptions || includeAll) {
+      this.addLatexCommand("convergent", "con", { fontSize: "9px" });
+      this.addLatexCommand("divergent", "div", { fontSize: "9px" });
     }
     if (noOptions || includeAll) {
       this.addLatexCommand("\\circ", "\u2218");

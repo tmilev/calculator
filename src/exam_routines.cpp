@@ -2578,6 +2578,8 @@ void CalculatorHTML::initAutocompleteExtras() {
   }
   this->autoCompleteExtrasForProblems.addOnTop("answerCalculatorHighlight");
   this->autoCompleteExtrasForProblems.addOnTop("algebra");
+  this->autoCompleteExtrasForProblems.addOnTop("series");
+  this->autoCompleteExtrasForProblems.addOnTop("seriesConvergence");
   this->autoCompleteExtrasForProblems.addOnTop("logarithms");
   this->autoCompleteExtrasForProblems.addOnTop("buttons");
   this->autoCompleteExtrasForProblems.addOnTop("displaystyle");

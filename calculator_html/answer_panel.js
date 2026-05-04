@@ -26,7 +26,9 @@ class AnswerPanel {
      * isLoggedIn: boolean,
      * idButtonAnswer:string,
      * problemId:string,
-     * randomSeed: number|null|undefined}} */
+     * randomSeed: number|null|undefined
+     * }}
+     */
     input,
   ) {
     this.input = input;

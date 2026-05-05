@@ -1542,7 +1542,8 @@ bool SemisimpleSubalgebras::isSolved(const CandidateSubalgebraStatus& status) {
   return
   status == CandidateSubalgebraStatus::realized ||
   status == CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions ||
-  status == CandidateSubalgebraStatus::unrealizableNonFittingCharacter;
+  status == CandidateSubalgebraStatus::unrealizableNonFittingCharacter ||
+  status == CandidateSubalgebraStatus::previouslyRealizedAsADirectSummand;
 }
 
 bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
@@ -1570,7 +1571,9 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
       foundUnrealizedStream
       << "<hr>Failed to realize type "
       << candidate.weylNonEmbedded->dynkinType.toString()
-      << " because I couldn't handle the polynomial system. "
+      << ". Subalgebra status: "
+      << candidate.toStringStatus()
+      << ". "
       << "One polynomial system that governs the embedding follows.<br>"
       << candidate.toStringSystemPart2()
       << "<hr>";

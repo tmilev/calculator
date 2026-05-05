@@ -3446,7 +3446,7 @@ bool CalculatorLieTheory::exponentOfAdjointOf(
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> result;
   if (
-  multiplyAByPi||
+    multiplyAByPi ||
     !ownerSemisimple->exponentOfAdXIfNilpotent(
       elementA, elementB, result, &commentsOnError
     )

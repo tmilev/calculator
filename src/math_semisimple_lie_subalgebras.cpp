@@ -7474,10 +7474,6 @@ attemptToSolveSystemFinal() {
   if (this->configuredSystemToSolve.flagSystemSolvedOverBaseField) {
     this->status = CandidateSubalgebraStatus::realized;
   } else if (this->configuredSystemToSolve.flagSystemProvenToHaveNoSolution) {
-    global.comments
-    << "DEBUG: type: "
-    << this->toStringType()
-    << " unrealizable!";
     this->status =
     CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions;
   } else {

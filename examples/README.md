@@ -2345,6 +2345,16 @@ PlotExpressionTree (1,2);
 ```
 Internal data structure transformation: sequence ->open interval.
 
+Operator or function \log is overloaded with 2 total handlers.
+
+*\log* [LogarithmOfZeroAndOne] {CalculatorFunctionsBasic::logarithmOfOneAndZero}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog%7b%7d%281%29%3b%5cn%5c%5clog%200%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+\log{}(1);
+\log 0
+```
+Logarithm of 1 and zero. 
+
 *\log* [\log] {CalculatorFunctionsBasic::logarithm}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog%7b%7d%28e%29%3b%5cn%5c%5clog%2010%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

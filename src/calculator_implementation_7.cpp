@@ -887,10 +887,10 @@ bool CalculatorFunctionsBasic::logarithmBase(
   );
 }
 
-bool CalculatorFunctionsBasic::logarithm(
+bool CalculatorFunctionsBasic::logarithmOfOneAndZero(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBasic::logarithm");
+  STACK_TRACE("CalculatorFunctionsBasic::logarithmOfOneAndZero");
   if (input.size() != 2) {
     return false;
   }
@@ -900,6 +900,16 @@ bool CalculatorFunctionsBasic::logarithm(
   }
   if (input[1].isEqualToOne()) {
     return output.assignValue(calculator, 0);
+  }
+  return false;
+}
+
+bool CalculatorFunctionsBasic::logarithm(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsBasic::logarithm");
+  if (input.size() != 2) {
+    return false;
   }
   double argument;
   if (!input[1].evaluatesToDouble(&argument)) {

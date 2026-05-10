@@ -2757,7 +2757,7 @@ bool CalculatorFunctionsBinaryOps::multiplySequenceByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsBinaryOps::multiplySequenceByMatrix");
-  if (!input.startsWith(calculator.opTimes()) || input.size()!= 3) {
+  if (!input.startsWith(calculator.opTimes()) || input.size() != 3) {
     return false;
   }
   int matrixRows = - 1;

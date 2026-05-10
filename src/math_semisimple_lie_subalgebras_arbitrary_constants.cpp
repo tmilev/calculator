@@ -77,7 +77,7 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
   this->output.configuredSystemToSolve.groebner.polynomialOrder.monomialOrder.
   setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
   DynkinType& embeddedType = this->output.weylNonEmbedded->dynkinType;
-  if (embeddedType == C(1,5)) {
+  if (embeddedType == C(1, 5)) {
     // Known to run slow in this type.
     maximumPolynomialDivisions = 100;
     maximumMonomialOperations = 2000;
@@ -98,9 +98,7 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
     true;
   }
   std::string embeddingLieAlgebraName = embeddedType.toString();
-  if (
-      embeddedType == B(3,2) && ambientType == E(1,6)
-  ) {
+  if (embeddedType == B(3, 2) && ambientType == E(1, 6)) {
     this->output.configuredSystemToSolve.substitutionsProvider.
     oneIsFirstWhenRecursionDepthIsMultipleOf =
     1;
@@ -224,12 +222,12 @@ bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
 bool CandidateSemisimpleSubalgebraArbitraryConstants::
 loadBuiltInGeneratorHintsE6() {
   DynkinType& typeToBeRealized = this->output.weylNonEmbedded->dynkinType;
-  if (typeToBeRealized ==A(36,1)) {
+  if (typeToBeRealized == A(36, 1)) {
     this->output.unknownNegativeGenerators[0] =
     g(- 6) + g(- 7) + g(- 8) + g(- 9) + g(- 10) + g(- 19);
     return true;
   }
-  if (typeToBeRealized == A(8,1)+A(4,1)) {
+  if (typeToBeRealized == A(8, 1) + A(4, 1)) {
     this->output.unknownNegativeGenerators[0] =
     g(- 12) + g(- 18) + g(- 20) + g(- 21) + g(- 22);
     this->output.unknownNegativeGenerators[1] = g(- 10) + g(- 13) + g(- 19);
@@ -772,16 +770,17 @@ DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::A(
 }
 
 DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::B(
-    int dynkinIndex, int rank
-    ) const {
+  int dynkinIndex, int rank
+) const {
   DynkinType result;
   Rational dynkinIndexRational = dynkinIndex;
   result.makeSimpleType('B', rank, &dynkinIndexRational);
   return result;
 }
+
 DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::C(
-    int dynkinIndex, int rank
-    ) const {
+  int dynkinIndex, int rank
+) const {
   DynkinType result;
   Rational dynkinIndexRational = dynkinIndex;
   result.makeSimpleType('C', rank, &dynkinIndexRational);

@@ -563,6 +563,9 @@ public:
   static bool logarithmBase(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool logarithmOfOneAndZero(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool logarithm(
     Calculator& calculator, const Expression& input, Expression& output
   );

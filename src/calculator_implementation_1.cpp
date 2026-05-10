@@ -1222,14 +1222,12 @@ JSData Plot::plotJSON3d(Calculator& owner) {
   JSData result;
   this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
   result[WebAPI::Result::scriptType] = "graphics3d";
-  if (!owner.flagPlotShowJavascriptOnly) {
-    std::string canvasId = this->getCanvasName();
-    std::string controlsId = canvasId + "Controls";
-    std::string messagesId = canvasId + "Messages";
-    result[Plot::Labels::canvasName] = canvasId;
-    result[Plot::Labels::controlsName] = controlsId;
-    result[Plot::Labels::messagesName] = messagesId;
-  }
+  std::string canvasId = this->getCanvasName();
+  std::string controlsId = canvasId + "Controls";
+  std::string messagesId = canvasId + "Messages";
+  result[Plot::Labels::canvasName] = canvasId;
+  result[Plot::Labels::controlsName] = controlsId;
+  result[Plot::Labels::messagesName] = messagesId;
   JSData plotUpdaters;
   for (int i = 0; i < this->parameterNames.size; i ++) {
     InputBox& currentBox =

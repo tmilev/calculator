@@ -1326,6 +1326,17 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\log",
+    CalculatorFunctionsBasic::logarithmOfOneAndZero,
+    "",
+    "Logarithm of 1 and zero. ",
+    "\\log{}(1);\n"
+    "\\log 0",
+    "CalculatorFunctionsBasic::logarithmOfOneAndZero",
+    "LogarithmOfZeroAndOne",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "\\log",
     CalculatorFunctionsBasic::logarithm,
     "",
     "Logarithm function. "

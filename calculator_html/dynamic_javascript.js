@@ -42,7 +42,7 @@ class OneGraphicWithSliders {
       layerContainer.className = "layerContainer";
     }
     if (canvases.length < 1) {
-      throw "Unexpected missing canvas.";
+      throw new Error(`Unexpected missing canvas. Canvas name: ${canvasName}`);
     }
     this.canvas = graphicsSerialization.fromJSON(
       this.graphics,

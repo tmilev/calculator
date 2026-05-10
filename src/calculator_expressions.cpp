@@ -1685,9 +1685,6 @@ bool Expression::getBoundVariables(
 }
 
 bool Expression::allowedAsFreeVariableAtom(const std::string& input) const {
-  // TODO: take care of matrices!
-  // Check problem: Vector-column-addition-1.html
-  int doNotSubmit;
   return
   input != "=" &&
   input != ">" &&

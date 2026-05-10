@@ -477,6 +477,7 @@ public:
   void getWeightProjectionFundamentalCoordinates(
     const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
   ) const;
+  bool startRealizationWithCartanCentralizerNormalization();
   void attemptToSolveSystem(
     bool attemptToChooseCentalizer,
     bool allowNonPolynomialSystemFailure,

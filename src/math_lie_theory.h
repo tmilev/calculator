@@ -255,7 +255,7 @@ public:
     List<int>* outputMults = nullptr,
     List<Rational>* outputFirstCoRootLengthsSquared = nullptr
   ) const;
-  void getTypesWithMults(List<DynkinSimpleType>& output) const;
+  void getTypesWithMultiplicities(List<DynkinSimpleType>& output) const;
   static void getOuterAutosGeneratorsOneTypeActOnVectorColumn(
     List<MatrixTensor<Rational> >& output,
     const DynkinSimpleType& dynkinType,

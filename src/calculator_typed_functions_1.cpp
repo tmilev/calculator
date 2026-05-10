@@ -2757,18 +2757,20 @@ bool CalculatorFunctionsBinaryOps::multiplySequenceByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsBinaryOps::multiplySequenceByMatrix");
-  if (!input.startsWith(calculator.opTimes())) {
+  if (!input.startsWith(calculator.opTimes()) || input.size()!= 3) {
     return false;
   }
   int matrixRows = - 1;
   int matrixColumns = - 1;
+  const Expression& sequence = input[1];
+  const Expression& matrix = input[2];
   if (
-    !input[1].isSequenceNElements() ||
-    !input[2].isMatrix(&matrixRows, &matrixColumns)
+    !sequence.isSequenceNElements() ||
+    !matrix.isMatrix(&matrixRows, &matrixColumns)
   ) {
     return false;
   }
-  if (input[1].size() - 1 != matrixRows) {
+  if (sequence.size() - 1 != matrixRows) {
     return false;
   }
   List<Expression> result;

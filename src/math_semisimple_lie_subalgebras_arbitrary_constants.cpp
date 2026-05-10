@@ -10,6 +10,8 @@ public:
   bool loadBuiltInGeneratorHintsE8();
   bool loadBuiltInGeneratorHintsE6();
   bool loadBuiltInGeneratorHints();
+  bool startRealizationWithCartanCentralizerNormalization();
+  bool startRealizationWithCartanCentralizerNormalizationInE8();
   CandidateSemisimpleSubalgebraArbitraryConstants(
     CandidateSemisimpleSubalgebra& outputSubalgebra
   ):
@@ -36,11 +38,19 @@ public:
   DynkinType A(int dynkinIndex, int rank) const;
   // Makes a dynkin type B.
   DynkinType B(int dynkinIndex, int rank) const;
+  // Makes a dynkin type C.
+  DynkinType C(int dynkinIndex, int rank) const;
   // Makes dynkin type E.
   DynkinType E(int dynkinIndex, int rank) const;
   // Makes dynkin type G.
   DynkinType G(int dynkinIndex, int rank) const;
 };
+
+bool CandidateSemisimpleSubalgebra::
+startRealizationWithCartanCentralizerNormalization() {
+  CandidateSemisimpleSubalgebraArbitraryConstants constants(*this);
+  return constants.startRealizationWithCartanCentralizerNormalization();
+}
 
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   CandidateSemisimpleSubalgebraArbitraryConstants constants(*this);
@@ -66,14 +76,12 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
   initializeForGroebnerComputation();
   this->output.configuredSystemToSolve.groebner.polynomialOrder.monomialOrder.
   setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
-  std::string ambientLieAlgebraName =
-  this->output.owner->owner->toStringLieAlgebraName();
-  if (ambientLieAlgebraName == "C^{1}_5") {
+  DynkinType& embeddedType = this->output.weylNonEmbedded->dynkinType;
+  if (embeddedType == C(1,5)) {
     // Known to run slow in this type.
     maximumPolynomialDivisions = 100;
     maximumMonomialOperations = 2000;
   }
-  DynkinType& embeddedType = this->output.weylNonEmbedded->dynkinType;
   DynkinType& ambientType = this->output.owner->owner->weylGroup.dynkinType;
   if (ambientType == E(1, 8)) {
     this->configurePolynomialSystemE8();
@@ -91,7 +99,7 @@ void CandidateSemisimpleSubalgebraArbitraryConstants::configurePolynomialSystem
   }
   std::string embeddingLieAlgebraName = embeddedType.toString();
   if (
-    embeddingLieAlgebraName == "B^{3}_2" && ambientLieAlgebraName == "E^{1}_6"
+      embeddedType == B(3,2) && ambientType == E(1,6)
   ) {
     this->output.configuredSystemToSolve.substitutionsProvider.
     oneIsFirstWhenRecursionDepthIsMultipleOf =
@@ -215,17 +223,41 @@ bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::
 loadBuiltInGeneratorHintsE6() {
-  std::string typeToBeRealized =
-  this->output.weylNonEmbedded->dynkinType.toString();
-  if (typeToBeRealized == "A^{36}_1") {
+  DynkinType& typeToBeRealized = this->output.weylNonEmbedded->dynkinType;
+  if (typeToBeRealized ==A(36,1)) {
     this->output.unknownNegativeGenerators[0] =
     g(- 6) + g(- 7) + g(- 8) + g(- 9) + g(- 10) + g(- 19);
     return true;
   }
-  if (typeToBeRealized == "A^{8}_1+A^{4}_1") {
+  if (typeToBeRealized == A(8,1)+A(4,1)) {
     this->output.unknownNegativeGenerators[0] =
     g(- 12) + g(- 18) + g(- 20) + g(- 21) + g(- 22);
     this->output.unknownNegativeGenerators[1] = g(- 10) + g(- 13) + g(- 19);
+  }
+  return false;
+}
+
+bool CandidateSemisimpleSubalgebraArbitraryConstants::
+startRealizationWithCartanCentralizerNormalization() {
+  if (
+    !this->output.getAmbientWeyl().dynkinType.isSimple(
+      &this->dynkinType, &this->rank
+    )
+  ) {
+    return false;
+  }
+  if (this->dynkinType == 'E' && this->rank == 8) {
+    return this->startRealizationWithCartanCentralizerNormalizationInE8();
+  }
+  return false;
+}
+
+bool CandidateSemisimpleSubalgebraArbitraryConstants::
+startRealizationWithCartanCentralizerNormalizationInE8() {
+  DynkinType& type = this->output.weylNonEmbedded->dynkinType;
+  if (type == A(7, 1) + A(2, 1)) {
+    this->output.centralizerRank = 3;
+    return true;
   }
   return false;
 }
@@ -740,11 +772,19 @@ DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::A(
 }
 
 DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::B(
-  int dynkinIndex, int rank
-) const {
+    int dynkinIndex, int rank
+    ) const {
   DynkinType result;
   Rational dynkinIndexRational = dynkinIndex;
   result.makeSimpleType('B', rank, &dynkinIndexRational);
+  return result;
+}
+DynkinType CandidateSemisimpleSubalgebraArbitraryConstants::C(
+    int dynkinIndex, int rank
+    ) const {
+  DynkinType result;
+  Rational dynkinIndexRational = dynkinIndex;
+  result.makeSimpleType('C', rank, &dynkinIndexRational);
   return result;
 }
 

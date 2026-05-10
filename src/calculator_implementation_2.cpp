@@ -1296,7 +1296,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
       std::stringstream substitutionComment;
       if (this->history != nullptr) {
         substitutionComment
-        << "\text{User-defined substitution: }"
+        << "\\text{User-defined substitution: }"
         << currentPattern.toString();
       }
       this->setOutput(afterPatternMatch, substitutionComment.str());

@@ -5785,7 +5785,8 @@ bool SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast(
   return false;
 }
 
-void DynkinType::getTypesWithMults(List<DynkinSimpleType>& output) const {
+void DynkinType::getTypesWithMultiplicities(List<DynkinSimpleType>& output)
+const {
   output.setSize(0);
   output.reserve(this->getNumberOfSimpleComponents());
   List<DynkinSimpleType> componentsSorted;

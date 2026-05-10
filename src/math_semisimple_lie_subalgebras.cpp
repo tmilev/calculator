@@ -2222,7 +2222,9 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize(
     this->status = CandidateSubalgebraStatus::unrealizableNonFittingCharacter;
     return this->status;
   }
-  this->attemptToSolveSystem(false, false, currentExtension);
+  bool chooseCentralizer =
+  this->startRealizationWithCartanCentralizerNormalization();
+  this->attemptToSolveSystem(chooseCentralizer, false, currentExtension);
   if (
     this->status ==
     CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions
@@ -2856,7 +2858,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
 ) {
   STACK_TRACE("DynkinType::getDynkinIndicesSl2Subalgebras");
   List<DynkinSimpleType> dynkinTypes;
-  this->getTypesWithMults(dynkinTypes);
+  this->getTypesWithMultiplicities(dynkinTypes);
   List<List<Rational> > dynkinIndicesPerType;
   HashedList<Rational> bufferIndices;
   for (int i = 0; i < dynkinTypes.size; i ++) {
@@ -4467,6 +4469,7 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
       << "centralizer was not computed correctly. "
       << "Here's a full subalgebra printout"
       << this->toString(nullptr)
+      << this->toStringCentralizer(nullptr)
       << global.fatal;
     }
     if (rankCentralizer > this->getAmbientWeyl().getDimension()) {
@@ -4777,7 +4780,6 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystemPart2(
     this->attemptToSolveSystemPart2(
       attemptToChooseCentalizer, allowNonPolynomialSystemFailure
     );
-    return;
   }
 }
 
@@ -7472,6 +7474,10 @@ attemptToSolveSystemFinal() {
   if (this->configuredSystemToSolve.flagSystemSolvedOverBaseField) {
     this->status = CandidateSubalgebraStatus::realized;
   } else if (this->configuredSystemToSolve.flagSystemProvenToHaveNoSolution) {
+    global.comments
+    << "DEBUG: type: "
+    << this->toStringType()
+    << " unrealizable!";
     this->status =
     CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions;
   } else {
@@ -7504,8 +7510,7 @@ bool CandidateSemisimpleSubalgebra::verifySolution(
     currentPositive.substituteInCoefficients(substitution);
     this->negativeGenerators[i] = currentNegative;
     // <-implicit type conversion here, will crash if currentNegativeElement
-    // has
-    // non-const coefficients
+    // has non-const coefficients
     this->positiveGenerators[i] = currentPositive;
     // <-implicit type conversion here, will crash if currentNegElt has
     // non-const coefficients
@@ -7633,7 +7638,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
     monomial, this->getAmbientSemisimpleLieAlgebra().getRank()
   );
   List<DynkinSimpleType> dynkinTypes;
-  this->weylNonEmbedded->dynkinType.getTypesWithMults(dynkinTypes);
+  this->weylNonEmbedded->dynkinType.getTypesWithMultiplicities(dynkinTypes);
   Matrix<Rational> coCartanCandidate;
   this->cartanElementsScaledToActByTwo.getGramMatrix(
     coCartanCandidate, &this->getAmbientWeyl().cartanSymmetric
@@ -7841,6 +7846,7 @@ computeAndVerifyFromKnownGeneratorsAndHsPrepare(
       << this->weylNonEmbedded->coCartanSymmetric.toString()
       << ".</b>";
     }
+    this->owner->logComments(out.str());
     this->status = CandidateSubalgebraStatus::corrupt;
   }
   return this->status != CandidateSubalgebraStatus::corrupt;
@@ -7867,6 +7873,12 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs(
   }
   if (
     this->status ==
+    CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions
+  ) {
+    return false;
+  }
+  if (
+    this->status ==
     CandidateSubalgebraStatus::neitherRealizedNorProvedImpossible
   ) {
     return false;
@@ -7878,6 +7890,7 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs(
     << "<b>Corrupt semisimple subalgebra: "
     << "the ambient Lie algebra does not decompose "
     << "properly over the candidate subalgebra. </b>";
+    this->owner->logComments(out.str());
     this->status = CandidateSubalgebraStatus::corrupt;
   }
   if (!this->checkGeneratorsBracketToHs()) {
@@ -7885,6 +7898,7 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs(
     << "<b>Corrupt semisimple subalgebra: "
     << "Lie brackets of generators do not equal "
     << "the desired elements of the Cartan. </b>";
+    this->owner->logComments(out.str());
     this->status = CandidateSubalgebraStatus::corrupt;
   }
   this->comments = out.str();
@@ -9300,7 +9314,7 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
   bool useLaTeX = format == nullptr ? true : format->flagUseLatex;
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   List<DynkinSimpleType> simpleTypes;
-  this->weylNonEmbedded->dynkinType.getTypesWithMults(simpleTypes);
+  this->weylNonEmbedded->dynkinType.getTypesWithMultiplicities(simpleTypes);
   FormatExpressions currentFormat;
   currentFormat.ambientWeylLetter =
   this->getAmbientWeyl().dynkinType[0].letter;
@@ -10221,7 +10235,7 @@ void CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType(
 ) const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType");
   List<DynkinSimpleType> allTypes;
-  this->weylNonEmbedded->dynkinType.getTypesWithMults(allTypes);
+  this->weylNonEmbedded->dynkinType.getTypesWithMultiplicities(allTypes);
   outputHsByType.setSize(0);
   outputTypeList.setSize(0);
   if (

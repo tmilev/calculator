@@ -195,6 +195,16 @@ configurePolynomialSystemE8() {
     =
     MonomialPolynomial::orderDegreeThenLeftLargerWins();
   }
+  if (
+    embeddedType == A(7, 1) + A(2, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({1, 1, 0, 1, 1, 1, 1, 1})
+    )
+  ) {
+    // The system is contradictory but harder to prove so.
+    maximumPolynomialDivisions = 200000;
+    maximumMonomialOperations = 1000000;
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
@@ -253,8 +263,8 @@ startRealizationWithCartanCentralizerNormalization() {
 bool CandidateSemisimpleSubalgebraArbitraryConstants::
 startRealizationWithCartanCentralizerNormalizationInE8() {
   DynkinType& type = this->output.weylNonEmbedded->dynkinType;
-  if (type == A(7, 1) + A(2, 1)) {
-    this->output.centralizerRank = 3;
+  if (type == A(7, 1) + A(1, 1)) {
+    this->output.centralizerRank = 2;
     return true;
   }
   return false;

@@ -2317,7 +2317,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
     computation.polynomialOrder.monomialOrder = monomialOrder;
     Polynomial<Rational> numeratorCopy = this->numerator;
     computation.remainderDivisionByBasis(
-      numeratorCopy, computation.remainderDivision, - 1
+      numeratorCopy, computation.remainderDivision
     );
     this->printoutPartialFractionsLatex
     << "Here is a detailed long polynomial division. ";

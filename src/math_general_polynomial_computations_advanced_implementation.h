@@ -450,7 +450,6 @@ template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
   Polynomial<Coefficient>& currentRemainder,
   Polynomial<Coefficient>& remainderResult,
-  int basisIndexToIgnore,
   ProgressReport* report
 ) {
   STACK_TRACE("GroebnerBasisComputation::oneDivisonStepWithBasis");
@@ -465,9 +464,6 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
     return false;
   }
   for (int i = 0; i < this->basis.size; i ++) {
-    if (i == basisIndexToIgnore) {
-      continue;
-    }
     if (!highestMonomial.isDivisibleBy(this->basis[i].leadingMonomial)) {
       continue;
     }
@@ -492,12 +488,9 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
 template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
   const Polynomial<Coefficient>& input,
-  Polynomial<Coefficient>& outputRemainder,
-  int basisIndexToIgnore
+  Polynomial<Coefficient>& outputRemainder
 ) {
-  this->remainderDivisionByBasisFailureAllowed(
-    input, outputRemainder, basisIndexToIgnore, false
-  );
+  this->remainderDivisionByBasisFailureAllowed(input, outputRemainder, false);
 }
 
 template <class Coefficient>
@@ -531,7 +524,6 @@ bool GroebnerBasisComputation<Coefficient>::
 remainderDivisionByBasisFailureAllowed(
   const Polynomial<Coefficient>& input,
   Polynomial<Coefficient>& outputRemainder,
-  int basisIndexToIgnore,
   bool failureAllowed
 ) {
   // Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62.
@@ -581,7 +573,7 @@ remainderDivisionByBasisFailureAllowed(
     this->numberOfIntermediateRemainders = 0;
     while (
       this->oneDivisonStepWithBasis(
-        currentRemainder, outputRemainder, basisIndexToIgnore, &reportMain
+        currentRemainder, outputRemainder, &reportMain
       )
     ) {
       if (failureAllowed && this->limitsExceeded()) {
@@ -629,22 +621,21 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
   this->remainderDivision.getIndexLeadingMonomial(
     &newLeadingMonomial, nullptr, &this->polynomialOrder.monomialOrder
   );
-  int indexToAddAt = 0;
-  for (; indexToAddAt < this->basis.size; indexToAddAt ++) {
-    MonomialPolynomial& otherLeadingMonomial =
-    this->basis[indexToAddAt].leadingMonomial;
-    if (
-      this->polynomialOrder.monomialOrder.greaterThan(
-        otherLeadingMonomial, newLeadingMonomial
-      )
-    ) {
-      break;
+  int writingAtIndex = 0;
+  for (int i = 0; i < this->basis.size; i ++) {
+    const BasisElement& other = this->basis[i];
+    if (other.leadingMonomial.isDivisibleBy(newLeadingMonomial)) {
+      this->basisCandidates.addOnTop(other.element);
+      continue;
     }
+    if (writingAtIndex < i) {
+      this->basis[writingAtIndex] = other;
+    }
+    writingAtIndex ++;
   }
-  for (int i = this->basis.size - 1; i >= indexToAddAt; i --) {
-    this->basisCandidates.addOnTop(this->basis[i].element);
+  if (writingAtIndex < this->basis.size) {
+    this->basis.setSize(writingAtIndex);
   }
-  this->basis.setSize(indexToAddAt);
   this->addBasisElementNoReduction(this->remainderDivision);
   return true;
 }
@@ -1559,46 +1550,48 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
 }
 
 template <class Coefficient>
-bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
+void PolynomialSystem<Coefficient>::singleMonomialEquations(
   const List<Polynomial<Coefficient> >& inputSystem,
-  MonomialPolynomial& outputMonomial
+  HashedList<MonomialPolynomial>& outputMonomials
 ) {
-  STACK_TRACE("PolynomialSystem::hasSingleMonomialEquation");
-  bool result = false;
-  int minimalNumberOfNonZeroMonomialEntries =
-  this->numberOfVariablesToSolveForStart * 2 + 1;
-  for (int i = 0; i < inputSystem.size; i ++) {
-    Polynomial<Coefficient>& polynomial = inputSystem[i];
+  STACK_TRACE("PolynomialSystem::singleMonomialEquations");
+  outputMonomials.clear();
+  for (const Polynomial<Coefficient>& polynomial : inputSystem) {
     if (polynomial.size() != 1) {
       continue;
     }
-    result = true;
-    int currentNumberNonZeroMonomialEntries = 0;
-    const MonomialPolynomial& onlyMonomial = polynomial[0];
-    for (int j = 0; j < onlyMonomial.minimalNumberOfVariables(); j ++) {
-      if (!(onlyMonomial(j) == 0)) {
-        currentNumberNonZeroMonomialEntries ++;
-      }
-    }
-    if (
-      currentNumberNonZeroMonomialEntries <
-      minimalNumberOfNonZeroMonomialEntries
-    ) {
-      outputMonomial = onlyMonomial;
+    outputMonomials.addOnTopNoRepetition(polynomial[0]);
+  }
+}
+
+template <class Coefficient>
+MonomialPolynomial PolynomialSystem<Coefficient>::
+selectMonomialWithLeastNumberOfVariables(
+  const HashedList<MonomialPolynomial>& monomialsKnownToBeZero
+) {
+  MonomialPolynomial result = monomialsKnownToBeZero[0];
+  int currentNumberNonZeroMonomialEntries = result.numberOfNonZeroDegrees();
+  for (const MonomialPolynomial& monomial : monomialsKnownToBeZero) {
+    int incoming = monomial.numberOfNonZeroDegrees();
+    if (incoming < currentNumberNonZeroMonomialEntries) {
+      result = monomial;
+      currentNumberNonZeroMonomialEntries = incoming;
     }
   }
   return result;
 }
 
 template <class Coefficient>
-void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
+void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomials(
   List<Polynomial<Coefficient> >& inputOutputSystem,
-  const MonomialPolynomial& monomial
+  const HashedList<MonomialPolynomial>& singleMonomials
 ) {
-  STACK_TRACE("PolynomialSystem::solveWhenSystemHasSingleMonomial");
+  STACK_TRACE("PolynomialSystem::solveWhenSystemHasSingleMonomials");
   ProgressReport report1;
   List<Polynomial<Coefficient> > inputSystemCopy = inputOutputSystem;
   bool allProvenToHaveNoSolution = true;
+  MonomialPolynomial monomial =
+  this->selectMonomialWithLeastNumberOfVariables(singleMonomials);
   if (monomial.isConstant()) {
     // We have an equation of the form 1=0.
     this->flagSystemProvenToHaveNoSolution = true;
@@ -1606,7 +1599,10 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
   }
   std::stringstream caseSummary;
   caseSummary
-  << "The system has the single monomial equation: "
+  << "The system has the single monomial equations: "
+  << singleMonomials.toString()
+  << "<br>"
+  << " of which we selected: "
   << monomial.toString(&this->format())
   << " = 0. ";
   for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
@@ -1720,15 +1716,15 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     report2.report(out.str());
   }
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;
-  MonomialPolynomial singleMonomialEquation;
-  if (
-    this->flagUseMonomialBranchingOptimization &&
-    this->hasSingleMonomialEquation(inputSystem, singleMonomialEquation)
-  ) {
-    this->solveWhenSystemHasSingleMonomial(
-      inputSystem, singleMonomialEquation
-    );
-    return;
+  if (this->flagUseMonomialBranchingOptimization) {
+    HashedList<MonomialPolynomial> singleMonomialEquations;
+    this->singleMonomialEquations(inputSystem, singleMonomialEquations);
+    if (singleMonomialEquations.size > 0) {
+      this->solveWhenSystemHasSingleMonomials(
+        inputSystem, singleMonomialEquations
+      );
+      return;
+    }
   }
   this->substitutionsProvider.sampleCoefficient = this->sampleCoefficient;
   this->substitutionsProvider.computeArbitrarySubstitutions(

@@ -90,7 +90,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
     computation.polynomialOrder.monomialOrder = *monomialOrder;
   }
   computation.remainderDivisionByBasis(
-    input[0], computation.remainderDivision, - 1
+    input[0], computation.remainderDivision
   );
   std::stringstream latexOutput;
   latexOutput
@@ -271,7 +271,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   }
   Polynomial<AlgebraicNumber> outputRemainder;
   computation.remainderDivisionByBasis(
-    polynomialsRational[0], outputRemainder, - 1
+    polynomialsRational[0], outputRemainder
   );
   Expression currentExpression;
   Expression polynomialExpression;

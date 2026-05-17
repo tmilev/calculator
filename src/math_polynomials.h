@@ -226,6 +226,15 @@ public:
     }
     return true;
   }
+  int numberOfNonZeroDegrees() const {
+    int count = 0;
+    for (const Rational& power : this->monomialBody) {
+      if (!power.isEqualToZero()) {
+        count ++;
+      }
+    }
+    return count;
+  }
   int minimalNumberOfVariables() const {
     return this->monomialBody.size;
   }
@@ -1148,21 +1157,18 @@ public:
   // list of polynomial divisors; the order of the divisors matters.
   void remainderDivisionByBasis(
     const Polynomial<Coefficient>& input,
-    Polynomial<Coefficient>& outputRemainder,
-    int basisIndexToIgnore = - 1
+    Polynomial<Coefficient>& outputRemainder
   );
   // Same as remainderDivisionByBasis but failure due to exceeding
   // computational limits is allowed.
   bool remainderDivisionByBasisFailureAllowed(
     const Polynomial<Coefficient>& input,
     Polynomial<Coefficient>& outputRemainder,
-    int basisIndexToIgnore = - 1,
     bool failureAllowed = false
   );
   bool oneDivisonStepWithBasis(
     Polynomial<Coefficient>& currentRemainder,
     Polynomial<Coefficient>& remainderResult,
-    int basisIndexToIgnore,
     ProgressReport* report
   );
   void oneDivisonSubStepWithBasis(
@@ -1260,17 +1266,20 @@ public:
     List<Polynomial<Coefficient> >& inputSystem,
     PolynomialSubstitution<Coefficient>& outputSubstitution
   );
-  bool hasSingleMonomialEquation(
+  void singleMonomialEquations(
     const List<Polynomial<Coefficient> >& inputSystem,
-    MonomialPolynomial& outputMonomial
+    HashedList<MonomialPolynomial>& outputMonomials
+  );
+  MonomialPolynomial selectMonomialWithLeastNumberOfVariables(
+    const HashedList<MonomialPolynomial>& monomialsKnownToBeZero
   );
   void setUpRecursiveComputation(PolynomialSystem<Coefficient>& toBeModified);
   void processPossiblySolvedSubcase(
     PolynomialSystem<Coefficient>& potentiallySolvedCase
   );
-  void solveWhenSystemHasSingleMonomial(
+  void solveWhenSystemHasSingleMonomials(
     List<Polynomial<Coefficient> >& inputOutputSystem,
-    const MonomialPolynomial& monomial
+    const HashedList<MonomialPolynomial>& singleMonomials
   );
   int getPreferredSerreSystemSubstitutionIndex(
     List<Polynomial<Coefficient> >& inputSystem

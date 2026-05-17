@@ -1555,6 +1555,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << "State at beginning of computation: "
   << this->toStringProgressReport();
   reportHeader.report(reportHeaderStream.str());
+  this->logComments("<hr><b> Resuming computation.</b>");
   while (this->incrementIfNeededReturnFalseIfPastLast()) {
     reportHeader.report(this->toStringProgressReport());
     CandidateSemisimpleSubalgebra candidate;
@@ -2222,8 +2223,11 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize(
     this->status = CandidateSubalgebraStatus::unrealizableNonFittingCharacter;
     return this->status;
   }
-  bool chooseCentralizer =
-  this->startRealizationWithCartanCentralizerNormalization();
+  bool chooseCentralizer = false;
+  if (this->startRealizationWithCartanCentralizerNormalization()) {
+    this->flagUsedBuiltInRealization = true;
+    chooseCentralizer = true;
+  }
   this->attemptToSolveSystem(chooseCentralizer, false, currentExtension);
   if (
     this->status ==
@@ -3571,6 +3575,14 @@ incrementIfNeededReturnFalseIfPastLast(ProgressReport* report) {
       this->state.numberOfExtensionHsExplored < this->state.
       extensionHCandidates.size
     ) {
+      this->owner->logComments(
+        "<br>Attempt to extend: " +
+        this->realizedBase->content.toStringType() +
+        " by " +
+        this->nextUnexploredDynkinType().toString() +
+        " via h candidate: " +
+        this->nextCandidateHScaledToActByTwo().toString()
+      );
       return true;
     }
     this->state.numberOfExtensionHsExplored = 0;
@@ -3757,6 +3769,10 @@ bool SemisimpleSubalgebras::incrementIfNeededReturnFalseIfPastLast() {
       lastExtension.realizedBase->content.getRank() >= this->owner->getRank()
     ) {
       this->currentSubalgebraChain.removeLastObject();
+      this->logComments(
+        "<br>Discarding subalgebra candidate because rank is too large: " +
+        lastExtension.realizedBase->content.toStringType()
+      );
       continue;
     }
     if (!lastExtension.incrementIfNeededReturnFalseIfPastLast(&report)) {
@@ -4227,10 +4243,17 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
     // CandidateSemisimpleSubalgebraArbitraryContants.
     // We have entered a hint, but we failed to solve for it, which means
     // our hint is wrong.
+    this->owner->logComments(
+      "Failed to solve for " +
+      this->weylNonEmbedded->dynkinType.toString() +
+      " which has a hard-coded hint. System: " +
+      this->toStringSystemPart2()
+    );
     global.fatal
     << "Encountered a hard-coded hint for semisimple subalgebra "
     << this->weylNonEmbedded->dynkinType.toString()
-    << " which I failed to solve for. "
+    << " which I failed to solve for.<br>"
+    << this->toStringSystemPart2()
     << global.fatal;
   }
 }
@@ -4577,7 +4600,9 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
     << "differs from number of unknown positive ones. "
     << global.fatal;
   }
-  this->flagUsedBuiltInRealization = this->loadBuiltInPartialRealization();
+  if (this->loadBuiltInPartialRealization()) {
+    this->flagUsedBuiltInRealization = true;
+  }
   this->prepareSystemSerreRelations();
   this->computeSystemToSolveMixedRelationsFirst();
   return true;
@@ -7487,6 +7512,17 @@ attemptToSolveSystemFinal() {
 bool CandidateSemisimpleSubalgebra::verifySolution(
   PolynomialSystem<AlgebraicNumber>& system
 ) {
+  if (
+    this->status ==
+    CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions &&
+    this->flagUsedBuiltInRealization
+  ) {
+    global.fatal
+    << "We have a subalgebra with built-in realization "
+    << "that we couldn't solve for. "
+    << this->toStringSystemPart2(nullptr)
+    << global.fatal;
+  }
   if (this->status != CandidateSubalgebraStatus::realized) {
     return true;
   }

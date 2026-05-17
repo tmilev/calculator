@@ -217,7 +217,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainderBuiltIn(
     computation.addBasisElementNoReduction(polynomials[i]);
   }
   Polynomial<Type> outputRemainder;
-  computation.remainderDivisionByBasis(polynomials[0], outputRemainder, - 1);
+  computation.remainderDivisionByBasis(polynomials[0], outputRemainder);
   return output.assignValueWithContext(calculator, outputRemainder, context);
 }
 
@@ -262,7 +262,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   computation.divisionReport.getElement().firstIndexLatexSlide =
   firstIndexLatexSlide;
   computation.remainderDivisionByBasis(
-    polynomialsRational[0], computation.remainderDivision, - 1
+    polynomialsRational[0], computation.remainderDivision
   );
   context.getFormat(computation.format);
   computation.format.flagUseLatex = true;

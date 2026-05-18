@@ -1227,11 +1227,6 @@ public:
   Coefficient sampleCoefficient;
   List<Polynomial<Coefficient> > gaussianEliminatedSystem;
   AlgebraicClosureRationals* algebraicClosure;
-  List<Polynomial<Coefficient> > hintEquations;
-  GroebnerBasisComputation<Coefficient> groebner;
-  MemorySaving<PolynomialSystem<Coefficient> > computationUsedInRecursiveCalls;
-  List<Coefficient> systemSolution;
-  Selection solutionsFound;
   // Additional polynomial equations that were added to the system
   // to help find a solution more quickly.
   // The hints are not necessarily a consequence of the polynomial system.
@@ -1243,6 +1238,11 @@ public:
   // y-1=0.
   // The hint equations may hide some solutions, but are expected
   // to not turn the system into a contradictory one.
+  List<Polynomial<Coefficient> > hintEquations;
+  GroebnerBasisComputation<Coefficient> groebner;
+  MemorySaving<PolynomialSystem<Coefficient> > computationUsedInRecursiveCalls;
+  List<Coefficient> systemSolution;
+  Selection solutionsFound;
   List<PolynomialSubstitution<Coefficient> > impliedSubstitutions;
   ArbitrarySubstitutionsProvider<Coefficient> substitutionsProvider;
   PolynomialSystem();
@@ -1266,7 +1266,7 @@ public:
     List<Polynomial<Coefficient> >& inputSystem,
     PolynomialSubstitution<Coefficient>& outputSubstitution
   );
-  void singleMonomialEquations(
+  void extractSingleMonomialEquations(
     const List<Polynomial<Coefficient> >& inputSystem,
     HashedList<MonomialPolynomial>& outputMonomials
   );

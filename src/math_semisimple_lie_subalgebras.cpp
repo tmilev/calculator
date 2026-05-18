@@ -2991,6 +2991,9 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
 }
 
 void SemisimpleSubalgebras::logComments(const std::string& extraComments) {
+  if (this->fileNameToLogComments.empty()) {
+    return;
+  }
   this->comments += extraComments;
   std::fstream logFile;
   if (
@@ -3768,11 +3771,12 @@ bool SemisimpleSubalgebras::incrementIfNeededReturnFalseIfPastLast() {
     if (
       lastExtension.realizedBase->content.getRank() >= this->owner->getRank()
     ) {
-      this->currentSubalgebraChain.removeLastObject();
       this->logComments(
         "<br>Discarding subalgebra candidate because rank is too large: " +
         lastExtension.realizedBase->content.toStringType()
       );
+      this->currentSubalgebraChain.removeLastObject();
+      // lastExtension is invalidated.
       continue;
     }
     if (!lastExtension.incrementIfNeededReturnFalseIfPastLast(&report)) {
@@ -4537,7 +4541,7 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
     }
     slTwoRealization =
     &this->owner->slTwoSubalgebras.allSubalgebras[slTwoIndex];
-    this->flagUsedBuiltInRealization = true;
+    this->flagUsedBuiltInRealization = !attemptToChooseCentalizer;
   }
   for (int i = 0; i < this->involvedNegativeGenerators.size; i ++) {
     if (

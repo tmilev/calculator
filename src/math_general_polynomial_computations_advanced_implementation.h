@@ -268,19 +268,23 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
   if (this->basisCandidates.size == 0) {
     return true;
   }
+  int bestIndex = 0;
   // Put the best polynomial in the last position.
-  for (int i = this->basisCandidates.size - 2; i >= 0; i --) {
+  for (int i = 1; i < this->basisCandidates.size; i ++) {
+    Polynomial<Coefficient>& bestCandidate = this->basisCandidates[bestIndex];
     const Polynomial<Coefficient>& currentCandidate =
     this->basisCandidates[i];
-    const Polynomial<Coefficient>& last = *this->basisCandidates.lastObject();
     if (
       PolynomialSystem<Coefficient>::leftIsBetterSubstitutionThanRight(
-        currentCandidate, last
+        currentCandidate, bestCandidate
       )
     ) {
-      this->basisCandidates.swapTwoIndices(i, this->basisCandidates.size - 1);
+      bestIndex = i;
     }
   }
+  this->basisCandidates.swapTwoIndices(
+    bestIndex, this->basisCandidates.size - 1
+  );
   if (
     !this->remainderDivisionByBasisFailureAllowed(
       *this->basisCandidates.lastObject(), this->remainderDivision
@@ -527,7 +531,10 @@ remainderDivisionByBasisFailureAllowed(
   bool failureAllowed
 ) {
   // Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62.
-  STACK_TRACE("GroebnerBasisComputation::remainderDivisionByBasis");
+  STACK_TRACE(
+    "GroebnerBasisComputation::"
+    "remainderDivisionByBasisFailureAllowed"
+  );
   if (this->flagDoLogDivision) {
     this->divisionReport.getElement().owner = this;
   }
@@ -633,9 +640,7 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
     }
     writingAtIndex ++;
   }
-  if (writingAtIndex < this->basis.size) {
-    this->basis.setSize(writingAtIndex);
-  }
+  this->basis.setSize(writingAtIndex);
   this->addBasisElementNoReduction(this->remainderDivision);
   return true;
 }
@@ -1550,7 +1555,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
 }
 
 template <class Coefficient>
-void PolynomialSystem<Coefficient>::singleMonomialEquations(
+void PolynomialSystem<Coefficient>::extractSingleMonomialEquations(
   const List<Polynomial<Coefficient> >& inputSystem,
   HashedList<MonomialPolynomial>& outputMonomials
 ) {
@@ -1560,7 +1565,7 @@ void PolynomialSystem<Coefficient>::singleMonomialEquations(
     if (polynomial.size() != 1) {
       continue;
     }
-    outputMonomials.addOnTopNoRepetition(polynomial[0]);
+    outputMonomials.addOnTopNoRepetition(polynomial.monomials[0]);
   }
 }
 
@@ -1569,6 +1574,10 @@ MonomialPolynomial PolynomialSystem<Coefficient>::
 selectMonomialWithLeastNumberOfVariables(
   const HashedList<MonomialPolynomial>& monomialsKnownToBeZero
 ) {
+  STACK_TRACE(
+    "PolynomialSystem::"
+    "selectMonomialWithLeastNumberOfVariables"
+  );
   MonomialPolynomial result = monomialsKnownToBeZero[0];
   int currentNumberNonZeroMonomialEntries = result.numberOfNonZeroDegrees();
   for (const MonomialPolynomial& monomial : monomialsKnownToBeZero) {
@@ -1600,7 +1609,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomials(
   std::stringstream caseSummary;
   caseSummary
   << "The system has the single monomial equations: "
-  << singleMonomials.toString()
+  << singleMonomials.toStringCommaDelimited()
   << "<br>"
   << " of which we selected: "
   << monomial.toString(&this->format())
@@ -1718,7 +1727,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;
   if (this->flagUseMonomialBranchingOptimization) {
     HashedList<MonomialPolynomial> singleMonomialEquations;
-    this->singleMonomialEquations(inputSystem, singleMonomialEquations);
+    this->extractSingleMonomialEquations(inputSystem, singleMonomialEquations);
     if (singleMonomialEquations.size > 0) {
       this->solveWhenSystemHasSingleMonomials(
         inputSystem, singleMonomialEquations
@@ -1739,11 +1748,13 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     << arbitrarySubstitutions.toStringCommaDelimited()
     << ".<br>";
   }
+  if (this->isSolvedSystem(inputSystem)) {
+    this->flagSystemSolvedOverBaseField = true;
+    this->flagSystemProvenToHaveSolution = true;
+    this->backSubstituteIntoPolynomialSystem(this->impliedSubstitutions);
+    return;
+  }
   for (int i = 0; i < arbitrarySubstitutions.size; i ++) {
-    if (this->isSolvedSystem(inputSystem)) {
-      this->flagSystemSolvedOverBaseField = true;
-      return;
-    }
     const Coefficient& arbitrarySubstitution = arbitrarySubstitutions[i];
     int preferredSubstitutionIndex =
     this->getPreferredSerreSystemSubstitutionIndex(inputSystem);

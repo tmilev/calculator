@@ -176,6 +176,59 @@ bool CalculatorFunctionsTrigonometry::csc(
   output.makeXOX(calculator, calculator.opDivide(), numerator, denominator);
 }
 
+bool CalculatorFunctionsTrigonometry::exponentOfMultipleOfIPi(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsTrigonometry::exponentOfMultipleOfIPi");
+  if (!input.startsWith(calculator.opPower(), 3)) {
+    return false;
+  }
+  if (!input[1].isOperationGiven(calculator.opE())) {
+    return false;
+  }
+  const Expression& powerExpression = input[2];
+  List<Expression> multiplicands;
+  calculator.accumulateMultiplicands(powerExpression, multiplicands);
+  if (multiplicands.size != 2) {
+    return false;
+  }
+  Expression& left = multiplicands[0];
+  Expression& right = multiplicands[1];
+  if (right != calculator.expressionPi()) {
+    return false;
+  }
+  AlgebraicNumber coefficient;
+  if (!left.isOfType<AlgebraicNumber>(&coefficient)) {
+    return false;
+  }
+  AlgebraicNumber imaginaryUnit;
+  imaginaryUnit = calculator.objectContainer.algebraicClosure.imaginaryUnit();
+  Rational rationalMultipleOfIPi;
+  if (!(coefficient / imaginaryUnit).isRational(&rationalMultipleOfIPi)) {
+    return false;
+  }
+  if (
+    !(rationalMultipleOfIPi* 4).isInteger() &&
+    !(rationalMultipleOfIPi* 6).isInteger()
+  ) {
+    return false;
+  }
+  AlgebraicNumber realPart;
+  AlgebraicNumber imaginaryPart;
+  if (
+    !realPart.assignCosRationalTimesPi(
+      rationalMultipleOfIPi, calculator.objectContainer.algebraicClosure
+    ) ||
+    !imaginaryPart.assignSinRationalTimesPi(
+      rationalMultipleOfIPi, calculator.objectContainer.algebraicClosure
+    )
+  ) {
+    return false;
+  }
+  AlgebraicNumber result = realPart + imaginaryPart * imaginaryUnit;
+  return output.assignValue(calculator, result);
+}
+
 bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

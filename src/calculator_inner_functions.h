@@ -400,6 +400,9 @@ public:
   static bool eulerFormulaAsLaw(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool exponentOfMultipleOfIPi(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool fourierFractionForm(
     Calculator& calculator, const Expression& input, Expression& output
   );

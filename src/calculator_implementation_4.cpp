@@ -339,10 +339,10 @@ bool Calculator::accumulateOpandsReturnTrueIfOrderIsNonCanonical(
   const Expression& input, List<Expression>& output, int operation
 ) {
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
-  if (this->recursionDepth > this->maximumRecursionDepth) {
-    return false;
-  }
-  if (!input.isListStartingWithAtom(operation)) {
+  if (
+    this->recursionDepth > this->maximumRecursionDepth ||
+    !input.isListStartingWithAtom(operation)
+  ) {
     output.addOnTop(input);
     return false;
   }

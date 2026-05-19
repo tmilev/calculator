@@ -1531,7 +1531,7 @@ z
 ```
 The operation =: is the "is denoted by" operation. The expression a =:b always reduces to a =b. In addition to the transformation, the pair of expressions a, b is registered in a special global "registry". This has the following effect. Every time the expression b is met, it is displayed on the screen as a. We note that subsequent occurrences of the expression a will first be replaced by b (as mandated by the a =b command), but then displayed on the screen as a.
 
-Operator or function ^ is overloaded with 37 total handlers.
+Operator or function ^ is overloaded with 38 total handlers.
 
 *^* [EulerFormula] {CalculatorFunctionsTrigonometry::eulerFormulaAsLaw}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22EulerFormula%5c%22%29%3b%5cne%5e%7bi%20x%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1540,6 +1540,15 @@ TurnOnRules("EulerFormula");
 e^{i x}
 ```
 Trigonometrizes an exponential expression using Euler's formula.
+
+*^* [ExponentiateEWhenAnswerIsEasyConstant] {CalculatorFunctionsTrigonometry::exponentOfMultipleOfIPi}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22e%5e%7bsqrt%28-1%29%20pi%2f2%7d%3b%5cne%5e%7bsqrt%28-1%29%20pi%2f3%7d%3b%5cne%5e%7b11%2f2%20sqrt%28-1%29%20pi%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+e^{sqrt(-1) pi/2};
+e^{sqrt(-1) pi/3};
+e^{11/2 sqrt(-1) pi}
+```
+Computes e^{sqrt(-1) pi q } where q is a rational multiple of 1/2.
 
 *^* [PowerImaginaryUnit] {CalculatorFunctions::powerImaginaryUnit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22PowerImaginaryUnit%5c%22%29%3b%5cni%5e%7b-50%21%2b%201%7d%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3815,7 +3824,7 @@ Returns the length of a sequence.
 ```
 GetMultiplicandList(a*b*c) 
 ```
-Converts a sum to a sequence containing the summands. 
+Converts a sum to a sequence containing the multiplicands. 
 
 *NormalizeIntervals* [NormalizeIntervals] {CalculatorFunctionsIntervals::normalizeIntervals}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cnNormalizeIntervals%28%5b2%2c3%5d%20%5c%5ccup%20%5b5%2c%207%5d%20%5c%5ccup%20%5b-%201%2c-%201%2f2%5d%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)

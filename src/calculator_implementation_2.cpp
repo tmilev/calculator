@@ -240,6 +240,12 @@ Expression Calculator::expressionEulersNumber() {
   return result;
 }
 
+Expression Calculator::expressionPi() {
+  Expression result;
+  result.makeAtom(*this, "\\pi");
+  return result;
+}
+
 Expression Calculator::expressionRational(const Rational& input) {
   Expression result;
   result.assignValue(*this, input);

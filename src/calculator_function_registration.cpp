@@ -838,6 +838,18 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
+    CalculatorFunctionsTrigonometry::exponentOfMultipleOfIPi,
+    "",
+    "Computes e^{sqrt(-1) pi q } where q is a rational multiple of 1/2.",
+    "e^{sqrt(-1) pi/2};\n"
+    "e^{sqrt(-1) pi/3};\n"
+    "e^{11/2 sqrt(-1) pi}",
+    "CalculatorFunctionsTrigonometry::exponentOfMultipleOfIPi",
+    "ExponentiateEWhenAnswerIsEasyConstant",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "^",
     CalculatorFunctions::powerImaginaryUnit,
     "",
     "Raises imaginary unit to an integer power. ",
@@ -2869,7 +2881,7 @@ void Calculator::initializeFunctionsStandard() {
     "GetMultiplicandList",
     CalculatorFunctions::collectMultiplicands,
     "",
-    "Converts a sum to a sequence containing the summands. ",
+    "Converts a sum to a sequence containing the multiplicands. ",
     "GetMultiplicandList(a*b*c) ",
     "CalculatorFunctions::collectMultiplicands",
     "GetMultiplicandList",

@@ -1608,8 +1608,9 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomials(
   }
   std::stringstream caseSummary;
   caseSummary
-  << "The system has the single monomial equations: "
-  << singleMonomials.toStringCommaDelimited()
+  << "The system has "
+  << singleMonomials.size
+  << " single monomials,"
   << "<br>"
   << " of which we selected: "
   << monomial.toString(&this->format())

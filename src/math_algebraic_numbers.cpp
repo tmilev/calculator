@@ -700,7 +700,7 @@ bool AlgebraicNumber::assignCosRationalTimesPi(
   LargeInteger halfIntegerPartTimesTwo;
   if (!halfIntegerPart.isInteger(&halfIntegerPartTimesTwo)) {
     global.fatal
-    << "something went wrong: floor function returns non-integer"
+    << "Something went wrong: floor function returns non-integer"
     << global.fatal;
   }
   halfIntegerPart /= 2;

@@ -1729,7 +1729,7 @@ bool FunctionTransformingChild::applyWithLogs(
   return true;
 }
 
-bool Function::inputFitsMyInnerType(const Expression& input) {
+bool Function::inputFitsMyInnerType(const Expression& input) const {
   if (!this->options.flagIsInner) {
     return false;
   }
@@ -1794,7 +1794,7 @@ std::string Function::toStringSummary() const {
   return out.str();
 }
 
-bool Function::shouldBeApplied() {
+bool Function::shouldBeApplied() const {
   if (this->options.disabledByUser) {
     return false;
   }

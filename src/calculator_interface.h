@@ -1723,8 +1723,8 @@ public:
   std::string toStringSummary() const;
   std::string toStringFull() const;
   JSData toJSON() const;
-  bool shouldBeApplied();
-  bool inputFitsMyInnerType(const Expression& input);
+  bool shouldBeApplied()const;
+  bool inputFitsMyInnerType(const Expression& input)const;
   Function();
   Function(
     Calculator& inputOwner,

@@ -749,11 +749,13 @@ bool CalculatorFunctions::operationBinary(
     return false;
   }
   ListReferences<Function>& handlers = operationMap.getElement().handlers;
-  for (int i = 0; i < handlers.size; i ++) {
-    if (handlers[i].inputFitsMyInnerType(input)) {
-      if (handlers[i].functionAddress(calculator, input, output)) {
+  for (const Function& handler: handlers) {
+    if (!handler.inputFitsMyInnerType(input) || ! handler.shouldBeApplied()) {
+      continue;
+    }
+      if (handler.functionAddress(calculator, input, output)) {
         return true;
-      }
+
     }
   }
   return false;

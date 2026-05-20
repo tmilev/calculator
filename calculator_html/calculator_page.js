@@ -730,6 +730,7 @@ class Calculator {
     result.style.height = "100%";
     const crashesAndComments = this.writeErrorsCrashesComments(inputParsed);
     result.appendChild(crashesAndComments);
+    this.panels = [];
     if (inputParsed.timeOut === true) {
       if (inputParsed.timeOutComments !== undefined) {
         let comment = document.createElement("div");
@@ -752,7 +753,7 @@ class Calculator {
     if (
       !hasSyntaxErrors && !hasResult && hasHtmlResult
     ) {
-      // The result is mimssing, so show the fallback resultHTML.
+      // The result is missing, so show the fallback resultHTML.
       let resultHtml = document.createElement("div");
       writeHTML(resultHtml, inputParsed.resultHtml);
       result.appendChild(resultHtml);
@@ -784,6 +785,7 @@ class Calculator {
     return result;
   }
 
+  /** @return {HTMLElement} */
   constructInputOutputAndComments(
     inputParsed,
   ) {
@@ -796,6 +798,8 @@ class Calculator {
     inputOutput.appendChild(inputOutputTable);
     let commentsContainer = this.constructComments(inputParsed);
     inputOutputComments.appendChild(commentsContainer);
+    inputOutput.width = "90%";
+    commentsContainer.width = "10%";
     if (
       storage.variables.flagDebug.isTrue() &&
       inputParsed.debug !== undefined
@@ -1042,9 +1046,8 @@ class Calculator {
   }
 
   writeResultAndUpdateElement() {
-    this.panels = [];
     this.progressOutput.textContent = "";
-    let result = this.writeResult(this.parsedComputation, this.panels);
+    let result = this.writeResult(this.parsedComputation);
     this.getOutputElement().textContent = '';
     this.getOutputElement().appendChild(result);
   }

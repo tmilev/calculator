@@ -117,7 +117,7 @@ class PanelExpandableData {
 
 class PanelExpandable {
   constructor(
-    /** @type {HtmlElement|string} */
+    /** @type {HTMLElement|string} */
     container,
   ) {
     this.originalHeight = 0;
@@ -127,20 +127,20 @@ class PanelExpandable {
     this.containerId = "";
     /** @type {HTMLElement} */
     this.container = container;
-    /** @type {HtmlElement|null} */
+    /** @type {HTMLElement|null} */
     this.panelContent = null;
-    /** @type {HtmlElement|null} */
+    /** @type {HTMLElement|null} */
     this.panelLabel = null;
-    /** @type {HtmlElement|null} */
+    /** @type {HTMLElement|null} */
     this.expandedMark = null;
-    /** @type {HtmlElement|null} */
+    /** @type {HTMLElement|null} */
     this.button = null;
-    /** @type {HtmlElement|null} */
+    /** @type {HTMLElement|null} */
     this.buttonFullExpand = null;
     /** @type {HtmlButtonElement|null} */
     this.buttonCopy = null;
     this.contentCopyButton = "";
-    /** @type {HtmlElement|null} */
+    /** @type {HTMLElement|null} */
     this.spanContainerButtons = null;
     /** @type {boolean} */
     this.fullyExpanded = false;
@@ -254,10 +254,22 @@ class PanelExpandable {
    * @return {string|null} 
    */
   latexContentOrNull() {
+    if (this.panelContent === null) {
+      return null;
+    }
     /** @type {string} */
     let textContent = this.panelContent.textContent;
     if (textContent.startsWith("\\(") && textContent.endsWith("\\)")) {
       return textContent.substring(2, textContent.length - 2);
+    }
+    if (this.panelContent.children.length > 0) {
+      let child = this.panelContent.children[0];
+      if (child.className !== 'mathcalculator' && child.children.length > 0) {
+        child = child.children[0];
+      }
+      if (child.className === 'mathcalculator') {
+        return child.textContent;
+      }
     }
     const mathMLElements = this.panelContent.getElementsByTagName('annotation');
     if (mathMLElements.length !== 1) {

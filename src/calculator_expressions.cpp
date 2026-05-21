@@ -4222,7 +4222,7 @@ bool Expression::toStringEndStatementOneRow(
   }
   std::string currentInput;
   std::string currentOutput;
-  const Expression currentE = (*this)[index];
+  const Expression currentExpression = (*this)[index];
   out << "<tr><td class='cellCalculatorInput'>";
   if (!this->owner->flagHideLHS && startingExpression != nullptr) {
     if (index < (*startingExpression).size()) {
@@ -4253,19 +4253,19 @@ bool Expression::toStringEndStatementOneRow(
     // Important: this should only be called at the top level.
     // The requiresNoMathTagsNonConstRunTime runs potentially very slowly;
     // we cannot to afford it below the top level.
-    shouldOmitMathTags = currentE.requiresNoMathTagsNonConstRunTime();
+    shouldOmitMathTags = currentExpression.requiresNoMathTagsNonConstRunTime();
   }
-  if (currentE.isOfType<std::string>() && isFinal) {
+  if (currentExpression.isOfType<std::string>() && isFinal) {
     currentOutput =
     StringRoutines::Conversions::stringToCalculatorDisplay(
-      currentE.getValue<std::string>()
+      currentExpression.getValue<std::string>()
     );
   } else if (shouldOmitMathTags) {
     format.flagDontCollalpseProductsByUnits = false;
-    currentOutput = currentE.toString(&format);
+    currentOutput = currentExpression.toString(&format);
   } else {
     format.flagDontCollalpseProductsByUnits = false;
-    std::string childString = currentE.toString(&format);
+    std::string childString = currentExpression.toString(&format);
     if (StringRoutines::stringContains(childString, "\\(")) {
       // The string contains the math tag \(. We assume the childString
       // has embedded descriptive latex strings. We should not generate math
@@ -4277,7 +4277,7 @@ bool Expression::toStringEndStatementOneRow(
       currentOutput = HtmlRoutines::getMathNoDisplay(childString);
     }
   }
-  currentOutput += currentE.toStringAllSlidersInExpression();
+  currentOutput += currentExpression.toStringAllSlidersInExpression();
   if (outputJS != nullptr) {
     (*outputJS)["output"][index - 1] = currentOutput;
   }

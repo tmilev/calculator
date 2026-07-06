@@ -1539,9 +1539,9 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toStringIfShort(
   this->getIndexLeadingMonomial(&leadingMonomial, &leadingCoefficient);
   out
   << this->termToString(leadingCoefficient, leadingMonomial, format, "")
-  << "+ ... [large linear combination with "
+  << "+ ... ["
   << this->size()
-  << " monomials]. ";
+  << " monomials omitted]. ";
   return out.str();
 }
 

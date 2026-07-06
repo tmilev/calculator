@@ -71,10 +71,10 @@ toStringStatusGroebnerBasisTransformation() {
 }
 
 template <class Coefficient>
-void GroebnerBasisComputation<Coefficient>::
-generateOneSymmetricDifferenceCandidate(
+void GroebnerBasisComputation<Coefficient>::computeSymmetricDifference(
   GroebnerBasisComputation::BasisElement& left,
-  GroebnerBasisComputation::BasisElement& right
+  GroebnerBasisComputation::BasisElement& right,
+  Polynomial<Coefficient>& output
 ) {
   int numberOfVariables =
   MathRoutines::maximum(
@@ -96,11 +96,21 @@ generateOneSymmetricDifferenceCandidate(
       rightShift.setVariable(k, 0);
     }
   }
-  Polynomial<Coefficient> symmetricDifference = left.element;
-  symmetricDifference.multiplyBy(leftShift, right.leadingCoefficient);
+  output = left.element;
+  output.multiplyBy(leftShift, right.leadingCoefficient);
   Polynomial<Coefficient> rightScaled = right.element;
   rightScaled.multiplyBy(rightShift, left.leadingCoefficient);
-  symmetricDifference -= rightScaled;
+  output -= rightScaled;
+}
+
+template <class Coefficient>
+void GroebnerBasisComputation<Coefficient>::
+generateOneSymmetricDifferenceCandidate(
+  GroebnerBasisComputation::BasisElement& left,
+  GroebnerBasisComputation::BasisElement& right
+) {
+  Polynomial<Coefficient> symmetricDifference;
+  this->computeSymmetricDifference(left, right, symmetricDifference);
   this->basisCandidates.addOnTop(symmetricDifference);
   this->numberPolynomialDivisions ++;
 }
@@ -177,6 +187,17 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
 }
 
 template <class Coefficient>
+std::string GroebnerBasisComputation<Coefficient>::toStringPseudoRandomInfo()
+const {
+  std::stringstream out;
+  out
+  << "Total pseudorandom basis elements: "
+  << this->totalRandomMoves
+  << ".";
+  return out.str();
+}
+
+template <class Coefficient>
 std::string GroebnerBasisComputation<Coefficient>::toStringLimits() const {
   std::stringstream out;
   out
@@ -207,6 +228,8 @@ std::string GroebnerBasisComputation<Coefficient>::
 toStringPolynomialBasisStatusLong() {
   return
   this->toStringLimits() +
+  "<br>" +
+  this->toStringPseudoRandomInfo() +
   "<br>" +
   this->toStringPolynomialBasisStatusShort();
 }
@@ -263,15 +286,10 @@ bool GroebnerBasisComputation<Coefficient>::limitsExceeded() const {
 }
 
 template <class Coefficient>
-bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
-  STACK_TRACE("GroebnerBasisComputation::addAndReduceOnePolynomial");
-  if (this->basisCandidates.size == 0) {
-    return true;
-  }
-  int bestIndex = 0;
-  // Put the best polynomial in the last position.
-  for (int i = 1; i < this->basisCandidates.size; i ++) {
-    Polynomial<Coefficient>& bestCandidate = this->basisCandidates[bestIndex];
+int GroebnerBasisComputation<Coefficient>::nextNonReducedPolynomialIndex() {
+  int result = this->nextPseudorandomCandidateIndex();
+  for (int i = 0; i < this->basisCandidates.size; i ++) {
+    Polynomial<Coefficient>& bestCandidate = this->basisCandidates[result];
     const Polynomial<Coefficient>& currentCandidate =
     this->basisCandidates[i];
     if (
@@ -279,12 +297,83 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
         currentCandidate, bestCandidate
       )
     ) {
-      bestIndex = i;
+      result = i;
     }
   }
-  this->basisCandidates.swapTwoIndices(
-    bestIndex, this->basisCandidates.size - 1
+  return result;
+}
+
+template <class Coefficient>
+int GroebnerBasisComputation<Coefficient>::nextPseudorandomIndex(int modulus) {
+  this->pseudoRandomIndexSeed =
+  17 + this->pseudoRandomIndexSeed * this->pseudoRandomIndexSeed;
+  if (modulus > 0) {
+    this->pseudoRandomIndexSeed %= modulus;
+  }
+  if (this->pseudoRandomIndexSeed < 0) {
+    this->pseudoRandomIndexSeed = 0;
+  }
+  return this->pseudoRandomIndexSeed;
+}
+
+template <class Coefficient>
+int GroebnerBasisComputation<Coefficient>::nextPseudorandomCandidateIndex() {
+  return this->nextPseudorandomIndex(this->basisCandidates.size);
+}
+
+template <class Coefficient>
+int GroebnerBasisComputation<Coefficient>::nextPseudorandomBasisIndex() {
+  return this->nextPseudorandomIndex(this->basis.size);
+}
+
+template <class Coefficient>
+bool GroebnerBasisComputation<Coefficient>::maybePushPseudorandomCandidateToTop
+() {
+  if (this->basisCandidates.size == 0) {
+    return false;
+  }
+  if (this->randomMovePeriod <= 1) {
+    return false;
+  }
+  this->randomMoveCounter ++;
+  if (this->randomMoveCounter > this->randomMovePeriod) {
+    this->randomMoveCounter = 0;
+  }
+  if (this->randomMoveCounter != 0) {
+    return false;
+  }
+  int randomIndex1 = this->nextPseudorandomBasisIndex();
+  int randomIndex2 = this->nextPseudorandomBasisIndex();
+  Polynomial<Coefficient> maybeCandidate;
+  this->computeSymmetricDifference(
+    this->basis[randomIndex1], this->basis[randomIndex2], maybeCandidate
   );
+  if (maybeCandidate.size() > 50) {
+    return false;
+  }
+  this->basisCandidates.addOnTop(maybeCandidate);
+  this->numberPolynomialDivisions ++;
+  this->totalRandomMoves ++;
+  return true;
+}
+
+template <class Coefficient>
+void GroebnerBasisComputation<Coefficient>::maybeCarryOutPseudorandomMove() {
+  if (this->maybePushPseudorandomCandidateToTop()) {
+    return;
+  }
+  this->basisCandidates.swapTwoIndices(
+    this->nextNonReducedPolynomialIndex(), this->basisCandidates.size - 1
+  );
+}
+
+template <class Coefficient>
+bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
+  STACK_TRACE("GroebnerBasisComputation::addAndReduceOnePolynomial");
+  if (this->basisCandidates.size == 0) {
+    return true;
+  }
+  this->maybeCarryOutPseudorandomMove();
   if (
     !this->remainderDivisionByBasisFailureAllowed(
       *this->basisCandidates.lastObject(), this->remainderDivision
@@ -503,11 +592,7 @@ std::string GroebnerBasisComputation<Coefficient>::toStringBasisShort() const {
   formatCopy = this->format;
   std::stringstream out;
   if (this->basis.size > 3) {
-    out
-    << this->basis.size
-    << " basis elements total: "
-    << this->basis.size
-    << ":\n<br>\n";
+    out << "Total basis elements: " << this->basis.size << ":\n<br>\n";
   }
   int totalCharacters = 0;
   int maximumCharacters = 500;
@@ -680,6 +765,10 @@ GroebnerBasisComputation<Coefficient>::GroebnerBasisComputation() {
   this->flagFoundNewBasisElements = false;
   this->numberOfSymmetricDifferenceRounds = 0;
   this->flagDoProgressReport = true;
+  this->pseudoRandomIndexSeed = 0;
+  this->randomMovePeriod = 0;
+  this->randomMoveCounter = 0;
+  this->totalRandomMoves = 0;
 }
 
 template <class Coefficient>

@@ -1102,6 +1102,16 @@ public:
 
 template <class Coefficient>
 class GroebnerBasisComputation {
+  // A pseudorandom number that may be used to arbitrarily select
+  // a next basis element (used for both candidate and reduced basis elements).
+  int pseudoRandomIndexSeed;
+  // Every [period] number of moves, we should perform a random move.
+  // If this is less than or equal to one (one, zero or negative)
+  // we perform no random moves.
+  int randomMovePeriod;
+  // Counter used to select whether we are doing a random move.
+  int randomMoveCounter;
+  int totalRandomMoves;
 public:
   PolynomialOrder polynomialOrder;
   Polynomial<Coefficient> remainderDivision;
@@ -1129,16 +1139,32 @@ public:
   bool flagStoreQuotients;
   MemorySaving<PolynomialDivisionReport<Coefficient> > divisionReport;
   FormatExpressions format;
+  int nextPseudorandomCandidateIndex();
+  int nextPseudorandomBasisIndex();
+  int nextPseudorandomIndex(int modulus);
+  int nextNonReducedPolynomialIndex();
   void addBasisElementNoReduction(const Polynomial<Coefficient>& input);
   bool limitsExceeded() const;
   bool addAndReducePolynomials();
   bool addAndReduceOnePolynomial();
+  bool maybePushPseudorandomCandidateToTop();
+  // Adds some arbitrary-ness during the core loop of the reduction algorithm.
+  // 1. Selects next basis element to adjoin arbtirarily.
+  // 2. Depending on configurable parameters, every now and then, configurable
+  // to never,
+  // generates an arbitrary S-poly difference.
+  void maybeCarryOutPseudorandomMove();
   bool addRemainderToBasis();
   bool transformToReducedBasis(List<Polynomial<Coefficient> >& inputOutput);
   bool transformToReducedGroebnerBasis(
     List<Polynomial<Coefficient> >& inputOutput, bool rescaleLeadingMonomials
   );
   void generateSymmetricDifferenceCandidates();
+  void computeSymmetricDifference(
+    GroebnerBasisComputation<Coefficient>::BasisElement& left,
+    GroebnerBasisComputation<Coefficient>::BasisElement& right,
+    Polynomial<Coefficient>& output
+  );
   void generateOneSymmetricDifferenceCandidate(
     GroebnerBasisComputation<Coefficient>::BasisElement& left,
     GroebnerBasisComputation<Coefficient>::BasisElement& right
@@ -1184,6 +1210,7 @@ public:
   std::string toStringPolynomialBasisStatusLong();
   std::string toStringPolynomialBasisStatusShort();
   std::string toStringLimits() const;
+  std::string toStringPseudoRandomInfo() const;
   std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
   std::string toStringStatusGroebnerBasisTransformation();
   std::string toStringBasisShort() const;

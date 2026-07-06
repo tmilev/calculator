@@ -1265,7 +1265,7 @@ bool CalculatorConversions::loadKey(
   << inputKey
   << " not found in expression "
   << inputStatementList.toString()
-  << ".";
+  << ". ";
 }
 
 bool CalculatorConversions::storeCandidateSubalgebra(
@@ -1533,7 +1533,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
       ) {
         return
         calculator
-        << "<hr>Failed to load Possible extensions from: "
+        << "<hr>Failed to load possible extensions from: "
         << statesExpressionContainer[i].toString();
       }
       possibleExtensions.addOnTop(state);

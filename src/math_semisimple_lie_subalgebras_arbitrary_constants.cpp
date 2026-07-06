@@ -205,6 +205,27 @@ configurePolynomialSystemE8() {
     maximumPolynomialDivisions = 200000;
     maximumMonomialOperations = 1000000;
   }
+  if (
+    embeddedType == A(7, 1) + A(1, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({0, 1, 0, 1, 1, 1, 1, 1})
+    )
+  ) {
+    maximumMonomialOperations = 2000000;
+    maximumPolynomialDivisions = 2000000;
+  }
+  if (embeddedType == A(7, 1) + A(1, 1) + A(1, 1)) {
+    maximumMonomialOperations = 2000000;
+    maximumPolynomialDivisions = 2000000;
+    this->output.notesOnHardCoding =
+    "This type can be shown to be impossible: "
+    "the centalizer of A_1^7 is of type G_2^2+A_1^1";
+  }
+  if (embeddedType == B(6, 2)) {
+    // System is contradictory.
+    maximumMonomialOperations = 200000;
+    maximumPolynomialDivisions = 200000;
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
@@ -262,11 +283,13 @@ startRealizationWithCartanCentralizerNormalization() {
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::
 startRealizationWithCartanCentralizerNormalizationInE8() {
-  DynkinType& type = this->output.weylNonEmbedded->dynkinType;
-  if (type == A(7, 1) + A(1, 1)) {
-    this->output.centralizerRank = 2;
-    return true;
-  }
+  // DynkinType& type = this->output.weylNonEmbedded->dynkinType;
+  // if (type == A(6, 1) + A(6, 1)) {
+  // // The centralizer of A^6_1 is of type A^6_1 + B_3.
+  // // Therefore the centralizer of 2A^6_1 is of type B_3, so, of rank 3.
+  // this->output.centralizerRank = 3;
+  // return true;
+  // }
   return false;
 }
 
@@ -757,6 +780,37 @@ loadBuiltInGeneratorHintsE8() {
     "and got a quick solution.";
     this->output.unknownNegativeGenerators[0] =
     g(- 72) + g(- 73) + g(- 75) + g(- 76);
+  }
+  if (
+    type == A(6, 2) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({0, - 3, - 3, - 6, - 6, - 6, - 4, - 2})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "1. Computations of standard solver "
+    "were running slow.\n"
+    "2. This type was already realized by the solver without manual intervention, "
+    "but for a different cartan subalgebra."
+    "2. Hard-coded the same first negative generator as "
+    "the one from the already found A_2^6 with different Cartan."
+    "3. Ran the solver with this hint and slightly relaxed computational limits, "
+    "to get the present solution.";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 84) + g(- 86) + g(- 87) + g(- 89);
+    this->output.unknownNegativeGenerators[1] =
+    g(39) * "-1/2" + g(36) * "3/2" + g(35) + g(34) * 2 + g(33) + g(29);
+  }
+  if (
+    type == A(6, 1) + A(6, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({2, 1, 2, 2, 1, 0, 2, 2})
+    )
+  ) {
+    this->output.unknownNegativeGenerators[0] =
+    g(- 74) + g(- 86) * "1/2" + g(- 87) * "-1/2" + g(- 97);
+    this->output.unknownNegativeGenerators[1] =
+    g(- 7) *(- 2) + g(- 8) + g(- 23) + g(- 24);
   }
   return false;
 }

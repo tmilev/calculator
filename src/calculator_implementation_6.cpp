@@ -3043,9 +3043,12 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
   }
   LargeInteger numberOfRowsTimesColumns = numberOfRows;
   numberOfRowsTimesColumns *= numberOfColumns;
-  if (numberOfRowsTimesColumns > 10000) {
+  int maximumEntries = 120 * 120;
+  if (numberOfRowsTimesColumns > maximumEntries) {
     calculator
-    << "Max number of matrix entries is 10000. You requested "
+    << "Matrices are allowed to have maximum "
+    << maximumEntries
+    << " entries. You requested "
     << numberOfRows
     << " rows and "
     << numberOfColumns

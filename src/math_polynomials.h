@@ -1101,6 +1101,16 @@ public:
 };
 
 template <class Coefficient>
+class GroebnerBasisElement {
+public:
+  Polynomial<Coefficient> element;
+  MonomialPolynomial leadingMonomial;
+  Coefficient leadingCoefficient;
+  std::string toString(FormatExpressions* format) const;
+  std::string toStringShort(FormatExpressions* format) const;
+};
+
+template <class Coefficient>
 class GroebnerBasisComputation {
   // A pseudorandom number that may be used to arbitrarily select
   // a next basis element (used for both candidate and reduced basis elements).
@@ -1117,16 +1127,7 @@ public:
   Polynomial<Coefficient> remainderDivision;
   List<Polynomial<Coefficient> > quotients;
   List<Polynomial<Coefficient> > basisCandidates;
-  class BasisElement {
-  public:
-    Polynomial<Coefficient> element;
-    MonomialPolynomial leadingMonomial;
-    Coefficient leadingCoefficient;
-    std::string toString(FormatExpressions* format) const;
-    std::string toStringShort(FormatExpressions* format) const;
-  };
-
-  List<BasisElement> basis;
+  List<GroebnerBasisElement<Coefficient> > basis;
   int numberPolynomialDivisions;
   int numberMonomialOperations;
   int maximumMonomialOperations;
@@ -1163,13 +1164,13 @@ public:
   );
   void generateSymmetricDifferenceCandidates();
   void computeSymmetricDifference(
-    GroebnerBasisComputation<Coefficient>::BasisElement& left,
-    GroebnerBasisComputation<Coefficient>::BasisElement& right,
+    GroebnerBasisElement<Coefficient>& left,
+    GroebnerBasisElement<Coefficient>& right,
     Polynomial<Coefficient>& output
   );
   void generateOneSymmetricDifferenceCandidate(
-    GroebnerBasisComputation<Coefficient>::BasisElement& left,
-    GroebnerBasisComputation<Coefficient>::BasisElement& right
+    GroebnerBasisElement<Coefficient>& left,
+    GroebnerBasisElement<Coefficient>& right
   );
   void getBasis(List<Polynomial<Coefficient> >& output);
   bool wrapUpGroebnerOnExceedingComputationLimit(
@@ -1216,6 +1217,15 @@ public:
   std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
   std::string toStringStatusGroebnerBasisTransformation();
   std::string toStringBasisShort() const;
+  bool compareLeftGreaterThanRight(
+    const GroebnerBasisElement<Coefficient>& left,
+    const GroebnerBasisElement<Coefficient>& right
+  ) const {
+    return
+    this->polynomialOrder.monomialOrder.greaterThan(
+      left.leadingMonomial, right.leadingMonomial
+    );
+  }
 };
 
 template <class Coefficient>

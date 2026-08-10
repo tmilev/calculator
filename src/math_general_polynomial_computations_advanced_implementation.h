@@ -30,6 +30,7 @@ void GroebnerBasisComputation<Coefficient>::getBasis(
   List<Polynomial<Coefficient> >& output
 ) {
   output.setSize(this->basis.size);
+  this->basis.quickSortAscendingCustom(*this);
   for (int i = 0; i < this->basis.size; i ++) {
     output[i] = this->basis[i].element;
   }
@@ -72,8 +73,8 @@ toStringStatusGroebnerBasisTransformation() {
 
 template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::computeSymmetricDifference(
-  GroebnerBasisComputation::BasisElement& left,
-  GroebnerBasisComputation::BasisElement& right,
+  GroebnerBasisElement<Coefficient>& left,
+  GroebnerBasisElement<Coefficient>& right,
   Polynomial<Coefficient>& output
 ) {
   int numberOfVariables =
@@ -106,8 +107,8 @@ void GroebnerBasisComputation<Coefficient>::computeSymmetricDifference(
 template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::
 generateOneSymmetricDifferenceCandidate(
-  GroebnerBasisComputation::BasisElement& left,
-  GroebnerBasisComputation::BasisElement& right
+  GroebnerBasisElement<Coefficient>& left,
+  GroebnerBasisElement<Coefficient>& right
 ) {
   Polynomial<Coefficient> symmetricDifference;
   this->computeSymmetricDifference(left, right, symmetricDifference);
@@ -611,7 +612,7 @@ std::string GroebnerBasisComputation<Coefficient>::toStringBasisShort() const {
   }
   int totalCharacters = 0;
   int maximumCharacters = 500;
-  for (const BasisElement& basisElement : this->basis) {
+  for (const GroebnerBasisElement<Coefficient>& basisElement : this->basis) {
     std::string next = basisElement.toStringShort(&formatCopy);
     totalCharacters += next.size();
     if (totalCharacters > maximumCharacters) {
@@ -730,7 +731,7 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
   );
   int writingAtIndex = 0;
   for (int i = 0; i < this->basis.size; i ++) {
-    const BasisElement& other = this->basis[i];
+    const GroebnerBasisElement<Coefficient>& other = this->basis[i];
     if (other.leadingMonomial.isDivisibleBy(newLeadingMonomial)) {
       this->basisCandidates.addOnTop(other.element);
       continue;
@@ -789,7 +790,7 @@ GroebnerBasisComputation<Coefficient>::GroebnerBasisComputation() {
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::BasisElement::toString(
+std::string GroebnerBasisElement<Coefficient>::toString(
   FormatExpressions* format
 ) const {
   std::stringstream out;
@@ -802,7 +803,7 @@ std::string GroebnerBasisComputation<Coefficient>::BasisElement::toString(
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::BasisElement::toStringShort(
+std::string GroebnerBasisElement<Coefficient>::toStringShort(
   FormatExpressions* format
 ) const {
   std::stringstream out;
@@ -826,8 +827,7 @@ void GroebnerBasisComputation<Coefficient>::addBasisElementNoReduction(
     return;
   }
   this->basis.setSize(this->basis.size + 1);
-  GroebnerBasisComputation<Coefficient>::BasisElement& last =
-  *this->basis.lastObject();
+  GroebnerBasisElement<Coefficient>& last = *this->basis.lastObject();
   last.element = input;
   last.element.getIndexLeadingMonomial(
     &last.leadingMonomial,

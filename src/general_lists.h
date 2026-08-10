@@ -520,9 +520,9 @@ public:
     return result;
   }
   // The following function returns false if the comparison operator failed!!!!
-  template <class compareClass, class carbonCopyType = Object>
+  template <class CompareClass, class carbonCopyType = Object>
   bool quickSortAscendingCustom(
-    compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr
+    CompareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr
   ) {
     return
     this->quickSortAscendingCustomRecursive(

@@ -123,6 +123,7 @@ generateSymmetricDifferenceCandidates() {
   );
   ProgressReport reportProgress(1, "Groebner basis report");
   this->numberOfSymmetricDifferenceRounds ++;
+  this->flagGeneratedAllSymmetricDifferenceCandidates = true;
   for (int i = 0; i < this->basis.size; i ++) {
     for (int j = i + 1; j < this->basis.size && i < this->basis.size; j ++) {
       if (reportProgress.tickAndWantReport()) {
@@ -143,6 +144,10 @@ generateSymmetricDifferenceCandidates() {
         << this->basis.size
         << ".";
         reportProgress.report(reportStream.str());
+      }
+      if (this->basisCandidates.size > this->maximumBasisCandidates) {
+        this->flagGeneratedAllSymmetricDifferenceCandidates = false;
+        break;
       }
       this->generateOneSymmetricDifferenceCandidate(
         this->basis[i], this->basis[j]
@@ -181,7 +186,17 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
     if (!this->addAndReducePolynomials()) {
       return this->wrapUpGroebnerOnExceedingComputationLimit(inputOutput);
     }
-  } while (this->flagFoundNewBasisElements);
+    // When flagGeneratedAllSymmetricDifferenceCandidates is false, we
+    // had too many basis candidates.
+    // This does not imply that we will pop our computational limits, as
+    // reducing symmetric difference polynomials may decrease the basis size.
+    // Therefore we continue to compute even when
+    // this->flagGeneratedAllSymmetricDifferenceCandidates is false with the
+    // hope that the number of basis elements will drop.
+  } while (
+    this->flagFoundNewBasisElements ||
+    !this->flagGeneratedAllSymmetricDifferenceCandidates
+  );
   bool result = this->wrapUpOnGroebnerBasisSuccess(inputOutput);
   return result;
 }
@@ -769,6 +784,8 @@ GroebnerBasisComputation<Coefficient>::GroebnerBasisComputation() {
   this->randomMovePeriod = 0;
   this->randomMoveCounter = 0;
   this->totalRandomMoves = 0;
+  this->flagGeneratedAllSymmetricDifferenceCandidates = true;
+  this->maximumBasisCandidates = 20000;
 }
 
 template <class Coefficient>

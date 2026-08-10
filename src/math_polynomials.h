@@ -1137,6 +1137,8 @@ public:
   bool flagDoProgressReport;
   bool flagDoLogDivision;
   bool flagStoreQuotients;
+  int maximumBasisCandidates;
+  bool flagGeneratedAllSymmetricDifferenceCandidates;
   MemorySaving<PolynomialDivisionReport<Coefficient> > divisionReport;
   FormatExpressions format;
   int nextPseudorandomCandidateIndex();

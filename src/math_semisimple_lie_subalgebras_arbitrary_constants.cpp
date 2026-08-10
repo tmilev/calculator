@@ -226,6 +226,17 @@ configurePolynomialSystemE8() {
     maximumMonomialOperations = 200000;
     maximumPolynomialDivisions = 200000;
   }
+  if (
+    embeddedType == A(5, 1) + A(4, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({0, 3, 3, 5, 4, 3, 2, 0})
+    )
+  ) {
+    maximumMonomialOperations = 10000;
+    maximumPolynomialDivisions = 50000;
+    this->output.notesOnHardCoding =
+    "Needs extra computational time to show it's impossible.";
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
@@ -758,6 +769,7 @@ loadBuiltInGeneratorHintsE8() {
     "with the standard polynomial solver.";
     this->output.unknownNegativeGenerators[0] =
     g(- 66) + g(- 67) + g(- 74) + g(- 80) + g(- 81);
+    return true;
   }
   if (
     type == A(8, 1) + A(4, 1) + A(4, 1) &&
@@ -780,6 +792,7 @@ loadBuiltInGeneratorHintsE8() {
     "and got a quick solution.";
     this->output.unknownNegativeGenerators[0] =
     g(- 72) + g(- 73) + g(- 75) + g(- 76);
+    return true;
   }
   if (
     type == A(6, 2) &&
@@ -800,6 +813,7 @@ loadBuiltInGeneratorHintsE8() {
     g(- 84) + g(- 86) + g(- 87) + g(- 89);
     this->output.unknownNegativeGenerators[1] =
     g(39) * "-1/2" + g(36) * "3/2" + g(35) + g(34) * 2 + g(33) + g(29);
+    return true;
   }
   if (
     type == A(6, 1) + A(6, 1) &&
@@ -807,10 +821,15 @@ loadBuiltInGeneratorHintsE8() {
       List<Rational>({2, 1, 2, 2, 1, 0, 2, 2})
     )
   ) {
+    this->output.notesOnHardCoding =
+    "Solved by setting x_13=1 and letting the solver run. "
+    "Solved while trying to prove that "
+    "an alternative candidate for 2A^6_1 is unrealizable.";
     this->output.unknownNegativeGenerators[0] =
     g(- 74) + g(- 86) * "1/2" + g(- 87) * "-1/2" + g(- 97);
     this->output.unknownNegativeGenerators[1] =
     g(- 7) *(- 2) + g(- 8) + g(- 23) + g(- 24);
+    return true;
   }
   return false;
 }

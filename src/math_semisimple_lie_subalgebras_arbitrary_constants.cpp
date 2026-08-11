@@ -237,6 +237,17 @@ configurePolynomialSystemE8() {
     this->output.notesOnHardCoding =
     "Needs extra computational time to show it's impossible.";
   }
+  if (
+    embeddedType == A(5, 1) + A(3, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({0, 2, 2, 4, 4, 3, 2, 0})
+    )
+  ) {
+    maximumMonomialOperations = 10000;
+    maximumPolynomialDivisions = 50000;
+    this->output.notesOnHardCoding =
+    "Needs extra computational time to show it's impossible.";
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints

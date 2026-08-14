@@ -3498,6 +3498,7 @@ std::string SemisimpleSubalgebras::toStringProgressReport(
   if (this->toStringExpressionString != nullptr) {
     out
     << "\n<hr>\n"
+    << "%HideLHS\n"
     << "LoadSemisimpleSubalgebras {}"
     << this->toStringExpressionString(*this);
   }

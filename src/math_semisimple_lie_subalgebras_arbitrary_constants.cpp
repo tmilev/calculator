@@ -248,6 +248,29 @@ configurePolynomialSystemE8() {
     this->output.notesOnHardCoding =
     "Needs extra computational time to show it's impossible.";
   }
+  if (
+    embeddedType == A(4, 1) + A(4, 1) + A(4, 1) &&
+    this->output.cartanElementsScaledToActByTwo[2].isEqualTo(
+      List<Rational>({0, 3, 3, 5, 4, 3, 2, 0})
+    )
+  ) {
+    maximumMonomialOperations = 10000;
+    maximumPolynomialDivisions = 50000;
+    this->output.notesOnHardCoding =
+    "Needs extra computational time to show it's impossible.";
+  }
+  if (
+    embeddedType == A(4, 1) + A(4, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({3, 5, 6, 9, 7, 5, 3, 0})
+    )
+  ) {
+    maximumMonomialOperations = 100000;
+    maximumPolynomialDivisions = 100000;
+    this->output.notesOnHardCoding =
+    "Smaller computational bounds were "
+    "not sufficient to prove this case is impossible.";
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
@@ -840,6 +863,42 @@ loadBuiltInGeneratorHintsE8() {
     g(- 74) + g(- 86) * "1/2" + g(- 87) * "-1/2" + g(- 97);
     this->output.unknownNegativeGenerators[1] =
     g(- 7) *(- 2) + g(- 8) + g(- 23) + g(- 24);
+    return true;
+  }
+  if (
+    type == A(4, 1) + A(4, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({4, 4, 6, 8, 6, 4, 2, 0})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "1. RAM consumption was too high, software was crashing.\n"
+    "2. Set up three arbitrarily chosen "
+    "f-coefficients of first generator to 1.\n"
+    "3. Set up 26 other f-coefficients to 0. "
+    "Left 3 f-coefficients of first generator unspecified.\n"
+    "4. Ran the polynomial solver to get the present solution. ";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 61) + g(- 73) + g(- 77) + g(- 108);
+    this->output.unknownNegativeGenerators[1] =
+    - g(- 1) + g(- 47) + g(- 64) + g(- 69) + g(- 76);
+    return true;
+  }
+  if (
+    type == A(4, 1) + A(4, 1) + A(4, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({4, 4, 6, 8, 6, 4, 2, 0})
+    ) &&
+    this->output.cartanElementsScaledToActByTwo[2].isEqualTo(
+      List<Rational>({0, 2, 2, 4, 4, 4, 2, 0})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "Initialized generators coefficients with zeroes "
+    "arbitrarily and ran the solver. ";
+    this->output.unknownNegativeGenerators[0] = g(- 79) + g(- 98);
+    this->output.unknownNegativeGenerators[1] = g(- 45) + g(- 64);
+    this->output.unknownNegativeGenerators[2] = g(- 13) + g(- 48);
     return true;
   }
   return false;

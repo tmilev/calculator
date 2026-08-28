@@ -905,11 +905,6 @@
       "body":"Solve the equation (over the real numbers). \n\n\n<br>\n\\(e^{2 x}-13 e^{x}+36=0\\).\n<br>\nIf there is more than one answer, separate them by comma. \n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n",
       "head":""
     },
-    "problems/series-add-infinite-decimal-to-rational-simple-1.html":{
-      "randomSeed":0,
-      "body":"\nConvert the recurring decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerZero'></span>\n\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n\n",
-      "head":""
-    },
     "problems/Indefinite-integral-constant-1.html":{
       "randomSeed":0,
       "body":"\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b style=\"color:red\">will be marked wrong</b>.\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n",
@@ -1258,6 +1253,11 @@
     "problems/Indefinite-integral-acotpx.html":{
       "randomSeed":0,
       "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle \\int \\left(-8 \\cot{}\\left(4 x\\right)\\right) {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n",
+      "head":""
+    },
+    "problems/Series-add-infinite-decimal-to-rational-simple-1.html":{
+      "randomSeed":0,
+      "body":"\nConvert the recurring decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerZero'></span>\n\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n\n",
       "head":""
     },
     "problems/Riemann-sum-plug-in-the-numbers-3.html":{
@@ -3137,11 +3137,6 @@
       "body":"Solve the equation (over the real numbers). \n\n\n<br>\n\\(e^{2 x}-16 e^{x}+63=0\\).\n<br>\nIf there is more than one answer, separate them by comma. \n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n",
       "head":""
     },
-    "problems/series-add-infinite-decimal-to-rational-simple-1.html":{
-      "randomSeed":1,
-      "body":"\nConvert the recurring decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerZero'></span>\n\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n\n",
-      "head":""
-    },
     "problems/Indefinite-integral-constant-1.html":{
       "randomSeed":1,
       "body":"\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b style=\"color:red\">will be marked wrong</b>.\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n",
@@ -3490,6 +3485,11 @@
     "problems/Indefinite-integral-acotpx.html":{
       "randomSeed":1,
       "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle \\int 15 \\cot{}\\left(11 x\\right) {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n",
+      "head":""
+    },
+    "problems/Series-add-infinite-decimal-to-rational-simple-1.html":{
+      "randomSeed":1,
+      "body":"\nConvert the recurring decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerZero'></span>\n\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n\n",
       "head":""
     },
     "problems/Riemann-sum-plug-in-the-numbers-3.html":{
@@ -5369,11 +5369,6 @@
       "body":"Solve the equation (over the real numbers). \n\n\n<br>\n\\(e^{2 x}-12 e^{x}+35=0\\).\n<br>\nIf there is more than one answer, separate them by comma. \n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n",
       "head":""
     },
-    "problems/series-add-infinite-decimal-to-rational-simple-1.html":{
-      "randomSeed":2,
-      "body":"\nConvert the recurring decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerZero'></span>\n\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n\n",
-      "head":""
-    },
     "problems/Indefinite-integral-constant-1.html":{
       "randomSeed":2,
       "body":"\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b style=\"color:red\">will be marked wrong</b>.\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n",
@@ -5722,6 +5717,11 @@
     "problems/Indefinite-integral-acotpx.html":{
       "randomSeed":2,
       "body":"<span class=\"setCalculatorExamProblem\">\n</span>\n\n\nIntegrate. Do not forget to <b><span style=\"color:red\">include +C</span> (case sensitive) <span style=\"color:red\">in your answer</span></b> \nor else your answer <b><span style=\"color:red\">will be marked wrong</span></b>.\n<br>\n\\( \\displaystyle \\int 14 \\cot{}\\left(2 x\\right) {\\text{d}} x \\)=\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n \n\n\n\n\n\n",
+      "head":""
+    },
+    "problems/Series-add-infinite-decimal-to-rational-simple-1.html":{
+      "randomSeed":2,
+      "body":"\nConvert the recurring decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerZero'></span>\n\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerOne'></span>\n\n\n\n\n\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswerTwo'></span>\n\n\n",
       "head":""
     },
     "problems/Riemann-sum-plug-in-the-numbers-3.html":{

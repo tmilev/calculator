@@ -682,7 +682,7 @@
     },
     "problems/Series-add-infinite-decimal-to-rational-1.html":{
       "randomSeed":0,
-      "body":"\nConvert the cyclic decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n",
+      "body":"\nConvert the cyclic decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n",
       "head":""
     },
     "problems/Factor-cubic-one-rational-two-real-roots-1.html":{
@@ -2914,7 +2914,7 @@
     },
     "problems/Series-add-infinite-decimal-to-rational-1.html":{
       "randomSeed":1,
-      "body":"\nConvert the cyclic decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n",
+      "body":"\nConvert the cyclic decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n",
       "head":""
     },
     "problems/Factor-cubic-one-rational-two-real-roots-1.html":{
@@ -5146,7 +5146,7 @@
     },
     "problems/Series-add-infinite-decimal-to-rational-1.html":{
       "randomSeed":2,
-      "body":"\nConvert the cyclic decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n",
+      "body":"\nConvert the cyclic decimal notation to a rational number (quotient of two integers).\n\n<br>\n\n<span class='panelAnswer' id='spanAnswerPanelAlgebraAnswer'></span>\n\n\n\n\n\n",
       "head":""
     },
     "problems/Factor-cubic-one-rational-two-real-roots-1.html":{

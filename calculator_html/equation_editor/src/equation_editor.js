@@ -10805,6 +10805,17 @@ class MathNodeOverLine extends MathNode {
     let base = this.children[0].toLatexWithAnnotation(options);
     return new LatexWithAnnotation(`\\overline{${base.latex}}`);
   }
+
+  toMathML() {
+    let base = this.children[0].stripRedundantHorizontalMath();
+    const overline = this.createMathMLElement("mo");
+    overline.textContent = "\u203E";
+    const result = this.createMathMLElement("mpadded");
+    result.setAttribute("width", "100%");
+    result.setAttribute("style", "border-top: 1px solid currentColor; padding-top: 2px;");
+    result.appendChild(base.toMathML());
+    return result;
+  }
 }
 
 class MathNodeFormInput extends MathNode {

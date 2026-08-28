@@ -266,7 +266,7 @@ public:
   List<int> centralizerSubalgebraModules;
   List<int> primalSubalgebraModules;
   List<List<int> > oppositeModulesByStructure;
-  List<List<int> > oppositeModulesByChar;
+  List<List<int> > oppositeModulesByCharacter;
   HashedList<int, HashFunctions::hashFunction> modulesWithZeroWeights;
   std::string comments;
   std::string nilradicalGenerationLog;

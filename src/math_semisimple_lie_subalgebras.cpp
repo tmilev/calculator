@@ -1585,6 +1585,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
       this->addSubalgebraIfNewSetToStackTop(candidate);
     }
     beingExtended.state.numberOfExtensionHsExplored ++;
+    this->writeProgressFile();
     this->checkAll();
     if (this->flagHasPossibleSubalgebrasWeCouldntSolveFor) {
       this->comments +=
@@ -3411,7 +3412,6 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   nextExtension.realizedBase = &realized;
   nextExtension.state.cartanElementsBaseSubalgebra =
   subalgebra.cartanElementsScaledToActByTwo;
-  this->writeProgressFile();
 }
 
 void SemisimpleSubalgebras::writeProgressFile() {
@@ -5870,19 +5870,19 @@ void CandidateSemisimpleSubalgebra::computeCharactersPrimalModules() {
       );
     }
   }
-  this->oppositeModulesByChar.setSize(this->modules.size);
+  this->oppositeModulesByCharacter.setSize(this->modules.size);
   List<CharacterSemisimpleLieAlgebraModule<Rational> > dualModules;
   dualModules.setSize(this->modules.size);
   for (int i = 0; i < this->modules.size; i ++) {
     this->charactersPrimalModules[i].getDual(dualModules[i]);
-    this->oppositeModulesByChar[i].setSize(0);
+    this->oppositeModulesByCharacter[i].setSize(0);
   }
   for (int i = 0; i < this->modules.size; i ++) {
     for (int j = i; j < this->modules.size; j ++) {
       if ((this->charactersPrimalModules[i] - dualModules[j]).isEqualToZero()) {
-        this->oppositeModulesByChar[i].addOnTop(j);
+        this->oppositeModulesByCharacter[i].addOnTop(j);
         if (i != j) {
-          this->oppositeModulesByChar[j].addOnTop(i);
+          this->oppositeModulesByCharacter[j].addOnTop(i);
         }
       }
     }
@@ -6017,7 +6017,9 @@ void CandidateSemisimpleSubalgebra::computeKsl2Triples() {
       for (int k = 0; k < this->modulesSl2Opposite[i][j].size; k ++) {
         this->computeKsl2TriplesGetOppositeElementsInOppositeModule(
           this->weightsModulesPrimal[i][k],
-          this->modulesIsotypicallyMerged[this->oppositeModulesByChar[i][0]],
+          this->modulesIsotypicallyMerged[
+            this->oppositeModulesByCharacter[i][0]
+          ],
           fMustBeLinearCombinationOf
         );
         if (
@@ -9155,11 +9157,11 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTableLaTeX(
     }
   }
   out << "\\\\\\hline Opposite character";
-  for (int i = 0; i < this->oppositeModulesByChar.size; i ++) {
+  for (int i = 0; i < this->oppositeModulesByCharacter.size; i ++) {
     out << "&";
-    for (int j = 0; j < this->oppositeModulesByChar[i].size; j ++) {
-      out << "$W_{" << this->oppositeModulesByChar[i][j] + 1 << "} $";
-      if (j != this->oppositeModulesByChar[i].size - 1) {
+    for (int j = 0; j < this->oppositeModulesByCharacter[i].size; j ++) {
+      out << "$W_{" << this->oppositeModulesByCharacter[i][j] + 1 << "} $";
+      if (j != this->oppositeModulesByCharacter[i].size - 1) {
         out << ", ";
       }
     }
@@ -9250,11 +9252,11 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
   }
   out << "</tr>";
   out << "<tr> <td>Opposite modules by character:</td>";
-  for (int i = 0; i < this->oppositeModulesByChar.size; i ++) {
+  for (int i = 0; i < this->oppositeModulesByCharacter.size; i ++) {
     out << "<td>";
-    for (int j = 0; j < this->oppositeModulesByChar[i].size; j ++) {
-      out << "W_{" << this->oppositeModulesByChar[i][j] + 1 << "}";
-      if (j != this->oppositeModulesByChar[i].size - 1) {
+    for (int j = 0; j < this->oppositeModulesByCharacter[i].size; j ++) {
+      out << "W_{" << this->oppositeModulesByCharacter[i][j] + 1 << "}";
+      if (j != this->oppositeModulesByCharacter[i].size - 1) {
         out << ", ";
       }
     }

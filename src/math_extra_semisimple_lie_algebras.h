@@ -153,7 +153,7 @@ public:
     );
     return result;
   }
-  ElementSemisimpleLieAlgebra<Coefficient> operator*(const Rational& other)
+  ElementSemisimpleLieAlgebra<Coefficient> operator*(const Coefficient& other)
   const {
     ElementSemisimpleLieAlgebra<Coefficient> result;
     result =

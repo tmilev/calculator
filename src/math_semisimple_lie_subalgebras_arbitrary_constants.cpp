@@ -901,6 +901,39 @@ loadBuiltInGeneratorHintsE8() {
     this->output.unknownNegativeGenerators[2] = g(- 13) + g(- 48);
     return true;
   }
+  if (
+    type == A(4, 3) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({- 1, - 4, - 3, - 5, - 3, - 2, - 1, 0})
+    ) &&
+    this->output.cartanElementsScaledToActByTwo[2].isEqualTo(
+      List<Rational>({- 1, 0, 0, - 1, - 2, - 1, 0, - 1})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "A little help for the solver to speed things up. ";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 95) * x(1) +
+    g(- 97) * x(2) +
+    g(- 98) * x(3) +
+    g(- 99) * x(4) +
+    g(- 100) * x(5) +
+    g(- 103) * x(6);
+    this->output.unknownNegativeGenerators[1] =
+    g(39) * x(7) +
+    g(34) +
+    g(33) * x(9) +
+    g(31) * x(10) +
+    g(25) * x(11) +
+    g(23) *(- 2);
+    this->output.unknownNegativeGenerators[2] =
+    g(20) * x(13) +
+    g(13) * x(14) +
+    g(12) * x(15) +
+    g(8) * 2 +
+    g(5) * x(17) - g(1);
+    return true;
+  }
   return false;
 }
 

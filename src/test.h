@@ -16,6 +16,7 @@ public:
     static const std::string crypto;
     static const std::string topicLists;
     static const std::string topiclists;
+    static const std::string topics;
     static const std::string freecalc;
     static const std::string calculator;
     static const std::string json;

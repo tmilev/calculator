@@ -506,7 +506,7 @@ bool TopicElementParser::Test::defaultPdfsOKCrashOnFailure() {
   int whichTopic = 0;
   if (!tester.defaultPdfsOK(whichTopic)) {
     std::stringstream topicBuildCommand;
-    topicBuildCommand << "BuildSlidesInTopicList(" << whichTopic << ")";
+    topicBuildCommand << "BuildSlidesInTopicList(" << whichTopic + 1 << ")";
     global.fatal
     << "Default pdfs are broken. "
     << tester.comments.str()
@@ -529,8 +529,8 @@ bool TopicElementParser::Test::defaultPdfsOK(int& whichTopic) {
   }
   for (whichTopic = 0; whichTopic < courses.allCourses.size; whichTopic ++) {
     CalculatorHTML owner;
-    owner.topicListFileName =
-    courses.allCourses[whichTopic].courseTopicsWithFolder();
+    Course& currentCourse = courses.allCourses[whichTopic];
+    owner.topicListFileName = currentCourse.courseTopicsWithFolder();
     if (!owner.loadAndParseTopicList(this->comments)) {
       this->comments
       << "Failed to load course "
@@ -542,6 +542,12 @@ bool TopicElementParser::Test::defaultPdfsOK(int& whichTopic) {
       this->comments << "Topic pdf check failed. ";
       return false;
     }
+    global
+    << Logger::green
+    << "Course: "
+    << currentCourse.title
+    << " loads its pdfs sucessfully. "
+    << Logger::endL;
   }
   return true;
 }

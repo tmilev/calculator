@@ -207,6 +207,8 @@ public:
   Rational maxPoints;
 };
 
+class Course;
+
 class CalculatorHTML {
 private:
   bool interpretHtmlOneAttemptPartTwo(
@@ -367,7 +369,9 @@ public:
     const std::string& inputRandomSeed,
     std::stringstream* commentsOnFailure
   );
-  bool loadAndParseTopicIndex(int index, std::stringstream& comments);
+  bool loadAndParseTopicIndex(
+    int index, Course* whichCourse, std::stringstream& comments
+  );
   bool loadAndParseTopicList(std::stringstream& comments);
   bool loadDatabaseInfo(std::stringstream& comments);
   std::string cleanUpFileName(const std::string& inputLink);

@@ -4922,7 +4922,7 @@ void CalculatorHTML::interpretAccountInformationLinks(
 }
 
 bool CalculatorHTML::loadAndParseTopicIndex(
-  int index, std::stringstream& comments
+  int index, Course* whichCourse, std::stringstream& comments
 ) {
   STACK_TRACE("CalculatorHTML::loadAndParseTopicIndex");
   if (index == 0) {
@@ -4941,6 +4941,9 @@ bool CalculatorHTML::loadAndParseTopicIndex(
   Course course = courseList.allCourses[index];
   this->topicListFileName = course.courseTopicsWithFolder();
   this->courseHome = course.title;
+  if (whichCourse != nullptr) {
+    *whichCourse = course;
+  }
   return CalculatorHTML::loadAndParseTopicList(comments);
 }
 

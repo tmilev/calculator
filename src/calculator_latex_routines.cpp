@@ -996,20 +996,20 @@ bool LaTeXCrawler::extractFileNames(
   }
   this->targetPDFVirtualPath =
   FileOperations::getPathFromFileNameWithPath(firstSignificantSlideName);
-  std::string tempString;
+  std::string suffix;
   if (
     StringRoutines::stringBeginsWith(
-      this->targetPDFVirtualPath, "freecalc", &tempString
+      this->targetPDFVirtualPath, "freecalc", &suffix
     )
   ) {
-    this->targetPDFVirtualPath = "slides-video" + tempString;
+    this->targetPDFVirtualPath = "slides-video" + suffix;
   }
   if (
     StringRoutines::stringBeginsWith(
-      this->targetPDFVirtualPath, "LaTeX-materials", &tempString
+      this->targetPDFVirtualPath, "LaTeX-materials", &suffix
     )
   ) {
-    this->targetPDFVirtualPath = "slides-video" + tempString;
+    this->targetPDFVirtualPath = "slides-video" + suffix;
   }
   this->targetPDFNoPath =
   FileOperations::getFileNameFromFileNameWithPath(firstSignificantSlideName);
@@ -1043,13 +1043,12 @@ bool LaTeXCrawler::extractFileNames(
   this->targetPDFLatexPath = "../../" + this->targetPDFVirtualPath;
   if (
     !StringRoutines::stringBeginsWith(
-      this->targetPDFVirtualPath, "slides-video/modules/", &tempString
+      this->targetPDFVirtualPath, "slides-video/modules/", &suffix
     )
   ) {
     this->targetVideoLatexPath = "";
   } else {
-    this->targetVideoLatexPath =
-    "../../slides-video/modules-video/" + tempString;
+    this->targetVideoLatexPath = "../../slides-video/modules-video/" + suffix;
   }
   this->targetPDFFileNameWithLatexPath =
   this->targetPDFLatexPath + this->targetPDFNoPath;
@@ -1377,7 +1376,12 @@ bool LaTeXCrawler::buildTopicList(
     commentsGeneral = &temp;
   }
   topicParser.loadFileNames();
-  if (!topicParser.loadAndParseTopicIndex(topicNumber, *commentsOnFailure)) {
+  Course course;
+  if (
+    !topicParser.loadAndParseTopicIndex(
+      topicNumber, &course, *commentsOnFailure
+    )
+  ) {
     return false;
   }
   int numberOfSlidePairsToBuild = 0;
@@ -1419,7 +1423,13 @@ bool LaTeXCrawler::buildTopicList(
     << processedCount
     << " out of "
     << numberOfSlidePairsToBuild
-    << ". ";
+    << ". "
+    << "Current topic: "
+    << currentElement.title
+    << ". Course index: "
+    << topicNumber
+    << ". Course name: "
+    << course.title;
     report.report(reportStream.str());
     for (int i = 0; i < currentElement.sourceHomework.size; i ++) {
       LaTeXCrawler::FileWithOption file;

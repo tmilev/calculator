@@ -21,6 +21,7 @@ const std::string Test::Suites::crypto = "crypto";
 const std::string Test::Suites::freecalc = "freecalc";
 const std::string Test::Suites::topicLists = "topicLists";
 const std::string Test::Suites::topiclists = "topiclists";
+const std::string Test::Suites::topics = "topics";
 const std::string Test::Suites::calculator = "calculator";
 const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
@@ -118,7 +119,8 @@ void Test::run() {
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||
-    this->shouldTest(Test::Suites::topiclists)
+    this->shouldTest(Test::Suites::topiclists) ||
+    this->shouldTest(Test::Suites::topics)
   ) {
     TopicElementParser::Test::all();
     global << Logger::green << "Topic tests completed." << Logger::endL;

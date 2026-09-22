@@ -1258,7 +1258,7 @@ public:
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosure;
-  bool flagUseSmallImpliedSubstitutions;
+  bool flagUseSmallImpliedSubstitutionsOnly;
   bool flagNeedAlgebraicClosure;
   // For fields that are dynamically generated such as modular arithmetic
   // elements (ElementZModP), use this element as factory to generate

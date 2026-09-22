@@ -271,6 +271,33 @@ configurePolynomialSystemE8() {
     "Smaller computational bounds were "
     "not sufficient to prove this case is impossible.";
   }
+  if (
+    embeddedType == B(4, 2) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({- 4, - 8, - 8, - 12, - 8, - 6, - 4, - 2})
+    )
+  ) {
+    maximumMonomialOperations = 50000;
+    maximumPolynomialDivisions = 70000;
+    this->output.notesOnHardCoding =
+    "Smaller computational bounds were "
+    "not sufficient to prove this case is impossible.";
+  }
+  if (
+    embeddedType == A(4, 1) + A(4, 1) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({0, 1, 0, 0, 0, 0, 0, 0})
+    ) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({2, 0, 2, 2, 2, 2, 2, 2})
+    )
+  ) {
+    maximumMonomialOperations = 100000;
+    maximumPolynomialDivisions = 100000;
+    this->output.notesOnHardCoding =
+    "Smaller computational bounds were "
+    "not sufficient to prove this case is impossible.";
+  }
 }
 
 bool CandidateSemisimpleSubalgebraArbitraryConstants::loadBuiltInGeneratorHints
@@ -932,6 +959,25 @@ loadBuiltInGeneratorHintsE8() {
     g(12) * x(15) +
     g(8) * 2 +
     g(5) * x(17) - g(1);
+    return true;
+  }
+  if (
+    type == B(4, 2) &&
+    this->output.cartanElementsScaledToActByTwo[0].isEqualTo(
+      List<Rational>({5, 8, 10, 15, 12, 9, 6, 3})
+    ) &&
+    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
+      List<Rational>({- 4, - 8, - 8, - 12, - 8, - 6, - 4, - 2})
+    )
+  ) {
+    this->output.notesOnHardCoding =
+    "Got solution through trial and error "
+    "seeding of initial zero values "
+    "for the coefficients of the system and running the solver.";
+    this->output.unknownNegativeGenerators[0] =
+    g(- 95) + g(- 97) *(- 3) + g(- 98) - g(- 103);
+    this->output.unknownNegativeGenerators[1] =
+    g(51) * x(23) + g(47) * x(26) + g(50) + g(48) + g(37) + g(26);
     return true;
   }
   return false;

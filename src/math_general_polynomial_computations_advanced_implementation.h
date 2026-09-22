@@ -767,7 +767,7 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
   this->flagNeedAlgebraicClosure = false;
-  this->flagUseSmallImpliedSubstitutions = false;
+  this->flagUseSmallImpliedSubstitutionsOnly = false;
 }
 
 template <class Coefficient>
@@ -1053,7 +1053,8 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
     return false;
   }
   if (
-    this->flagUseSmallImpliedSubstitutions && bestPolynomial.totalDegree() > 2
+    this->flagUseSmallImpliedSubstitutionsOnly &&
+    bestPolynomial.totalDegree() > 2
   ) {
     return false;
   }

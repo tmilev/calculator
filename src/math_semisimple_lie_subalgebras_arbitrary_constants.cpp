@@ -283,15 +283,7 @@ configurePolynomialSystemE8() {
     "Smaller computational bounds were "
     "not sufficient to prove this case is impossible.";
   }
-  if (
-    embeddedType == A(4, 1) + A(4, 1) &&
-    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
-      List<Rational>({0, 1, 0, 0, 0, 0, 0, 0})
-    ) &&
-    this->output.cartanElementsScaledToActByTwo[1].isEqualTo(
-      List<Rational>({2, 0, 2, 2, 2, 2, 2, 2})
-    )
-  ) {
+  if (embeddedType == A(4, 1) + A(4, 1)) {
     maximumMonomialOperations = 100000;
     maximumPolynomialDivisions = 100000;
     this->output.notesOnHardCoding =

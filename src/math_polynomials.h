@@ -65,6 +65,9 @@ public:
     output << monomial.toString();
     return output;
   }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->monomialBody.byteSizeOwnedThroughPointers();
+  }
   void multiplyByVariable(int variableIndex, const Rational& variablePower);
   const Rational& operator[](int i) const;
   Rational operator()(int i) const;
@@ -325,6 +328,11 @@ public:
     return
     this->polynomialPart.isConstant() &&
     this->differentialPart.isConstant();
+  }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return
+    this->polynomialPart.byteSizeOwnedThroughPointers() +
+    this->differentialPart.byteSizeOwnedThroughPointers();
   }
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(

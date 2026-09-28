@@ -52,6 +52,9 @@ public:
     this->basisIndex = 0;
     this->flagDeallocated = false;
   }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->element.byteSizeOwnedThroughPointers();
+  }
   void makeZero();
   static AlgebraicNumber zeroStatic();
   static AlgebraicNumber oneStatic();

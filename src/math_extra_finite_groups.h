@@ -440,6 +440,9 @@ struct SimpleReflectionOrOuterAutomorphism {
   int index;
   SimpleReflectionOrOuterAutomorphism(): flagIsOuter(false), index(- 1) {}
   std::string toString() const;
+  int64_t byteSizeOwnedThroughPointers() const {
+    return 0;
+  }
   void makeOuterAuto(int inputIndex) {
     this->flagIsOuter = true;
     this->index = inputIndex;
@@ -491,6 +494,9 @@ struct SimpleReflection {
   bool operator>(const SimpleReflection& right) const {
     return this->index > right.index;
   }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return 0;
+  }
 };
 
 class ElementSubgroupWeylGroupAutomorphisms {
@@ -506,6 +512,9 @@ public:
   );
   unsigned int hashFunction() const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->generatorsLastAppliedFirst.byteSizeOwnedThroughPointers();
+  }
 };
 
 class ElementWeylGroup {
@@ -526,6 +535,9 @@ public:
   ElementWeylGroup(): owner(nullptr), flagDeallocated(false) {}
   ~ElementWeylGroup() {
     this->flagDeallocated = true;
+  }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->generatorsLastAppliedFirst.byteSizeOwnedThroughPointers();
   }
   void operator=(const ElementWeylGroup& other) {
     this->owner = other.owner;
@@ -615,6 +627,9 @@ public:
   void makeIdentity(WeylGroupAutomorphisms& inputAutomorphisms);
   ElementWeylGroupAutomorphisms();
   ~ElementWeylGroupAutomorphisms();
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->generatorsLastAppliedFirst.byteSizeOwnedThroughPointers();
+  }
   bool checkInitialization() const;
   // Standard action of an automorphism on a weight.
   template <class Coefficient>
@@ -644,6 +659,11 @@ public:
   HashedList<MatrixTensor<Coefficient> > elements;
   bool generateElements(int upperBoundNonPositiveMeansNoLimit);
   std::string toString(const FormatExpressions* format = nullptr) const;
+  int64_t byteSizeOwnedThroughPointers() const {
+    return
+    this->generators.byteSizeOwnedThroughPointers() +
+    this->elements.byteSizeOwnedThroughPointers();
+  }
 };
 
 template <class Coefficient>
@@ -1395,6 +1415,11 @@ public:
   void computeOuterAutomorphisms();
   WeylGroupAutomorphisms();
   ~WeylGroupAutomorphisms();
+  int64_t byteSize() const {
+    return
+    this->outerAutomorphisms.byteSizeOwnedThroughPointers() +
+    this->allElements.byteSizeOwnedThroughPointers();
+  }
   template <class Coefficient>
   bool generateOuterOrbit(
     Vectors<Coefficient>& weights,
@@ -2530,6 +2555,15 @@ public:
   Vectors<Rational> rootsOfBorel;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms();
   ~SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms();
+  int64_t byteSize() const {
+    return
+    this->allElements.byteSizeOwnedThroughPointers() +
+    this->representativesQuotientAmbientOrder.byteSizeOwnedThroughPointers() +
+    this->simpleRootsInner.byteSizeOwnedThroughPointers() +
+    this->externalAutomorphisms.byteSizeOwnedThroughPointers() +
+    this->rootSubsystem.byteSizeOwnedThroughPointers() +
+    this->rootsOfBorel.byteSizeOwnedThroughPointers();
+  }
   bool checkInitialization();
   void toString(std::string& output, bool displayElements);
   void getGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output);

@@ -639,6 +639,7 @@ HEADERS += \
    #openssl/test/testutil/tu_local.h \
    #openssl/test/threadstest.h \
     progress_report.h \
+  ram_usage_computation.h \
     signals_infrastructure.h \
     test.h \
     user.h \
@@ -735,6 +736,7 @@ SOURCES += \
     email_user.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \
+  general_list_test.cpp \
     general_strings_test.cpp \
     global_objects.cpp \
     html_snippets.cpp \
@@ -2297,6 +2299,7 @@ SOURCES += \
    #openssl/util/check-format-test-negatives.c \
    #openssl/util/check-format-test-positives.c \
    #openssl/util/quicserver.c \
+  ram_usage_computation.cpp \
     random.cpp \
     random_system.cpp \
     source_code_formatter.cpp \

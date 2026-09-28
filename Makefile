@@ -193,6 +193,7 @@ SOURCES_RELATIVE_PATH=\
     json_parsing.cpp \
     json_test.cpp \
     general_strings_test.cpp \
+    general_list_test.cpp \
     math_algebraic_numbers.cpp \
     math_algebraic_numbers_test.cpp \
     math_basics.cpp \
@@ -227,6 +228,7 @@ SOURCES_RELATIVE_PATH=\
     multitasking.cpp \
     network.cpp \
     random_system.cpp \
+    ram_usage_computation.cpp \
     source_code_formatter.cpp \
     string_constants.cpp \
     symmetric_groups_and_generalizations.cpp \

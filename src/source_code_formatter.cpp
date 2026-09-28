@@ -163,8 +163,10 @@ std::string CodeFormatter::Element::toStringType(
     return "union";
   case CodeFormatter::Element::ClassKeyWord:
     return "class";
-  case CodeFormatter::Element::Namespace:
+  case CodeFormatter::Element::NamespaceKeyword:
     return "namespace";
+  case CodeFormatter::Element::NamespaceWithContent:
+    return "namespaceWithContent";
   case CodeFormatter::Element::StructKeyWord:
     return "struct";
   case CodeFormatter::Element::TypenameKeyWord:
@@ -2241,7 +2243,7 @@ CodeFormatter::CodeFormatter() {
     "class", CodeFormatter::Element::ClassKeyWord
   );
   this->elementTypes.setKeyValue(
-    "namespace", CodeFormatter::Element::Namespace
+    "namespace", CodeFormatter::Element::NamespaceKeyword
   );
   this->elementTypes.setKeyValue(
     "struct", CodeFormatter::Element::StructKeyWord
@@ -3170,15 +3172,30 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeBelowLast(1);
   }
   if (
-    secondToLast.type == CodeFormatter::Element::Namespace &&
+    secondToLast.type == CodeFormatter::Element::NamespaceKeyword &&
     last.type == CodeFormatter::Element::CodeBlock
   ) {
-    this->lastRuleName = "namespace";
+    this->lastRuleName = "anonymous namespace";
     secondToLast.makeFrom2(
-      CodeFormatter::Element::FunctionDefinition, secondToLast, last
+      CodeFormatter::Element::NamespaceWithContent, secondToLast, last
     );
     secondToLast.makeFrom1(CodeFormatter::Element::Command, secondToLast);
     return this->removeLast();
+  }
+  if (
+    thirdToLast.type == CodeFormatter::Element::NamespaceKeyword &&
+    secondToLast.isIdentifierOrAtom() &&
+    last.type == CodeFormatter::Element::CodeBlock
+  ) {
+    this->lastRuleName = "named namespace";
+    thirdToLast.makeFrom3(
+      CodeFormatter::Element::NamespaceWithContent,
+      thirdToLast,
+      secondToLast,
+      last
+    );
+    thirdToLast.makeFrom1(CodeFormatter::Element::Command, thirdToLast);
+    return this->removeLast(2);
   }
   if (
     thirdToLast.type == CodeFormatter::Element::TypenameKeyWord &&

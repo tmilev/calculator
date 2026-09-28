@@ -55,6 +55,29 @@ class CalculatorParserTest {
 public:
   static bool all();
   static bool whitespace();
+  static bool largeExample1(Calculator& initializedTester);
+};
+
+struct HashedListTest {
+  static bool all();
+  static bool largeHashedList1();
+  static bool largeHashedList2();
+  static int incrementIntPseudorandomly(int counter);
+};
+
+class ExpressionTest {
+public:
+  static bool all();
+  static bool builtInAtomValues(Calculator& owner);
+  static bool largeNestedExpression1(Calculator& owner);
+  static bool toStringTestRecode(Calculator& owner);
+  static bool toStringTestRecodeOnce(
+    const std::string& inputHardCodedMustParse, Calculator& owner
+  );
+  static bool isUserDefinedAtomOnce(
+    Calculator& owner, const std::string& input, bool isUserDefinedAtom
+  );
+  static bool isUserDefinedAtom(Calculator& owner);
 };
 
 #endif

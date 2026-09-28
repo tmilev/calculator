@@ -104,6 +104,9 @@ public:
   letter(inputLetter),
   rank(inputRank),
   cartanSymmetricInverseScale(inputScale) {}
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->cartanSymmetricInverseScale.byteSizeOwnedThroughPointers();
+  }
   int getRootSystemSize() const;
   int getLieAlgebraDimension() const {
     return this->getRootSystemSize() + this->rank;

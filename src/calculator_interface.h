@@ -170,7 +170,7 @@ public:
   }
   Expression zero();
   static Expression zeroStatic();
-  bool addChildRationalOnTop(const Rational& inputRat);
+  bool addChildRationalOnTop(const Rational& inputRational);
   bool addChildOnTop(const Expression& inputChild);
   bool addChildAtomOnTop(const std::string& operationString);
   bool addChildAtomOnTop(int operationIndex);
@@ -1299,6 +1299,9 @@ public:
   bool requiresNoMathTagsNonConstRunTime() const;
   static unsigned int hashFunction(const Expression& input);
   unsigned int hashFunction() const;
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->children.byteSizeOwnedThroughPointers();
+  }
   Expression(): flagDeallocated(false) {
     this->reset();
   }
@@ -1437,18 +1440,6 @@ public:
     MapList<Expression, Expression>& substitutions
   );
   static void initializeToMathMLHandlers(Calculator& toBeInitialized);
-  class Test {
-  public:
-    static bool all();
-    static bool toStringTestRecode(Calculator& owner);
-    static bool toStringTestRecodeOnce(
-      const std::string& inputHardCodedMustParse, Calculator& owner
-    );
-    static bool isUserDefinedAtomOnce(
-      Calculator& owner, const std::string& input, bool isUserDefinedAtom
-    );
-    static bool isUserDefinedAtom(Calculator& owner);
-  };
 };
 
 class ExpressionContext {
@@ -2633,6 +2624,11 @@ class Calculator {
   void evaluateCommandsWriteJavascriptOutput();
   void collectJavascript(const Expression& input, HashedList<JSData>& output);
 public:
+  // Contains precomputed operation lookups.
+  struct BuiltInAtomValues {
+    static const int list = 0;
+  };
+
   class OperationHandlers {
   public:
     std::string atom;

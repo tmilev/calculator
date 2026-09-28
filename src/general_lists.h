@@ -3,6 +3,7 @@
 
 #include "general_multitasking.h"
 #include "globals.h"
+#include "ram_usage_computation.h"
 #include <algorithm>
 #include <math.h>
 #include <stdint.h> // Contains uint32_t. Needed by clang++ on *some systems*.
@@ -50,10 +51,12 @@ private:
   static const unsigned int primeConstants[HashConstants::size];
 public:
   static inline unsigned int getConstantIncrementCounter(int& counter) {
-    if (counter > HashConstants::size) {
+    if (counter >= HashConstants::size) {
       counter = 0;
     }
-    return primeConstants[counter];
+    unsigned int result = primeConstants[counter];
+    counter ++;
+    return result;
   }
   static const unsigned constant0 = 607;
   static const unsigned constant1 = 1013;
@@ -869,16 +872,17 @@ public:
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   void releaseMemory();
   unsigned int hashFunction() const {
-    unsigned int result = 0;
-    int k = 0;
+    int64_t result = 0;
+    int64_t k = 0;
     int hashCounter = 0;
-    for (int i = 0; i < this->size; i ++) {
+    for (const Object& object : *this) {
       k ++;
-      result +=
-      k * HashConstants::getConstantIncrementCounter(hashCounter) *
-      HashFunctions::hashFunction(this->objects[i]);
+      result += k*static_cast<int64_t>(
+        HashConstants::getConstantIncrementCounter(hashCounter)
+      ) *
+      static_cast<int64_t>(HashFunctions::hashFunction(object));
     }
-    return result;
+    return static_cast<unsigned int>(result);
   }
   static unsigned int hashFunction(const List<Object>& input) {
     return input.hashFunction();
@@ -996,6 +1000,13 @@ public:
     result.pointer = &this->objects[this->size];
     return result;
   }
+  int64_t byteSizeOwnedThroughPointers() const {
+    int64_t result = 0;
+    for (int i = 0; i < this->actualSize; i ++) {
+      result += RamUsageComputation::byteSize<Object>(this->objects[i]);
+    }
+    return result;
+  }
 };
 
 template <typename Object>
@@ -1064,6 +1075,15 @@ public:
   }
 };
 
+// Stores a list of objects.
+// Objects are identified with their hash functions.
+// The objects' hash functions are expected to stay immutable.
+// Mutations in the objects that do not change the hash functions
+// are allowed but discouraged. Storing different objects with
+// the same hash function is discoraged and can break
+// Lookup of objects in the list is
+// near constant time, assuming different objects have different
+// hash functions.
 template <
   class Object,
   class TemplateList,
@@ -1113,22 +1133,39 @@ public:
     std::stringstream out;
     out << "<br>List size: " << this->size;
     out << "<br>Hash size: " << this->hashBuckets.size;
-    int maxHashSize = 0;
+    int maximumHashSize = 0;
     int totalNonZeroHashes = 0;
-    for (int i = 0; i < this->hashBuckets.size; i ++) {
-      if (maxHashSize < this->hashBuckets[i].size) {
-        maxHashSize = this->hashBuckets[i].size;
+    int totalBucketSizes = 0;
+    int doNotSubmit;
+    const List<int>* largestHashBucket = nullptr;
+    for (const List<int>& bucket : this->hashBuckets) {
+      if (maximumHashSize < bucket.size) {
+        maximumHashSize = bucket.size;
+        largestHashBucket = &bucket;
       }
-      if (this->hashBuckets[i].size > 0) {
+      if (bucket.size > 0) {
         totalNonZeroHashes ++;
       }
+      totalBucketSizes += bucket.size;
     }
-    out << "<br>Max hash array size: " << maxHashSize;
+    out << "<br>Max hash array size: " << maximumHashSize << ".\n";
     out
-    << "<br>Average hash array size: "
-    << (static_cast<double>(this->size)) / (
-      static_cast<double>(totalNonZeroHashes)
-    );
+    << "<br>Non-empty hash buckets: "
+    << totalNonZeroHashes
+    << " out of "
+    << this->hashBuckets.size
+    << ".\n";
+    if (totalNonZeroHashes != 0 && largestHashBucket != nullptr) {
+      out
+      << "<br>Average non-empty hash array size: "
+      << (static_cast<double>(this->size)) / (
+        static_cast<double>(totalNonZeroHashes)
+      )
+      << "\n";
+    }
+    if (totalBucketSizes != this->size) {
+      fatalCrash("Bucket hash count doesn't match the object hash count.");
+    }
     return out.str();
   }
   void addOnTop(const Object& o) {
@@ -1155,6 +1192,9 @@ public:
   const List<int>& getHashArray(int hashIndex) const {
     return this->hashBuckets[hashIndex];
   }
+  // A slow check for hash list corruption (usually due
+  // to mutation of the stored object which causes its
+  // hash function to change.
   void grandMasterConsistencyCheck() const {
     for (int i = 0; i < this->hashBuckets.size; i ++) {
       List<int>& current = this->hashBuckets[i];
@@ -1491,6 +1531,24 @@ public:
     for (int i = 0; i < other.size; i ++) {
       this->addOnTop(other.objects[i]);
     }
+  }
+  // The total RAM consumption of this object in bytes.
+  int64_t byteSizeOwnedThroughPointers() const {
+    int64_t result = 0;
+    result +=
+    this->hashBuckets.byteSizeOwnedThroughPointers() +
+    this->TemplateList::byteSizeOwnedThroughPointers();
+    return result;
+  }
+  // Returns the size of the largest hash bucket.
+  int largestBucketSize() {
+    int result = 0;
+    for (const List<int>& bucket : this->hashBuckets) {
+      if (bucket.size > result) {
+        result = bucket.size;
+      }
+    }
+    return result;
   }
 };
 

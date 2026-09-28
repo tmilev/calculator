@@ -60,9 +60,10 @@ void Test::run() {
     global << Logger::green << "Json tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::basic)) {
+    HashedListTest::all();
+    ExpressionTest::all();
     AlgebraicNumber::Test::all();
     StringRoutines::Test::all();
-    Expression::Test::all();
     LargeIntegerUnsigned::Test::all();
     Rational::Test::all();
     ElementZmodP::Test::all();

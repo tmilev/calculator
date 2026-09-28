@@ -58,6 +58,9 @@ public:
     output << largeIntegerUnsigned.toString();
     return output;
   }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->digits.byteSizeOwnedThroughPointers();
+  }
   static const List<unsigned int>& allPrimesSmallerThan15Bits();
   void padWithZeroesToAtLeastNDigits(int desiredMinimumDigits);
   void addLargeIntegerUnsignedShiftedTimesDigit(
@@ -272,6 +275,9 @@ public:
   }
   void multiplyByInt(int x);
   void toString(std::string& output) const;
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->value.byteSizeOwnedThroughPointers();
+  }
   std::string toString(const FormatExpressions* format = nullptr) const {
     (void) format;
     std::string currentString;
@@ -499,6 +505,11 @@ private:
   public:
     LargeInteger numerator;
     LargeIntegerUnsigned denominator;
+    int64_t byteSizeOwnedThroughPointers() const {
+      return
+      this->numerator.byteSizeOwnedThroughPointers() +
+      this->denominator.byteSizeOwnedThroughPointers();
+    }
   };
 
   friend Rational operator-(const Rational& argument);
@@ -564,6 +575,12 @@ public:
   static unsigned long long int totalLargeMultiplications;
   static unsigned long long int totalSmallGreatestCommonDivisors;
   static unsigned long long int totalLargeGreatestCommonDivisors;
+  int64_t byteSizeOwnedThroughPointers() const {
+    if (this->extended == nullptr) {
+      return 0;
+    }
+    return RamUsageComputation::byteSize(*this->extended);
+  }
   static std::string className() {
     return "Rational";
   }

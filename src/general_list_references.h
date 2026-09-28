@@ -100,14 +100,17 @@ public:
     return *this->references[i];
   }
   unsigned int hashFunction() const {
-    unsigned int result = 0;
-    int j = 0;
-    for (int i = 0; i < this->size; i ++) {
-      result +=
-      HashConstants::getConstantIncrementCounter(j) *
-      HashFunctions::hashFunction((*this)[i]);
+    int64_t result = 0;
+    int64_t k = 0;
+    int hashCounter = 0;
+    for (const Object& object : *this) {
+      k ++;
+      result += k*static_cast<int64_t>(
+        HashConstants::getConstantIncrementCounter(hashCounter)
+      ) *
+      static_cast<int64_t>(HashFunctions::hashFunction(object));
     }
-    return result;
+    return static_cast<unsigned int>(result);
   }
   bool contains(const Object& inputObject) const {
     for (int i = 0; i < this->size; i ++) {
@@ -248,6 +251,13 @@ public:
   ListReferencesIterator<Object> end() const {
     ListReferencesIterator<Object> result(this);
     result.index = this->size;
+    return result;
+  }
+  int64_t byteSizeOwnedThroughPointers() const {
+    int64_t result = 0;
+    for (int i = 0; i < this->references.size; i ++) {
+      result += RamUsageComputation::byteSize(*this->references[i]);
+    }
     return result;
   }
 };

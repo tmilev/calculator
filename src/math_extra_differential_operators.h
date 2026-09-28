@@ -23,6 +23,11 @@ public:
   unsigned int hashFunction() const {
     return hashFunction(*this);
   }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return
+    this->weylMonomial.byteSizeOwnedThroughPointers() +
+    this->matrixMonomial.byteSizeOwnedThroughPointers();
+  }
   bool operator==(const QuasiDifferentialMononomial& other) const {
     return
     this->weylMonomial == other.weylMonomial &&

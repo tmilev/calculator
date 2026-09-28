@@ -2163,6 +2163,9 @@ public:
   int monomialIndex;
   MonomialVector(): monomialIndex(- 1) {}
   MonomialVector(int inputIndex): monomialIndex(inputIndex) {}
+  int64_t byteSize() const {
+    return sizeof(*this);
+  }
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toMathML(
     const FormatExpressions* format = nullptr,
@@ -2182,6 +2185,9 @@ public:
   }
   bool operator>(const MonomialVector& other) const {
     return this->monomialIndex > other.monomialIndex;
+  }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return 0;
   }
 };
 
@@ -3410,6 +3416,9 @@ public:
     this->vIndex = other.vIndex;
     this->dualIndex = other.dualIndex;
     this->isIdentity = other.isIdentity;
+  }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return 0;
   }
   void makeEij(int i, int j) {
     this->dualIndex = j;

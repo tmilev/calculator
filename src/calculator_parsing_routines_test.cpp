@@ -248,7 +248,46 @@ bool Calculator::Examples::Test::compose() {
 
 bool CalculatorParserTest::all() {
   STACK_TRACE("CalculatorParserTest::all");
+  Calculator tester;
+  tester.initialize(Calculator::Mode::full);
+  CalculatorParserTest::largeExample1(tester);
   CalculatorParserTest::whitespace();
+  return true;
+}
+
+bool CalculatorParserTest::largeExample1(Calculator& initializedTester) {
+  // A large example. Intended to catch non-linear parsing speed.
+  std::stringstream out;
+  int iterations = 20000;
+  int64_t start = global.getElapsedMilliseconds();
+  for (int i = 0; i < iterations; i ++) {
+    out << "(1-5 *";
+  }
+  out << "1";
+  for (int i = 0; i < iterations; i ++) {
+    out << ")";
+  }
+  std::string input = out.str();
+  Expression output;
+  if (!initializedTester.parser.parseNoEmbeddingInCommand(input, output)) {
+    global.fatal << "Failed to parse: " << input << global.fatal;
+  }
+  int64_t duration = global.getElapsedMilliseconds() - start;
+  if (duration > 2000) {
+    global.fatal
+    << "Parsing "
+    << iterations
+    << " iterations is too slow, took: "
+    << duration
+    << " milliseconds. "
+    << global.fatal;
+  }
+  global
+  << Logger::green
+  << "Parsing large expression took: "
+  << duration
+  << " milliseconds. "
+  << Logger::endL;
   return true;
 }
 

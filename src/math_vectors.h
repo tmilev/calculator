@@ -1552,6 +1552,11 @@ public:
   );
   bool hasCommonPointWithPositiveTwoToTheNthQuadrant();
   bool operator==(const AffineHyperplane& right);
+  int64_t byteSizeOwnedThroughPointers() const {
+    return
+    this->affinePoint.byteSizeOwnedThroughPointers() +
+    this->normal.byteSizeOwnedThroughPointers();
+  }
 };
 
 template <class Coefficient>
@@ -1680,6 +1685,9 @@ public:
   bool splitByAffineHyperplane(
     AffineHyperplane<Rational>& killerPlane, AffineCones& output
   );
+  int64_t byteSizeOwnedThroughPointers() const {
+    return this->walls.byteSizeOwnedThroughPointers();
+  }
 };
 
 class AffineCones: public HashedList<AffineCone> {

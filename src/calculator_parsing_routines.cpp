@@ -2144,7 +2144,7 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
   this->boundVariablesInContext.clear();
   const int totalTimesOneRuleCanBeCalled = 1000;
   int counterReport = 0;
-  int symbolsToIssueReport = 100;
+  int symbolsToIssueReport = 1000;
   int minMillisecondsPerReport = 200;
   this->owner->statistics.startParsing = global.getElapsedMilliseconds();
   this->owner->statistics.lastStopwatchParsing =
@@ -2160,10 +2160,9 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
     if (counterReport >= symbolsToIssueReport) {
       counterReport = 0;
       int64_t currentMilliseconds = global.getElapsedMilliseconds();
-      if (
-        currentMilliseconds - this->owner->statistics.lastStopwatchParsing >
-        minMillisecondsPerReport
-      ) {
+      int64_t elapsedMilliseconds =
+      currentMilliseconds - this->owner->statistics.lastStopwatchParsing;
+      if (elapsedMilliseconds > minMillisecondsPerReport) {
         this->owner->statistics.lastStopwatchParsing = currentMilliseconds;
         std::stringstream reportStream;
         reportStream
@@ -2171,8 +2170,11 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
         << this->counterInToBeParsed
         << " out of "
         << (*this->toBeParsed).size
-        << " syntactic elements. ";
+        << " syntactic elements. Total child expressions: "
+        << this->owner->allChildExpressions.size
+        << ". ";
         report.report(reportStream.str());
+        global << "DEBUG: " << reportStream.str() << Logger::endL;
       }
     }
     (*this->syntacticStack).addOnTop((*this->toBeParsed)[

@@ -116,7 +116,8 @@ public:
       Else,
       Return,
       ReturnedExpression,
-      Namespace,
+      NamespaceKeyword,
+      NamespaceWithContent,
     };
   private:
     bool computeIndentation();

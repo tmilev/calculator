@@ -73,6 +73,11 @@ public:
   ~LinearCombination() {
     this->flagDeallocated = true;
   }
+  int64_t byteSizeOwnedThroughPointers() const {
+    return
+    this->monomials.byteSizeOwnedThroughPointers() +
+    this->coefficients.byteSizeOwnedThroughPointers();
+  }
   void computeFormattingProperties(
     const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr

@@ -1426,6 +1426,7 @@ unsigned int Expression::hashFunction() const {
       return result;
     }
     global.fatal << "Uninitialized expression. " << global.fatal;
+    return 0;
   }
   int hashCounter = 0;
   for (int childIndex : this->children) {
@@ -1448,11 +1449,11 @@ Expression Expression::zeroStatic() {
   return result;
 }
 
-bool Expression::addChildRationalOnTop(const Rational& inputRat) {
+bool Expression::addChildRationalOnTop(const Rational& inputRational) {
   this->checkInitialization();
-  Expression ratE;
-  ratE.assignValue(*this->owner, inputRat);
-  return this->addChildOnTop(ratE);
+  Expression rationalExpression;
+  rationalExpression.assignValue(*this->owner, inputRational);
+  return this->addChildOnTop(rationalExpression);
 }
 
 int Calculator::addChildExpression(const Expression& child) {
@@ -5790,6 +5791,7 @@ std::string Expression::toString(
   MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toString");
+  global << "DEBUG: do not submit: tostring called!!!" << Logger::endL;
   MemorySaving<FormatExpressions> formatContainer;
   if (format == nullptr) {
     format = &formatContainer.getElement();
@@ -6499,7 +6501,8 @@ bool Expression::makeXOX(
   left.checkInitialization();
   right.checkInitialization();
   this->reset(owner, 3);
-  this->data = owner.opList();
+  // Must equal opList. Verified in unit tests.
+  this->data = Calculator::BuiltInAtomValues::list;
   this->addChildAtomOnTop(operation);
   this->addChildOnTop(left);
   return this->addChildOnTop(right);

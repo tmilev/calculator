@@ -378,12 +378,17 @@ public:
   static void computeSha224(
     const List<unsigned char>& input, List<uint32_t>& output
   );
+  static void computeSha224(const std::string& input, List<uint32_t>& output);
+  static void computeSha2xx(
+    const std::string& input, List<uint32_t>& output, bool is224
+  );
   static void computeSha2xx(
     const List<unsigned char>& input, List<uint32_t>& output, bool is224
   );
   static void computeSha256(
     const List<unsigned char>& input, List<uint32_t>& output
   );
+  static void computeSha256(const std::string& input, List<uint32_t>& output);
   static void computeSha256(
     const List<unsigned char>& input, List<unsigned char>& output
   );
@@ -394,6 +399,9 @@ public:
   );
   static void computeSha512(
     const List<unsigned char>& input, List<unsigned char>& output
+  );
+  static void computeSha512(
+    const std::string& input, List<unsigned char>& output
   );
   static std::string computeSha3_256OutputBase64URL(const std::string& input);
   static void computeKeccak3_256(

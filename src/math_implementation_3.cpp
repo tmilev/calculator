@@ -15344,7 +15344,7 @@ std::string Cone::toStringNeighbors(const ConeCollection& owner) const {
       neighborDisplayIds.addOnTop("(corrupt)");
       continue;
     }
-    neighborDisplayIds.addListOnTop(neighbor->displayId());
+    neighborDisplayIds.addOnTop(neighbor->displayId());
   }
   std::stringstream out;
   out << neighbors;

@@ -690,7 +690,7 @@ bool CalculatorFunctionsCrypto::testRSASign(
   List<unsigned char> message;
   List<unsigned char> paddedMessage;
   List<unsigned char> signature;
-  message = messageString;
+  ListConversions::convertStringToListBytes(messageString, message);
   key.hashAndPadPKCS1(
     message,
     SignatureAlgorithmSpecification::HashAlgorithm::sha256,
@@ -2538,7 +2538,7 @@ bool CalculatorFunctionsCrypto::testASN1Decode(
   }
   AbstractSyntaxNotationOneSubsetDecoder decoder;
   List<unsigned char> dataList;
-  dataList = data;
+  ListConversions::convertStringToListBytes(data, dataList);
   std::stringstream commentsOnError;
   std::stringstream out;
   ASNElement result;

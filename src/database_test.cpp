@@ -108,10 +108,7 @@ bool Database::Test::deleteAllByFindQuery() {
 
 bool Database::Test::loadFromJSON() {
   STACK_TRACE("Database::Test::loadFromJSON");
-  StateMaintainer<std::string> maintainerDatabaseName(Database::name);
-  StateMaintainer<DatabaseType> maintainerDatabaseType(global.databaseType);
-  global.databaseType = DatabaseType::internal;
-  Database::name = Database::Test::testDatabaseName(global.databaseType);
+  Database::Test tester(DatabaseType::internal);
   std::stringstream comments;
   bool mustBeTrue =
   DatabaseLoader::loadDatabase(

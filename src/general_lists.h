@@ -380,7 +380,7 @@ private:
     List<CarbonCopyType>* carbonCopy
   );
   void quickSortDescending(int bottomIndex, int topIndex);
-  inline void initConstructorCallOnly() {
+  inline void initializeConstructorCallOnly() {
     this->objects = nullptr;
     this->actualSize = 0;
     this->size = 0;
@@ -393,18 +393,14 @@ public:
   Object* objects;
   int size;
   List() {
-    this->initConstructorCallOnly();
-  }
-  List(const std::string& input) {
-    this->initConstructorCallOnly();
-    *this = input;
+    this->initializeConstructorCallOnly();
   }
   List(const std::initializer_list<Object>& input) {
-    this->initConstructorCallOnly();
+    this->initializeConstructorCallOnly();
     *this = input;
   }
   List(const List<Object>& other) {
-    this->initConstructorCallOnly();
+    this->initializeConstructorCallOnly();
     *this = other;
   }
   List<Object> sliceCopy(int startingIndex, int sizeOfSlice) const;
@@ -493,16 +489,6 @@ public:
   }
   void removeIndexSwapWithLast(int index);
   void removeLastObject();
-  void removeObjectsShiftDown(const List<Object>& toBeRemoved) {
-    int currentIndex = 0;
-    for (int i = 0; i < this->size; i ++) {
-      if (!toBeRemoved.contains((*this)[i])) {
-        toBeRemoved.swapTwoIndices(i, currentIndex);
-        currentIndex ++;
-      }
-    }
-    this->setSize(currentIndex);
-  }
   // The below function is named a bit awkwardly because otherwise there is a
   // risk of confusion
   // with the removeIndexSwapWithLast when selecting from autocomplete list.
@@ -888,12 +874,6 @@ public:
     return input.hashFunction();
   }
   void intersectWith(const List<Object>& other, List<Object>& output) const;
-  void operator=(const std::string& right) {
-    this->setSize(right.size());
-    for (int i = 0; i < this->size; i ++) {
-      this->objects[i] = right[static_cast<unsigned>(i)];
-    }
-  }
   void operator=(const std::initializer_list<Object>& other) {
     this->setSize(other.size());
     int counter = 0;
@@ -957,17 +937,6 @@ public:
   bool operator!=(const List<Object>& other) const {
     return !this->isEqualTo(other);
   }
-  bool operator==(const std::string& other) {
-    if ((static_cast<unsigned>(this->size)) != other.size()) {
-      return false;
-    }
-    for (int i = 0; i < this->size; i ++) {
-      if (!(this->objects[i] == other[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
   bool operator==(const List<Object>& other) const {
     return this->isEqualTo(other);
   }
@@ -1007,6 +976,19 @@ public:
     }
     return result;
   }
+};
+
+class ListConversions {
+public:
+  static void convertListUnsignedCharsToString(
+    const List<unsigned char>& input, std::string& output
+  );
+  static void convertStringToListBytes(
+    const std::string& input, List<unsigned char>& output
+  );
+  static void convertStringToListBytesSigned(
+    const std::string& input, List<char>& output
+  );
 };
 
 template <typename Object>
@@ -1089,11 +1071,16 @@ template <
   class TemplateList,
   unsigned int hashFunctionObject(const Object&) = Object::hashFunction
 >
-class HashTemplate: public TemplateList {
+class HashedContainerTemplate: public TemplateList {
 private:
+  friend class HashedListTest;
   Object popIndexShiftDown(int index);
   void reverseElements();
   void shiftUpExpandOnTop(int startingIndex);
+  void initializeHashesToOne() {
+    this->hashBuckets.setSize(1);
+    this->hashBuckets[0].size = 0;
+  }
 protected:
   // In the i^th bucket, we store the indices of all objects
   // for which (hash(object) mod hashBuckets.size) equals i.
@@ -1133,14 +1120,13 @@ public:
     std::stringstream out;
     out << "<br>List size: " << this->size;
     out << "<br>Hash size: " << this->hashBuckets.size;
-    int maximumHashSize = 0;
+    int largestHashBucketSize = 0;
     int totalNonZeroHashes = 0;
     int totalBucketSizes = 0;
-    int doNotSubmit;
     const List<int>* largestHashBucket = nullptr;
     for (const List<int>& bucket : this->hashBuckets) {
-      if (maximumHashSize < bucket.size) {
-        maximumHashSize = bucket.size;
+      if (largestHashBucketSize < bucket.size) {
+        largestHashBucketSize = bucket.size;
         largestHashBucket = &bucket;
       }
       if (bucket.size > 0) {
@@ -1148,7 +1134,7 @@ public:
       }
       totalBucketSizes += bucket.size;
     }
-    out << "<br>Max hash array size: " << maximumHashSize << ".\n";
+    out << "<br>Largest hash bucket size: " << largestHashBucketSize << ".\n";
     out
     << "<br>Non-empty hash buckets: "
     << totalNonZeroHashes
@@ -1160,8 +1146,7 @@ public:
       << "<br>Average non-empty hash array size: "
       << (static_cast<double>(this->size)) / (
         static_cast<double>(totalNonZeroHashes)
-      )
-      << "\n";
+      );
     }
     if (totalBucketSizes != this->size) {
       fatalCrash("Bucket hash count doesn't match the object hash count.");
@@ -1442,7 +1427,7 @@ public:
       this->setHashSize(expectedSize* 5);
     }
   }
-  inline void setHashSize(int inputHashSize) {
+  inline void setHashSizeSigned(int inputHashSize) {
     return this->setHashSize(static_cast<unsigned>(inputHashSize));
   }
   void setHashSize(unsigned int desiredHashSize) {
@@ -1453,11 +1438,14 @@ public:
     List<int> emptyList;
     // <-empty list has size 0
     this->hashBuckets.initializeFillInObject(desiredHashSize, emptyList);
-    if (this->size > 0) {
-      for (int i = 0; i < this->size; i ++) {
-        int index = this->getHash((*this)[i]);
-        this->hashBuckets[index].addOnTop(i);
-      }
+    if (this->size <= 0) {
+      return;
+    }
+    int i = 0;
+    for (const Object& object : (*this)) {
+      int index = this->getHash(object);
+      this->hashBuckets[index].addOnTop(i);
+      i ++;
     }
   }
   template <typename otherType = int>
@@ -1480,15 +1468,11 @@ public:
     myCopy.quickSortDescending(order, carbonCopy);
     this->operator=(myCopy);
   }
-  void initializeHashesToOne() {
-    this->hashBuckets.setSize(1);
-    this->hashBuckets[0].size = 0;
-  }
-  HashTemplate(const HashTemplate& other) {
+  HashedContainerTemplate(const HashedContainerTemplate& other) {
     this->initializeHashesToOne();
     this->operator=(other);
   }
-  HashTemplate() {
+  HashedContainerTemplate() {
     this->initializeHashesToOne();
   }
   std::string toString(FormatExpressions* format) const {
@@ -1558,50 +1542,52 @@ template <
     Object
   >
 >
-class HashedList: public HashTemplate<Object, List<Object>, hashFunction> {
+class HashedList: public HashedContainerTemplate<
+  Object, List<Object>, hashFunction
+> {
 public:
   HashedList(const HashedList& other):
-  HashTemplate<Object, List<Object>, hashFunction>() {
+  HashedContainerTemplate<Object, List<Object>, hashFunction>() {
     this->operator=(other);
   }
   HashedList() {}
   void operator=(const HashedList& other) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(
-      other
-    );
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    operator=(other);
   }
   void operator=(const List<Object>& other) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(
-      other
-    );
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    operator=(other);
   }
   // Note The following function specializations are declared entirely in order
   // to facilitate autocomplete in my current IDE. If I find a better
   // autocompletion IDE the following should be removed.
   void addOnTopNoRepetition(const List<Object>& input) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
     addOnTopNoRepetition(input);
   }
   bool addOnTopNoRepetition(const Object& o) {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
     addOnTopNoRepetition(o);
   }
   void addOnTop(const Object& o) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(o);
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    addOnTop(o);
   }
   void addListOnTop(const List<Object>& input) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addListOnTop(
-      input
-    );
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    addListOnTop(input);
   }
   bool contains(const Object& o) const {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::contains(o);
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    contains(o);
   }
   bool contains(const List<Object>& input) const {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::contains(input);
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    contains(input);
   }
   // Returns a non-const reference to an object.
   // Modifying the so returned object is allowed, so long as the modification
@@ -1610,36 +1596,34 @@ public:
   // If possible, use operator[] instead.
   Object& getElement(int objectIndex) const {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::getElement(
-      objectIndex
-    );
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    getElement(objectIndex);
   }
   void setObjectAtIndex(int index, const Object& object) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::setObjectAtIndex(
-      index, object
-    );
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    setObjectAtIndex(index, object);
   }
   void removeIndexShiftDown(int index) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
     removeIndexShiftDown(index);
   }
   void removeIndexSwapWithLast(int index) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
     removeIndexSwapWithLast(index);
   }
   int getIndex(const Object& o) const {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::getIndex(o);
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    getIndex(o);
   }
   int getIndexNoFail(const Object& o) const {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::getIndexNoFail(
-      o
-    );
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    getIndexNoFail(o);
   }
   int addNoRepetitionOrReturnIndexFirst(const Object& o) {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
     addNoRepetitionOrReturnIndexFirst(o);
   }
   template <typename otherType = int>
@@ -1647,7 +1631,7 @@ public:
     typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
     quickSortAscending(order, carbonCopy);
   }
   template <typename otherType = int>
@@ -1655,13 +1639,12 @@ public:
     typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
     quickSortDescending(order, carbonCopy);
   }
   void setExpectedSize(int expectedSize) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::setExpectedSize(
-      expectedSize
-    );
+    this->::HashedContainerTemplate<Object, List<Object>, hashFunction>::
+    setExpectedSize(expectedSize);
   }
 };
 

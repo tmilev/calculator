@@ -258,7 +258,7 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
     return false;
   }
   if (output.messageId <= 0 || output.messageSize <= 0) {
-    // Not a large message.
+    // Not a large message; the entire payload was received.
     return true;
   }
   // We have a large message that does not fit in a single chunk.

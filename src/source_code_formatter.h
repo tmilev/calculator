@@ -410,7 +410,7 @@ public:
   int maximumDesiredLineLength;
   int indexCurrentlyConsumed;
   const int tabLength = 2;
-  const int dummyElements = 6;
+  const int dummyElements = 7;
   // A class to represent
   CodeFormatter();
   static bool formatCPPDirectory(

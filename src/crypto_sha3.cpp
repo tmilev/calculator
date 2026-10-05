@@ -336,7 +336,7 @@ void Sha3::initialize() {
 
 void Sha3::update(const std::string& input) {
   List<unsigned char> inputChar;
-  inputChar = input;
+  Crypto::convertStringToListBytes(input, inputChar);
   this->update(inputChar);
 }
 
@@ -385,7 +385,7 @@ void Crypto::computeSha3_256(
   const std::string& input, List<unsigned char>& output
 ) {
   List<unsigned char> inputChar;
-  inputChar = input;
+  Crypto::convertStringToListBytes(input, inputChar);
   return Crypto::computeSha3_256(inputChar, output);
 }
 

@@ -2139,7 +2139,7 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
   for (int i = 0; i < this->numberOfEmptyTokensStart; i ++) {
     (*this->syntacticStack)[i] = this->getStartFillerElement();
   }
-  this->parsingLog = "";
+  this->parsingLog.clear();
   this->nonBoundVariablesInContext.clear();
   this->boundVariablesInContext.clear();
   const int totalTimesOneRuleCanBeCalled = 1000;
@@ -2174,7 +2174,6 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
         << this->owner->allChildExpressions.size
         << ". ";
         report.report(reportStream.str());
-        global << "DEBUG: " << reportStream.str() << Logger::endL;
       }
     }
     (*this->syntacticStack).addOnTop((*this->toBeParsed)[

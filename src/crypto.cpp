@@ -916,6 +916,12 @@ void Crypto::convertListUnsignedCharsToString(
   const List<unsigned char>& input, std::string& output
 ) {
   STACK_TRACE("Crypto::convertBytesToString");
+  ListConversions::convertListUnsignedCharsToString(input, output);
+}
+
+void ListConversions::convertListUnsignedCharsToString(
+  const List<unsigned char>& input, std::string& output
+) {
   output.clear();
   output.reserve(static_cast<unsigned>(input.size));
   for (int i = 0; i < input.size; i ++) {
@@ -927,26 +933,44 @@ void Crypto::convertStringToListBytes(
   const std::string& input, List<unsigned char>& output
 ) {
   STACK_TRACE("Crypto::convertStringToListBytes");
-  output = input;
+  ListConversions::convertStringToListBytes(input, output);
+}
+
+void ListConversions::convertStringToListBytes(
+  const std::string& input, List<unsigned char>& output
+) {
+  output.clear();
+  for (char c : input) {
+    output.addOnTop(static_cast<unsigned char>(c));
+  }
+}
+
+void ListConversions::convertStringToListBytesSigned(
+  const std::string& input, List<char>& output
+) {
+  output.clear();
+  for (char c : input) {
+    output.addOnTop(c);
+  }
 }
 
 void Crypto::convertStringToListBytesSigned(
   const std::string& input, List<char>& output
 ) {
   STACK_TRACE("Crypto::convertStringToListBytesSigned");
-  output = input;
+  ListConversions::convertStringToListBytesSigned(input, output);
 }
 
 std::string Crypto::convertStringToBase64Standard(const std::string& input) {
-  List<unsigned char> inputChar;
-  inputChar = input;
-  return Crypto::convertListUnsignedCharsToBase64(inputChar, false);
+  List<unsigned char> inputCharacters;
+  Crypto::convertStringToListBytes(input, inputCharacters);
+  return Crypto::convertListUnsignedCharsToBase64(inputCharacters, false);
 }
 
 std::string Crypto::convertStringToBase64URL(const std::string& input) {
-  List<unsigned char> inputChar;
-  inputChar = input;
-  return Crypto::convertListUnsignedCharsToBase64(inputChar, true);
+  List<unsigned char> inputCharacters;
+  Crypto::convertStringToListBytes(input, inputCharacters);
+  return Crypto::convertListUnsignedCharsToBase64(inputCharacters, true);
 }
 
 std::string Crypto::convertListUnsignedCharsToBase64(
@@ -1147,7 +1171,7 @@ bool Crypto::convertHexToListUnsignedChar(
   if (!Crypto::convertHexToString(input, outputString, commentsOnFailure)) {
     return false;
   }
-  output = outputString;
+  Crypto::convertStringToListBytes(outputString, output);
   return true;
 }
 
@@ -1768,7 +1792,10 @@ bool Crypto::convertLargeUnsignedToBase64SignificantDigitsFirst(
   Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(
     input, 0, converter
   );
-  outputBase64 = Crypto::convertListUnsignedCharsToBase64(converter, false);
+  List<unsigned char> converterBytes;
+  Crypto::convertStringToListBytes(converter, converterBytes);
+  outputBase64 =
+  Crypto::convertListUnsignedCharsToBase64(converterBytes, false);
   return true;
 }
 
@@ -1921,6 +1948,11 @@ void Crypto::convertStringToLargeIntUnsigned(
   }
 }
 
+void Crypto::computeSha224(const std::string& input, List<uint32_t>& output) {
+  STACK_TRACE("Crypto::computeSha224");
+  return Crypto::computeSha2xx(input, output, true);
+}
+
 void Crypto::computeSha224(
   const List<unsigned char>& input, List<uint32_t>& output
 ) {
@@ -1937,7 +1969,7 @@ std::string Crypto::computeSha256(const std::string& input) {
 void Crypto::computeSha256(const std::string& input, std::string& output) {
   List<unsigned char> inputList;
   List<unsigned char> outputList;
-  inputList = input;
+  Crypto::convertStringToListBytes(input, inputList);
   computeSha256(inputList, outputList);
   output.assign(
     reinterpret_cast<char*>(outputList.objects),
@@ -1953,6 +1985,11 @@ void Crypto::computeSha256(
   Crypto::convertListUint32ToListUcharBigendian(sha256Uint, output);
 }
 
+void Crypto::computeSha256(const std::string& input, List<uint32_t>& output) {
+  STACK_TRACE("Crypto::computeSha256");
+  return Crypto::computeSha2xx(input, output, false);
+}
+
 void Crypto::computeSha256(
   const List<unsigned char>& input, List<uint32_t>& output
 ) {
@@ -1962,6 +1999,14 @@ void Crypto::computeSha256(
 
 List<uint32_t> Crypto::kArraySha2xx;
 List<uint64_t> Crypto::kArraySha512;
+
+void Crypto::computeSha2xx(
+  const std::string& input, List<uint32_t>& output, bool is224
+) {
+  List<unsigned char> converted;
+  Crypto::convertStringToListBytes(input, converted);
+  Crypto::computeSha2xx(converted, output, is224);
+}
 
 void Crypto::computeSha2xx(
   const List<unsigned char>& input, List<uint32_t>& output, bool is224
@@ -2118,6 +2163,14 @@ void Crypto::computeSha512(
       output64[i], output
     );
   }
+}
+
+void Crypto::computeSha512(
+  const std::string& input, List<unsigned char>& output
+) {
+  List<unsigned char> convertedInput;
+  Crypto::convertStringToListBytes(input, convertedInput);
+  Crypto::computeSha512(convertedInput, output);
 }
 
 void Crypto::computeSha512(

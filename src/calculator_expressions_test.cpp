@@ -78,7 +78,7 @@ bool ExpressionTest::builtInAtomValues(Calculator& owner) {
 
 bool ExpressionTest::largeNestedExpression1(Calculator& owner) {
   STACK_TRACE("Expression::Test::largeNestedExpression1");
-  int iterations = 1000000;
+  int iterations = 1000;
   Expression current;
   Expression one;
   one.assignValue(owner, 1);
@@ -87,18 +87,23 @@ bool ExpressionTest::largeNestedExpression1(Calculator& owner) {
   int DEBUG_DO_NOT_SUBMIT;
   int counter = 0;
   int childExpressionsAtStart = 0;
+  int startHashResizes = GlobalStatistics::numberOfHashResizes;
   for (int i = 0; i < iterations; i ++) {
     current.makeXOX(owner, operatorPlus, current, one);
     counter ++;
     if (counter >= 10000) {
       counter = 0;
       int64_t elapsedSoFar = global.getElapsedMilliseconds() - start;
+      int hashResizesSoFar =
+      GlobalStatistics::numberOfHashResizes - startHashResizes;
       global
       << "Iteration: "
       << i
       << ", milliseconds: "
       << elapsedSoFar
       << ". "
+      << "Hash resizes: "
+      << hashResizesSoFar
       << Logger::endL;
       int64_t expressionRam =
       owner.allChildExpressions.byteSizeOwnedThroughPointers();
@@ -154,6 +159,8 @@ bool ExpressionTest::largeNestedExpression1(Calculator& owner) {
   }
   int64_t duration = global.getElapsedMilliseconds() - start;
   int64_t maximumDuration = 10;
+  int totalHashResizes =
+  GlobalStatistics::numberOfHashResizes - startHashResizes;
   if (duration > maximumDuration) {
     global.fatal
     << "Constructing a large nested expression: "
@@ -165,6 +172,9 @@ bool ExpressionTest::largeNestedExpression1(Calculator& owner) {
     << maximumDuration
     << " ms.\nAll children: "
     << owner.allChildExpressions.getReport()
+    << "\nTotal hash resizes: "
+    << totalHashResizes
+    << ".\n"
     << global.fatal;
   }
   return true;

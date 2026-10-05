@@ -240,7 +240,9 @@ bool WebWorker::receiveAll() {
     this->displayUserInput = this->error;
     return false;
   }
-  this->remainingBytesToSend = std::string("HTTP/1.0 100 Continue\r\n\r\n");
+  ListConversions::convertStringToListBytesSigned(
+    std::string("HTTP/1.0 100 Continue\r\n\r\n"), this->remainingBytesToSend
+  );
   this->sendAllBytesNoHeaders();
   this->remainingBytesToSend.setSize(0);
   std::string bufferString;

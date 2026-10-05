@@ -1387,17 +1387,17 @@ bool Expression::checkConsistency() const {
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
       bool isGood = false;
-      const Expression& currentE = mustBeTheContext[i];
-      if (currentE.startsWith(this->owner->opPolynomialVariables())) {
+      const Expression& currentExpression = mustBeTheContext[i];
+      if (currentExpression.startsWith(this->owner->opPolynomialVariables())) {
         isGood = true;
       }
-      if (currentE.startsWith(this->owner->opSemisimpleLieAlgebra())) {
+      if (currentExpression.startsWith(this->owner->opSemisimpleLieAlgebra())) {
         isGood = true;
       }
-      if (currentE.startsWith(this->owner->opWeylAlgebraVariables())) {
+      if (currentExpression.startsWith(this->owner->opWeylAlgebraVariables())) {
         isGood = true;
       }
-      if (currentE.startsWith(this->owner->opMod())) {
+      if (currentExpression.startsWith(this->owner->opMod())) {
         isGood = true;
       }
       if (!isGood) {
@@ -1405,7 +1405,7 @@ bool Expression::checkConsistency() const {
         << "The context "
         << mustBeTheContext.toStringFull()
         << " has an entry which I do not recognize, namely, "
-        << currentE.toStringFull()
+        << currentExpression.toStringFull()
         << ". "
         << global.fatal;
       }
@@ -5791,7 +5791,6 @@ std::string Expression::toString(
   MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toString");
-  global << "DEBUG: do not submit: tostring called!!!" << Logger::endL;
   MemorySaving<FormatExpressions> formatContainer;
   if (format == nullptr) {
     format = &formatContainer.getElement();

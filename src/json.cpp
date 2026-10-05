@@ -1,3 +1,4 @@
+#include "general_logging_global_variables.h"
 #include "general_strings.h"
 #include "json.h"
 #include "math_large_integers.h"
@@ -51,7 +52,7 @@ void JSData::operator=(const JSData& other) {
 
 void JSData::operator=(const List<unsigned char>& other) {
   this->elementType = JSData::Type::tokenString;
-  this->stringValue = other.toStringConcatenate();
+  ListConversions::convertListUnsignedCharsToString(other, this->stringValue);
   this->listObjects.setSize(0);
   this->objects.clear();
 }
@@ -145,7 +146,7 @@ bool JSData::hasCompositeKeyOfType(
   ) {
     return false;
   }
-  output = container.stringValue;
+  ListConversions::convertStringToListBytes(container.stringValue, output);
   return true;
 }
 

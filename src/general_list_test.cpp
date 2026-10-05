@@ -9,15 +9,12 @@ bool HashedListTest::all() {
 }
 
 int HashedListTest::incrementIntPseudorandomly(int counter) {
-  int64_t result = static_cast<int64_t>(
-    counter
-  );
-  if (result == 0){
-    result =1;
+  int64_t result = static_cast<int64_t>(counter);
+  if (result == 0) {
+    result = 1;
   }
   result *= 19;
   result %= 123456791;
-
   return static_cast<int>(result);
 }
 
@@ -27,6 +24,8 @@ bool HashedListTest::largeHashedList1() {
   int iterations = 1000000;
   int current = 0;
   int64_t millisecondsStart = global.getElapsedMilliseconds();
+  int hashResizesStart = GlobalStatistics::numberOfHashResizes;
+  int listResizesStart = GlobalStatistics::numberOfListResizesTotal;
   for (int i = 0; i < iterations; i ++) {
     large.addOnTop(current);
     current = HashedListTest::incrementIntPseudorandomly(current);
@@ -44,13 +43,36 @@ bool HashedListTest::largeHashedList1() {
     << ". "
     << global.fatal;
   }
+  if (duration > 100) {
+    global
+    << Logger::yellow
+    << "Hashed list with "
+    << iterations
+    << " pseudorandoms took "
+    << duration
+    << " milliseconds to construct. "
+    << Logger::endL
+    << large.getReport()
+    << Logger::endL
+    << "Total list resizes: "
+    << GlobalStatistics::numberOfListResizesTotal - listResizesStart
+    << ". "
+    << "Total hash resizes: "
+    << GlobalStatistics::numberOfHashResizes - hashResizesStart
+    << Logger::endL
+    << "Ram consumed: "
+    << RamUsageComputation::byteSize(large)
+    << "Ram used by hash buckets: "
+    << RamUsageComputation::byteSize(large.hashBuckets)
+    << Logger::endL;
+  }
   return true;
 }
 
 bool HashedListTest::largeHashedList2() {
-  STACK_TRACE("HashedListTest::largeHashedList1");
+  STACK_TRACE("HashedListTest::largeHashedList2");
   HashedList<HashedList<int> > large;
-  HashedList<int>  differentIntegers;
+  HashedList<int> differentIntegers;
   int iterations = 1000000;
   int current = 0;
   int64_t millisecondsStart = global.getElapsedMilliseconds();
@@ -87,8 +109,24 @@ bool HashedListTest::largeHashedList2() {
     << large.lastObject()->getReport()
     << "\nHash report, full list: "
     << large.getReport()
-            << "\nDifferent integers: " << differentIntegers.size
+    << "\nDifferent integers: "
+    << differentIntegers.size
     << global.fatal;
+  }
+  if (duration > 100) {
+    global
+    << Logger::yellow
+    << "Large hash list of hashed lists with "
+    << iterations
+    << " elements took "
+    << duration
+    << " milliseconds to construct. "
+    << Logger::endL
+    << large.getReport()
+    << Logger::endL
+    << "Ram consumed: "
+    << RamUsageComputation::byteSize(large)
+    << Logger::endL;
   }
   return true;
 }

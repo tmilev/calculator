@@ -4036,8 +4036,10 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (
     fourthToLast.isExpressionOrAtom() &&
-    thirdToLast.type == CodeFormatter::Element::Colon &&
-    secondToLast.isExpressionOrAtom() &&
+    thirdToLast.type == CodeFormatter::Element::Colon && (
+      secondToLast.isExpressionOrAtom() ||
+      secondToLast.type == CodeFormatter::Element::InParentheses
+    ) &&
     last.type == CodeFormatter::Element::RightParenthesis
   ) {
     this->lastRuleName = "expression : expression)";

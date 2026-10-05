@@ -353,7 +353,7 @@ Object&ListReferencesIterator<Object>::operator*() const {
 template <
   class Object, unsigned int hashFunction(const Object&) = Object::hashFunction
 >
-class HashedListReferences: public HashTemplate<
+class HashedListReferences: public HashedContainerTemplate<
   Object, ListReferences<Object>, hashFunction
 > {
 public:
@@ -361,51 +361,61 @@ public:
   // to facilitate autocomplete in my current IDE. If I find a better
   // autocompletion IDE the following should be removed.
   inline void addOnTopNoRepetition(const List<Object>& inputList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    addOnTopNoRepetition(inputList);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::addOnTopNoRepetition(inputList);
   }
   inline bool addOnTopNoRepetition(const Object& o) {
     return
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    addOnTopNoRepetition(o);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::addOnTopNoRepetition(o);
   }
   inline void addOnTop(const Object& o) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    addOnTop(o);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::addOnTop(o);
   }
   inline void addListOnTop(const List<Object>& inputList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    addListOnTop(inputList);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::addListOnTop(inputList);
   }
   inline bool contains(const Object& o) const {
     return
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    contains(o);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::contains(o);
   }
   inline bool contains(const List<Object>& inputList) const {
     return
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    contains(inputList);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::contains(inputList);
   }
   Object& getElement(int objectIndex) const {
     return
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    getElement(objectIndex);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::getElement(objectIndex);
   }
   int getIndex(const Object& o) const {
     return
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    getIndex(o);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::getIndex(o);
   }
   inline int getIndexNoFail(const Object& o) const {
     return
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    getIndexNoFail(o);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::getIndexNoFail(o);
   }
   inline int addNoRepetitionOrReturnIndexFirst(const Object& o) {
     return
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
-    addNoRepetitionOrReturnIndexFirst(o);
+    this->::HashedContainerTemplate<
+      Object, ListReferences<Object>, hashFunction
+    >::addNoRepetitionOrReturnIndexFirst(o);
   }
 };
 

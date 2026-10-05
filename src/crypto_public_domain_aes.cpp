@@ -30,6 +30,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
         For AES192/256 the key size is proportionally larger.
 
 */
+#include "crypto_calculator.h"
 #include "crypto_public_domain.h"
 #include "general_logging_global_variables.h"
 
@@ -1084,7 +1085,7 @@ bool CryptoPublicDomain::decryptAES_CBC_256(
   context.initializeContext(
     reinterpret_cast<const uint8_t*>(inputKey.c_str())
   );
-  output = inputCipherText;
+  Crypto::convertStringToListBytes(inputCipherText, output);
   context.AES_CBC_decrypt_buffer(
     static_cast<uint8_t*>(output.objects), static_cast<unsigned>(output.size)
   );
@@ -1127,7 +1128,7 @@ bool CryptoPublicDomain::encryptAES_CBC_256(
   context.initializeContext(
     reinterpret_cast<const uint8_t*>(inputKey.c_str())
   );
-  output = inputPlainText;
+  Crypto::convertStringToListBytes(inputPlainText, output);
   context.AES_CBC_encrypt_buffer(
     reinterpret_cast<uint8_t*>(output.objects),
     static_cast<unsigned>(output.size)

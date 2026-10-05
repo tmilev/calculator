@@ -19,11 +19,10 @@ class ExpressionContext;
 
 class Expression {
 private:
-  HashedList<int> children;
+  List<int> children;
   void reset() {
     this->owner = nullptr;
-    this->children.size = 0;
-    this->data = - 1;
+    this->children.clear();
   }
   bool setChild(int childIndexInMe, int childIndexInOwner);
   bool evaluatesToScalarInternal() const;

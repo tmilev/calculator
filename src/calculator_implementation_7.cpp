@@ -42,7 +42,10 @@ bool CalculatorFunctionsCrypto::testLoadPEMCertificates(
   std::stringstream resultStream;
   // May not be initialized if unit testing. Safe after the first run.
   ASNObject::namesToObjectIdsNonThreadSafe();
-  bool success = certificate.loadFromASNEncoded(binaryString, &errorStream);
+  List<unsigned char> binayStringBytes;
+  Crypto::convertStringToListBytes(binaryString, binayStringBytes);
+  bool success =
+  certificate.loadFromASNEncoded(binayStringBytes, &errorStream);
   if (!success) {
     resultStream << "Failed to load asn encoded certificate.<br>";
     resultStream << errorStream.str();
@@ -114,8 +117,10 @@ bool CalculatorFunctionsCrypto::testTLSMessageSequence(
   spoofServer.spoofer.flagDoSpoof = true;
   for (int i = 2; i < inputMessages.size; i ++) {
     spoofServer.spoofer.incomingMessages.addOnTop(SSLRecord());
-    spoofServer.spoofer.incomingMessages.lastObject()->incomingBytes =
-    inputMessages[i];
+    ListConversions::convertStringToListBytes(
+      inputMessages[i],
+      spoofServer.spoofer.incomingMessages.lastObject()->incomingBytes
+    );
   }
   spoofServer.spoofer.currentInputMessageIndex = 0;
   std::stringstream errorStream;
@@ -143,7 +148,7 @@ bool CalculatorFunctionsCrypto::testLoadPEMPrivateKey(
     return false;
   }
   List<unsigned char> privateKeyBytes;
-  privateKeyBytes = privateKeyString;
+  ListConversions::convertStringToListBytes(privateKeyString, privateKeyBytes);
   std::stringstream errorStream;
   std::stringstream resultStream;
   PrivateKeyRSA privateKey;
@@ -288,7 +293,7 @@ bool CalculatorFunctionsCrypto::functionHashString(
     return false;
   }
   List<unsigned char> bitStream;
-  bitStream = inputString;
+  ListConversions::convertStringToListBytes(inputString, bitStream);
   std::stringstream out;
   if (verbose) {
     out << "<br>Input: " << inputString;
@@ -682,7 +687,7 @@ bool CalculatorFunctionsEncoding::convertCharToBase64(
     return false;
   }
   List<unsigned char> bitStream;
-  bitStream = inputString;
+  ListConversions::convertStringToListBytes(inputString, bitStream);
   return
   output.assignValue(
     calculator, Crypto::convertListUnsignedCharsToBase64(bitStream, false)

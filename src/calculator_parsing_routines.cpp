@@ -2152,12 +2152,6 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
       *this->toBeParsed
     ).size; this->counterInToBeParsed ++
   ) {
-    if (this->counterInToBeParsed == 6000000) {
-      int doNotSubmit;
-      global<< Logger::red << "Parsing " << this->counterInToBeParsed << " words took "
-             << global.getElapsedMilliseconds()-
-                    this->owner->statistics.startParsing  << " ms. " << Logger::endL;
-    }
     counterReport ++;
     if (counterReport >= symbolsToIssueReport) {
       counterReport = 0;

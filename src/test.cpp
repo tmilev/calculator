@@ -79,7 +79,7 @@ void Test::run() {
     Calculator::Examples::Test::all();
     ChevalleyGenerator::Test::all();
     PartialFractions::Test::all();
-    Matrix<Rational>::Test::all();
+    MatrixTest::all();
     global << Logger::green << "Basic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::crypto)) {

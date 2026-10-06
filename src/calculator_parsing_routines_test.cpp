@@ -260,7 +260,7 @@ bool CalculatorParserTest::all() {
 bool CalculatorParserTest::largeExample1(Calculator& initializedTester) {
   // A large example. Intended to catch non-linear parsing speed.
   std::stringstream out;
-  int iterations =  100 * 1000;
+  int iterations = 100 * 1000;
   int64_t start = global.getElapsedMilliseconds();
   for (int i = 0; i < iterations; i ++) {
     out << "(1+5 *";
@@ -275,18 +275,22 @@ bool CalculatorParserTest::largeExample1(Calculator& initializedTester) {
     global.fatal << "Failed to parse: " << input << global.fatal;
   }
   int64_t duration = global.getElapsedMilliseconds() - start;
-  int64_t maximumDuration = iterations/50;
+  int64_t maximumDuration = iterations / 50;
   if (duration > maximumDuration) {
     global.fatal
     << "Parsing "
     << iterations
     << " iterations is too slow, took: "
     << duration
-            << " milliseconds, maximum allowed: " << maximumDuration << ". "
+    << " milliseconds, maximum allowed: "
+    << maximumDuration
+    << ". "
     << global.fatal;
   }
   global
-          << "Parsing expression of size: " << input.size() << " took: "
+  << "Parsing expression of size: "
+  << input.size()
+  << " took: "
   << duration
   << " milliseconds. "
   << Logger::endL;

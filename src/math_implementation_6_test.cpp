@@ -2,6 +2,7 @@
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_polynomial_factorization.h"
 #include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks the build.
+#include "test.h"
 
 bool PolynomialFactorizationFiniteFields::Test::all() {
   STACK_TRACE("PolynomialFactorizationFiniteFields::Test::all");
@@ -595,8 +596,7 @@ bool PolynomialFactorizationCantorZassenhaus<
   return true;
 }
 
-template < >
-void Matrix<Rational>::Test::matrixFromString(
+void MatrixTest::matrixFromString(
   const std::string& inputString, Matrix<Rational>& output
 ) {
   Calculator calculator;
@@ -615,14 +615,13 @@ void Matrix<Rational>::Test::matrixFromString(
   }
 }
 
-template < >
-bool Matrix<Rational>::Test::oneMatrixIntegerWithDenominator(
+bool MatrixTest::oneMatrixIntegerWithDenominator(
   const std::string& input,
   const std::string& expectedMatrix,
   int expectedScale
 ) {
   Matrix<Rational> matrix;
-  Matrix<Rational>::Test::matrixFromString(input, matrix);
+  MatrixTest::matrixFromString(input, matrix);
   Matrix<LargeInteger> result;
   LargeIntegerUnsigned denominator;
   matrix.getMatrixIntegerWithDenominator(result, denominator);
@@ -644,16 +643,14 @@ bool Matrix<Rational>::Test::oneMatrixIntegerWithDenominator(
   return true;
 }
 
-template < >
-bool Matrix<Rational>::Test::matrixIntegerWithDenominator() {
+bool MatrixTest::matrixIntegerWithDenominator() {
   oneMatrixIntegerWithDenominator(
     "((-2/3,4),(0,-1/2))", "[-4 24]\n[ 0 -3]", 6
   );
   return true;
 }
 
-template < >
-bool Matrix<Rational>::Test::all() {
-  Matrix<Rational>::Test::matrixIntegerWithDenominator();
+bool MatrixTest::all() {
+  MatrixTest::matrixIntegerWithDenominator();
   return true;
 }

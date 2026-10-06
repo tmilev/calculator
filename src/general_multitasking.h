@@ -87,6 +87,7 @@ public:
   static unsigned int numberOfListResizesTotal;
   static unsigned int numberOfHashResizes;
   static void checkPointerCounters();
+  static std::string toString();
 };
 
 #endif // header_general_multitasking_ALREADY_INCLUDED

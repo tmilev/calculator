@@ -28,6 +28,7 @@ const std::string Test::Suites::build = "build";
 const std::string Test::Suites::json = "json";
 const std::string Test::Suites::wasm = "wasm";
 const std::string Test::Suites::basic = "basic";
+const std::string Test::Suites::expressions = "expressions";
 const std::string Test::Suites::API = "api";
 const std::string Test::Suites::scientific = "scientific";
 
@@ -56,12 +57,15 @@ void Test::run() {
     global << Logger::green << "Database tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::json)) {
-    JSData::Test::all();
+    JSDataTest::all();
     global << Logger::green << "Json tests completed." << Logger::endL;
   }
-  if (this->shouldTest(Test::Suites::basic)) {
-    HashedListTest::all();
+  if (this->shouldTest(Test::Suites::expressions)) {
     ExpressionTest::all();
+  }
+  if (this->shouldTest(Test::Suites::basic)) {
+    ListReferencesTest::all();
+    HashedListTest::all();
     AlgebraicNumber::Test::all();
     StringRoutines::Test::all();
     LargeIntegerUnsigned::Test::all();

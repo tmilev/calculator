@@ -1,20 +1,49 @@
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "json.h"
+#include "test.h"
 
-bool JSData::Test::all() {
-  STACK_TRACE("JSData::Test::all");
-  JSData::Test::recode();
-  JSData::Test::recodeRelaxed();
-  JSData::Test::badInput();
-  JSData::Test::decodeEscapedUnicode();
-  JSData::Test::loadLarger();
-  JSData::Test::endcodeNonstandardWhitespace();
+bool JSDataTest::all() {
+  STACK_TRACE("JSDataTest::all");
+  JSDataTest::keyAccessUsingOperator();
+  JSDataTest::recode();
+  JSDataTest::recodeRelaxed();
+  JSDataTest::badInput();
+  JSDataTest::decodeEscapedUnicode();
+  JSDataTest::loadLarger();
+  JSDataTest::endcodeNonstandardWhitespace();
   return true;
 }
 
-bool JSData::Test::recode() {
-  STACK_TRACE("JSData::Test::recode");
+bool JSDataTest::keyAccessUsingOperator() {
+  STACK_TRACE("JSDataTest::keyAccessUsingOperator");
+  JSData element;
+  element["a"] = "b";
+  element[std::string("b")] = "c";
+  JSData one;
+  one = 1;
+  JSData array;
+  array.makeEmptyArray();
+  array[0] = one;
+  array[1] = one;
+  array[2] = one;
+  array[4] = one;
+  element["c"] = array;
+  std::string actual = element.toString();
+  std::string expected = "{\"a\":\"b\",\"b\":\"c\",\"c\":[1,1,1,null,1]}";
+  if (expected != actual) {
+    global.fatal
+    << "Json key access: got: "
+    << actual
+    << ", expected: "
+    << expected
+    << global.fatal;
+  }
+  return true;
+}
+
+bool JSDataTest::recode() {
+  STACK_TRACE("JSDataTest::recode");
   // first element is string input, second element
   // is expected recoded output.
   List<List<std::string> > toRecode;
@@ -41,14 +70,13 @@ bool JSData::Test::recode() {
       })
   );
   for (int i = 0; i < toRecode.size; i ++) {
-    JSData::Test::recodeOnce(toRecode[i], false);
+    JSDataTest::recodeOnce(toRecode[i], false);
   }
   return true;
 }
 
-bool JSData::Test::recodeOnce(const List<std::string>& pair, bool relaxedInput)
-{
-  STACK_TRACE("JSData::Test::recodeOnce");
+bool JSDataTest::recodeOnce(const List<std::string>& pair, bool relaxedInput) {
+  STACK_TRACE("JSDataTest::recodeOnce");
   JSData parser;
   std::string input = pair[0];
   std::stringstream commentsOnFailure;
@@ -97,8 +125,8 @@ bool JSData::Test::recodeOnce(const List<std::string>& pair, bool relaxedInput)
   return true;
 }
 
-bool JSData::Test::recodeRelaxed() {
-  STACK_TRACE("JSData::Test::recodeRelaxed");
+bool JSDataTest::recodeRelaxed() {
+  STACK_TRACE("JSDataTest::recodeRelaxed");
   // first element is string input, second element
   // is expected recoded output.
   List<List<std::string> > toRecode;
@@ -114,12 +142,12 @@ bool JSData::Test::recodeRelaxed() {
     List<std::string>({"{a: 1, b:\"c\"}", "{\"a\":1,\"b\":\"c\"}"})
   );
   for (int i = 0; i < toRecode.size; i ++) {
-    JSData::Test::recodeOnce(toRecode[i], true);
+    JSDataTest::recodeOnce(toRecode[i], true);
   }
   return true;
 }
 
-bool JSData::Test::decodeEscapedUnicode() {
+bool JSDataTest::decodeEscapedUnicode() {
   JSData parser;
   std::string input = "\"\\u03C0\"";
   std::string expectedOutput = "\u03C0";
@@ -146,8 +174,8 @@ bool JSData::Test::decodeEscapedUnicode() {
   return true;
 }
 
-bool JSData::Test::endcodeNonstandardWhitespace() {
-  STACK_TRACE("JSData::Test::endcodeNonstandardWhitespace");
+bool JSDataTest::endcodeNonstandardWhitespace() {
+  STACK_TRACE("JSDataTest::endcodeNonstandardWhitespace");
   JSData data;
   data =
   "\t\n\v\f\r\u0085\u00a0\u2000\u2001"
@@ -170,8 +198,8 @@ bool JSData::Test::endcodeNonstandardWhitespace() {
   return true;
 }
 
-bool JSData::Test::badInput() {
-  STACK_TRACE("JSData::Test::badInput");
+bool JSDataTest::badInput() {
+  STACK_TRACE("JSDataTest::badInput");
   // first element is string input, second element
   // is expected recoded output.
   List<std::string> broken = List<std::string>({"{", "ab", "]", ""});
@@ -190,8 +218,8 @@ bool JSData::Test::badInput() {
   return true;
 }
 
-bool JSData::Test::loadLarger() {
-  STACK_TRACE("JSData::Test::loadLarger");
+bool JSDataTest::loadLarger() {
+  STACK_TRACE("JSDataTest::loadLarger");
   std::string input;
   FileOperations::loadFileToStringVirtual(
     "test/larger.json", input, false, nullptr

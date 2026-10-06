@@ -459,7 +459,9 @@ public:
   void actByEAlpha(int indexAlpha);
   void actByEFDisplayIndex(int displayIndex);
   void operator+=(const LittelmannPath& other) {
-    this->waypoints.reserve(this->waypoints.size + other.waypoints.size);
+    this->waypoints.setExpectedSize(
+      this->waypoints.size + other.waypoints.size
+    );
     Vector<Rational> endPoint = *this->waypoints.lastObject();
     for (int i = 0; i < other.waypoints.size; i ++) {
       this->waypoints.addOnTop(other.waypoints[i] + endPoint);

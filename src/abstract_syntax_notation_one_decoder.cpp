@@ -175,7 +175,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeSequenceLikeContent(
   ASNElement nextElement;
   int numberOfDecoded = 0;
   // We reserve 32 bytes per object - a reasonable assumption.
-  output.elements.reserve(output.lengthPromised / 32);
+  output.elements.setExpectedSize(output.lengthPromised / 32);
   while (this->dataPointer < lastIndexPlusOne) {
     int lastPointer = this->dataPointer;
     bool isGood = this->decodeCurrent(nextElement);

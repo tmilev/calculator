@@ -782,9 +782,6 @@ void Calculator::reset() {
   this->globalCache.clear();
   // The expression container must be cleared second to last.
   this->allChildExpressions.clear();
-  // The hashes list below is used in computing the hashes of the list above.
-  // It must therefore be cleared last.
-  this->allChildExpressionHashes.clear();
   this->parser.reset();
   this->approximationHandlers.clear();
 }
@@ -2150,12 +2147,17 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
   this->owner->statistics.lastStopwatchParsing =
   this->owner->statistics.startParsing;
   ProgressReport report;
-  bool currentLogEvaluation = this->owner->flagLogEvaluation;
   for (
     this->counterInToBeParsed = 0; this->counterInToBeParsed < (
       *this->toBeParsed
     ).size; this->counterInToBeParsed ++
   ) {
+    if (this->counterInToBeParsed == 6000000) {
+      int doNotSubmit;
+      global<< Logger::red << "Parsing " << this->counterInToBeParsed << " words took "
+             << global.getElapsedMilliseconds()-
+                    this->owner->statistics.startParsing  << " ms. " << Logger::endL;
+    }
     counterReport ++;
     if (counterReport >= symbolsToIssueReport) {
       counterReport = 0;
@@ -2187,10 +2189,6 @@ bool CalculatorParser::extractExpressionsFromPreprocessed(
     int totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;
     int minStackSize = this->syntacticStack->size;
     while (this->applyOneRule()) {
-      if (currentLogEvaluation != this->owner->flagLogEvaluation) {
-        this->owner->logTime(this->owner->statistics.lastStopwatchParsing);
-        currentLogEvaluation = this->owner->flagLogEvaluation;
-      }
       this->logParsingOperation();
       if (this->syntacticStack->size < minStackSize) {
         totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;

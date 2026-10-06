@@ -9,3 +9,10 @@ template < >
 int64_t RamUsageComputation::byteSize(const unsigned int& object) {
   return sizeof(object);
 }
+
+template < >
+int64_t RamUsageComputation::byteSize(
+  const RamUsageComputation::IntPointer& object
+) {
+  return sizeof(object);
+}

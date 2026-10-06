@@ -1808,7 +1808,7 @@ bool RationalFraction<Coefficient>::getRelations(
     comments << "Failed to find Groebner basis";
     return false;
   }
-  outputRelations.reserve(groebnerBasis.size);
+  outputRelations.setExpectedSize(groebnerBasis.size);
   outputRelations.setSize(0);
   for (int i = 0; i < groebnerBasis.size; i ++) {
     Polynomial<Rational>& currentPolynomial = groebnerBasis[i];

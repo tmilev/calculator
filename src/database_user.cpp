@@ -1273,9 +1273,9 @@ bool UserCalculator::storeToDatabaseOverwrite(
     this->computeHashedSaltedPassword();
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
-  JSData setUser = this->toJSON();
   QueryUpdate doSetUser;
-  doSetUser.addValue(this->toJSON());
+  JSData jsonRepresentation = this->toJSON();
+  doSetUser.addValue(jsonRepresentation);
   return
   Database::get().updateOne(findUser, doSetUser, true, commentsOnFailure);
 }

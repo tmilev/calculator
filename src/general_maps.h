@@ -73,7 +73,8 @@ public:
       this->keys.addOnTop(input);
       this->values.addOnTop(empty);
     }
-    return this->values[index];
+    Value& result = this->values[index];
+    return result;
   }
   // Returns a value with a given key, or,
   // if the map doesn't have the key, writes

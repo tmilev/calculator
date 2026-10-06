@@ -149,17 +149,6 @@ public:
   static void filterColumnsJSDataObjectList(
     List<JSData>& inputOutput, const List<std::string>& columnsToPreserve
   );
-  class Test {
-  public:
-    static bool all();
-    static bool recode();
-    static bool recodeOnce(const List<std::string>& pair, bool relaxedInput);
-    static bool recodeRelaxed();
-    static bool decodeEscapedUnicode();
-    static bool endcodeNonstandardWhitespace();
-    static bool badInput();
-    static bool loadLarger();
-  };
 };
 
 // Helper class used when parsing jsons. Holds either a fully parsed json

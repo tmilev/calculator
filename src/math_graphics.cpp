@@ -561,7 +561,7 @@ bool DrawingVariables::mouseMoveRedraw(int x, int y) {
 }
 
 void DrawingVariables::initialize() {
-  this->operations.reserve(1000);
+  this->operations.setExpectedSize(1000);
   this->centerX = 300;
   this->centerY = 300;
   this->graphicsUnit = DrawingVariables::graphicsUnitDefault;

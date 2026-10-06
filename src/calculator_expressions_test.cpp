@@ -78,104 +78,46 @@ bool ExpressionTest::builtInAtomValues(Calculator& owner) {
 
 bool ExpressionTest::largeNestedExpression1(Calculator& owner) {
   STACK_TRACE("Expression::Test::largeNestedExpression1");
-  int iterations = 1000;
+  int iterations = 1 * 1000 * 1000;
   Expression current;
   Expression one;
   one.assignValue(owner, 1);
   int operatorPlus = owner.opPlus();
   int64_t start = global.getElapsedMilliseconds();
-  int DEBUG_DO_NOT_SUBMIT;
-  int counter = 0;
-  int childExpressionsAtStart = 0;
   int startHashResizes = GlobalStatistics::numberOfHashResizes;
   for (int i = 0; i < iterations; i ++) {
     current.makeXOX(owner, operatorPlus, current, one);
-    counter ++;
-    if (counter >= 10000) {
-      counter = 0;
-      int64_t elapsedSoFar = global.getElapsedMilliseconds() - start;
-      int hashResizesSoFar =
-      GlobalStatistics::numberOfHashResizes - startHashResizes;
-      global
-      << "Iteration: "
-      << i
-      << ", milliseconds: "
-      << elapsedSoFar
-      << ". "
-      << "Hash resizes: "
-      << hashResizesSoFar
-      << Logger::endL;
-      int64_t expressionRam =
-      owner.allChildExpressions.byteSizeOwnedThroughPointers();
-      expressionRam +=
-      owner.allChildExpressionHashes.byteSizeOwnedThroughPointers();
-      int childrenMaximumBucketSize =
-      owner.allChildExpressions.largestBucketSize();
-      double bytesPerIteration = 0;
-      double bytesPerExpression = 0;
-      double expressionsPerIteration = 0;
-      int expressionsCreated =
-      owner.allChildExpressions.size - childExpressionsAtStart;
-      if (i > 0) {
-        bytesPerIteration = static_cast<double>(expressionRam) /
-        static_cast<double>(i);
-        bytesPerExpression = static_cast<double>(expressionRam) /
-        static_cast<double>(owner.allChildExpressions.size);
-        expressionsPerIteration = static_cast<double>(expressionsCreated) /
-        static_cast<double>(i);
-      }
-      global
-      << "Total expression RAM: "
-      << expressionRam
-      << ", "
-      << FloatingPoint::doubleToString(bytesPerExpression)
-      << " bytes per expression, "
-      << FloatingPoint::doubleToString(bytesPerIteration)
-      << " bytes per iteration. "
-      << Logger::endL;
-      global
-      << "Expressions created: "
-      << expressionsCreated
-      << ". "
-      << "Expressions per iteration: "
-      << FloatingPoint::doubleToString(expressionsPerIteration)
-      << Logger::endL;
-      global
-      << "Current expression RAM in bytes: "
-      << RamUsageComputation::byteSize(current)
-      << Logger::endL;
-      double expressionRAMPerMillisecond = static_cast<double>(expressionRam) /
-      elapsedSoFar;
-      global
-      << "Ram per millisecond: "
-      << expressionRAMPerMillisecond
-      << Logger::endL;
-      global
-      << "Maximum hash bucket size: "
-      << childrenMaximumBucketSize
-      << ". "
-      << Logger::endL;
-    }
   }
   int64_t duration = global.getElapsedMilliseconds() - start;
-  int64_t maximumDuration = 10;
+  int64_t maximumDuration = 6000;
+  int64_t recommendedDuration = 300;
   int totalHashResizes =
   GlobalStatistics::numberOfHashResizes - startHashResizes;
-  if (duration > maximumDuration) {
-    global.fatal
+  if (duration > recommendedDuration) {
+    global
+    << Logger::red
     << "Constructing a large nested expression: "
     << iterations
-    << " iterations "
-    << "took "
+    << " iterations took "
+    << Logger::red
     << duration
     << " ms, maximum allowed: "
     << maximumDuration
-    << " ms.\nAll children: "
+    << " ms, recommended: "
+    << recommendedDuration
+    << "ms."
+    << Logger::endL
+    << "All children: "
     << owner.allChildExpressions.getReport()
     << "\nTotal hash resizes: "
     << totalHashResizes
     << ".\n"
-    << global.fatal;
+    << "Ram: "
+    << RamUsageComputation::byteSize(owner.allChildExpressions)
+    << Logger::endL;
+  }
+  if (duration > maximumDuration) {
+    global.fatal << global.fatal;
   }
   return true;
 }

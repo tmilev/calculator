@@ -5,6 +5,19 @@
 #include <assert.h>
 #include <mutex>
 
+std::string GlobalStatistics::toString() {
+  std::stringstream out;
+  out
+  << "List resizes: "
+  << GlobalStatistics::numberOfListResizesTotal
+  << ", hash resizes: "
+  << GlobalStatistics::numberOfHashResizes
+  << ", total list creations: "
+  << GlobalStatistics::numberOfListsCreated
+  << ". ";
+  return out.str();
+}
+
 void GlobalStatistics::checkPointerCounters() {
   if (
     GlobalStatistics::globalPointerCounter >

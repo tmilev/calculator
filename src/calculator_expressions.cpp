@@ -1414,24 +1414,24 @@ bool Expression::checkConsistency() const {
   return true;
 }
 
-unsigned int Expression::hashFunction(const Expression& input) {
-  return input.hashFunction();
-}
-
 unsigned int Expression::hashFunction() const {
-  unsigned int result = static_cast<unsigned>(this->data) *
-  HashConstants::constant1;
+  if (this->hashCache != 0) {
+    return this->hashCache;
+  }
+  if (this->children.size == 0) {
+    return static_cast<unsigned>(this->data) * HashConstants::constant1;
+  }
   if (this->owner == nullptr) {
-    if (this->children.size == 0) {
-      return result;
-    }
     global.fatal << "Uninitialized expression. " << global.fatal;
     return 0;
   }
+  unsigned int result = 0;
   int hashCounter = 0;
   for (int childIndex : this->children) {
-    unsigned int cache = this->owner->allChildExpressionHashes[childIndex];
-    result += HashConstants::getConstantIncrementCounter(hashCounter) * cache;
+    unsigned int childHash =
+    this->owner->allChildExpressions[childIndex].hashFunction();
+    result +=
+    HashConstants::getConstantIncrementCounter(hashCounter) * childHash;
   }
   return result;
 }
@@ -1463,7 +1463,7 @@ int Calculator::addChildExpression(const Expression& child) {
   }
   index = this->allChildExpressions.size;
   this->allChildExpressions.addOnTop(child);
-  this->allChildExpressionHashes.addOnTop(child.hashFunction());
+  this->allChildExpressions.lastObject().setHashCache(child.hashFunction());
   return index;
 }
 
@@ -2481,6 +2481,13 @@ bool Expression::operator>(const Expression& other) const {
   }
   bool result = leftMonomial.greaterThanNoCoefficient(rightMonomial);
   return result;
+}
+
+template < >
+int64_t RamUsageComputation::byteSize(
+  const Expression::ExpressionPointer& object
+) {
+  return sizeof(object);
 }
 
 bool Expression::greaterThanNoCoefficient(const Expression& other) const {

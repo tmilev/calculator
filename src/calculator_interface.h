@@ -19,10 +19,11 @@ class ExpressionContext;
 
 class Expression {
 private:
-  List<int> children;
   void reset() {
     this->owner = nullptr;
     this->children.clear();
+    this->data = - 1;
+    this->hashCache = 0;
   }
   bool setChild(int childIndexInMe, int childIndexInOwner);
   bool evaluatesToScalarInternal() const;
@@ -93,8 +94,8 @@ private:
   // The i^th child of an expression can be accessed as const using
   // operator[](i).
   // The children of an expression are kept as a list of integers indicating
-  // the children's position in Calculator::expressionContainer.
-  // Calculator::expressionContainer is a Hashed List of references and must
+  // the children's position in Calculator::allChildExpressions.
+  // Calculator::allChildExpressions is a Hashed List of references and must
   // not be modified directly in any way.
   // Motivation for this implementation choice. The original implementation
   // had Expression contain all of its children as List<Expression>, making the
@@ -122,6 +123,13 @@ private:
   // implemented. However, currently the calculator resets after
   // each user-facing operation, so this should not present a practical
   // problem.
+  List<int> children;
+  // Cached precomputed hash function.
+  // Setting this to a value other than 0 means the Expression
+  // is regarded as immutable from that point on.
+  // Should only be set to non-zero for Expressions
+  // that have been added to Calculator::allChildExpressions.
+  unsigned int hashCache;
 public:
   Calculator* owner;
   int data;
@@ -164,6 +172,7 @@ public:
   void reset(Calculator& newOwner, int numberOfExpectedChildren = 0) {
     this->owner = &newOwner;
     this->data = 0;
+    this->hashCache = 0;
     this->children.clear();
     this->children.setExpectedSize(numberOfExpectedChildren);
   }
@@ -1296,8 +1305,13 @@ public:
     FormatExpressions& format
   ) const;
   bool requiresNoMathTagsNonConstRunTime() const;
-  static unsigned int hashFunction(const Expression& input);
+  inline static unsigned int hashFunction(const Expression& input) {
+    return input.hashFunction();
+  }
   unsigned int hashFunction() const;
+  void setHashCache(unsigned int input) {
+    this->hashCache = input;
+  }
   int64_t byteSizeOwnedThroughPointers() const {
     return this->children.byteSizeOwnedThroughPointers();
   }
@@ -1396,6 +1410,9 @@ public:
     this->data = other.data;
     this->children = other.children;
     this->owner = other.owner;
+    // We do not copy the hashCache deliberately:
+    // mutating an expression invalidates its cache.
+    this->hashCache = 0;
   }
   void operator=(const Rational& other) {
     STACK_TRACE("Expression::operator=(Rational)");
@@ -1439,8 +1456,11 @@ public:
     MapList<Expression, Expression>& substitutions
   );
   static void initializeToMathMLHandlers(Calculator& toBeInitialized);
+  typedef Expression* ExpressionPointer;
 };
 
+template < >
+int64_t RamUsageComputation::byteSize(const Expression::ExpressionPointer& o);
 class ExpressionContext {
 private:
   HashedList<Expression> variables;
@@ -2899,7 +2919,6 @@ public:
   MapReferences<Expression, Calculator::GlobalCache> globalCache;
   Expression ruleStack;
   HashedListReferences<Expression> allChildExpressions;
-  List<unsigned int> allChildExpressionHashes;
   List<std::string> evaluationErrors;
   HashedList<std::string> allBuiltInTypes;
   // std::string inputStringRawestOfTheRaw;

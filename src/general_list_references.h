@@ -26,9 +26,8 @@ public:
 };
 
 // class ListReferences is a list of objects used similarly to class List.
-// The essential differences between ListReferences and List are:
-// 1) ListReferences cannot be copied themselves.
-// 2) the way the objects are
+// The difference between ListReferences and List is:
+// the way the objects are
 // stored in memory. A copy of each object of ListReferences
 // is allocated with an individual copy constructor (call of new Object; rather
 // than new Object[size];),
@@ -46,7 +45,7 @@ public:
 // You should use ListReferences/HashedListReferences
 // for objects that will be shared and passed accross functions.
 // Those include mostly large
-// objects and objects contained in the Object container of the calulator.
+// objects and objects contained in the Object container of the calculator.
 // Data that is not meant to be shared
 // or that is otherwise small (lists of ints, monomials, Rationals, etc.)
 // should be kept in simple Lists and copied around when needed.
@@ -74,10 +73,30 @@ class ListReferences {
     output << "]";
     return output;
   }
+  // Reserves minimalTotalPointers or more pointers.
+  // Some of the pointers may be null.
+  void reservePointers(int minimalTotalPointers);
+  // Allocates at least minimalTotalAllocatedElement non-null pointers.
+  void allocateElements(int minimalTotalAllocatedElements);
+  // Possibly beefs up the number of desired total pointers to ensure
+  // exponential growth of our buffer reservations.
+  // The exponential growth of our buffer reservations ensures
+  // non-quadratic complexity when we grow the buffer one object at a time.
+  int maybeIncreaseDesiredTotalPointers(int minimalTotalPointers);
 public:
   bool flagDeallocated;
-  List<Object*> references;
+  Object** references;
+  // The number of used pointers.
+  // Additional pointers may be allocated, but unused.
   int size;
+  // The pointers for which 0<=index<numberOfAllocatedPointers
+  // are non-nullptr.
+  int numberOfAllocatedPointers;
+  // Total number of pointers.
+  // All pointers for which
+  // numberOfAllocatedPointers<=index<numberOfAllocatedPointers
+  // are nullptr.
+  int totalPointers;
   Object& operator[](int i) const {
     if (i < 0 || i >= this->size) {
       std::stringstream commentsOnCrash;
@@ -97,7 +116,7 @@ public:
       << " in ListReferences has zero pointer. ";
       fatalCrash(commentsOnCrash.str());
     }
-    return *this->references[i];
+    return *(this->references[i]);
   }
   unsigned int hashFunction() const {
     int64_t result = 0;
@@ -120,6 +139,9 @@ public:
     }
     return false;
   }
+  void reserve(int desiredSize) {
+    this->allocateElements(desiredSize);
+  }
   void removeLastObject() {
     if (this->size == 0) {
       return;
@@ -138,9 +160,7 @@ public:
       << " elements.";
       fatalCrash(errorStream.str());
     }
-    this->killElementIndex(index);
-    this->references[index] = this->references[this->size - 1];
-    this->references[this->size - 1] = nullptr;
+    *this->references[index] = *this->references[this->size - 1];
     this->size --;
   }
   void addListOnTop(const List<Object>& input) {
@@ -149,11 +169,23 @@ public:
     }
   }
   void swapTwoIndices(int index1, int index2) {
-    this->references.swapTwoIndices(index1, index2);
-  }
-  void allocateElements(int newSize);
-  void reserve(int desiredSize) {
-    this->allocateElements(desiredSize);
+    if (
+      index1 >= this->size || index2 >= this->size || index1 < 0 || index2 < 0
+    ) {
+      std::stringstream out;
+      out
+      << "Attempt to swap indices: "
+      << index1
+      << ", "
+      << index2
+      << " in a ListReferences of size: "
+      << this->size
+      << ". ";
+      fatalCrash(out.str());
+    }
+    Object copy = *this->references[index1];
+    *this->references[index1] = *this->references[index2];
+    *this->references[index2] = copy;
   }
   void clear() {
     this->setSize(0);
@@ -162,11 +194,6 @@ public:
   // Fills newly created objects with objects allocated with default
   // constructors.
   void setSize(int newSize) {
-    this->allocateElements(newSize);
-    this->size = newSize;
-  }
-  // Resizes the object and sets teh expected size.
-  void setSizeAndExpectedSize(int newSize) {
     this->setExpectedSize(newSize);
     this->allocateElements(newSize);
     this->size = newSize;
@@ -175,17 +202,9 @@ public:
   // fixed percent, which gurantees that N non-trivial resizes
   // will result in exponential in N growth.
   void setExpectedSize(int desiredSize) {
-    int newSize = (desiredSize* 6) / 5;
-    if (newSize > 0) {
-      this->allocateElements(newSize);
-    }
+    this->reservePointers(desiredSize);
   }
   void killAllElements();
-  void killElementIndex(int i) {
-    delete this->references[i];
-    // <- NOT thread safe!
-    this->references[i] = nullptr;
-  }
   void addOnTop(const Object& o);
   int getIndex(const Object& o) const;
   bool containsExactlyOnce(const Object& o) const {
@@ -212,10 +231,9 @@ public:
     if (this == &other) {
       return;
     }
-    this->killAllElements();
-    this->reserve(other.size);
+    this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->addOnTop(other[i]);
+      (*this)[i] = other[i];
     }
   }
   void operator=(const List<Object>& other) {
@@ -234,7 +252,12 @@ public:
   ) {
     List<Object>::quickSortAscending(*this, order, carbonCopy);
   }
-  ListReferences(): flagDeallocated(false), size(0) {}
+  ListReferences():
+  flagDeallocated(false),
+  references(nullptr),
+  size(0),
+  numberOfAllocatedPointers(0),
+  totalPointers(0) {}
   ~ListReferences() {
     this->flagDeallocated = true;
     this->killAllElements();
@@ -255,73 +278,106 @@ public:
   }
   int64_t byteSizeOwnedThroughPointers() const {
     int64_t result = 0;
-    for (int i = 0; i < this->references.size; i ++) {
+    for (int i = 0; i < this->numberOfAllocatedPointers; i ++) {
       result += RamUsageComputation::byteSize(*this->references[i]);
     }
+    result += this->totalPointers * sizeof(Object*);
     return result;
+  }
+  std::string getMemoryReport() {
+    std::stringstream out;
+    out
+    << "List references size: "
+    << this->size
+    << ", pointers: "
+    << " Byte size: "
+    << RamUsageComputation::byteSize(*this);
+    return out.str();
   }
 };
 
 template <class Object>
-void ListReferences<Object>::allocateElements(int newSize) {
-  if (newSize < 0) {
-    std::stringstream commentsOnCrash;
-    commentsOnCrash
-    << "Requested to set negative size "
-    << newSize
-    << " of List of References. "
-    << "If a List is to be set empty, then one should call setSize(0), "
-    << "rather than provide a negative argument to setSize.";
-    fatalCrash(commentsOnCrash.str());
+int ListReferences<Object>::maybeIncreaseDesiredTotalPointers(
+  int minimalTotalPointers
+) {
+  int minimumCountToEnsureExponentialGrowth = (this->totalPointers * 4) / 3 +
+  1;
+  if (minimumCountToEnsureExponentialGrowth > minimalTotalPointers) {
+    return minimumCountToEnsureExponentialGrowth;
   }
-  int oldSize = this->size;
-  int ensureNonZeroPointerUpTo = newSize;
-  if (ensureNonZeroPointerUpTo > this->references.size) {
-    ensureNonZeroPointerUpTo = this->references.size;
-  }
-  // The pointers from oldSize to ensureNonZeroPointerUpTo
-  // were previously unused, and could have been deleted and set to
-  // nullptr.
-  // Ensure all pointers in said range are allocated.
-  for (int i = oldSize; i < ensureNonZeroPointerUpTo; i ++) {
-    if (this->references[i] == nullptr) {
-      this->references[i] = (new Object);
-    }
-  }
-  if (newSize <= this->references.size) {
-    // We already have enough internal pointers, all allocated,
-    // to handle the newly requested size.
+  return minimalTotalPointers;
+}
+
+template <class Object>
+void ListReferences<Object>::reservePointers(int minimalTotalPointers) {
+  if (minimalTotalPointers < this->totalPointers) {
     return;
   }
-  // We need to add new objects.
-  int oldReferencesSize = this->references.size;
-  this->references.setSize(newSize);
-  // The pointers in the range below
-  // are in a newly allocated list.
-  // These are not null by default.
-  // By allocated new Objects below, we ensure all
-  // pointers in the references array are valid.
-  for (int i = oldReferencesSize; i < newSize; i ++) {
-    this->references[i] = (new Object);
+  int newTotalPointers =
+  this->maybeIncreaseDesiredTotalPointers(minimalTotalPointers);
+  Object** newReferences = new Object*[newTotalPointers];
+  for (int i = 0; i < this->numberOfAllocatedPointers; i ++) {
+    newReferences[i] = this->references[i];
   }
+  for (int i = this->numberOfAllocatedPointers; i < newTotalPointers; i ++) {
+    newReferences[i] = nullptr;
+  }
+  delete[] this->references;
+  this->references = newReferences;
+  int difference = newTotalPointers - this->totalPointers;
+  this->totalPointers = newTotalPointers;
 #ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter += newSize - oldReferencesSize;
+  GlobalStatistics::globalPointerCounter += difference;
   GlobalStatistics::checkPointerCounters();
 #endif
 }
 
 template <class Object>
-void ListReferences<Object>::killAllElements() {
-  for (int i = 0; i < this->references.size; i ++) {
-    delete this->references[i];
+void ListReferences<Object>::allocateElements(
+  int minimalTotalAllocatedElements
+) {
+  if (minimalTotalAllocatedElements <= this->numberOfAllocatedPointers) {
+    return;
+  }
+  if (minimalTotalAllocatedElements > this->totalPointers) {
+    this->reservePointers(minimalTotalAllocatedElements);
+  }
+  for (
+    int i = this->numberOfAllocatedPointers; i <
+    minimalTotalAllocatedElements; i ++
+  ) {
+    if (this->references[i] != nullptr) {
+      fatalCrash("Unexpected non-null pointer");
+    }
+    this->references[i] = new Object;
+  }
 #ifdef AllocationLimitsSafeguard
-    GlobalStatistics::globalPointerCounter --;
-    GlobalStatistics::checkPointerCounters();
+  GlobalStatistics::globalPointerCounter +=
+  minimalTotalAllocatedElements - this->numberOfAllocatedPointers;
+  GlobalStatistics::checkPointerCounters();
 #endif
+  this->numberOfAllocatedPointers = minimalTotalAllocatedElements;
+}
+
+template <class Object>
+void ListReferences<Object>::killAllElements() {
+  for (int i = 0; i < this->numberOfAllocatedPointers; i ++) {
+    delete this->references[i];
     this->references[i] = nullptr;
   }
-  this->references.size = 0;
+#ifdef AllocationLimitsSafeguard
+  GlobalStatistics::globalPointerCounter -= this->numberOfAllocatedPointers;
+  GlobalStatistics::checkPointerCounters();
+#endif
+  delete[] this->references;
+#ifdef AllocationLimitsSafeguard
+  GlobalStatistics::globalPointerCounter -= this->totalPointers;
+  GlobalStatistics::checkPointerCounters();
+#endif
+  this->references = nullptr;
   this->size = 0;
+  this->numberOfAllocatedPointers = 0;
+  this->totalPointers = 0;
 }
 
 template <class Object>
@@ -351,7 +407,10 @@ Object&ListReferencesIterator<Object>::operator*() const {
 }
 
 template <
-  class Object, unsigned int hashFunction(const Object&) = Object::hashFunction
+  class Object,
+  unsigned int hashFunction(const Object&) = HashFunctions::hashFunction<
+    Object
+  >
 >
 class HashedListReferences: public HashedContainerTemplate<
   Object, ListReferences<Object>, hashFunction

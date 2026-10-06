@@ -371,7 +371,12 @@ public:
 
 private:
   friend class ListZeroAfterUse<Object>;
-  void expandArrayOnTop(int increase);
+  // Sets the actual size to at least the given amount.
+  // If the actual size is smaller than the input, will
+  // expand the actual size with a guaranteed exponential increase.
+  void setActualSizeAtLeast(int desiredActualSize);
+  // Sets the actual size to at most the given amount.
+  void setActualSizeAtMost(int desiredActualSize);
   template <class CompareClass, class CarbonCopyType>
   bool quickSortAscendingCustomRecursive(
     int bottomIndex,
@@ -413,28 +418,22 @@ public:
     }
     return true;
   }
-  int getNewSizeRelativeToExpectedSize(int expectedSize) const {
-    // <-Registering stack trace forbidden! Multithreading deadlock alert.
-    if (expectedSize == 1) {
-      return 1;
-    }
-    if (expectedSize == 2) {
-      return 2;
+  int maybeIncreaseExpectedSize(int expectedSize) const {
+    // <-Registering stack trace forbidden!
+    // Multithreading deadlock alert.
+    if (expectedSize <= 3) {
+      return expectedSize;
     }
     return (expectedSize* 4) / 3 + 1;
   }
-  void setExpectedSize(int desiredSize) {
-    // <-Registering stack trace forbidden! Multithreading deadlock alert.
-    if ((this->actualSize * 5 / 6) < desiredSize) {
-      this->reserve(this->getNewSizeRelativeToExpectedSize(desiredSize));
+  void reserve(int exactSize) {
+    if (exactSize <= this->actualSize) {
+      return;
     }
+    this->setActualSizeAtLeast(exactSize);
   }
-  void expandOnTop(int increase) {
-    int newSize = this->size + increase;
-    if (newSize < 0) {
-      newSize = 0;
-    }
-    this->setSize(newSize);
+  void setExpectedSize(int desiredSize) {
+    this->setActualSizeAtLeast(desiredSize);
   }
   void setSize(int incomingSize);
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -452,7 +451,6 @@ public:
     }
   }
   void initializeFillInObject(int incomingSize, const Object& o);
-  void reserve(int desiredSize);
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   void insertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
     this->shiftUpExpandOnTop(desiredIndex);
@@ -535,6 +533,18 @@ public:
   // The function below is required to reserve the order of elements given by
   // selection.elements.
   void subSelection(const Selection& selection, List<Object>& output);
+  std::string getMemoryReport() {
+    std::stringstream out;
+    out
+    << "List size: "
+    << this->size
+    << "; actual size: "
+    << this->actualSize
+    << ", byte size: "
+    << RamUsageComputation::byteSize(*this)
+    << ". ";
+    return out.str();
+  }
   // If comparison function is not specified, quickSortAscending uses operator
   // >, else it uses the given comparison function.
   template <class otherType = Object>
@@ -1118,7 +1128,7 @@ public:
   }
   std::string getReport() {
     std::stringstream out;
-    out << "<br>List size: " << this->size;
+    out << this->getMemoryReport();
     out << "<br>Hash size: " << this->hashBuckets.size;
     int largestHashBucketSize = 0;
     int totalNonZeroHashes = 0;
@@ -1146,7 +1156,8 @@ public:
       << "<br>Average non-empty hash array size: "
       << (static_cast<double>(this->size)) / (
         static_cast<double>(totalNonZeroHashes)
-      );
+      )
+      << ". ";
     }
     if (totalBucketSizes != this->size) {
       fatalCrash("Bucket hash count doesn't match the object hash count.");
@@ -1491,7 +1502,7 @@ public:
     if (from.isSparse()) {
       for (int i = 0; i < this->size; i ++) {
         unsigned int hashIndex = this->getHash(this->objects[i]);
-        this->hashBuckets[hashIndex].reserve(
+        this->hashBuckets[hashIndex].setExpectedSize(
           from.hashBuckets[hashIndex].size
         );
         this->hashBuckets[hashIndex].addOnTop(i);
@@ -1965,7 +1976,8 @@ void List<Object>::slice(
 
 template <class Object>
 void List<Object>::initializeFillInObject(int incomingSize, const Object& o) {
-  this->setSize(incomingSize);
+  this->setActualSizeAtMost(incomingSize);
+  this->size = incomingSize;
   for (int i = 0; i < this->size; i ++) {
     this->objects[i] = o;
   }
@@ -2007,14 +2019,6 @@ bool List<Object>::hasCommonElementWith(List<Object>& right) {
 }
 
 template <class Object>
-void List<Object>::reserve(int desiredSize) {
-  // <-Registering stack trace forbidden! Multithreading deadlock alert.
-  if (this->actualSize < desiredSize) {
-    this->expandArrayOnTop(desiredSize - this->actualSize);
-  }
-}
-
-template <class Object>
 void List<Object>::removeFirstOccurenceSwapWithLast(const Object& o) {
   for (int i = 0; i < this->size; i ++) {
     if (o == this->objects[i]) {
@@ -2031,7 +2035,6 @@ void List<Object>::setSize(int incomingSize) {
     incomingSize = 0;
   }
   this->setExpectedSize(incomingSize);
-  this->reserve(incomingSize);
   this->size = incomingSize;
 }
 
@@ -2158,26 +2161,35 @@ List<Object>::~List() {
 }
 
 template <class Object>
-void List<Object>::expandArrayOnTop(int increase) {
+void List<Object>::setActualSizeAtLeast(int desiredActualSize) {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
-  if (increase <= 0) {
+  if (desiredActualSize <= this->actualSize) {
+    return;
+  }
+  int newActualSize = this->maybeIncreaseExpectedSize(desiredActualSize);
+  return this->setActualSizeAtMost(newActualSize);
+}
+
+template <class Object>
+void List<Object>::setActualSizeAtMost(int desiredActualSize) {
+  if (desiredActualSize <= this->actualSize) {
     return;
   }
   MacroIncrementCounter(GlobalStatistics::numberOfListResizesTotal);
-  Object* newArray = 0;
+  Object* newArray = nullptr;
   try {
-    newArray = new Object[this->actualSize + increase];
+    newArray = new Object[desiredActualSize];
   } catch(std::bad_alloc& e) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "Memory allocation failure: failed to allocate "
-    << this->actualSize + increase
+    << desiredActualSize
     << " objects. "
     << e.what();
     fatalCrash(commentsOnCrash.str());
   }
 #ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter += this->actualSize + increase;
+  GlobalStatistics::globalPointerCounter += desiredActualSize;
   GlobalStatistics::checkPointerCounters();
 #endif
   for (int i = 0; i < this->size; i ++) {
@@ -2197,7 +2209,7 @@ void List<Object>::expandArrayOnTop(int increase) {
   GlobalStatistics::globalPointerCounter -= this->actualSize;
   GlobalStatistics::checkPointerCounters();
 #endif
-  this->actualSize += increase;
+  this->actualSize = desiredActualSize;
 }
 
 template <class Object>
@@ -2219,21 +2231,10 @@ void List<Object>::reverseRange(int rangeBegin, int rangeEnd) {
 
 template <class Object>
 void List<Object>::addOnTop(const Object& o) {
-  // <-Registering stack trace forbidden! Multithreading deadlock alert.
-  if (this->size > this->actualSize) {
-    std::stringstream commentsOnCrash;
-    commentsOnCrash
-    << "The actual size of the list is "
-    << this->actualSize
-    << " but this->size equals "
-    << this->size
-    << ". ";
-    fatalCrash(commentsOnCrash.str());
-  }
-  if (this->size == this->actualSize) {
-    this->expandArrayOnTop(
-      this->getNewSizeRelativeToExpectedSize(this->actualSize + 1) - this->size
-    );
+  // <-Registering stack trace forbidden!
+  // Multithreading deadlock alert.
+  if (this->size >= this->actualSize) {
+    this->setExpectedSize(this->size + 1);
   }
   this->objects[this->size] = o;
   this->size ++;

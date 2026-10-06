@@ -35,8 +35,8 @@ public:
     return this->generatorsIndices.size == 0;
   }
   void operator=(List<int>& other) {
-    this->generatorsIndices.reserve(other.size);
-    this->powers.reserve(other.size);
+    this->generatorsIndices.setExpectedSize(other.size);
+    this->powers.setExpectedSize(other.size);
     this->makeConstant();
     for (int i = 0; i < other.size; i ++) {
       this->multiplyByGeneratorPowerOnTheRight(other[i], 1);

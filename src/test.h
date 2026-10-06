@@ -22,6 +22,7 @@ public:
     static const std::string json;
     static const std::string polynomial;
     static const std::string basic;
+    static const std::string expressions;
     static const std::string scientific;
     static const std::string courses;
   };
@@ -58,10 +59,22 @@ public:
   static bool largeExample1(Calculator& initializedTester);
 };
 
-struct HashedListTest {
+class ListReferencesTest {
+public:
+  static bool all();
+  // The purpose of this test is to check
+  // that adding elements to a list of references does not
+  // accidentally incur quadratic complexity.
+  static bool largeListReferences1(int millionMultiple);
+  static bool quicksortReversedList(int numberOfElements);
+};
+
+class HashedListTest {
+public:
   static bool all();
   static bool largeHashedList1();
   static bool largeHashedList2();
+  static bool largeHashedListReferences1(int millionMultiple);
   static int incrementIntPseudorandomly(int counter);
 };
 
@@ -78,6 +91,19 @@ public:
     Calculator& owner, const std::string& input, bool isUserDefinedAtom
   );
   static bool isUserDefinedAtom(Calculator& owner);
+};
+
+class JSDataTest {
+public:
+  static bool all();
+  static bool keyAccessUsingOperator();
+  static bool recode();
+  static bool recodeOnce(const List<std::string>& pair, bool relaxedInput);
+  static bool recodeRelaxed();
+  static bool decodeEscapedUnicode();
+  static bool endcodeNonstandardWhitespace();
+  static bool badInput();
+  static bool loadLarger();
 };
 
 #endif

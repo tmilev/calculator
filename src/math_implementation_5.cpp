@@ -887,7 +887,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
           Matrix<Rational>& currentHighest =
           highestWeightCandidatesProjected[k];
           this->highestWeightVectors.addOnTop(currentHighest);
-          this->gModKModules.expandOnTop(1);
+          this->gModKModules.setSize(this->gModKModules.size + 1);
           List<Matrix<Rational> >& currentModule =
           *this->gModKModules.lastObject();
           currentModule.size = 0;

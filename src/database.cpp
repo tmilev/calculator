@@ -828,7 +828,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   STACK_TRACE("GlobalVariables::initModifiableDatabaseFields");
   List<List<std::string> >& modifiableData = global.databaseModifiableFields;
   List<std::string> currentEntry;
-  modifiableData.reserve(10);
+  modifiableData.setExpectedSize(10);
   currentEntry.addOnTop(DatabaseStrings::tableUsers);
   currentEntry.addOnTop(DatabaseStrings::objectSelector);
   currentEntry.addOnTop(DatabaseStrings::labelProblemDataJSON);

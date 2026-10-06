@@ -74,7 +74,7 @@ void JSData::operator=(int64_t input) {
 JSData& JSData::operator[](int i) {
   this->elementType = JSData::Type::tokenArray;
   if (this->listObjects.size < i + 1) {
-    this->listObjects.setSizeAndExpectedSize(i + 1);
+    this->listObjects.setSize(i + 1);
   }
   return this->listObjects[i];
 }
@@ -295,7 +295,8 @@ void JSData::setKeyValue(const std::string& key, const JSData& value) {
 
 JSData& JSData::operator[](const std::string& key) {
   this->elementType = JSData::Type::tokenObject;
-  return this->objects.getValueCreateEmpty(key);
+  JSData& result = this->objects.getValueCreateEmpty(key);
+  return result;
 }
 
 bool JSData::isLargeInteger(LargeInteger* whichInteger) const {

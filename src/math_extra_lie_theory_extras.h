@@ -1584,10 +1584,10 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::multiplyByNoSimplify(
     << "Output not allowed to be equal to this object. "
     << global.fatal;
   }
-  this->generatorsIndices.reserve(
+  this->generatorsIndices.setExpectedSize(
     other.generatorsIndices.size + this->generatorsIndices.size
   );
-  this->powers.reserve(
+  this->powers.setExpectedSize(
     other.generatorsIndices.size + this->generatorsIndices.size
   );
   this - coefficient.multiplyBy(other.coefficient);
@@ -1789,7 +1789,7 @@ switchConsecutiveIndicesIfTheyCommute(
     element
   );
   if (element.isEqualToZero()) {
-    output.generatorsIndices.reserve(this->generatorsIndices.size);
+    output.generatorsIndices.setExpectedSize(this->generatorsIndices.size);
     output.powers.reserve(this->generatorsIndices.size);
     output.makeZero(ringZero, *this->owner);
     output.coefficient = this->coefficient;
@@ -1843,7 +1843,7 @@ commuteConsecutiveIndicesRightIndexAroundLeft(
   MonomialUniversalEnvelopingOrdered monomial;
   monomial.makeZero(ringZero, *this->owner);
   monomial.powers.reserve(this->generatorsIndices.size + 2);
-  monomial.generatorsIndices.reserve(this->generatorsIndices.size + 2);
+  monomial.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
   monomial.powers.size = 0;
   monomial.generatorsIndices.size = 0;
   int rightGeneratorIndex = this->generatorsIndices.objects[index + 1];

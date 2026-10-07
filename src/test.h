@@ -78,11 +78,15 @@ public:
   static int incrementIntPseudorandomly(int counter);
 };
 
+enum ExpressionTestType {
+  Sum, SumProduct, Arithmetic, NestedList,
+};
+
 class ExpressionTest {
 public:
   static bool all();
   static bool builtInAtomValues(Calculator& owner);
-  static bool largeNestedExpression1(Calculator& owner);
+  static bool largeNestedExpressionCreationSpeed1(Calculator& owner);
   static bool toStringTestRecode(Calculator& owner);
   static bool toStringTestRecodeOnce(
     const std::string& inputHardCodedMustParse, Calculator& owner
@@ -91,6 +95,38 @@ public:
     Calculator& owner, const std::string& input, bool isUserDefinedAtom
   );
   static bool isUserDefinedAtom(Calculator& owner);
+  static void makeLargeAdditionSumNested(
+    Calculator& owner, Expression& output, int iterations
+  );
+  static void makeLargeAdditionSumProductNested(
+    Calculator& owner, Expression& output, int iterations
+  );
+  static void makeLargeExpressionArithmeticNested(
+    Calculator& owner, Expression& output, int iterations
+  );
+  static void makeLargeNestedList(
+    Calculator& owner, Expression& output, int iterations
+  );
+  static void makeLarge(
+    Calculator& owner,
+    Expression& output,
+    ExpressionTestType expressionType,
+    int iterations
+  );
+  static bool largeStringConversion(
+    Calculator& owner,
+    bool mathML,
+    ExpressionTestType expressionType,
+    int iterations
+  );
+  static bool smallStringConversion(
+    Calculator& owner,
+    bool mathML,
+    ExpressionTestType expressionType,
+    int iterations,
+    const std::string& expected
+  );
+  static std::string expressionTypeToString(ExpressionTestType expressionType);
 };
 
 class JSDataTest {

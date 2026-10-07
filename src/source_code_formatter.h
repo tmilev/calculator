@@ -125,6 +125,7 @@ public:
     bool computeIndentationFunctionDeclaration();
     bool computeIndentationFunctionDefinition();
     bool computeIndentationCodeBlock();
+    bool computeIndentationNamespaceWithContent();
     bool computeIndentationControlWantsCodeBlock();
     bool computeIndentationCommandList();
     bool computeIndentationCommaList(bool forceNewLines = false);

@@ -454,7 +454,8 @@ bool CodeFormatter::Element::isSuitableForTopLevel() const {
   this->type == CodeFormatter::Element::Comment ||
   this->type == CodeFormatter::Element::CommentMultiline ||
   this->type == CodeFormatter::Element::ClassDefinition ||
-  this->type == CodeFormatter::Element::EnumDefinition;
+  this->type == CodeFormatter::Element::EnumDefinition ||
+  this->type == CodeFormatter::Element::NamespaceWithContent;
 }
 
 bool CodeFormatter::Element::isSuitableForCommand() const {
@@ -927,6 +928,8 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationTopLevel();
   case CodeFormatter::Element::CodeBlock:
     return this->computeIndentationCodeBlock();
+  case CodeFormatter::Element::NamespaceWithContent:
+    return this->computeIndentationNamespaceWithContent();
   case CodeFormatter::Element::CurlyBraceCommaDelimitedList:
     return this->computeIndentationCurlyBraceCommaDelimitedList();
   case CodeFormatter::Element::ControlWantsCodeBlock:
@@ -1173,6 +1176,22 @@ bool CodeFormatter::Element::computeIndentationCurlyBraceCommaDelimitedList() {
   this->children.lastObject()->indentationLevel = this->indentationLevel;
   this->children.lastObject()->computeIndentation();
   this->children.lastObject()->whiteSpaceBefore = this->indentationLevel;
+  return true;
+}
+
+bool CodeFormatter::Element::computeIndentationNamespaceWithContent() {
+  if (this->children.size != 2 && this->children.size != 3) {
+    this->computeIndentationBasic(0);
+    return true;
+  }
+  if (this->children.lastObject()->type != CodeFormatter::Element::CodeBlock) {
+    this->computeIndentationBasic(0);
+    return true;
+  }
+  this->children.lastObject()->indentationLevel = - 2;
+  for (CodeFormatter::Element& element : this->children) {
+    element.computeIndentation();
+  }
   return true;
 }
 
@@ -1634,6 +1653,13 @@ bool CodeFormatter::Element::shouldAddExtraLineInTopLevel(
     return true;
   }
   if (this->isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDefinition)) {
+    return true;
+  }
+  if (
+    this->isOfTypeOrCommandOfType(
+      CodeFormatter::Element::NamespaceWithContent
+    )
+  ) {
     return true;
   }
   if (
@@ -3179,7 +3205,6 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.makeFrom2(
       CodeFormatter::Element::NamespaceWithContent, secondToLast, last
     );
-    secondToLast.makeFrom1(CodeFormatter::Element::Command, secondToLast);
     return this->removeLast();
   }
   if (
@@ -3194,7 +3219,6 @@ bool CodeFormatter::Processor::applyOneRule() {
       secondToLast,
       last
     );
-    thirdToLast.makeFrom1(CodeFormatter::Element::Command, thirdToLast);
     return this->removeLast(2);
   }
   if (

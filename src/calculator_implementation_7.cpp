@@ -1213,24 +1213,24 @@ bool CalculatorFunctions::solvePolynomialSystem(
 }
 
 namespace {
-  void computeArbitrarySubstitutionsModP(
-    ArbitrarySubstitutionsProvider<ElementZmodP>& object, int recursionDepth
-  ) {
-    STACK_TRACE("computeArbitrarySubstitutionsModP");
-    (void) recursionDepth;
-    int upperLimit = 0;
-    LargeIntegerUnsigned& modulus = object.sampleCoefficient.modulus;
-    if (!modulus.isIntegerFittingInInt(&upperLimit)) {
-      upperLimit = 2;
-    }
-    if (upperLimit > 100) {
-      upperLimit = 100;
-    }
-    object.arbitrarySubstitutions.setSize(upperLimit);
-    for (int i = 0; i < upperLimit; i ++) {
-      object.arbitrarySubstitutions[i].makeFrom(modulus, i);
-    }
+void computeArbitrarySubstitutionsModP(
+  ArbitrarySubstitutionsProvider<ElementZmodP>& object, int recursionDepth
+) {
+  STACK_TRACE("computeArbitrarySubstitutionsModP");
+  (void) recursionDepth;
+  int upperLimit = 0;
+  LargeIntegerUnsigned& modulus = object.sampleCoefficient.modulus;
+  if (!modulus.isIntegerFittingInInt(&upperLimit)) {
+    upperLimit = 2;
   }
+  if (upperLimit > 100) {
+    upperLimit = 100;
+  }
+  object.arbitrarySubstitutions.setSize(upperLimit);
+  for (int i = 0; i < upperLimit; i ++) {
+    object.arbitrarySubstitutions[i].makeFrom(modulus, i);
+  }
+}
 }
 
 bool CalculatorFunctions::solvePolynomialSystemModP(

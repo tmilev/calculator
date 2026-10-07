@@ -1459,8 +1459,10 @@ public:
   typedef Expression* ExpressionPointer;
 };
 
-template < >
-int64_t RamUsageComputation::byteSize(const Expression::ExpressionPointer& o);
+namespace RamUsageComputation {
+  template < >
+  int64_t byteSize(const Expression::ExpressionPointer& o);
+}
 class ExpressionContext {
 private:
   HashedList<Expression> variables;

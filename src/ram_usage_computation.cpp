@@ -1,18 +1,16 @@
 #include "ram_usage_computation.h"
 
-template < >
-int64_t RamUsageComputation::byteSize(const int& object) {
-  return sizeof(object);
-}
-
-template < >
-int64_t RamUsageComputation::byteSize(const unsigned int& object) {
-  return sizeof(object);
-}
-
-template < >
-int64_t RamUsageComputation::byteSize(
-  const RamUsageComputation::IntPointer& object
-) {
-  return sizeof(object);
+namespace RamUsageComputation {
+  template < >
+  int64_t byteSize(const int& object) {
+    return sizeof(object);
+  }
+  template < >
+  int64_t byteSize(const unsigned int& object) {
+    return sizeof(object);
+  }
+  template < >
+  int64_t byteSize(const RamUsageComputation::IntPointer& object) {
+    return sizeof(object);
+  }
 }

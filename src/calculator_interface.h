@@ -2982,11 +2982,6 @@ public:
     bool writeExamplesReadme();
     std::string getExamplesReadmeFragment();
     Examples();
-    class Test {
-    public:
-      static bool compose();
-      static bool all();
-    };
   };
 
   Examples examples;
@@ -3561,19 +3556,6 @@ public:
     bool loadTestStrings(std::stringstream* commentsOnFailure);
     bool writeTestStrings(std::stringstream* commentsOnFailure);
     bool loadOneTest(JSData& input);
-    static bool all(bool updateABTestFile);
-    static bool cacheWorks();
-    static bool loopDetection();
-    static bool loopDetectionCycle();
-    static bool loopDetectionEverExpanding();
-    static bool numberOfTestFunctions(Calculator& ownerInitialized);
-    static bool parseDecimal(Calculator& ownerInitialized);
-    static bool parseQuotes(Calculator& ownerInitialized);
-    static bool parseAllExamples(Calculator& ownerInitialized);
-    static bool builtInFunctionsABTest(
-      Calculator& ownerInitialized, bool updateABTestFile
-    );
-    static bool checkBuiltInInitializations(Calculator& ownerInitialized);
     void addOneTest(
       const std::string& input, int maximumRuntimeMilliseconds = 0
     );

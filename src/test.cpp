@@ -76,7 +76,7 @@ void Test::run() {
     VectorTest::all();
     Selection::Test::all();
     // Also tested in calculator test suite.
-    Calculator::Examples::Test::all();
+    CalculatorExamplesTest::all();
     ChevalleyGenerator::Test::all();
     PartialFractions::Test::all();
     MatrixTest::all();
@@ -157,8 +157,8 @@ void Test::run() {
       }
       global << Logger::blue << "Test file deleted. " << Logger::endL;
     }
-    Calculator::Examples::Test::all();
-    Calculator::Test::all(Test::flagUpdateABTests);
+    CalculatorExamplesTest::all();
+    CalculatorTest::all(Test::flagUpdateABTests);
   }
   if (this->shouldTest(Test::Suites::problems)) {
     CalculatorHTML::Test::all();

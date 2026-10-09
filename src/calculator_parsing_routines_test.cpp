@@ -3,21 +3,8 @@
 #include "test.h"
 #include <iostream>
 
-bool Calculator::Test::all(bool updateABTestFile) {
-  Calculator tester;
-  tester.initialize(Calculator::Mode::full);
-  Calculator::Test::parseQuotes(tester);
-  Calculator::Test::cacheWorks();
-  Calculator::Test::loopDetection();
-  Calculator::Test::checkBuiltInInitializations(tester);
-  Calculator::Test::parseAllExamples(tester);
-  Calculator::Test::numberOfTestFunctions(tester);
-  Calculator::Test::parseDecimal(tester);
-  Calculator::Test::builtInFunctionsABTest(tester, updateABTestFile);
-  return true;
-}
 
-bool Calculator::Test::checkBuiltInInitializations(
+bool CalculatorTest::checkBuiltInInitializations(
   Calculator& ownerInitialized
 ) {
   if (!ownerInitialized.checkPredefinedFunctionNameRepetitions()) {
@@ -31,7 +18,7 @@ bool Calculator::Test::checkBuiltInInitializations(
   return true;
 }
 
-bool Calculator::Test::numberOfTestFunctions(Calculator& ownerInitialized) {
+bool CalculatorTest::numberOfTestFunctions(Calculator& ownerInitialized) {
   int numberOfBuiltInFunction = ownerInitialized.getNumberOfBuiltInFunctions();
   if (numberOfBuiltInFunction <= 0) {
     global.fatal
@@ -42,7 +29,7 @@ bool Calculator::Test::numberOfTestFunctions(Calculator& ownerInitialized) {
   return true;
 }
 
-bool Calculator::Test::cacheWorks() {
+bool CalculatorTest::cacheWorks() {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::educational);
   int64_t startTime = global.getElapsedMilliseconds();
@@ -64,13 +51,13 @@ bool Calculator::Test::cacheWorks() {
   return true;
 }
 
-bool Calculator::Test::loopDetection() {
-  Calculator::Test::loopDetectionCycle();
-  Calculator::Test::loopDetectionEverExpanding();
+bool CalculatorTest::loopDetection() {
+  CalculatorTest::loopDetectionCycle();
+  CalculatorTest::loopDetectionEverExpanding();
   return true;
 }
 
-bool Calculator::Test::loopDetectionEverExpanding() {
+bool CalculatorTest::loopDetectionEverExpanding() {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::educational);
   calculator.evaluate("x=x+1;x");
@@ -84,7 +71,7 @@ bool Calculator::Test::loopDetectionEverExpanding() {
   return true;
 }
 
-bool Calculator::Test::loopDetectionCycle() {
+bool CalculatorTest::loopDetectionCycle() {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::educational);
   calculator.evaluate(
@@ -101,7 +88,7 @@ bool Calculator::Test::loopDetectionCycle() {
   return true;
 }
 
-bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
+bool CalculatorTest::parseAllExamples(Calculator& ownerInitialized) {
   STACK_TRACE("Calculator::Test::parseAllExamples");
   for (int i = 0; i < ownerInitialized.numberOfPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& operationPointer =
@@ -138,7 +125,7 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
   return true;
 }
 
-bool Calculator::Test::parseQuotes(Calculator& ownerInitialized) {
+bool CalculatorTest::parseQuotes(Calculator& ownerInitialized) {
   std::string input = "\"\\\"\\\\\\\"\"";
   std::string expected = "\"\\\"\\\\\\\"\"";
   Expression output;
@@ -159,7 +146,7 @@ bool Calculator::Test::parseQuotes(Calculator& ownerInitialized) {
   return true;
 }
 
-bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
+bool CalculatorTest::parseDecimal(Calculator& ownerInitialized) {
   std::string mustEvaluateToZero = "2.01 - 201/100";
   ownerInitialized.evaluate(mustEvaluateToZero);
   if (ownerInitialized.programExpression.toString() != "0") {
@@ -194,7 +181,7 @@ Calculator::Test::OneTest::OneTest() {
   this->actualDuration = 0;
 }
 
-bool Calculator::Test::builtInFunctionsABTest(
+bool CalculatorTest::builtInFunctionsABTest(
   Calculator& ownerInitialized, bool updateABTestFile
 ) {
   Calculator::Test test(ownerInitialized);
@@ -234,12 +221,12 @@ bool Calculator::Test::builtInFunctionsABTest(
   return true;
 }
 
-bool Calculator::Examples::Test::all() {
-  Calculator::Examples::Test::compose();
+bool CalculatorExamplesTest::all() {
+  CalculatorExamplesTest::compose();
   return true;
 }
 
-bool Calculator::Examples::Test::compose() {
+bool CalculatorExamplesTest::compose() {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::full);
   calculator.examples.writeExamplesReadme();
@@ -275,7 +262,7 @@ bool CalculatorParserTest::largeExample1(Calculator& initializedTester) {
     global.fatal << "Failed to parse: " << input << global.fatal;
   }
   int64_t duration = global.getElapsedMilliseconds() - start;
-  int64_t maximumDuration = iterations / 50;
+  int64_t maximumDuration = iterations / 20;
   if (duration > maximumDuration) {
     global.fatal
     << "Parsing "

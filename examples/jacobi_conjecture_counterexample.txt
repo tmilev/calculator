@@ -1,5 +1,4 @@
 
-%HideLHS 
 %This computation shows the counter-example to the Jacobi conjecture discovered by Levent Alpöge.;
 %The Jacobi conjecture states that if the determinant of a jacobian of a polynomial map is a non-zero constant, the the map is one-to-one.;
 %This is proven false by the following counter-example.;
@@ -17,8 +16,8 @@ d/dy x =0;
 d/dy z =0;
 d/dz x=0;
 d/dz y=0;
-A=\begin{pmatrix}\frac{d}{dx}P&\frac{d}{dy}P&\frac{d}{dz}P\\\frac{d}{dx}Q&\frac{d}{dy}Q&\frac{d}{dz}Q\\\frac{d}{dx}R&\frac{d}{dy}R&\frac{d}{dz}R\end{pmatrix};
-\det A;
+Jacobian=\begin{pmatrix}\frac{d}{dx}P&\frac{d}{dy}P&\frac{d}{dz}P\\\frac{d}{dx}Q&\frac{d}{dy}Q&\frac{d}{dz}Q\\\frac{d}{dx}R&\frac{d}{dy}R&\frac{d}{dz}R\end{pmatrix};
+\det Jacobian;
 B= (P,Q,R);
 (x=0; y=0; z=-1/4; B);
 (x=1; y=-3/2; z=13/2;B );

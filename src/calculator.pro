@@ -720,6 +720,7 @@ SOURCES += \
     calculator_javascript_graphics.cpp \
     calculator_latex_routines.cpp \
     calculator_parsing_routines.cpp \
+  calculator_test.cpp \
     calculator_typed_functions_1.cpp \
     calculator_webserver_functions.cpp \
     crypto.cpp \

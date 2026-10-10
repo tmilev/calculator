@@ -1,13 +1,16 @@
 #include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
+#include "test.h"
 
-bool PrivateKeyRSA::Test::all() {
-  PrivateKeyRSA::Test::loadFromPEMFile();
-  PrivateKeyRSA::Test::loadFromPEM();
+namespace Testing {
+
+bool PrivateKeyRSATest::all() {
+  PrivateKeyRSATest::loadFromPEMFile();
+  PrivateKeyRSATest::loadFromPEM();
   return true;
 }
 
-bool PrivateKeyRSA::Test::loadFromPEMFile() {
+bool PrivateKeyRSATest::loadFromPEMFile() {
   std::string fileName = "test/private_key.pem";
   PrivateKeyRSA key;
   std::stringstream commentsOnFailure;
@@ -20,7 +23,7 @@ bool PrivateKeyRSA::Test::loadFromPEMFile() {
   return true;
 }
 
-bool PrivateKeyRSA::Test::loadFromPEM() {
+bool PrivateKeyRSATest::loadFromPEM() {
   std::string pemContent =
   "-----BEGIN PRIVATE KEY-----\n"
   "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDvlOX7G1JZ/TxJ\n"
@@ -63,13 +66,13 @@ bool PrivateKeyRSA::Test::loadFromPEM() {
   return true;
 }
 
-bool X509Certificate::Test::all() {
-  X509Certificate::Test::loadFromPEMFile();
-  X509Certificate::Test::loadFromPEM();
+bool X509CertificateTest::all() {
+  X509CertificateTest::loadFromPEMFile();
+  X509CertificateTest::loadFromPEM();
   return true;
 }
 
-bool X509Certificate::Test::loadFromPEM() {
+bool X509CertificateTest::loadFromPEM() {
   std::string pemContent =
   "-----BEGIN CERTIFICATE-----"
   "MIID5TCCAs2gAwIBAgIUOFXi72uftmcTij+B7sbVOUdkOlcwDQYJKoZIhvcNAQEL"
@@ -104,7 +107,7 @@ bool X509Certificate::Test::loadFromPEM() {
   return true;
 }
 
-bool X509Certificate::Test::loadFromPEMFile() {
+bool X509CertificateTest::loadFromPEMFile() {
   std::string fileName = "test/certificate_self_signed.pem";
   std::stringstream commentsOnFailure;
   X509Certificate certificate;
@@ -116,3 +119,4 @@ bool X509Certificate::Test::loadFromPEMFile() {
   }
   return true;
 }
+} // namespace: Testing.

@@ -10777,42 +10777,6 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   this->bilinearFormFundamentalPrimal *= matrixFundamentalCoordinatesSimple;
 }
 
-bool SemisimpleSubalgebras::Test::all() {
-  SemisimpleSubalgebras::Test::constructAllB3Subalgebras();
-  return true;
-}
-
-bool SemisimpleSubalgebras::Test::constructAllB3Subalgebras() {
-  STACK_TRACE("SemisimpleSubalgebras::Test::constructAllB3Subalgebras");
-  SemisimpleSubalgebras subalgebras;
-  SemisimpleLieAlgebra b3;
-  b3.weylGroup.makeArbitrarySimple('B', 3);
-  AlgebraicClosureRationals algebraicClosure;
-  MapReferences<std::string, AlgebraicClosureRationals>
-  algebraicClosuresForLargeComputations;
-  MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasNonEmbedded;
-  ListReferences<SlTwoSubalgebras> sl2sOfSubalgebras;
-  subalgebras.findSemisimpleSubalgebrasFromScratch(
-    b3,
-    algebraicClosure,
-    algebraicClosuresForLargeComputations,
-    subalgebrasNonEmbedded,
-    sl2sOfSubalgebras,
-    nullptr
-  );
-  int expected = 16;
-  if (subalgebras.subalgebras.size() != expected) {
-    global.fatal
-    << "B3 subalgebra count is wrong: got: "
-    << subalgebras.subalgebras.size()
-    << ", expected: "
-    << expected
-    << "."
-    << global.fatal;
-  }
-  return true;
-}
-
 SemisimpleSubalgebrasComputationOptions::
 SemisimpleSubalgebrasComputationOptions() {
   this->forceRecompute = false;

@@ -54,8 +54,8 @@ void Test::run() {
   << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->shouldTest(Test::Suites::database)) {
-    QueryUpdate::Test::all();
-    Database::Test::all();
+    QueryUpdateTest::all();
+    DatabaseTest::all();
     global << Logger::green << "Database tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::json)) {
@@ -69,7 +69,7 @@ void Test::run() {
     ListReferencesTest::all();
     HashedListTest::all();
     AlgebraicNumberTest::all();
-    StringRoutines::Test::all();
+    StringRoutinesTest::all();
     LargeIntegerUnsignedTest::all();
     RationalTest::all();
     ElementZmodPTest::all();
@@ -87,9 +87,9 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();
     Crypto::Random::initializeRandomBytes();
-    PrivateKeyRSA::Test::all();
-    Crypto::Test::all();
-    X509Certificate::Test::all();
+    PrivateKeyRSATest::all();
+    CryptoTest::all();
+    X509CertificateTest::all();
     SSLRecordTest::all();
     global << Logger::green << "Crypto tests completed." << Logger::endL;
   }
@@ -113,8 +113,8 @@ void Test::run() {
     << Logger::blue
     << "Scientific function test start ..."
     << Logger::endL;
-    ElementUniversalEnveloping<Rational>::Test::all();
-    SemisimpleSubalgebras::Test::all();
+    ElementUniversalEnvelopingTest::all();
+    SemisimpleSubalgebrasTest::all();
     global
     << Logger::green
     << "Scientific function tests passed."
@@ -125,15 +125,15 @@ void Test::run() {
     this->shouldTest(Test::Suites::topiclists) ||
     this->shouldTest(Test::Suites::topics)
   ) {
-    TopicElementParser::Test::all();
+    TopicElementParserTest::all();
     global << Logger::green << "Topic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::freecalc)) {
-    CalculatorFunctionsFreecalc::Test::all();
+    CalculatorFunctionsFreecalcTest::all();
     global << Logger::green << "Freecalc tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::courses)) {
-    Course::Test::all();
+    CourseTest::all();
   }
   if (this->shouldTest(Test::Suites::calculator)) {
     CalculatorParserTest::all();
@@ -159,7 +159,7 @@ void Test::run() {
     CalculatorTest::all(Test::flagUpdateABTests);
   }
   if (this->shouldTest(Test::Suites::problems)) {
-    CalculatorHTML::Test::all();
+    CalculatorHTMLTest::all();
   }
   if (this->shouldTest(Test::Suites::build)) {
     GlobalVariables::Test::all();
@@ -170,7 +170,7 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::database)) {
     // This special test can only run once per
     // test executable, and it must run last.
-    Database::Test::noShutdownSignal();
+    DatabaseTest::noShutdownSignal();
   }
 }
 

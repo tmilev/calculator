@@ -43,13 +43,6 @@ public:
   ASNElement sourceASNInner;
   PrivateKeyRSA();
   void computeBitSize();
-  class Test {
-  public:
-    static bool all();
-    static bool loadFromPEMFile();
-    static bool loadFromPEM();
-  };
-
   bool basicChecks(std::stringstream* comments);
   bool loadFromPEMFile(
     const std::string& input, std::stringstream* commentsOnFailure
@@ -154,13 +147,6 @@ public:
   ASNElement sourceASN;
   ASNElement recodedASN;
   List<unsigned char> cachedServerHandshakeCertificateMessage;
-  class Test {
-  public:
-    static bool all();
-    static bool loadFromPEMFile();
-    static bool loadFromPEM();
-  };
-
   bool loadFromPEMFile(
     const std::string& inputFilenameVirtual,
     std::stringstream* commentsOnFailure
@@ -195,12 +181,6 @@ public:
   static List<PublicKeyRSA> knownCertificates;
   static List<uint32_t> kArraySha2xx;
   static List<uint64_t> kArraySha512;
-  class Test {
-  public:
-    static bool sha256();
-    static bool all();
-  };
-
   static bool loadKnownCertificates(
     std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );

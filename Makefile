@@ -161,6 +161,7 @@ SOURCES_RELATIVE_PATH=\
     calculator_implementation_4.cpp \
     calculator_implementation_5.cpp \
     calculator_implementation_6.cpp \
+    calculator_implementation_6_problem_testing.cpp \
     calculator_implementation_6_test.cpp \
     calculator_implementation_7.cpp \
     calculator_implementation_8_polynomial.cpp \
@@ -222,6 +223,7 @@ SOURCES_RELATIVE_PATH=\
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
+    math_semisimple_lie_subalgebras_test.cpp \
     math_semisimple_lie_subalgebras_arbitrary_constants.cpp \
     math_semisimple_lie_subalgebras_sltwos.cpp \
     math_semisimple_lie_subalgebras_sltwos_arbitrary_constants.cpp \

@@ -417,11 +417,6 @@ public:
   ) {
     this->operator=(other);
   }
-  class Test {
-  public:
-    static bool all();
-    static bool casimirElement();
-  };
 };
 
 template <class Coefficient>

@@ -216,11 +216,11 @@ void WebAPIResponseTest::extactActivationTokenFromEmail(
 
 bool WebAPIResponseTest::changePasswordEmailOnly() {
   STACK_TRACE("WebAPIResponseTest::changePasswordEmailOnly");
-  Database::Test tester(DatabaseType::internal);
+  DatabaseTest tester(DatabaseType::internal);
   tester.deleteDatabase();
   tester.startDatabase(DatabaseType::internal);
   UserCalculatorData userData;
-  Database::Test::createAdminAccountReturnUser(true, userData);
+  DatabaseTest::createAdminAccountReturnUser(true, userData);
   StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
   StateMaintainer<bool> maintainUsingSSL(
     global.flagUsingSSLinCurrentConnection
@@ -285,11 +285,11 @@ bool WebAPIResponseTest::changePasswordEmailOnly() {
 
 bool WebAPIResponseTest::deleteAccount() {
   STACK_TRACE("WebAPIResponseTest::deleteAccount");
-  Database::Test tester(DatabaseType::internal);
+  DatabaseTest tester(DatabaseType::internal);
   tester.deleteDatabase();
   tester.startDatabase(DatabaseType::internal);
   UserCalculatorData userData;
-  Database::Test::createAdminAccountReturnUser(true, userData);
+  DatabaseTest::createAdminAccountReturnUser(true, userData);
   StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
   StateMaintainer<bool> maintainUsingSSL(
     global.flagUsingSSLinCurrentConnection
@@ -348,11 +348,11 @@ bool WebAPIResponseTest::deleteAccount() {
 
 bool WebAPIResponseTest::changePassword() {
   STACK_TRACE("WebAPIResponseTest::changePassword");
-  Database::Test tester(DatabaseType::internal);
+  DatabaseTest tester(DatabaseType::internal);
   tester.deleteDatabase();
   tester.startDatabase(DatabaseType::internal);
   UserCalculatorData userData;
-  Database::Test::createAdminAccountReturnUser(true, userData);
+  DatabaseTest::createAdminAccountReturnUser(true, userData);
   StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
   StateMaintainer<bool> maintainUsingSSL(
     global.flagUsingSSLinCurrentConnection
@@ -391,7 +391,7 @@ bool WebAPIResponseTest::changePassword() {
   }
   UserCalculatorData user;
   user.username = WebAPI::userDefaultAdmin;
-  user.enteredPassword = Database::Test::adminPassword;
+  user.enteredPassword = DatabaseTest::adminPassword;
   std::stringstream loginWithOldPassword;
   std::stringstream loginWithNewPassword;
   if (Database::get().user.loginViaDatabase(user, &loginWithOldPassword)) {
@@ -413,8 +413,8 @@ bool WebAPIResponseTest::changePassword() {
 
 bool WebAPIResponseTest::forgotLogin() {
   STACK_TRACE("WebAPIResponseTest::forgotLogin");
-  Database::Test tester(DatabaseType::internal);
-  Database::Test::createAdminAccount(true);
+  DatabaseTest tester(DatabaseType::internal);
+  DatabaseTest::createAdminAccount(true);
   DatabaseUserRoutines blankUser;
   global.userDefault.reset();
   StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
@@ -478,8 +478,8 @@ bool WebAPIResponseTest::forgotLogin() {
 
 bool WebAPIResponseTest::signUp() {
   STACK_TRACE("WebAPIResponseTest::signUp");
-  Database::Test tester(DatabaseType::internal);
-  Database::Test::createAdminAccount(true);
+  DatabaseTest tester(DatabaseType::internal);
+  DatabaseTest::createAdminAccount(true);
   DatabaseUserRoutines blankUser;
   global.userDefault.reset();
   StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
@@ -543,8 +543,8 @@ bool WebAPIResponseTest::signUp() {
 
 bool WebAPIResponseTest::addUsersFromData() {
   STACK_TRACE("WebAPIResponseTest::addUsersFromData");
-  Database::Test tester(DatabaseType::internal);
-  Database::Test::createAdminAccount(false);
+  DatabaseTest tester(DatabaseType::internal);
+  DatabaseTest::createAdminAccount(false);
   StateMaintainer<int64_t> maintainMillisecondsMaxComputation(
     global.millisecondsMaxComputation
   );
@@ -651,7 +651,7 @@ bool WebAPIResponseTest::scoredQuiz(DatabaseType databaseType) {
   << Logger::blue
   << Database::toString()
   << Logger::endL;
-  Course::Test::Setup setup(databaseType);
+  CourseTest::Setup setup(databaseType);
   setup.setupAll();
   std::string sample = "test/problems/interval_notation_1.html";
   global.webArguments[WebAPI::Problem::fileName] = sample;

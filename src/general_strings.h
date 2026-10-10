@@ -102,27 +102,6 @@ public:
     // javascript variable.
     // Avoid use of underscores and other characters so as attempt to produce a
     // name that is in addition a valid latex string and a valid html tag.
-    class Test {
-    public:
-      static bool all();
-      static bool utf8StringToJSONStringEscaped();
-      static bool unescapeJavascriptLike();
-      static bool convertStringToJSONStringEscapeOnly();
-      static bool codePointToUtf8();
-      static bool oneCodePointToUtf8(
-        uint32_t codePoint, const std::string& expectedHex
-      );
-      static bool convertUtf8StringToUnicodeCodePoints();
-      static bool oneUtf8ToJSONSuccess(
-        const std::string& givenInput, const std::string& expectedOutput
-      );
-      static bool oneConversionUtf8Success(
-        const std::string& givenInput,
-        uint32_t codePoint1,
-        uint32_t codePoint2 = 0xffffffff,
-        uint32_t codePoint3 = 0xffffffff
-      );
-    };
   };
 
   static std::string convertStringToJavascriptVariable(
@@ -202,10 +181,6 @@ public:
     result << x;
     return result.str();
   }
-  class Test {
-  public:
-    static bool all();
-  };
 };
 
 #endif

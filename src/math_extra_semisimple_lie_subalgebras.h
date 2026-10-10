@@ -1019,11 +1019,6 @@ public:
     const List<int>& currentRootInjection,
     const List<Vector<Rational> >& centralizerOfOldHs
   );
-  class Test {
-  public:
-    static bool all();
-    static bool constructAllB3Subalgebras();
-  };
 };
 
 #endif // header_math_extra_semisimple_lie_subalgebras_ALREADY_INCLUDED

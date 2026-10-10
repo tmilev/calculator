@@ -2,10 +2,13 @@
 #include "database.h"
 #include "general_file_operations_encodings.h"
 #include "string_constants.h"
+#include "test.h"
 
-std::string Database::Test::adminPassword = "111";
+namespace Testing {
 
-std::string Database::Test::testDatabaseName(DatabaseType databaseType) {
+std::string DatabaseTest::adminPassword = "111";
+
+std::string DatabaseTest::testDatabaseName(DatabaseType databaseType) {
   switch (databaseType) {
   case DatabaseType::internal:
     return "test_local";
@@ -17,15 +20,15 @@ std::string Database::Test::testDatabaseName(DatabaseType databaseType) {
   return "";
 }
 
-void Database::Test::startDatabase(DatabaseType databaseType) {
+void DatabaseTest::startDatabase(DatabaseType databaseType) {
   global.databaseType = databaseType;
   global.flagServerForkedIntoWorker = true;
   Crypto::Random::initializeRandomBytesForTesting();
-  Database::name = Database::Test::testDatabaseName(databaseType);
+  Database::name = DatabaseTest::testDatabaseName(databaseType);
   Database::get().initialize(10);
 }
 
-Database::Test::Test(DatabaseType inputDatabaseType) {
+DatabaseTest::DatabaseTest(DatabaseType inputDatabaseType) {
   this->databaseType = inputDatabaseType;
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
   this->maintainerDatabase.initialize(global.databaseType);
@@ -35,10 +38,10 @@ Database::Test::Test(DatabaseType inputDatabaseType) {
   << Database::name
   << ". "
   << Logger::endL;
-  Database::Test::startDatabase(inputDatabaseType);
+  DatabaseTest::startDatabase(inputDatabaseType);
 }
 
-Database::Test::~Test() {
+DatabaseTest::~DatabaseTest() {
   Database::get().shutdown(nullptr);
   this->deleteDatabase();
   global
@@ -48,20 +51,20 @@ Database::Test::~Test() {
   << Logger::endL;
 }
 
-bool Database::Test::all() {
-  STACK_TRACE("Database::Test::all");
-  Database::Test::basics(DatabaseType::fallback);
-  Database::Test::basics(DatabaseType::internal);
-  Database::Test::findWithOptions(DatabaseType::fallback);
-  Database::Test::findWithOptions(DatabaseType::internal);
-  Database::Test::loadFromJSON();
-  Database::Test::deleteAllByFindQuery();
+bool DatabaseTest::all() {
+  STACK_TRACE("DatabaseTest::all");
+  DatabaseTest::basics(DatabaseType::fallback);
+  DatabaseTest::basics(DatabaseType::internal);
+  DatabaseTest::findWithOptions(DatabaseType::fallback);
+  DatabaseTest::findWithOptions(DatabaseType::internal);
+  DatabaseTest::loadFromJSON();
+  DatabaseTest::deleteAllByFindQuery();
   return true;
 }
 
-bool Database::Test::deleteAllByFindQuery() {
-  STACK_TRACE("Database::Test::deleteAllByFindQuery");
-  Database::Test tester(DatabaseType::internal);
+bool DatabaseTest::deleteAllByFindQuery() {
+  STACK_TRACE("DatabaseTest::deleteAllByFindQuery");
+  DatabaseTest tester(DatabaseType::internal);
   tester.createAdminAccount(false);
   QueryFind query;
   query.collection = "users";
@@ -106,9 +109,9 @@ bool Database::Test::deleteAllByFindQuery() {
   return true;
 }
 
-bool Database::Test::loadFromJSON() {
-  STACK_TRACE("Database::Test::loadFromJSON");
-  Database::Test tester(DatabaseType::internal);
+bool DatabaseTest::loadFromJSON() {
+  STACK_TRACE("DatabaseTest::loadFromJSON");
+  DatabaseTest tester(DatabaseType::internal);
   std::stringstream comments;
   bool mustBeTrue =
   DatabaseLoader::loadDatabase(
@@ -165,13 +168,13 @@ bool Database::Test::loadFromJSON() {
   return true;
 }
 
-bool Database::Test::findWithOptions(DatabaseType databaseType) {
-  STACK_TRACE("Database::Test::findWithOptions");
+bool DatabaseTest::findWithOptions(DatabaseType databaseType) {
+  STACK_TRACE("DatabaseTest::findWithOptions");
   global
   << "Testing default database. "
   << Database::toString()
   << Logger::endL;
-  Database::Test tester(databaseType);
+  DatabaseTest tester(databaseType);
   tester.createAdminAccount(false);
   QueryFind queryExact;
   queryExact.exactValue = "default";
@@ -196,23 +199,23 @@ bool Database::Test::findWithOptions(DatabaseType databaseType) {
   return true;
 }
 
-bool Database::Test::basics(DatabaseType databaseType) {
-  STACK_TRACE("Database::Test::basics");
+bool DatabaseTest::basics(DatabaseType databaseType) {
+  STACK_TRACE("DatabaseTest::basics");
   global
   << "Testing default database. "
   << Database::toString()
   << Logger::endL;
-  Database::Test tester(databaseType);
+  DatabaseTest tester(databaseType);
   tester.createAdminAccount(false);
   return true;
 }
 
-bool Database::Test::noShutdownSignal() {
+bool DatabaseTest::noShutdownSignal() {
   global
   << "Database: starting database that will not be shutdown correctly. "
   << Logger::endL;
-  Database::Test::startDatabase(DatabaseType::internal);
-  Database::Test::createAdminAccount(false);
+  DatabaseTest::startDatabase(DatabaseType::internal);
+  DatabaseTest::createAdminAccount(false);
   global
   << "Database: premature exit without shutdown. "
   << "The database should still shutdown correctly."
@@ -225,7 +228,7 @@ bool Database::Test::noShutdownSignal() {
   return true;
 }
 
-bool Database::Test::deleteDatabase() {
+bool DatabaseTest::deleteDatabase() {
   std::stringstream commentsOnFailure;
   if (!Database::get().shutdown(&commentsOnFailure)) {
     global.fatal
@@ -250,12 +253,12 @@ bool Database::Test::deleteDatabase() {
   return true;
 }
 
-bool Database::Test::createAdminAccountReturnUser(
+bool DatabaseTest::createAdminAccountReturnUser(
   bool withEmail, UserCalculatorData& outputUserData
 ) {
-  STACK_TRACE("Database::Test::createAdminAccountReturnUser");
+  STACK_TRACE("DatabaseTest::createAdminAccountReturnUser");
   outputUserData.username = WebAPI::userDefaultAdmin;
-  outputUserData.enteredPassword = Database::Test::adminPassword;
+  outputUserData.enteredPassword = DatabaseTest::adminPassword;
   if (withEmail) {
     outputUserData.email = "test.admin.user@calculator-algebra.org";
   }
@@ -271,19 +274,19 @@ bool Database::Test::createAdminAccountReturnUser(
   return true;
 }
 
-bool Database::Test::createAdminAccount(bool withEmail) {
-  STACK_TRACE("Database::Test::createAdminAccount");
+bool DatabaseTest::createAdminAccount(bool withEmail) {
+  STACK_TRACE("DatabaseTest::createAdminAccount");
   UserCalculatorData userData;
-  return Database::Test::createAdminAccountReturnUser(withEmail, userData);
+  return DatabaseTest::createAdminAccountReturnUser(withEmail, userData);
 }
 
-bool QueryUpdate::Test::all() {
-  QueryUpdate::Test::basics(DatabaseType::internal);
-  QueryUpdate::Test::basics(DatabaseType::fallback);
+bool QueryUpdateTest::all() {
+  QueryUpdateTest::basics(DatabaseType::internal);
+  QueryUpdateTest::basics(DatabaseType::fallback);
   return true;
 }
 
-void QueryUpdate::Test::updateNoFail(QueryFind& find, QueryUpdate updater) {
+void QueryUpdateTest::updateNoFail(QueryFind& find, QueryUpdate updater) {
   std::stringstream comments;
   if (!Database::get().updateOne(find, updater, true, &comments)) {
     global.fatal
@@ -297,7 +300,7 @@ void QueryUpdate::Test::updateNoFail(QueryFind& find, QueryUpdate updater) {
   }
 }
 
-void QueryUpdate::Test::findExactlyOneNoFail(QueryFind& find, JSData& result) {
+void QueryUpdateTest::findExactlyOneNoFail(QueryFind& find, JSData& result) {
   std::stringstream comments;
   List<JSData> output;
   QueryFindOneOf wrapperQuery;
@@ -316,7 +319,7 @@ void QueryUpdate::Test::findExactlyOneNoFail(QueryFind& find, JSData& result) {
   result = output[0];
 }
 
-void QueryUpdate::Test::matchKeyValue(
+void QueryUpdateTest::matchKeyValue(
   const JSData& mustContain, const JSData& mustBeContained
 ) {
   JSData empty;
@@ -341,9 +344,9 @@ void QueryUpdate::Test::matchKeyValue(
   }
 }
 
-bool QueryUpdate::Test::basics(DatabaseType databaseType) {
-  STACK_TRACE("QueryUpdate::Test::basics");
-  Database::Test tester(databaseType);
+bool QueryUpdateTest::basics(DatabaseType databaseType) {
+  STACK_TRACE("QueryUpdateTest::basics");
+  DatabaseTest tester(databaseType);
   QueryFind find;
   JSData found;
   JSData expected;
@@ -357,17 +360,17 @@ bool QueryUpdate::Test::basics(DatabaseType databaseType) {
     "{key:[\"a\", \"b\", \"c\"], value:\"123\"},"
     "{key:[\"instructor\"], value:\"X\"}]"
   );
-  QueryUpdate::Test::updateNoFail(find, updater);
-  QueryUpdate::Test::findExactlyOneNoFail(find, found);
+  QueryUpdateTest::updateNoFail(find, updater);
+  QueryUpdateTest::findExactlyOneNoFail(find, found);
   expected.parseNoFail(
     "{username:\"ttt\",a:{b:{c:\"123\"}},instructor:\"X\"}", true
   );
-  QueryUpdate::Test::matchKeyValue(found, expected);
+  QueryUpdateTest::matchKeyValue(found, expected);
   updater.fromJSONStringNoFail(
     "[{key:[\"$set\", \"a.b\",\"$set.a.b\"], value:\"123\"}]"
   );
-  QueryUpdate::Test::updateNoFail(find, updater);
-  QueryUpdate::Test::findExactlyOneNoFail(find, found);
+  QueryUpdateTest::updateNoFail(find, updater);
+  QueryUpdateTest::findExactlyOneNoFail(find, found);
   expected.parseNoFail(
     "{"
     "username:\"ttt\",a:{b:{c:\"123\"}}, "
@@ -375,13 +378,13 @@ bool QueryUpdate::Test::basics(DatabaseType databaseType) {
     "}",
     true
   );
-  QueryUpdate::Test::matchKeyValue(found, expected);
+  QueryUpdateTest::matchKeyValue(found, expected);
   find.exactValue = "ttt2";
   updater.fromJSONStringNoFail(
     "[{key:[\"username\"], value:\"ttt2\"}, "
     "{key:[\"instructor\"], value:\"X\"}]"
   );
-  QueryUpdate::Test::updateNoFail(find, updater);
+  QueryUpdateTest::updateNoFail(find, updater);
   find.nestedLabels.clear();
   find.nestedLabels.addOnTop("instructor");
   find.exactValue = "X";
@@ -400,3 +403,4 @@ bool QueryUpdate::Test::basics(DatabaseType databaseType) {
   }
   return true;
 }
+} // namespace Testing.

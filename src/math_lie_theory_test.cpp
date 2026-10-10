@@ -1,9 +1,11 @@
 #include "math_extra_lie_theory_extras.h" // IWYU pragma: keep: breaks the build.
 #include "math_general_implementation.h" // IWYU pragma: keep: breaks the build.
+#include "test.h"
 
-template < >
-bool ElementUniversalEnveloping<Rational>::Test::casimirElement() {
-  STACK_TRACE("ElementUniversalEnveloping::Test::casimirElement");
+namespace Testing {
+
+bool ElementUniversalEnvelopingTest::casimirElement() {
+  STACK_TRACE("ElementUniversalEnvelopingTest::casimirElement");
   List<std::string> typesToCheck = List<std::string>({
       "A_1",
       "A_2",
@@ -51,8 +53,8 @@ bool ElementUniversalEnveloping<Rational>::Test::casimirElement() {
   return true;
 }
 
-template < >
-bool ElementUniversalEnveloping<Rational>::Test::all() {
-  ElementUniversalEnveloping::Test::casimirElement();
+bool ElementUniversalEnvelopingTest::all() {
+  ElementUniversalEnvelopingTest::casimirElement();
   return true;
 }
+} // namespace: Testing.

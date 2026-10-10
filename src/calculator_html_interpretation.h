@@ -75,11 +75,6 @@ public:
   class Test {
   public:
     std::stringstream comments;
-    static bool all();
-    static void logMessageNoEducationalMaterials();
-    static bool hasEducationalMaterials();
-    static bool defaultTopicListsOKCrashOnFailure();
-    static bool defaultPdfsOKCrashOnFailure();
     bool defaultPdfsOK(int& whichTopic);
     bool defaultTopicListsOK();
   };
@@ -645,9 +640,6 @@ public:
       int inputRandomSeed,
       JSData* output
     );
-    static bool builtInCrashOnFailure();
-    static bool all();
-    static bool parsingTest();
     std::string toStringSummary();
     std::string toHTMLBuiltIn();
     std::string toHTMLDebug();
@@ -665,28 +657,6 @@ public:
   std::string courseTopicsWithFolder();
   std::string toString() const;
   JSData toJSON() const;
-  class Test {
-  public:
-    static bool all();
-    static bool setDeadlines(DatabaseType databaseType);
-    class Setup {
-      StateMaintainer<bool> maintainLogin;
-      StateMaintainer<bool> maintainerDatabase;
-      StateMaintainer<bool> maintainSSLFlag;
-      StateMaintainer<UserCalculatorData> maintainUserRole;
-      StateMaintainer<
-        MapList<
-          std::string, std::string, HashFunctions::hashFunction<std::string>
-        >
-      > maintainWebArguments;
-      StateMaintainer<std::string> maintainRequestType;
-      StateMaintainer<int32_t(*)()> maintainTimePointer;
-    public:
-      Database::Test databaseTester;
-      Setup(DatabaseType databaseType);
-      bool setupAll();
-    };
-  };
 };
 
 class CourseList {

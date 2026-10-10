@@ -88,16 +88,6 @@ public:
   JSData toJSON() const;
   std::string toStringDebug() const;
   void mergeData(JSData& toMergeInto) const;
-  class Test {
-  public:
-    static bool all();
-    static bool basics(DatabaseType databaseType);
-    static void updateNoFail(QueryFind& find, QueryUpdate updater);
-    static void findExactlyOneNoFail(QueryFind& find, JSData& result);
-    static void matchKeyValue(
-      const JSData& mustContain, const JSData& mustBeContained
-    );
-  };
 };
 
 class QueryResultOptions {
@@ -733,34 +723,6 @@ public:
     const std::string& collectionName
   );
   bool shutdown(std::stringstream* commentsOnFailure);
-  class Test {
-  public:
-    StateMaintainer<bool> maintainServerForkFlag;
-    StateMaintainer<DatabaseType> maintainerDatabase;
-    StateMaintainer<std::string> maintainerDatabaseName;
-    DatabaseType databaseType;
-    static std::string adminPassword;
-    // A special test that does not shutdown the database correctly.
-    // This test is only allowed to run once per test executable run.
-    // It test what happens when the parent process exits early,
-    // without shutting the database down.
-    static bool noShutdownSignal();
-    static bool all();
-    static bool basics(DatabaseType databaseType);
-    static bool findWithOptions(DatabaseType databaseType);
-    static bool loadFromJSON();
-    static bool deleteAllByFindQuery();
-    bool deleteDatabase();
-    static bool createAdminAccount(bool withEmail);
-    static bool createAdminAccountReturnUser(
-      bool withEmail, UserCalculatorData& outputUserData
-    );
-    Test(DatabaseType inputDatabaseType);
-    ~Test();
-    static void startDatabase(DatabaseType databaseType);
-    static std::string testDatabaseName(DatabaseType databaseType);
-  };
-
   Database();
   ~Database();
 };

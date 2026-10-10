@@ -1,12 +1,15 @@
 #include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
+#include "test.h"
 
-bool Crypto::Test::all() {
-  Crypto::Test::sha256();
+namespace Testing {
+
+bool CryptoTest::all() {
+  CryptoTest::sha256();
   return true;
 }
 
-bool Crypto::Test::sha256() {
+bool CryptoTest::sha256() {
   List<std::string> inputs;
   List<std::string> outputs;
   inputs.addOnTop("abc");
@@ -56,3 +59,4 @@ bool Crypto::Test::sha256() {
   }
   return true;
 }
+} // namespace: Testing.

@@ -2,24 +2,27 @@
 #include "general_logging_global_variables.h"
 #include "general_strings.h"
 #include "globals.h"
+#include "test.h"
 
-bool StringRoutines::Test::all() {
-  StringRoutines::Conversions::Test::all();
+namespace Testing {
+
+bool StringRoutinesTest::all() {
+  StringRoutinesConversionsTest::all();
   return true;
 }
 
-bool StringRoutines::Conversions::Test::all() {
-  StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly();
-  StringRoutines::Conversions::Test::convertUtf8StringToUnicodeCodePoints();
-  StringRoutines::Conversions::Test::utf8StringToJSONStringEscaped();
-  StringRoutines::Conversions::Test::unescapeJavascriptLike();
-  StringRoutines::Conversions::Test::codePointToUtf8();
+bool StringRoutinesConversionsTest::all() {
+  StringRoutinesConversionsTest::convertStringToJSONStringEscapeOnly();
+  StringRoutinesConversionsTest::convertUtf8StringToUnicodeCodePoints();
+  StringRoutinesConversionsTest::utf8StringToJSONStringEscaped();
+  StringRoutinesConversionsTest::unescapeJavascriptLike();
+  StringRoutinesConversionsTest::codePointToUtf8();
   return true;
 }
 
-bool StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly() {
+bool StringRoutinesConversionsTest::convertStringToJSONStringEscapeOnly() {
   STACK_TRACE(
-    "StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly"
+    "StringRoutinesConversionsTest::convertStringToJSONStringEscapeOnly"
   );
   List<List<std::string> > conversionPairs;
   conversionPairs.addOnTop(List<std::string>({"\\\"", "\\\\\\\""}));
@@ -41,13 +44,13 @@ bool StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly() {
   return true;
 }
 
-bool StringRoutines::Conversions::Test::oneConversionUtf8Success(
+bool StringRoutinesConversionsTest::oneConversionUtf8Success(
   const std::string& givenInput,
   uint32_t codePoint1,
   uint32_t codePoint2,
   uint32_t codePoint3
 ) {
-  STACK_TRACE("StringRoutines::Conversions::Test::oneConversionUtf8Success");
+  STACK_TRACE("StringRoutinesConversionsTest::oneConversionUtf8Success");
   List<uint32_t> expected, computed;
   expected.addOnTop(codePoint1);
   if (codePoint2 != 0xffffffff) {
@@ -87,18 +90,17 @@ bool StringRoutines::Conversions::Test::oneConversionUtf8Success(
   return true;
 }
 
-bool StringRoutines::Conversions::Test::convertUtf8StringToUnicodeCodePoints(
-) {
-  StringRoutines::Conversions::Test::oneConversionUtf8Success("$", 36);
-  StringRoutines::Conversions::Test::oneConversionUtf8Success("\u00A2", 162);
-  StringRoutines::Conversions::Test::oneConversionUtf8Success("\u0939", 2361);
-  StringRoutines::Conversions::Test::oneConversionUtf8Success("\u20AC", 8364);
-  StringRoutines::Conversions::Test::oneConversionUtf8Success("\uD55C", 54620);
-  StringRoutines::Conversions::Test::oneConversionUtf8Success("\u03C0", 960);
+bool StringRoutinesConversionsTest::convertUtf8StringToUnicodeCodePoints() {
+  StringRoutinesConversionsTest::oneConversionUtf8Success("$", 36);
+  StringRoutinesConversionsTest::oneConversionUtf8Success("\u00A2", 162);
+  StringRoutinesConversionsTest::oneConversionUtf8Success("\u0939", 2361);
+  StringRoutinesConversionsTest::oneConversionUtf8Success("\u20AC", 8364);
+  StringRoutinesConversionsTest::oneConversionUtf8Success("\uD55C", 54620);
+  StringRoutinesConversionsTest::oneConversionUtf8Success("\u03C0", 960);
   return true;
 }
 
-bool StringRoutines::Conversions::Test::oneUtf8ToJSONSuccess(
+bool StringRoutinesConversionsTest::oneUtf8ToJSONSuccess(
   const std::string& givenInput, const std::string& expected
 ) {
   std::string result =
@@ -117,10 +119,10 @@ bool StringRoutines::Conversions::Test::oneUtf8ToJSONSuccess(
   return true;
 }
 
-bool StringRoutines::Conversions::Test::oneCodePointToUtf8(
+bool StringRoutinesConversionsTest::oneCodePointToUtf8(
   uint32_t codePoint, const std::string& expectedHex
 ) {
-  STACK_TRACE("StringRoutines::Conversions::Test::oneCodePointToUtf8");
+  STACK_TRACE("StringRoutinesConversionsTest::oneCodePointToUtf8");
   std::string converted =
   StringRoutines::Conversions::codePointToUtf8(codePoint);
   std::string convertedHex = Crypto::convertStringToHex(converted, 0, false);
@@ -137,19 +139,19 @@ bool StringRoutines::Conversions::Test::oneCodePointToUtf8(
   return true;
 }
 
-bool StringRoutines::Conversions::Test::codePointToUtf8() {
-  STACK_TRACE("StringRoutines::Conversions::Test::codePointToUtf8");
-  StringRoutines::Conversions::Test::oneCodePointToUtf8(67, "43");
-  StringRoutines::Conversions::Test::oneCodePointToUtf8(960, "cf80");
+bool StringRoutinesConversionsTest::codePointToUtf8() {
+  STACK_TRACE("StringRoutinesConversionsTest::codePointToUtf8");
+  StringRoutinesConversionsTest::oneCodePointToUtf8(67, "43");
+  StringRoutinesConversionsTest::oneCodePointToUtf8(960, "cf80");
   // \pi.
-  StringRoutines::Conversions::Test::oneCodePointToUtf8(35000, "e8a2b8");
+  StringRoutinesConversionsTest::oneCodePointToUtf8(35000, "e8a2b8");
   //
-  StringRoutines::Conversions::Test::oneCodePointToUtf8(68000, "f090a6a0");
+  StringRoutinesConversionsTest::oneCodePointToUtf8(68000, "f090a6a0");
   // Meroitic Cursive Letter A
   return true;
 }
 
-bool StringRoutines::Conversions::Test::unescapeJavascriptLike() {
+bool StringRoutinesConversionsTest::unescapeJavascriptLike() {
   std::string input = "\u00a2$\u00a2@\u03c0";
   std::string unescaped =
   StringRoutines::Conversions::unescapeJavascriptLike(input);
@@ -169,9 +171,10 @@ bool StringRoutines::Conversions::Test::unescapeJavascriptLike() {
   return true;
 }
 
-bool StringRoutines::Conversions::Test::utf8StringToJSONStringEscaped() {
-  StringRoutines::Conversions::Test::oneUtf8ToJSONSuccess(
+bool StringRoutinesConversionsTest::utf8StringToJSONStringEscaped() {
+  StringRoutinesConversionsTest::oneUtf8ToJSONSuccess(
     "\u00a2$\u00a2@\u03c0", "\\u00a2$\\u00a2@\\u03c0"
   );
   return true;
 }
+} // namespace: Testing.

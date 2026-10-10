@@ -1,9 +1,11 @@
 #ifndef header_test_ALREADY_INCLUDED
 #define header_test_ALREADY_INCLUDED
 
+#include "database.h"
 #include "general_lists.h"
 #include "math_extra_polynomial_factorization.h"
 #include "transport_layer_security.h"
+#include"general_logging_global_variables.h"
 
 namespace Testing {
 
@@ -458,6 +460,149 @@ public:
     List<std::string> vectors;
     bool test();
   };
+};
+
+class StringRoutinesTest {
+public:
+  static bool all();
+};
+
+class StringRoutinesConversionsTest {
+public:
+  static bool all();
+  static bool utf8StringToJSONStringEscaped();
+  static bool unescapeJavascriptLike();
+  static bool convertStringToJSONStringEscapeOnly();
+  static bool codePointToUtf8();
+  static bool oneCodePointToUtf8(
+    uint32_t codePoint, const std::string& expectedHex
+  );
+  static bool convertUtf8StringToUnicodeCodePoints();
+  static bool oneUtf8ToJSONSuccess(
+    const std::string& givenInput, const std::string& expectedOutput
+  );
+  static bool oneConversionUtf8Success(
+    const std::string& givenInput,
+    uint32_t codePoint1,
+    uint32_t codePoint2 = 0xffffffff,
+    uint32_t codePoint3 = 0xffffffff
+  );
+};
+
+class X509CertificateTest {
+public:
+  static bool all();
+  static bool loadFromPEMFile();
+  static bool loadFromPEM();
+};
+
+class PrivateKeyRSATest {
+public:
+  static bool all();
+  static bool loadFromPEMFile();
+  static bool loadFromPEM();
+};
+
+class CryptoTest {
+public:
+  static bool sha256();
+  static bool all();
+};
+
+class ElementUniversalEnvelopingTest {
+public:
+  static bool all();
+  static bool casimirElement();
+};
+
+class SemisimpleSubalgebrasTest {
+public:
+  static bool all();
+  static bool constructAllB3Subalgebras();
+};
+
+class TopicElementParserTest {
+public:
+  static bool all();
+  static void logMessageNoEducationalMaterials();
+  static bool hasEducationalMaterials();
+  static bool defaultTopicListsOKCrashOnFailure();
+  static bool defaultPdfsOKCrashOnFailure();
+};
+
+class CalculatorHTMLTest {
+public:
+  static bool builtInCrashOnFailure();
+  static bool all();
+  static bool parsingTest();
+};
+
+class DatabaseTest {
+public:
+  StateMaintainer<bool> maintainServerForkFlag;
+  StateMaintainer<DatabaseType> maintainerDatabase;
+  StateMaintainer<std::string> maintainerDatabaseName;
+  DatabaseType databaseType;
+  static std::string adminPassword;
+  // A special test that does not shutdown the database correctly.
+  // This test is only allowed to run once per test executable run.
+  // It test what happens when the parent process exits early,
+  // without shutting the database down.
+  static bool noShutdownSignal();
+  static bool all();
+  static bool basics(DatabaseType databaseType);
+  static bool findWithOptions(DatabaseType databaseType);
+  static bool loadFromJSON();
+  static bool deleteAllByFindQuery();
+  bool deleteDatabase();
+  static bool createAdminAccount(bool withEmail);
+  static bool createAdminAccountReturnUser(
+    bool withEmail, UserCalculatorData& outputUserData
+  );
+  DatabaseTest(DatabaseType inputDatabaseType);
+  ~DatabaseTest();
+  static void startDatabase(DatabaseType databaseType);
+  static std::string testDatabaseName(DatabaseType databaseType);
+};
+
+class CourseTest {
+public:
+  static bool all();
+  static bool setDeadlines(DatabaseType databaseType);
+  class Setup {
+    StateMaintainer<bool> maintainLogin;
+    StateMaintainer<bool> maintainerDatabase;
+    StateMaintainer<bool> maintainSSLFlag;
+    StateMaintainer<UserCalculatorData> maintainUserRole;
+    StateMaintainer<
+      MapList<
+        std::string, std::string, HashFunctions::hashFunction<std::string>
+      >
+    > maintainWebArguments;
+    StateMaintainer<std::string> maintainRequestType;
+    StateMaintainer<int32_t(*)()> maintainTimePointer;
+  public:
+    DatabaseTest databaseTester;
+    Setup(DatabaseType databaseType);
+    bool setupAll();
+  };
+};
+
+class QueryUpdateTest {
+public:
+  static bool all();
+  static bool basics(DatabaseType databaseType);
+  static void updateNoFail(QueryFind& find, QueryUpdate updater);
+  static void findExactlyOneNoFail(QueryFind& find, JSData& result);
+  static void matchKeyValue(
+    const JSData& mustContain, const JSData& mustBeContained
+  );
+};
+
+class CalculatorFunctionsFreecalcTest {
+public:
+  static void all();
+  static void crawl();
 };
 } // namespace: Testing.
 #endif

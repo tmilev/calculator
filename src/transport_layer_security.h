@@ -494,16 +494,6 @@ public:
     static std::string session;
   };
 
-  class Test {
-  public:
-    static std::string sampleClientHelloHex;
-    static bool all();
-    static bool serialization();
-    static bool serializationClientHello(
-      TransportLayerSecurityServer& testServer
-    );
-  };
-
   int offsetDecoded;
   unsigned char recordType;
   int version;

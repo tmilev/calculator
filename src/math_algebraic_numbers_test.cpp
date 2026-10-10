@@ -1,14 +1,17 @@
 #include "calculator_interface.h"
 #include "math_extra_algebraic_numbers.h"
+#include "test.h"
 
-bool AlgebraicNumber::Test::all() {
-  AlgebraicNumber::Test::constantValues();
-  AlgebraicNumber::Test::hashFunction();
-  AlgebraicNumber::Test::evaluatesToComplex();
+namespace Testing {
+
+bool AlgebraicNumberTest::all() {
+  AlgebraicNumberTest::constantValues();
+  AlgebraicNumberTest::hashFunction();
+  AlgebraicNumberTest::evaluatesToComplex();
   return true;
 }
 
-bool AlgebraicNumber::Test::constantValues() {
+bool AlgebraicNumberTest::constantValues() {
   if (AlgebraicNumber::oneStatic().toString() != "1") {
     global.fatal
     << "Algebraic number 1 has unexpected value. "
@@ -37,7 +40,7 @@ struct AlgebraicNumberWithValue {
   }
 };
 
-bool AlgebraicNumber::Test::fromString(
+bool AlgebraicNumberTest::fromString(
   const std::string& input, Calculator& inputOwner, AlgebraicNumber& output
 ) {
   STACK_TRACE("AlgebraicNumber::fromString");
@@ -54,20 +57,20 @@ bool AlgebraicNumber::Test::fromString(
   return true;
 }
 
-AlgebraicNumber AlgebraicNumber::Test::fromStringWithoutFailure(
+AlgebraicNumber AlgebraicNumberTest::fromStringWithoutFailure(
   const std::string& input, Calculator& inputOwner
 ) {
   STACK_TRACE("AlgebraicNumber::fromStringWithoutFailure");
   AlgebraicNumber result;
   bool mustBeTrue =
-  AlgebraicNumber::Test::fromString(input, inputOwner, result);
+  AlgebraicNumberTest::fromString(input, inputOwner, result);
   if (!mustBeTrue) {
     global.fatal << "Attempt to create algebraic number failed for: " << input;
   }
   return result;
 }
 
-bool AlgebraicNumber::Test::evaluatesToComplex() {
+bool AlgebraicNumberTest::evaluatesToComplex() {
   List<AlgebraicNumberWithValue> examples = List<AlgebraicNumberWithValue>({
       AlgebraicNumberWithValue("sqrt(-1)", 0, 1),
       AlgebraicNumberWithValue(
@@ -88,7 +91,7 @@ bool AlgebraicNumber::Test::evaluatesToComplex() {
     calculator.initialize(Calculator::Mode::full);
     AlgebraicClosureRationals algebraicClosure;
     AlgebraicNumber number =
-    AlgebraicNumber::Test::fromStringWithoutFailure(
+    AlgebraicNumberTest::fromStringWithoutFailure(
       example.algebraicNumber, calculator
     );
     Complex<double> value;
@@ -120,7 +123,7 @@ bool AlgebraicNumber::Test::evaluatesToComplex() {
   return true;
 }
 
-bool AlgebraicNumber::Test::hashFunction() {
+bool AlgebraicNumberTest::hashFunction() {
   AlgebraicClosureRationals closure;
   AlgebraicNumber one = closure.one();
   unsigned int hashOfOne = one.hashFunction();
@@ -147,4 +150,5 @@ bool AlgebraicNumber::Test::hashFunction() {
     << global.fatal;
   }
   return true;
+}
 }

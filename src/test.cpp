@@ -68,7 +68,7 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::basic)) {
     ListReferencesTest::all();
     HashedListTest::all();
-    AlgebraicNumber::Test::all();
+    AlgebraicNumberTest::all();
     StringRoutines::Test::all();
     LargeIntegerUnsigned::Test::all();
     Rational::Test::all();
@@ -90,26 +90,22 @@ void Test::run() {
     PrivateKeyRSA::Test::all();
     Crypto::Test::all();
     X509Certificate::Test::all();
-    SSLRecord::Test::all();
+    SSLRecordTest::all();
     global << Logger::green << "Crypto tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::API)) {
-    WebAPIResponse::Test::all();
+    WebAPIResponseTest::all();
     global << Logger::green << "API tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::polynomial)) {
-    PolynomialUnivariateModularAsModulus::Test::all();
-    PolynomialModuloPolynomialModuloInteger::Test::all();
-    PolynomialFactorizationCantorZassenhaus<
-      PolynomialModuloPolynomialModuloInteger,
-      PolynomialUnivariateModular,
-      PolynomialUnivariateModularAsModulus
-    >::Test::all();
-    PolynomialConversions::Test::all();
+    PolynomialUnivariateModularAsModulusTest::all();
+    PolynomialModuloPolynomialModuloIntegerTest::all();
+    PolynomialFactorizationCantorZassenhausTest::all();
+    PolynomialConversionsTest::all();
     MonomialPolynomial::Test::all();
     Polynomial<Rational>::Test::all();
-    PolynomialUnivariateModular::Test::all();
-    PolynomialFactorizationFiniteFields::Test::all();
+    PolynomialUnivariateModularTest::all();
+    PolynomialFactorizationFiniteFieldsTest::all();
     global << Logger::green << "Polynomial tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::scientific)) {

@@ -16,4 +16,4 @@ bool CalculatorTest::all(bool updateABTestFile) {
   CalculatorTest::builtInFunctionsABTest(tester, updateABTestFile);
   return true;
 }
-}
+} // namespace: Testing.

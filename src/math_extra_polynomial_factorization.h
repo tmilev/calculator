@@ -101,40 +101,6 @@ public:
   void makeFromPolynomialAndModulusNoFailure(
     IntegerModulusSmall* modulus, const Polynomial<Rational>& input
   );
-  class Test {
-  public:
-    static bool all();
-    static bool greatestCommonDivisor();
-    static bool division();
-    static bool derivative();
-    static bool testOneGreatestCommonDivisor(
-      int modulusData,
-      const std::string& left,
-      const std::string& right,
-      const std::string& expected
-    );
-    static bool testOneDivision(
-      int modulusData,
-      const std::string& dividend,
-      const std::string& divisor,
-      const std::string& expectedQuotient,
-      const std::string& expectedRemainder
-    );
-    static bool testOneDerivative(
-      int modulusData,
-      const std::string& toBeDifferentiated,
-      const std::string& expected
-    );
-    static PolynomialUnivariateModular fromStringAndModulus(
-      const std::string& input, IntegerModulusSmall* modulus
-    );
-    static Polynomial<ElementZmodP> fromStringAndModulus(
-      const std::string& input, int modulus
-    );
-    static std::string toStringPolynomialElementZModP(
-      const Polynomial<ElementZmodP>& other
-    );
-  };
 };
 
 // (Attempts to) compute polynomial gcd for rational polynomials.
@@ -201,15 +167,6 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFull(FormatExpressions* format = nullptr) const;
   std::string toStringImagesOfX() const;
-  class Test {
-  public:
-    static bool all();
-    static bool oneTest(
-      int modulus,
-      const std::string& modulusPolynomial,
-      const std::string& expectedImagesOfX
-    );
-  };
 };
 
 class PolynomialModuloPolynomialModuloInteger {
@@ -244,18 +201,6 @@ public:
   std::string toStringFull(FormatExpressions* format = nullptr) const;
   void reduce();
   bool checkInitialization() const;
-  class Test {
-  public:
-    static bool all();
-    static bool product();
-    static bool testOneProduct(
-      int modulus,
-      const std::string& left,
-      const std::string& right,
-      const std::string& modulusPolynomial,
-      const std::string& expected
-    );
-  };
 };
 
 template <class Coefficient>

@@ -1,8 +1,12 @@
 #include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
+#include "test.h"
+#include "transport_layer_security.h"
 #include "transport_layer_security.h"
 
-std::string SSLRecord::Test::sampleClientHelloHex =
+namespace Testing {
+
+std::string SSLRecordTest::sampleClientHelloHex =
 "1603010200010001fc03031e70e7e6d1ccf06a234cf5b6f4c"
 "207609d824787e70a63808cacbe5fb2b67ea1"
 "202ae1460ab9498ccc0b624b4eb0f859a840d98724873a214a64c8b0b09c431cc6"
@@ -23,11 +27,11 @@ std::string SSLRecord::Test::sampleClientHelloHex =
 "000000000000000000000000000000000000000000000000000000000000000"
 "000000000000000000000000000000000000";
 
-bool SSLRecord::Test::serializationClientHello(
+bool SSLRecordTest::serializationClientHello(
   TransportLayerSecurityServer& testServer
 ) {
-  STACK_TRACE("SSLRecord::Test::serializationClientHello");
-  std::string inputHex = SSLRecord::Test::sampleClientHelloHex;
+  STACK_TRACE("SSLRecordTest::serializationClientHello");
+  std::string inputHex = SSLRecordTest::sampleClientHelloHex;
   SSLRecord record;
   record.owner = &testServer;
   std::stringstream comments;
@@ -64,20 +68,21 @@ bool SSLRecord::Test::serializationClientHello(
   return true;
 }
 
-bool SSLRecord::Test::all() {
-  STACK_TRACE("SSLRecord::Test::all");
-  SSLRecord::Test::serialization();
+bool SSLRecordTest::all() {
+  STACK_TRACE("SSLRecordTest::all");
+  SSLRecordTest::serialization();
   return true;
 }
 
-bool SSLRecord::Test::serialization() {
-  STACK_TRACE("SSLRecord::Test::serialization");
+bool SSLRecordTest::serialization() {
+  STACK_TRACE("SSLRecordTest::serialization");
   TransportLayerSecurity tls;
   TransportLayerSecurityServer& server = tls.server;
   server.initializeAllExceptPrivateKeys();
   server.session.initialize();
-  if (!SSLRecord::Test::serializationClientHello(server)) {
+  if (!SSLRecordTest::serializationClientHello(server)) {
     global.fatal << "Failed serialization of client hello. " << global.fatal;
   }
   return true;
 }
+} // namespace: Testing.

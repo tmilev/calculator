@@ -59,4 +59,4 @@ bool VectorTest::order() {
   }
   return true;
 }
-}
+} // namespace: Testing.

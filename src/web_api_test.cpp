@@ -4,24 +4,27 @@
 #include "general_logging_global_variables.h"
 #include "json.h"
 #include "string_constants.h"
+#include "test.h"
 #include "web_api.h"
 
-bool WebAPIResponse::Test::all() {
+namespace Testing {
+
+bool WebAPIResponseTest::all() {
   StateMaintainer<std::string> databaseName(Database::name);
-  WebAPIResponse::Test::addUsersFromData();
-  WebAPIResponse::Test::scoredQuiz(DatabaseType::fallback);
-  WebAPIResponse::Test::scoredQuiz(DatabaseType::internal);
-  WebAPIResponse::Test::solveJSON();
-  WebAPIResponse::Test::compareExpressions();
-  WebAPIResponse::Test::forgotLogin();
-  WebAPIResponse::Test::signUp();
-  WebAPIResponse::Test::changePasswordEmailOnly();
-  WebAPIResponse::Test::changePassword();
-  WebAPIResponse::Test::deleteAccount();
+  WebAPIResponseTest::addUsersFromData();
+  WebAPIResponseTest::scoredQuiz(DatabaseType::fallback);
+  WebAPIResponseTest::scoredQuiz(DatabaseType::internal);
+  WebAPIResponseTest::solveJSON();
+  WebAPIResponseTest::compareExpressions();
+  WebAPIResponseTest::forgotLogin();
+  WebAPIResponseTest::signUp();
+  WebAPIResponseTest::changePasswordEmailOnly();
+  WebAPIResponseTest::changePassword();
+  WebAPIResponseTest::deleteAccount();
   return true;
 }
 
-bool WebAPIResponse::Test::solveJSON() {
+bool WebAPIResponseTest::solveJSON() {
   WebAPIResponse response;
   global.calculator().freeMemory();
   global.calculator().getElement().initialize(Calculator::Mode::educational);
@@ -192,10 +195,10 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
   return true;
 }
 
-void WebAPIResponse::Test::extactActivationTokenFromEmail(
+void WebAPIResponseTest::extactActivationTokenFromEmail(
   const std::string& email, std::string& outputToken
 ) {
-  STACK_TRACE("WebAPIResponse::Test::extactActivationTokenFromEmail");
+  STACK_TRACE("WebAPIResponseTest::extactActivationTokenFromEmail");
   int location = email.find("activationToken=");
   std::string unused;
   std::string emailTrimmedFromTheStart;
@@ -211,8 +214,8 @@ void WebAPIResponse::Test::extactActivationTokenFromEmail(
   );
 }
 
-bool WebAPIResponse::Test::changePasswordEmailOnly() {
-  STACK_TRACE("WebAPIResponse::Test::changePasswordEmailOnly");
+bool WebAPIResponseTest::changePasswordEmailOnly() {
+  STACK_TRACE("WebAPIResponseTest::changePasswordEmailOnly");
   Database::Test tester(DatabaseType::internal);
   tester.deleteDatabase();
   tester.startDatabase(DatabaseType::internal);
@@ -254,7 +257,7 @@ bool WebAPIResponse::Test::changePasswordEmailOnly() {
     global.fatal << "The activation email is empty." << global.fatal;
   }
   std::string outputToken;
-  WebAPIResponse::Test::extactActivationTokenFromEmail(
+  WebAPIResponseTest::extactActivationTokenFromEmail(
     global.userDefault.activationEmail, outputToken
   );
   if (outputToken == "") {
@@ -280,8 +283,8 @@ bool WebAPIResponse::Test::changePasswordEmailOnly() {
   return true;
 }
 
-bool WebAPIResponse::Test::deleteAccount() {
-  STACK_TRACE("WebAPIResponse::Test::deleteAccount");
+bool WebAPIResponseTest::deleteAccount() {
+  STACK_TRACE("WebAPIResponseTest::deleteAccount");
   Database::Test tester(DatabaseType::internal);
   tester.deleteDatabase();
   tester.startDatabase(DatabaseType::internal);
@@ -343,8 +346,8 @@ bool WebAPIResponse::Test::deleteAccount() {
   return true;
 }
 
-bool WebAPIResponse::Test::changePassword() {
-  STACK_TRACE("WebAPIResponse::Test::changePassword");
+bool WebAPIResponseTest::changePassword() {
+  STACK_TRACE("WebAPIResponseTest::changePassword");
   Database::Test tester(DatabaseType::internal);
   tester.deleteDatabase();
   tester.startDatabase(DatabaseType::internal);
@@ -408,8 +411,8 @@ bool WebAPIResponse::Test::changePassword() {
   return true;
 }
 
-bool WebAPIResponse::Test::forgotLogin() {
-  STACK_TRACE("WebAPIResponse::Test::forgotLogin");
+bool WebAPIResponseTest::forgotLogin() {
+  STACK_TRACE("WebAPIResponseTest::forgotLogin");
   Database::Test tester(DatabaseType::internal);
   Database::Test::createAdminAccount(true);
   DatabaseUserRoutines blankUser;
@@ -473,8 +476,8 @@ bool WebAPIResponse::Test::forgotLogin() {
   return true;
 }
 
-bool WebAPIResponse::Test::signUp() {
-  STACK_TRACE("WebAPIResponse::Test::signUp");
+bool WebAPIResponseTest::signUp() {
+  STACK_TRACE("WebAPIResponseTest::signUp");
   Database::Test tester(DatabaseType::internal);
   Database::Test::createAdminAccount(true);
   DatabaseUserRoutines blankUser;
@@ -538,8 +541,8 @@ bool WebAPIResponse::Test::signUp() {
   return true;
 }
 
-bool WebAPIResponse::Test::addUsersFromData() {
-  STACK_TRACE("WebAPIResponse::Test::addUsersFromData");
+bool WebAPIResponseTest::addUsersFromData() {
+  STACK_TRACE("WebAPIResponseTest::addUsersFromData");
   Database::Test tester(DatabaseType::internal);
   Database::Test::createAdminAccount(false);
   StateMaintainer<int64_t> maintainMillisecondsMaxComputation(
@@ -610,8 +613,8 @@ bool WebAPIResponse::Test::addUsersFromData() {
   return true;
 }
 
-bool WebAPIResponse::Test::compareExpressions() {
-  STACK_TRACE("WebAPIResponse::Test::compareExpressions");
+bool WebAPIResponseTest::compareExpressions() {
+  STACK_TRACE("WebAPIResponseTest::compareExpressions");
   std::string comparisonJSON;
   std::stringstream commentsOnFailure;
   if (
@@ -641,8 +644,8 @@ bool WebAPIResponse::Test::compareExpressions() {
   return true;
 }
 
-bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
-  STACK_TRACE("WebAPIResponse::Test::scoredQuiz");
+bool WebAPIResponseTest::scoredQuiz(DatabaseType databaseType) {
+  STACK_TRACE("WebAPIResponseTest::scoredQuiz");
   global
   << "Test scored quiz. "
   << Logger::blue
@@ -710,3 +713,4 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   }
   return true;
 }
+} // namespace Testing.

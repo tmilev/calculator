@@ -2,6 +2,8 @@
 #define header_test_ALREADY_INCLUDED
 
 #include "general_lists.h"
+#include "math_extra_polynomial_factorization.h"
+#include "transport_layer_security.h"
 
 namespace Testing {
 
@@ -185,6 +187,149 @@ class CalculatorExamplesTest {
 public:
   static bool compose();
   static bool all();
+};
+
+class AlgebraicNumberTest {
+public:
+  // Constructs an algebraic number from string.
+  // Owned by an instance of the Calculator.
+  static bool fromString(
+    const std::string& input, Calculator& inputOwner, AlgebraicNumber& output
+  );
+  // Same as fromString but will crash if the input
+  // cannot be parsed.
+  static AlgebraicNumber fromStringWithoutFailure(
+    const std::string& input, Calculator& inputOwner
+  );
+  static bool all();
+  static bool constantValues();
+  static bool evaluatesToComplex();
+  static bool hashFunction();
+};
+
+class WebAPIResponseTest {
+public:
+  static bool scoredQuiz(DatabaseType databaseType);
+  static bool all();
+  static bool solveJSON();
+  static bool compareExpressions();
+  static bool addUsersFromData();
+  static bool forgotLogin();
+  static bool changePasswordEmailOnly();
+  static bool changePassword();
+  static bool signUp();
+  static bool deleteAccount();
+  static void extactActivationTokenFromEmail(
+    const std::string& email, std::string& outputToken
+  );
+};
+
+class SSLRecordTest {
+public:
+  static std::string sampleClientHelloHex;
+  static bool all();
+  static bool serialization();
+  static bool serializationClientHello(
+    TransportLayerSecurityServer& testServer
+  );
+};
+
+class PolynomialFactorizationFiniteFieldsTest {
+public:
+  class TestCase {
+  public:
+    std::string toBeFactored;
+    std::string desiredFactorization;
+    Polynomial<Rational>::Test parser;
+    bool run();
+  };
+
+  static bool all();
+  static bool test(
+    const std::string& toFactor, const std::string& desiredResult
+  );
+  static bool gelfondBound(
+    const std::string& inputPolynomial, const std::string& desiredBound
+  );
+};
+
+class PolynomialUnivariateModularTest {
+public:
+  static bool all();
+  static bool greatestCommonDivisor();
+  static bool division();
+  static bool derivative();
+  static bool testOneGreatestCommonDivisor(
+    int modulusData,
+    const std::string& left,
+    const std::string& right,
+    const std::string& expected
+  );
+  static bool testOneDivision(
+    int modulusData,
+    const std::string& dividend,
+    const std::string& divisor,
+    const std::string& expectedQuotient,
+    const std::string& expectedRemainder
+  );
+  static bool testOneDerivative(
+    int modulusData,
+    const std::string& toBeDifferentiated,
+    const std::string& expected
+  );
+  static PolynomialUnivariateModular fromStringAndModulus(
+    const std::string& input, IntegerModulusSmall* modulus
+  );
+  static Polynomial<ElementZmodP> fromStringAndModulus(
+    const std::string& input, int modulus
+  );
+  static std::string toStringPolynomialElementZModP(
+    const Polynomial<ElementZmodP>& other
+  );
+};
+
+class PolynomialUnivariateModularAsModulusTest {
+public:
+  static bool all();
+  static bool oneTest(
+    int modulus,
+    const std::string& modulusPolynomial,
+    const std::string& expectedImagesOfX
+  );
+};
+
+class PolynomialModuloPolynomialModuloIntegerTest {
+public:
+  static bool all();
+  static bool product();
+  static bool testOneProduct(
+    int modulus,
+    const std::string& left,
+    const std::string& right,
+    const std::string& modulusPolynomial,
+    const std::string& expected
+  );
+};
+
+class PolynomialConversionsTest {
+public:
+  static bool all();
+  static bool univariateModularToDense();
+  static bool oneUnivariateModularToDense(
+    int modulus, const std::string& input, const std::string& expected
+  );
+};
+
+class PolynomialFactorizationCantorZassenhausTest {
+public:
+  static bool all();
+  static bool constructStartingPolynomial();
+  static bool testOneStartingPolynomial(
+    int modulus, int constant, int currentDegree, const std::string& expected
+  );
+  static bool testOnce(
+    int modulus, const std::string& input, const std::string& expected
+  );
 };
 } // namespace: Testing.
 #endif

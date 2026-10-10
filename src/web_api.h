@@ -211,22 +211,6 @@ public:
   static std::string getSanitizedComment(
     const Expression& input, FormatExpressions& format, bool& resultIsPlot
   );
-  class Test {
-  public:
-    static bool scoredQuiz(DatabaseType databaseType);
-    static bool all();
-    static bool solveJSON();
-    static bool compareExpressions();
-    static bool addUsersFromData();
-    static bool forgotLogin();
-    static bool changePasswordEmailOnly();
-    static bool changePassword();
-    static bool signUp();
-    static bool deleteAccount();
-    static void extactActivationTokenFromEmail(
-      const std::string& email, std::string& outputToken
-    );
-  };
 };
 
 #endif // header_web_api_ALREADY_INCLUDED

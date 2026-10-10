@@ -887,14 +887,6 @@ public:
   ) {
     output = input;
   }
-  class Test {
-  public:
-    static bool all();
-    static bool univariateModularToDense();
-    static bool oneUnivariateModularToDense(
-      int modulus, const std::string& input, const std::string& expected
-    );
-  };
 };
 
 template <class Coefficient>

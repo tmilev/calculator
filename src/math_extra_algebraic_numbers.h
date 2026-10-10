@@ -204,23 +204,6 @@ public:
   ) const;
   std::string toMathMLFinal(const FormatExpressions* format = nullptr) const;
   std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
-  class Test {
-  public:
-    // Constructs an algebraic number from string.
-    // Owned by an instance of the Calculator.
-    static bool fromString(
-      const std::string& input, Calculator& inputOwner, AlgebraicNumber& output
-    );
-    // Same as fromString but will crash if the input
-    // cannot be parsed.
-    static AlgebraicNumber fromStringWithoutFailure(
-      const std::string& input, Calculator& inputOwner
-    );
-    static bool all();
-    static bool constantValues();
-    static bool evaluatesToComplex();
-    static bool hashFunction();
-  };
 };
 
 // The algebraic closure of the rationals is
@@ -369,17 +352,6 @@ public:
   static std::string name() {
     return "Cantor-Zassenhaus";
   }
-  class Test {
-  public:
-    static bool all();
-    static bool constructStartingPolynomial();
-    static bool testOneStartingPolynomial(
-      int modulus, int constant, int currentDegree, const std::string& expected
-    );
-    static bool testOnce(
-      int modulus, const std::string& input, const std::string& expected
-    );
-  };
 };
 
 class PolynomialFactorizationFiniteFields {
@@ -503,24 +475,6 @@ public:
     return "finite field factorization";
   }
   PolynomialFactorizationFiniteFields();
-  class Test {
-  public:
-    class TestCase {
-    public:
-      std::string toBeFactored;
-      std::string desiredFactorization;
-      Polynomial<Rational>::Test parser;
-      bool run();
-    };
-
-    static bool all();
-    static bool test(
-      const std::string& toFactor, const std::string& desiredResult
-    );
-    static bool gelfondBound(
-      const std::string& inputPolynomial, const std::string& desiredBound
-    );
-  };
 };
 
 // A class that (attempts to) determine whether the polynomial has

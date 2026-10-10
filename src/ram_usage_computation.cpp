@@ -16,4 +16,4 @@ template < >
 int64_t byteSize(const RamUsageComputation::IntPointer& object) {
   return sizeof(object);
 }
-}
+} // namespace: RamUsageComputation.

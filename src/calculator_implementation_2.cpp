@@ -1872,14 +1872,13 @@ void Calculator::evaluateCommandsDefault(
       true,
       &result
     );
+    out << resultString;
   } else {
-    resultString =
-    this->programExpression.toString(
-      &global.defaultFormat.getElement(), &startingExpression, true, &result
+    this->programExpression.toTableWithUnfoldedCommandEnclosures(
+      startingExpression, out, &global.defaultFormat.getElement(), &result
     );
   }
   this->output[WebAPI::Result::resultLabel] = result;
-  out << resultString;
 }
 
 void Calculator::evaluateCommandsDebugExpressionTreeOutput(

@@ -3834,16 +3834,14 @@ bool Expression::toStringTimesInContext(
   }
   MathExpressionFormattingProperties leftProperties;
   MathExpressionFormattingProperties rightProperties;
-  std::string secondString =
-  input[2].toString(format, nullptr, true, nullptr, &rightProperties);
+  std::string secondString = input[2].toString(format, &rightProperties);
   if (input[1].isOperationGiven(input.owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
     out << "\\sqrt{" << secondString << "}";
     return true;
   }
-  std::string firstString =
-  input[1].toString(format, nullptr, true, nullptr, &leftProperties);
+  std::string firstString = input[1].toString(format, &leftProperties);
   bool firstNeedsParentheses =
   leftProperties.needsParenthesesForMultiplicationOnTheRight;
   bool secondNeedsParentheses =
@@ -3932,12 +3930,8 @@ void Expression::toStringOpMultiplicative(
 ) const {
   MathExpressionFormattingProperties secondProperties;
   MathExpressionFormattingProperties firstProperties;
-  std::string secondE = (*this)[2].toString(
-    format, nullptr, true, nullptr, &secondProperties
-  );
-  std::string firstE = (*this)[1].toString(
-    format, nullptr, true, nullptr, &firstProperties
-  );
+  std::string secondE = (*this)[2].toString(format, &secondProperties);
+  std::string firstE = (*this)[1].toString(format, &firstProperties);
   bool firstNeedsBrackets =
   firstProperties.needsParenthesesForMultiplicationOnTheRight;
   bool secondNeedsBrackets =
@@ -4153,8 +4147,7 @@ bool Expression::toStringPower(
     return true;
   }
   MathExpressionFormattingProperties baseProperties;
-  std::string baseString =
-  baseExpression.toString(format, nullptr, true, nullptr, &baseProperties);
+  std::string baseString = baseExpression.toString(format, &baseProperties);
   std::string secondExpressionString = exponentExpression.toString(format);
   if (baseExpression.needsParenthesisForBaseOfExponent()) {
     bool useBigParenthesis = true;
@@ -4294,21 +4287,6 @@ bool Expression::toStringEndStatementOneRow(
   return true;
 }
 
-bool Expression::toStringEndStatement(
-  std::stringstream& out,
-  Expression* startingExpression,
-  JSData* outputJS,
-  FormatExpressions* format
-) const {
-  if (startingExpression != nullptr || outputJS != nullptr) {
-    return
-    this->toStringEndStatementTopLevel(
-      out, startingExpression, outputJS, format
-    );
-  }
-  return this->toStringEndStatementNested(out, format);
-}
-
 bool Expression::toStringEndStatementTopLevel(
   std::stringstream& out,
   Expression* startingExpression,
@@ -4325,10 +4303,6 @@ bool Expression::toStringEndStatementTopLevel(
     format->flagExpressionIsTopLevel = true;
   }
   bool isFinal = format->flagExpressionIsTopLevel;
-  bool createTable = (startingExpression != nullptr);
-  if (!createTable && this->size() > 2) {
-    out << "(";
-  }
   std::string currentOutput;
   if (outputJS != nullptr) {
     (*outputJS)["input"].elementType = JSData::Type::tokenArray;
@@ -4702,8 +4676,7 @@ bool Expression::toStringDifferential3(
     return false;
   }
   MathExpressionFormattingProperties coefficientProperties;
-  std::string coefficient =
-  input[2].toString(format, nullptr, true, nullptr, &coefficientProperties);
+  std::string coefficient = input[2].toString(format, &coefficientProperties);
   bool coefficientNeedsParentheses =
   coefficientProperties.needsParenthesesForMultiplicationOnTheRight ||
   coefficientProperties.startsWithMinus;
@@ -4753,7 +4726,7 @@ bool Expression::toStringDifferentiate(
   out << "\\frac{\\text{d} ";
   MathExpressionFormattingProperties differentialProperties;
   std::string differential =
-  input[2].toString(format, nullptr, true, nullptr, &differentialProperties);
+  input[2].toString(format, &differentialProperties);
   if (differentialProperties.needsParenthesesForMultiplicationOnTheRight) {
     out << "\\left(" << differential << "\\right)";
   } else {
@@ -4986,9 +4959,7 @@ bool Expression::toStringSumOrIntegral(
   if (!differential.startsWith(input.owner->opTimes(), 3)) {
     MathExpressionFormattingProperties differentialProperties;
     std::string differentialString =
-    differential.toString(
-      format, nullptr, true, nullptr, &differentialProperties
-    );
+    differential.toString(format, &differentialProperties);
     if (differentialProperties.startsWithMinus) {
       out << "\\left(" << differentialString << "\\right)";
     } else {
@@ -5092,7 +5063,7 @@ bool Expression::toStringIntersection(
   return true;
 }
 
-std::string Expression::toStringWithStartingExpression(
+std::string Expression::toTableWithStartingExpression(
   FormatExpressions* format,
   Expression* startingExpression,
   const std::string& stringWithoutStartingExpression,
@@ -5586,10 +5557,7 @@ bool Expression::toStringBind(
   if (!input.startsWith(input.owner->opBind(), 2)) {
     return false;
   }
-  out
-  << "{{"
-  << input[1].toString(format, nullptr, true, nullptr, outputProperties)
-  << "}}";
+  out << "{{" << input[1].toString(format, outputProperties) << "}}";
   return true;
 }
 
@@ -5751,12 +5719,13 @@ bool Expression::toStringWithCompositeHandler(
   return false;
 }
 
-bool Expression::toStringWithUnfoldedCommandEnclosures(
+bool Expression::toTableWithUnfoldedCommandEnclosures(
+  Expression& startingExpression,
   std::stringstream& out,
   const FormatExpressions* format,
-  Expression* startingExpression,
   JSData* outputJS
 ) const {
+  STACK_TRACE("Expression::toTableWithUnfoldedCommandEnclosures");
   if (this->owner == nullptr) {
     return false;
   }
@@ -5774,27 +5743,85 @@ bool Expression::toStringWithUnfoldedCommandEnclosures(
   ) {
     return false;
   }
-  if (startingExpression == nullptr) {
-    out << newMe.toString(format, nullptr, false, outputJS);
-    return true;
-  }
   Expression newStart;
   if (
     !CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
-      *this->owner, *startingExpression, newStart
+      *this->owner, startingExpression, newStart
     )
   ) {
     return false;
   }
-  out << newMe.toString(format, &newStart, false, outputJS);
+  out << newMe.toTable(newStart, format, outputJS);
   return true;
+}
+
+std::string Expression::toTable(
+  Expression& startingExpression,
+  const FormatExpressions* format,
+  JSData* outputJS,
+  MathExpressionFormattingProperties* outputProperties
+) const {
+  STACK_TRACE("Expression::toTable");
+  MemorySaving<FormatExpressions> formatContainer;
+  if (format == nullptr) {
+    format = &formatContainer.getElement();
+    formatContainer.getElement().flagUseQuotes = false;
+    formatContainer.getElement().flagExpressionIsInMainDisplay = true;
+  }
+  if (this->owner != nullptr) {
+    if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
+      return "(...)";
+    }
+  } else {
+    return "(Error:NoOwner)";
+  }
+  RecursionDepthCounter recursionCounter;
+  recursionCounter.initialize(&this->owner->recursionDepth);
+  this->checkConsistency();
+  std::stringstream out;
+  int notationIndex =
+  this->owner->objectContainer.expressionsWithNotation.getIndex(*this);
+  if (notationIndex != - 1) {
+    return
+    this->owner->objectContainer.expressionsWithNotation.values[
+      notationIndex
+    ].latex;
+  }
+  FormatExpressions formatCopy;
+  if (format != nullptr) {
+    formatCopy = *format;
+  }
+  if (
+    !this->isOfType<std::string>() &&
+    !this->startsWith(this->owner->opCommandSequence())
+  ) {
+    formatCopy.flagUseQuotes = false;
+  }
+  if (outputJS != nullptr) {
+    outputJS->reset();
+  }
+  if (this->toStringData(out, &formatCopy, outputProperties)) {} else if (
+    this->toStringWithAtomHandler(out, &formatCopy, outputProperties)
+  ) {} else if (this->toStringWithCompositeHandler(out, &formatCopy, nullptr)) {
+  } else if (
+    this->toStringEndStatementTopLevel(
+      out, &startingExpression, outputJS, &formatCopy
+    )
+  ) {} else if (this->size() == 1) {
+    out << (*this)[0].toString(&formatCopy);
+  } else if (this->toStringGeneral(out, &formatCopy, outputProperties)) {} else
+  {
+    // <-not sure if this case is possible
+    out << "(ProgrammingError:NotDocumented)";
+  }
+  return
+  this->toTableWithStartingExpression(
+    &formatCopy, &startingExpression, out.str(), outputJS
+  );
 }
 
 std::string Expression::toString(
   const FormatExpressions* format,
-  Expression* startingExpression,
-  bool unfoldCommandEnclosures,
-  JSData* outputJS,
   MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toString");
@@ -5815,14 +5842,6 @@ std::string Expression::toString(
   recursionCounter.initialize(&this->owner->recursionDepth);
   this->checkConsistency();
   std::stringstream out;
-  if (
-    unfoldCommandEnclosures &&
-    this->toStringWithUnfoldedCommandEnclosures(
-      out, format, startingExpression, outputJS
-    )
-  ) {
-    return out.str();
-  }
   int notationIndex =
   this->owner->objectContainer.expressionsWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
@@ -5839,33 +5858,19 @@ std::string Expression::toString(
     !this->isOfType<std::string>() &&
     !this->startsWith(this->owner->opCommandSequence())
   ) {
-    formatCopy.flagUseQuotes = (startingExpression == nullptr);
-  }
-  if (outputJS != nullptr) {
-    outputJS->reset();
+    formatCopy.flagUseQuotes = true;
   }
   if (this->toStringData(out, &formatCopy, outputProperties)) {} else if (
     this->toStringWithAtomHandler(out, &formatCopy, outputProperties)
   ) {} else if (this->toStringWithCompositeHandler(out, &formatCopy, nullptr)) {
-  } else if (
-    this->toStringEndStatement(out, startingExpression, outputJS, &formatCopy)
-  ) {} else if (this->size() == 1) {
+  } else if (this->toStringEndStatementNested(out, &formatCopy)) {} else if (
+    this->size() == 1
+  ) {
     out << (*this)[0].toString(&formatCopy);
   } else if (this->toStringGeneral(out, &formatCopy, outputProperties)) {} else
   {
     // <-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)";
-  }
-  if (startingExpression != nullptr) {
-    return
-    this->toStringWithStartingExpression(
-      &formatCopy, startingExpression, out.str(), outputJS
-    );
-  }
-  if (outputJS != nullptr) {
-    if (outputJS->elementType == JSData::Type::tokenUndefined) {
-      (*outputJS) = out.str();
-    }
   }
   return out.str();
 }
@@ -6595,7 +6600,7 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
       std::string firstExpression = (*this)[1].toUTF8String(format);
       MathExpressionFormattingProperties firstExpressionProperties;
       std::string firstExpressionLatex = (*this)[1].toString(
-        format, nullptr, true, nullptr, &firstExpressionProperties
+        format, &firstExpressionProperties
       );
       bool firstNeedsBrackets =
       firstExpressionProperties.needsParenthesesForMultiplicationOnTheRight;

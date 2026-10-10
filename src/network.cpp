@@ -63,16 +63,16 @@ std::string Connector::toString() const {
   std::stringstream out;
   if (this->peer == nullptr) {
     out << "{null}";
-  } else {
-    out << "{";
-    for (struct addrinfo* p = this->peer; p != nullptr; p = p->ai_next) {
-      out << this->toStringOneAddrInfo(p);
-      if (p->ai_next != nullptr) {
-        out << ", ";
-      }
-    }
-    out << "}";
+    return out.str();
   }
+  out << "{";
+  for (struct addrinfo* p = this->peer; p != nullptr; p = p->ai_next) {
+    out << this->toStringOneAddrInfo(p);
+    if (p->ai_next != nullptr) {
+      out << ", ";
+    }
+  }
+  out << "}";
   return out.str();
 }
 

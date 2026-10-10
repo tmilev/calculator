@@ -1931,7 +1931,7 @@
   },
   {
     "input":"MatchPattern{}(a = b * 10, a = {{c}} * b);\nMatchPattern{}(a = b * 10, a = b * {{c}})",
-    "output":"(CommandEnclosureStart;c=10;CommandEnclosureFinish;MatchPattern{}\\left(a=10 b, a=b {{c}}\\right))",
+    "output":"(CommandEnclosure{}\\left(c=10\\right);MatchPattern{}\\left(a=10 b, a=b {{c}}\\right))",
     "outputMathML":"<mtable><mtr><mtd><mrow><mi>CommandEnclosure</mi><mo fence='true' stretchy='true' form='prefix'>(</mo><mrow><mtable><mtr><mtd><mrow><mi>c</mi><mo>=</mo><mn>10</mn></mrow></mtd></mtr></mtable></mrow><mo fence='true' stretchy='true' form='suffix'>)</mo></mrow></mtd></mtr><mtr><mtd><mrow><mi>MatchPattern</mi><mo fence='true' stretchy='true' form='prefix'>(</mo><mrow><mrow><mi>a</mi><mo>=</mo><mrow><mn>10</mn><mi>b</mi></mrow></mrow><mo>,</mo><mrow><mi>a</mi><mo>=</mo><mrow><mi>b</mi><mrow><mi>c</mi></mrow></mrow></mrow></mrow><mo fence='true' stretchy='true' form='suffix'>)</mo></mrow></mtd></mtr></mtable>"
   },
   {

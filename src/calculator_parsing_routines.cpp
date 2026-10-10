@@ -722,6 +722,7 @@ void Calculator::EvaluationStatistics::reset() {
   this->patternMatchMilliseconds = 0;
   this->loopDetectionMilliseconds = 0;
   this->cachePerformanceMilliseconds = 0;
+  this->builtInEvaluationMilliseconds = 0;
 }
 
 void Calculator::reset() {

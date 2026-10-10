@@ -1,14 +1,11 @@
 #include "calculator_html_interpretation.h"
 #include "calculator_inner_functions.h"
 #include "crypto_calculator.h"
-#include "database.h"
 #include "general_file_operations_encodings.h"
 #include "main.h"
 #include "signals_infrastructure.h"
 #include "string_constants.h"
 #include "test.h"
-#include "transport_layer_security.h"
-#include "web_api.h"
 #include <iostream>
 
 int MainFunctions::mainTest(List<std::string>& inputArguments) {
@@ -204,4 +201,4 @@ void Test::initialize(List<std::string>& inputArguments) {
     this->flagTestAll = false;
   }
 }
-}
+} // namespace Testing.

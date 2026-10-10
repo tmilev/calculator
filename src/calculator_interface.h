@@ -1203,17 +1203,20 @@ public:
     FormatExpressions* format
   ) const;
   std::string toStringTreeHtml(int depth) const;
-  std::string toString(
+  std::string toTable(
+    Expression& startingExpression,
     const FormatExpressions* format = nullptr,
-    Expression* startingExpression = nullptr,
-    bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
-  bool toStringWithUnfoldedCommandEnclosures(
+  std::string toString(
+    const FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const;
+  bool toTableWithUnfoldedCommandEnclosures(
+    Expression& startingExpression,
     std::stringstream& out,
     const FormatExpressions* format = nullptr,
-    Expression* startingExpression = nullptr,
     JSData* outputJS = nullptr
   ) const;
   std::string toMathML(
@@ -1253,17 +1256,11 @@ public:
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
   ) const;
-  std::string toStringWithStartingExpression(
+  std::string toTableWithStartingExpression(
     FormatExpressions* format,
     Expression* startingExpression,
     const std::string& stringWithoutStartingExpression,
     JSData* outputJS
-  ) const;
-  bool toStringEndStatement(
-    std::stringstream& out,
-    Expression* startingExpression,
-    JSData* outputJS,
-    FormatExpressions* format
   ) const;
   bool toStringEndStatementNested(
     std::stringstream& out, FormatExpressions* format

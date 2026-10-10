@@ -2276,11 +2276,19 @@ bool CalculatorHTML::processOneExecutedCommand(
   format.flagUseLatex = true;
   format.flagUseQuotes = false;
   element.interpretedCommand = "";
-  // The presense of javascript content signals that
-  // we are at the top level of the expression.
-  JSData javascriptContent;
-  element.interpretedCommand +=
-  interpretedExpression.toString(&format, nullptr, true, &javascriptContent);
+  if (
+    interpretedExpression.isListStartingWithAtom(
+      interpreter.opCommandSequence()
+    )
+  ) {
+    std::stringstream out;
+    interpretedExpression.toStringEndStatementTopLevel(
+      out, nullptr, nullptr, &format
+    );
+    element.interpretedCommand += out.str();
+  } else {
+    element.interpretedCommand += interpretedExpression.toString(&format);
+  }
   element.flagUseDisplaystyleInMathMode = (
     element.content.find("\\displaystyle") != std::string::npos
   );

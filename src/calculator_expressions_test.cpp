@@ -38,7 +38,8 @@ bool ExpressionTest::all() {
     3,
     "\\left(0, 1, 2, \\left(0, 1, \\left(0, 0\\right)\\right)\\right)"
   );
-  List<int> iterationsToTest = List<int>({200, 400, 800});
+  List<int> iterationsToTest = List<int>({200, 400, 800, // 10000
+    });
   List<ExpressionTestType> types = List<ExpressionTestType>({
       ExpressionTestType::Sum,
       ExpressionTestType::SumProduct,
@@ -191,6 +192,7 @@ bool ExpressionTest::largeStringConversion(
 ) {
   STACK_TRACE("ExpressionTest::largeStringConversion");
   owner.initialize(Calculator::Mode::full);
+  owner.maximumRecursionDepth = 100000;
   Expression current;
   ExpressionTest::makeLarge(owner, current, expressionType, iterations);
   int64_t start = global.getElapsedMilliseconds();

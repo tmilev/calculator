@@ -604,5 +604,13 @@ public:
   static void all();
   static void crawl();
 };
+
+class GlobalVariablesTest {
+public:
+  static bool all();
+  static bool builds();
+  static bool oneMakeBuild(const std::string& buildCommand);
+  static bool webAssemblyBuild();
+};
 } // namespace: Testing.
 #endif

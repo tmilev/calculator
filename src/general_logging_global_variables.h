@@ -596,13 +596,6 @@ public:
   std::string toStringProgressReportConsole();
   WebServer& server();
   void makeReport();
-  class Test {
-  public:
-    static bool all();
-    static bool builds();
-    static bool oneMakeBuild(const std::string& buildCommand);
-    static bool webAssemblyBuild();
-  };
 };
 
 class Timer {

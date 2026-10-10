@@ -162,10 +162,10 @@ void Test::run() {
     CalculatorHTMLTest::all();
   }
   if (this->shouldTest(Test::Suites::build)) {
-    GlobalVariables::Test::all();
+    GlobalVariablesTest::all();
   }
   if (this->shouldTest(Test::Suites::wasm)) {
-    GlobalVariables::Test::webAssemblyBuild();
+    GlobalVariablesTest::webAssemblyBuild();
   }
   if (this->shouldTest(Test::Suites::database)) {
     // This special test can only run once per

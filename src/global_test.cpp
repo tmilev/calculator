@@ -1,12 +1,15 @@
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
+#include "test.h"
 
-bool GlobalVariables::Test::all() {
-  GlobalVariables::Test::builds();
+namespace Testing {
+
+bool GlobalVariablesTest::all() {
+  GlobalVariablesTest::builds();
   return true;
 }
 
-bool GlobalVariables::Test::webAssemblyBuild() {
+bool GlobalVariablesTest::webAssemblyBuild() {
   int wasmResult =
   global.externalCommandNoOutput("make -j20 wasm=1 optimize=1", true);
   if (wasmResult != 0) {
@@ -15,7 +18,7 @@ bool GlobalVariables::Test::webAssemblyBuild() {
   return true;
 }
 
-bool GlobalVariables::Test::oneMakeBuild(const std::string& buildCommand) {
+bool GlobalVariablesTest::oneMakeBuild(const std::string& buildCommand) {
   global.externalCommandNoOutput("make clean", true);
   if (FileOperations::fileExistsVirtual("calculator")) {
     global.fatal
@@ -44,10 +47,11 @@ bool GlobalVariables::Test::oneMakeBuild(const std::string& buildCommand) {
   return true;
 }
 
-bool GlobalVariables::Test::builds() {
-  GlobalVariables::Test::oneMakeBuild(
+bool GlobalVariablesTest::builds() {
+  GlobalVariablesTest::oneMakeBuild(
     "make -j20 noMongo=1 nossl=1 noPublicDomain=1 optimize=1"
   );
-  GlobalVariables::Test::oneMakeBuild("make -j20 llvm=1");
+  GlobalVariablesTest::oneMakeBuild("make -j20 llvm=1");
   return true;
 }
+} // namespace Testing.

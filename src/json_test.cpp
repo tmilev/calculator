@@ -3,6 +3,8 @@
 #include "json.h"
 #include "test.h"
 
+namespace Testing {
+
 bool JSDataTest::all() {
   STACK_TRACE("JSDataTest::all");
   JSDataTest::keyAccessUsingOperator();
@@ -254,4 +256,5 @@ bool JSDataTest::loadLarger() {
   << "ms."
   << Logger::endL;
   return true;
+}
 }

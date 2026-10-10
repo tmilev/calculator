@@ -1460,6 +1460,7 @@ public:
 };
 
 namespace RamUsageComputation {
+
 template < >
 int64_t byteSize(const Expression::ExpressionPointer& o);
 }

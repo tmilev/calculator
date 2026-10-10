@@ -596,6 +596,8 @@ bool PolynomialFactorizationCantorZassenhaus<
   return true;
 }
 
+namespace Testing {
+
 void MatrixTest::matrixFromString(
   const std::string& inputString, Matrix<Rational>& output
 ) {
@@ -653,4 +655,5 @@ bool MatrixTest::matrixIntegerWithDenominator() {
 bool MatrixTest::all() {
   MatrixTest::matrixIntegerWithDenominator();
   return true;
+}
 }

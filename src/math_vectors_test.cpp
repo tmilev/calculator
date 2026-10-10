@@ -1,6 +1,8 @@
 #include "math_vectors.h"
 #include "test.h"
 
+namespace Testing {
+
 Vector<Rational> VectorTest::fromString(const std::string& input) {
   Vector<Rational> result;
   bool shouldBeTrue = result.fromString(input);
@@ -56,4 +58,5 @@ bool VectorTest::order() {
     << global.fatal;
   }
   return true;
+}
 }

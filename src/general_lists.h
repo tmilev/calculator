@@ -1083,7 +1083,6 @@ template <
 >
 class HashedContainerTemplate: public TemplateList {
 private:
-  friend class HashedListTest;
   Object popIndexShiftDown(int index);
   void reverseElements();
   void shiftUpExpandOnTop(int startingIndex);
@@ -1103,6 +1102,9 @@ public:
     unsigned int result = hashFunctionObject(input);
     result %= this->hashBuckets.size;
     return result;
+  }
+  List<List<int> > getHashBucketsCopy() {
+    return this->hashBuckets;
   }
   void clear() {
     // If the hashed list is somewhat sparse, and the index is somewhat large,

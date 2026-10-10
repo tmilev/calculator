@@ -1192,6 +1192,11 @@ bool CodeFormatter::Element::computeIndentationNamespaceWithContent() {
   for (CodeFormatter::Element& element : this->children) {
     element.computeIndentation();
   }
+  CodeFormatter::Element& codeBlock = *this->children.lastObject();
+  if (codeBlock.isCodeBlock() && codeBlock.children.size == 3) {
+    codeBlock.children[0].newLinesAfter = 2;
+    codeBlock.children[1].computeIndentationTopLevel();
+  }
   return true;
 }
 
@@ -1691,12 +1696,26 @@ bool CodeFormatter::Element::computeIndentationTopLevel() {
     CodeFormatter::Element* rightMostAtom = current.rightMostAtomUnderMe();
     rightMostAtom->newLinesAfter = 1;
     current.computeIndentation();
-    bool addExtraLine = false;
-    if (i + 1 < this->children.size) {
-      addExtraLine =
-      current.shouldAddExtraLineInTopLevel(this->children[i + 1]);
+    if (
+      i > 0 &&
+      this->children[i - 1].type ==
+      CodeFormatter::Element::NamespaceWithContent &&
+      current.isComment()
+    ) {
+      current.leftMostAtomUnderMe()->whiteSpaceBefore = 1;
     }
-    if (addExtraLine) {
+    bool addExtraLine = false;
+    int removeNewLine = false;
+    if (i + 1 < this->children.size) {
+      CodeFormatter::Element& next = this->children[i + 1];
+      addExtraLine = current.shouldAddExtraLineInTopLevel(next);
+      removeNewLine = current.type ==
+      CodeFormatter::Element::NamespaceWithContent &&
+      next.isComment();
+    }
+    if (removeNewLine) {
+      rightMostAtom->newLinesAfter = 0;
+    } else if (addExtraLine) {
       rightMostAtom->newLinesAfter = 2;
     }
   }

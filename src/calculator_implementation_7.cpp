@@ -1213,6 +1213,7 @@ bool CalculatorFunctions::solvePolynomialSystem(
 }
 
 namespace {
+
 void computeArbitrarySubstitutionsModP(
   ArbitrarySubstitutionsProvider<ElementZmodP>& object, int recursionDepth
 ) {

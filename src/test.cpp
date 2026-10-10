@@ -11,6 +11,17 @@
 #include "web_api.h"
 #include <iostream>
 
+int MainFunctions::mainTest(List<std::string>& inputArguments) {
+  SignalsInfrastructure::signals().initializeSignals();
+  Testing::Test tester;
+  inputArguments.sliceInPlace(2, inputArguments.size - 2);
+  tester.initialize(inputArguments);
+  tester.run();
+  return 0;
+}
+
+namespace Testing {
+
 std::string Test::update = "update";
 bool Test::flagUpdateABTests = false;
 const std::string Test::Suites::all = "all";
@@ -31,15 +42,6 @@ const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::expressions = "expressions";
 const std::string Test::Suites::API = "api";
 const std::string Test::Suites::scientific = "scientific";
-
-int MainFunctions::mainTest(List<std::string>& inputArguments) {
-  SignalsInfrastructure::signals().initializeSignals();
-  Test tester;
-  inputArguments.sliceInPlace(2, inputArguments.size - 2);
-  tester.initialize(inputArguments);
-  tester.run();
-  return 0;
-}
 
 void Test::run() {
   STACK_TRACE("Test::run");
@@ -205,4 +207,5 @@ void Test::initialize(List<std::string>& inputArguments) {
   } else {
     this->flagTestAll = false;
   }
+}
 }

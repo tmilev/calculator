@@ -792,6 +792,12 @@ std::string Calculator::writeFileToOutputFolderReturnLink(
   );
 }
 
+Calculator::Test::OneTest::OneTest() {
+  this->requresAdminAccess = false;
+  this->maximumRuntimeMilliseconds = 0;
+  this->actualDuration = 0;
+}
+
 JSData Calculator::Test::OneTest::toJSON() const {
   JSData result;
   result["input"] = this->command;

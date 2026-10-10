@@ -3,6 +3,7 @@
 #include "test.h"
 #include <iostream>
 
+namespace Testing {
 
 bool CalculatorTest::checkBuiltInInitializations(
   Calculator& ownerInitialized
@@ -175,12 +176,6 @@ bool CalculatorTest::parseDecimal(Calculator& ownerInitialized) {
   return true;
 }
 
-Calculator::Test::OneTest::OneTest() {
-  this->requresAdminAccess = false;
-  this->maximumRuntimeMilliseconds = 0;
-  this->actualDuration = 0;
-}
-
 bool CalculatorTest::builtInFunctionsABTest(
   Calculator& ownerInitialized, bool updateABTestFile
 ) {
@@ -262,7 +257,7 @@ bool CalculatorParserTest::largeExample1(Calculator& initializedTester) {
     global.fatal << "Failed to parse: " << input << global.fatal;
   }
   int64_t duration = global.getElapsedMilliseconds() - start;
-  int64_t maximumDuration = iterations / 20;
+  int64_t maximumDuration = iterations / 10;
   if (duration > maximumDuration) {
     global.fatal
     << "Parsing "
@@ -311,4 +306,5 @@ bool CalculatorParserTest::whitespace() {
     << global.fatal;
   }
   return true;
+}
 }

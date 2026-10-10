@@ -1,6 +1,8 @@
 #include "calculator_interface.h"
 #include "test.h"
 
+namespace Testing {
+
 bool ExpressionTest::all() {
   STACK_TRACE("ExpressionTest::all");
   Calculator tester;
@@ -347,4 +349,5 @@ bool ExpressionTest::largeNestedExpressionCreationSpeed1(Calculator& owner) {
     global.fatal << global.fatal;
   }
   return true;
+}
 }

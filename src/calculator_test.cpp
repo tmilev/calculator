@@ -1,5 +1,7 @@
-#include "test.h"
 #include "calculator_interface.h"
+#include "test.h"
+
+namespace Testing {
 
 bool CalculatorTest::all(bool updateABTestFile) {
   Calculator tester;
@@ -13,4 +15,5 @@ bool CalculatorTest::all(bool updateABTestFile) {
   CalculatorTest::parseDecimal(tester);
   CalculatorTest::builtInFunctionsABTest(tester, updateABTestFile);
   return true;
+}
 }

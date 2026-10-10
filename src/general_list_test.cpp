@@ -2,6 +2,8 @@
 #include "test.h"
 #include <iostream>
 
+namespace Testing {
+
 bool HashedListTest::all() {
   global << "Testing hashed lists..." << Logger::endL;
   HashedListTest::largeHashedListReferences1(1);
@@ -67,7 +69,7 @@ bool HashedListTest::largeHashedList1() {
     << "Ram consumed: "
     << RamUsageComputation::byteSize(large)
     << ". Ram used by hash buckets: "
-    << RamUsageComputation::byteSize(large.hashBuckets)
+    << RamUsageComputation::byteSize(large.getHashBucketsCopy())
     << Logger::endL;
   }
   return true;
@@ -180,7 +182,7 @@ bool HashedListTest::largeHashedListReferences1(int millionMultiple) {
     << "Ram consumed: "
     << RamUsageComputation::byteSize(large)
     << ". Ram used by hash buckets: "
-    << RamUsageComputation::byteSize(large.hashBuckets)
+    << RamUsageComputation::byteSize(large.getHashBucketsCopy())
     << Logger::endL;
   }
   return true;
@@ -246,4 +248,5 @@ bool ListReferencesTest::largeListReferences1(int millionMultiple) {
     << Logger::endL;
   }
   return true;
+}
 }

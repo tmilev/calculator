@@ -3,6 +3,8 @@
 
 #include "general_lists.h"
 
+namespace Testing {
+
 class Test {
 public:
   class Suites {
@@ -79,7 +81,10 @@ public:
 };
 
 enum ExpressionTestType {
-  Sum, SumProduct, Arithmetic, NestedList,
+  Sum,
+  SumProduct,
+  Arithmetic,
+  NestedList,
 };
 
 class ExpressionTest {
@@ -159,7 +164,7 @@ public:
   );
 };
 
-class CalculatorTest{
+class CalculatorTest {
 public:
   static bool all(bool updateABTestFile);
   static bool cacheWorks();
@@ -171,10 +176,9 @@ public:
   static bool parseQuotes(Calculator& ownerInitialized);
   static bool parseAllExamples(Calculator& ownerInitialized);
   static bool builtInFunctionsABTest(
-      Calculator& ownerInitialized, bool updateABTestFile
-      );
+    Calculator& ownerInitialized, bool updateABTestFile
+  );
   static bool checkBuiltInInitializations(Calculator& ownerInitialized);
-
 };
 
 class CalculatorExamplesTest {
@@ -182,5 +186,5 @@ public:
   static bool compose();
   static bool all();
 };
-
+} // namespace: Testing.
 #endif

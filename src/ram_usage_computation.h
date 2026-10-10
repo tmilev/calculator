@@ -5,11 +5,14 @@
 #include <sstream>
 
 namespace RamUsageComputation {
+
 typedef int* IntPointer;
+
 template <typename T>
 int64_t byteSize(const T& object) {
   return sizeof(object) + object.byteSizeOwnedThroughPointers();
 }
+
 template < >
 int64_t byteSize(const int& object);
 template < >

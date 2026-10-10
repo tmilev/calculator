@@ -104,11 +104,6 @@ public:
     *this = other;
   }
   bool checkInitialization() const;
-  class Test {
-  public:
-    static bool all();
-    static bool testNElements(int n);
-  };
 };
 
 class SelectionWithMultiplicities {

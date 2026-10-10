@@ -134,12 +134,6 @@ public:
   static ElementZmodP zeroStatic();
   static ElementZmodP oneStatic();
   bool operator>(const ElementZmodP& other) const;
-  class Test {
-  public:
-    static bool all();
-    static bool basicOperations();
-    static bool scale();
-  };
 };
 
 #endif // header_math_modular_arithmetic_ALREADY_INCLUDED

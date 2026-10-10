@@ -70,13 +70,13 @@ void Test::run() {
     HashedListTest::all();
     AlgebraicNumberTest::all();
     StringRoutines::Test::all();
-    LargeIntegerUnsigned::Test::all();
-    Rational::Test::all();
-    ElementZmodP::Test::all();
-    RationalFraction<Rational>::Test::all();
+    LargeIntegerUnsignedTest::all();
+    RationalTest::all();
+    ElementZmodPTest::all();
+    RationalFractionTest::all();
     Vectors<Rational>::Test::all();
     VectorTest::all();
-    Selection::Test::all();
+    SelectionTest::all();
     // Also tested in calculator test suite.
     CalculatorExamplesTest::all();
     ChevalleyGenerator::Test::all();

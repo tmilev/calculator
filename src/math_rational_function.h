@@ -212,19 +212,8 @@ public:
   static RationalFraction<Coefficient> oneStatic() {
     return Coefficient::oneStatic();
   }
-  class Test {
-  public:
-    static bool all();
-    static bool scaleNormalizeIndex();
-    static RationalFraction<Rational> fromString(const std::string& input);
-    static bool fromStringTest();
-  };
 };
 
-template < >
-bool RationalFraction<Rational>::Test::fromStringTest();
-template < >
-bool RationalFraction<Rational>::Test::scaleNormalizeIndex();
 template <class Coefficient>
 class RationalSubstitution {
 public:

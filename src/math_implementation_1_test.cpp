@@ -3,8 +3,11 @@
 #include "math_general.h"
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -03 optimization build.
 #include "math_rational_function.h"
+#include "test.h"
 
-bool LargeIntegerUnsigned::Test::serializationToHex(
+namespace Testing {
+
+bool LargeIntegerUnsignedTest::serializationToHex(
   const LargeIntegerUnsigned& input
 ) {
   STACK_TRACE("LargeIntUnsigned::Test::serializationToHex");
@@ -36,17 +39,17 @@ bool LargeIntegerUnsigned::Test::serializationToHex(
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::all() {
-  STACK_TRACE("LargeIntegerUnsigned::Test::all");
-  LargeIntegerUnsigned::Test::serializationToHex(LargeIntegerUnsigned(100));
-  LargeIntegerUnsigned::Test::comparisons();
-  LargeIntegerUnsigned::Test::guaranteedPrime();
-  LargeIntegerUnsigned::Test::factor();
-  LargeIntegerUnsigned::Test::isPossiblyPrime();
+bool LargeIntegerUnsignedTest::all() {
+  STACK_TRACE("LargeIntegerUnsignedTest::all");
+  LargeIntegerUnsignedTest::serializationToHex(LargeIntegerUnsigned(100));
+  LargeIntegerUnsignedTest::comparisons();
+  LargeIntegerUnsignedTest::guaranteedPrime();
+  LargeIntegerUnsignedTest::factor();
+  LargeIntegerUnsignedTest::isPossiblyPrime();
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::comparisons() {
+bool LargeIntegerUnsignedTest::comparisons() {
   List<LargeIntegerUnsigned> toTest =
   {
     LargeIntegerUnsigned(0),
@@ -91,7 +94,7 @@ bool LargeIntegerUnsigned::Test::comparisons() {
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
+bool LargeIntegerUnsignedTest::isPossiblyPrime() {
   List<LargeIntegerUnsigned> mustReturnTrue;
   List<LargeIntegerUnsigned> mustReturnFalse;
   mustReturnTrue.addOnTop(2);
@@ -104,26 +107,22 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
   mustReturnFalse.addOnTop(4);
   mustReturnFalse.addOnTop(6);
   mustReturnFalse.addOnTop(9989);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 0, 3);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
-    mustReturnTrue, true, 100, 3
-  );
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
-    mustReturnFalse, false, 0, 3
-  );
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+  LargeIntegerUnsignedTest::isPossiblyPrimeFast(mustReturnTrue, true, 0, 3);
+  LargeIntegerUnsignedTest::isPossiblyPrimeFast(mustReturnTrue, true, 100, 3);
+  LargeIntegerUnsignedTest::isPossiblyPrimeFast(mustReturnFalse, false, 0, 3);
+  LargeIntegerUnsignedTest::isPossiblyPrimeFast(
     mustReturnFalse, false, 100, 3
   );
-  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
+  LargeIntegerUnsignedTest::isPossiblyPrimeMillerRabinOnly(
     mustReturnTrue, true, 100
   );
-  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
+  LargeIntegerUnsignedTest::isPossiblyPrimeMillerRabinOnly(
     mustReturnFalse, false, 100
   );
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+bool LargeIntegerUnsignedTest::isPossiblyPrimeFast(
   const List<LargeIntegerUnsigned>& input,
   bool mustBeTrue,
   int millerRabinTries,
@@ -161,7 +160,7 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
+bool LargeIntegerUnsignedTest::isPossiblyPrimeMillerRabinOnly(
   const List<LargeIntegerUnsigned>& input,
   bool mustBeTrue,
   int millerRabinTries
@@ -188,7 +187,7 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::guaranteedPrime() {
+bool LargeIntegerUnsignedTest::guaranteedPrime() {
   List<LargeIntegerUnsigned> primes;
   primes.addOnTop(2);
   primes.addOnTop(3);
@@ -238,17 +237,15 @@ bool LargeIntegerUnsigned::Test::guaranteedPrime() {
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::factor() {
-  LargeIntegerUnsigned::Test::factorSmall(
+bool LargeIntegerUnsignedTest::factor() {
+  LargeIntegerUnsignedTest::factorSmall(
     120, "2, 3, 5", "3, 1, 1", 100, 100, 3
   );
-  LargeIntegerUnsigned::Test::factorSmall(
-    120, "2, 3, 5", "3, 1, 1", 0, 100, 3
-  );
+  LargeIntegerUnsignedTest::factorSmall(120, "2, 3, 5", "3, 1, 1", 0, 100, 3);
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::factorSmall(
+bool LargeIntegerUnsignedTest::factorSmall(
   const LargeIntegerUnsigned& input,
   const std::string& expectedFactors,
   const std::string& expectedMultiplicities,
@@ -306,8 +303,8 @@ bool LargeIntegerUnsigned::Test::factorSmall(
   return true;
 }
 
-bool Rational::Test::all() {
-  Rational::Test::testScale();
+bool RationalTest::all() {
+  RationalTest::testScale();
   return true;
 }
 
@@ -337,7 +334,7 @@ TestRationalScale::TestRationalScale(
   this->expected = inputExpected;
 }
 
-bool Rational::Test::testScale() {
+bool RationalTest::testScale() {
   List<TestRationalScale> toTest =
   {
     TestRationalScale({"1/2", "2/3"}, 0, "3, 4"),
@@ -361,13 +358,13 @@ bool Rational::Test::testScale() {
   return true;
 }
 
-bool ElementZmodP::Test::all() {
-  ElementZmodP::Test::basicOperations();
-  ElementZmodP::Test::scale();
+bool ElementZmodPTest::all() {
+  ElementZmodPTest::basicOperations();
+  ElementZmodPTest::scale();
   return true;
 }
 
-bool ElementZmodP::Test::basicOperations() {
+bool ElementZmodPTest::basicOperations() {
   ElementZmodP x, y;
   x.modulus = 5;
   y.modulus = 5;
@@ -389,7 +386,7 @@ bool ElementZmodP::Test::basicOperations() {
   return true;
 }
 
-bool ElementZmodP::Test::scale() {
+bool ElementZmodPTest::scale() {
   ElementZmodP x, y, z;
   LargeIntegerUnsigned modulus = 7;
   x.makeOne(modulus);
@@ -417,8 +414,7 @@ bool ElementZmodP::Test::scale() {
   return true;
 }
 
-template < >
-RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(
+RationalFraction<Rational> RationalFractionTest::fromString(
   const std::string& input
 ) {
   Calculator parser;
@@ -443,20 +439,18 @@ RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(
   return result;
 }
 
-template < >
-bool RationalFraction<Rational>::Test::all() {
-  RationalFraction<Rational>::Test::fromStringTest();
-  RationalFraction<Rational>::Test::scaleNormalizeIndex();
+bool RationalFractionTest::all() {
+  RationalFractionTest::fromStringTest();
+  RationalFractionTest::scaleNormalizeIndex();
   return true;
 }
 
-template < >
-bool RationalFraction<Rational>::Test::fromStringTest() {
+bool RationalFractionTest::fromStringTest() {
   STACK_TRACE("RationalFunction::Test::fromString");
   std::string input = "(a^2+7b)/(2+d*c)";
   std::string expected = "(x_{1}^2+7x_{2} )/(x_{3} x_{4} +2)";
   RationalFraction<Rational> underTest =
-  RationalFraction<Rational>::Test::fromString(input);
+  RationalFractionTest::fromString(input);
   if (underTest.toString() != expected) {
     global.fatal
     << "Input: "
@@ -471,17 +465,11 @@ bool RationalFraction<Rational>::Test::fromStringTest() {
   return true;
 }
 
-template < >
-bool RationalFraction<Rational>::Test::scaleNormalizeIndex() {
-  RationalFraction<Rational> a = RationalFraction<Rational>::Test::fromString(
-    "(a+1/2)/(b+1/3)"
-  );
-  RationalFraction<Rational> b = RationalFraction<Rational>::Test::fromString(
-    "2a/5"
-  );
-  RationalFraction<Rational> c = RationalFraction<Rational>::Test::fromString(
-    "3a/(7x)"
-  );
+bool RationalFractionTest::scaleNormalizeIndex() {
+  RationalFraction<Rational> a =
+  RationalFractionTest::fromString("(a+1/2)/(b+1/3)");
+  RationalFraction<Rational> b = RationalFractionTest::fromString("2a/5");
+  RationalFraction<Rational> c = RationalFractionTest::fromString("3a/(7x)");
   List<List<RationalFraction<Rational> > > toScale = {{a}, {a, b}, {a, b, c}};
   List<std::string> expected =
   {
@@ -491,7 +479,7 @@ bool RationalFraction<Rational>::Test::scaleNormalizeIndex() {
   };
   for (int i = 0; i < toScale.size; i ++) {
     std::string atStart = toScale[i].toStringCommaDelimited();
-    RationalFraction::scaleNormalizeIndex(toScale[i], 0);
+    RationalFraction<Rational>::scaleNormalizeIndex(toScale[i], 0);
     if (toScale[i].toStringCommaDelimited() != expected[i]) {
       global.fatal
       << "Scaling rational functions: "
@@ -506,16 +494,16 @@ bool RationalFraction<Rational>::Test::scaleNormalizeIndex() {
   return true;
 }
 
-bool Selection::Test::all() {
-  Selection::Test::testNElements(0);
-  Selection::Test::testNElements(1);
-  Selection::Test::testNElements(2);
-  Selection::Test::testNElements(3);
-  Selection::Test::testNElements(4);
+bool SelectionTest::all() {
+  SelectionTest::testNElements(0);
+  SelectionTest::testNElements(1);
+  SelectionTest::testNElements(2);
+  SelectionTest::testNElements(3);
+  SelectionTest::testNElements(4);
   return true;
 }
 
-bool Selection::Test::testNElements(int n) {
+bool SelectionTest::testNElements(int n) {
   Selection selection;
   selection.initialize(n);
   int counter = 0;
@@ -536,3 +524,4 @@ bool Selection::Test::testNElements(int n) {
   }
   return true;
 }
+} // namespace: Testing.

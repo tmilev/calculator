@@ -208,35 +208,6 @@ public:
   const;
   // must be rewritten:
   double getDoubleValue() const;
-  class Test {
-  public:
-    static bool all();
-    static bool serializationToHex(const LargeIntegerUnsigned& input);
-    static bool serializationToHex();
-    static bool comparisons();
-    static bool isPossiblyPrime();
-    static bool guaranteedPrime();
-    static bool isPossiblyPrimeFast(
-      const List<LargeIntegerUnsigned>& input,
-      bool mustBeTrue,
-      int millerRabinTries,
-      int64_t maximumRunningTimeMilliseconds
-    );
-    static bool isPossiblyPrimeMillerRabinOnly(
-      const List<LargeIntegerUnsigned>& input,
-      bool mustBeTrue,
-      int millerRabinTries
-    );
-    static bool factor();
-    static bool factorSmall(
-      const LargeIntegerUnsigned& input,
-      const std::string& expectedFactors,
-      const std::string& expectedMultiplicities,
-      int maximumDivisorToTry,
-      int numberMillerRabinRuns,
-      int64_t maximumRunningTime
-    );
-  };
 };
 
 class LargeInteger {
@@ -1009,11 +980,6 @@ public:
     rightCopy.assignInteger(right);
     return rightCopy.isGreaterThan(*this);
   }
-  class Test {
-  public:
-    static bool all();
-    static bool testScale();
-  };
 };
 
 #endif // header_math_large_integers_ALREADY_INCLUDED

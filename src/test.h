@@ -331,5 +331,62 @@ public:
     int modulus, const std::string& input, const std::string& expected
   );
 };
+
+class LargeIntegerUnsignedTest {
+public:
+  static bool all();
+  static bool serializationToHex(const LargeIntegerUnsigned& input);
+  static bool serializationToHex();
+  static bool comparisons();
+  static bool isPossiblyPrime();
+  static bool guaranteedPrime();
+  static bool isPossiblyPrimeFast(
+    const List<LargeIntegerUnsigned>& input,
+    bool mustBeTrue,
+    int millerRabinTries,
+    int64_t maximumRunningTimeMilliseconds
+  );
+  static bool isPossiblyPrimeMillerRabinOnly(
+    const List<LargeIntegerUnsigned>& input,
+    bool mustBeTrue,
+    int millerRabinTries
+  );
+  static bool factor();
+  static bool factorSmall(
+    const LargeIntegerUnsigned& input,
+    const std::string& expectedFactors,
+    const std::string& expectedMultiplicities,
+    int maximumDivisorToTry,
+    int numberMillerRabinRuns,
+    int64_t maximumRunningTime
+  );
+};
+
+class RationalTest {
+public:
+  static bool all();
+  static bool testScale();
+};
+
+class ElementZmodPTest {
+public:
+  static bool all();
+  static bool basicOperations();
+  static bool scale();
+};
+
+class RationalFractionTest {
+public:
+  static bool all();
+  static bool scaleNormalizeIndex();
+  static RationalFraction<Rational> fromString(const std::string& input);
+  static bool fromStringTest();
+};
+
+class SelectionTest {
+public:
+  static bool all();
+  static bool testNElements(int n);
+};
 } // namespace: Testing.
 #endif

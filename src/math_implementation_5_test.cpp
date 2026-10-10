@@ -2,12 +2,15 @@
 #include "math_general.h"
 #include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks the build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
+#include "test.h"
 
-bool MonomialPolynomial::Test::all() {
-  return MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition();
+namespace Testing {
+
+bool MonomialPolynomialTest::all() {
+  return MonomialPolynomialTest::testMonomialOrdersSatisfyTheDefinition();
 }
 
-bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
+bool MonomialPolynomialTest::testMonomialOrdersSatisfyTheDefinitionOne(
   const MonomialPolynomial& mustBeSmaller,
   const MonomialPolynomial& mustBeLarger,
   List<MonomialPolynomial>::Comparator& order
@@ -25,7 +28,7 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
   return true;
 }
 
-bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
+bool MonomialPolynomialTest::testMonomialOrdersSatisfyTheDefinition() {
   MonomialPolynomial xOne;
   MonomialPolynomial xTwo;
   MonomialPolynomial xOneSquared;
@@ -62,7 +65,7 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
     for (int j = 0; j < elementsIncreasingOrder.size; j ++) {
       for (int k = 0; k < elementsIncreasingOrder[i].size; k ++) {
         for (int l = k + 1; l < elementsIncreasingOrder[i].size; l ++) {
-          MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
+          MonomialPolynomialTest::testMonomialOrdersSatisfyTheDefinitionOne(
             elementsIncreasingOrder[j][k],
             elementsIncreasingOrder[j][l],
             allOrders[i]
@@ -74,13 +77,10 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
   return true;
 }
 
-template < >
-bool Polynomial<Rational>::Test::oneFactorizationKronecker(
+bool PolynomialTest::oneFactorizationKronecker(
   const std::string& input, const std::string& expectedFactors
 ) {
-  Polynomial<Rational> toBeFactored = Polynomial<Rational>::Test::fromString(
-    input
-  );
+  Polynomial<Rational> toBeFactored = PolynomialTest::fromString(input);
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationKronecker algorithm;
   bool success =
@@ -109,34 +109,32 @@ bool Polynomial<Rational>::Test::oneFactorizationKronecker(
   return true;
 }
 
-template < >
-bool Polynomial<Rational>::Test::factorizationKronecker() {
-  Polynomial<Rational>::Test::oneFactorizationKronecker("x+1", "(x +1)");
-  Polynomial<Rational>::Test::oneFactorizationKronecker(
+bool PolynomialTest::factorizationKronecker() {
+  PolynomialTest::oneFactorizationKronecker("x+1", "(x +1)");
+  PolynomialTest::oneFactorizationKronecker(
     "(2x+1)(-3x+1)", "-(2x +1)(3x -1)"
   );
-  Polynomial<Rational>::Test::oneFactorizationKronecker(
+  PolynomialTest::oneFactorizationKronecker(
     "(1/2x+1/3)(-3/5x+1)", "-1/30(3x -5)(3x +2)"
   );
-  Polynomial<Rational>::Test::oneFactorizationKronecker(
+  PolynomialTest::oneFactorizationKronecker(
     "(x^2+3x+1)(-3x+1)", "-(3x -1)(x^2+3x +1)"
   );
-  Polynomial<Rational>::Test::oneFactorizationKronecker(
+  PolynomialTest::oneFactorizationKronecker(
     "(-3x^3-3x-5)(5x^3+x-7)", "-(3x^3+3x +5)(5x^3+x -7)"
   );
-  Polynomial<Rational>::Test::oneFactorizationKronecker(
+  PolynomialTest::oneFactorizationKronecker(
     "(-3x^4+7x^3+2x^2-3x-5)(-1/2x^3+x^2+x-7)",
     "1/2(x^3-2x^2-2x +14)(3x^4-7x^3-2x^2+3x +5)"
   );
-  Polynomial<Rational>::Test::oneFactorizationKronecker(
+  PolynomialTest::oneFactorizationKronecker(
     "10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x+1", "(10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x +1)"
   );
   return true;
 }
 
-template < >
-bool Polynomial<Rational>::Test::all() {
-  Polynomial<Rational>::Test tester;
+bool PolynomialTest::all() {
+  PolynomialTest tester;
   tester.initialize();
   tester.fromStringTest();
   tester.fromStringCommonContextTest();
@@ -146,18 +144,14 @@ bool Polynomial<Rational>::Test::all() {
   return true;
 }
 
-template < >
-void Polynomial<Rational>::Test::initialize() {
+void PolynomialTest::initialize() {
   this->format.polynomialAlphabet.addOnTop(MathMLAndLatex("x", "x"));
   this->format.polynomialAlphabet.addOnTop(MathMLAndLatex("y", "y"));
   this->format.polynomialAlphabet.addOnTop(MathMLAndLatex("z", "z"));
   this->format.flagUseHTML = false;
 }
 
-template < >
-Polynomial<Rational> Polynomial<Rational>::Test::fromString(
-  const std::string& input
-) {
+Polynomial<Rational> PolynomialTest::fromString(const std::string& input) {
   Calculator parser;
   std::string inputModified = "Polynomial(" + input + ")";
   parser.initialize(Calculator::Mode::full);
@@ -180,13 +174,10 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(
   return result;
 }
 
-template < >
-bool Polynomial<Rational>::Test::fromStringTest() {
+bool PolynomialTest::fromStringTest() {
   std::string expected = "y^2+x -y -1";
   std::string input = "x^2-1-x+b";
-  Polynomial<Rational> underTest = Polynomial<Rational>::Test::fromString(
-    input
-  );
+  Polynomial<Rational> underTest = PolynomialTest::fromString(input);
   std::string result = underTest.toString(&this->format);
   if (result != expected) {
     global.fatal
@@ -203,18 +194,18 @@ bool Polynomial<Rational>::Test::fromStringTest() {
   return true;
 }
 
-template < >
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
-fromStringCommonContext(const std::string& first, const std::string& second) {
+Vector<Polynomial<Rational> > PolynomialTest::fromStringCommonContext(
+  const std::string& first, const std::string& second
+) {
   List<std::string> input;
   input.addOnTop(first);
   input.addOnTop(second);
-  return Polynomial<Rational>::Test::fromStringCommonContext(input);
+  return PolynomialTest::fromStringCommonContext(input);
 }
 
-template < >
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
-fromStringCommonContext(const List<std::string>& input) {
+Vector<Polynomial<Rational> > PolynomialTest::fromStringCommonContext(
+  const List<std::string>& input
+) {
   Vector<Polynomial<Rational> > result;
   if (input.size == 0) {
     return result;
@@ -250,13 +241,12 @@ fromStringCommonContext(const List<std::string>& input) {
   return result;
 }
 
-template < >
-bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
+bool PolynomialTest::fromStringCommonContextTest() {
   std::string expected = "x , y^2+y ";
   std::string inputFirst = "x";
   std::string inputSecond = "y^{2}+y";
   List<Polynomial<Rational> > underTest =
-  Polynomial<Rational>::Test::fromStringCommonContext(inputFirst, inputSecond);
+  PolynomialTest::fromStringCommonContext(inputFirst, inputSecond);
   std::string result = underTest.toStringCommaDelimited(&this->format);
   if (result != expected) {
     global.fatal
@@ -275,14 +265,13 @@ bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
   return true;
 }
 
-template < >
-bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
+bool PolynomialTest::oneLeastCommonMultiple(
   const std::string& left,
   const std::string& right,
   const std::string& expected
 ) {
   List<Polynomial<Rational> > converted =
-  Polynomial<Rational>::Test::fromStringCommonContext(left, right);
+  PolynomialTest::fromStringCommonContext(left, right);
   Polynomial<Rational> output;
   Polynomial<Rational>::leastCommonMultiple(
     converted[0], converted[1], output, Rational::one(), nullptr
@@ -306,8 +295,7 @@ bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   return true;
 }
 
-template < >
-bool Polynomial<Rational>::Test::leastCommonMultiple() {
+bool PolynomialTest::leastCommonMultiple() {
   this->oneLeastCommonMultiple("x", "y", "x y ");
   this->oneLeastCommonMultiple(
     "(x^2y + 3 x + z y^2 - 1 + 7x^3)(x^3 + 5x y z + x y - z - 2)",
@@ -323,12 +311,10 @@ bool Polynomial<Rational>::Test::leastCommonMultiple() {
   return true;
 }
 
-template < >
-bool Polynomial<Rational>::Test::oneDifferential(
+bool PolynomialTest::oneDifferential(
   const std::string& input, const std::string& expected
 ) {
-  Polynomial<Rational> inputPolynomial = Polynomial<Rational>::Test::fromString
-  (input);
+  Polynomial<Rational> inputPolynomial = PolynomialTest::fromString(input);
   Polynomial<Rational> output;
   inputPolynomial.differential(output, nullptr);
   std::string outputString = output.toString(&this->formatDifferentials);
@@ -346,8 +332,7 @@ bool Polynomial<Rational>::Test::oneDifferential(
   return true;
 }
 
-template < >
-bool Polynomial<Rational>::Test::differential() {
+bool PolynomialTest::differential() {
   List<std::string> variables = List<std::string>(
     {"x", "y", "z", "dx", "dy", "dz"}
   );
@@ -364,12 +349,12 @@ bool Polynomial<Rational>::Test::differential() {
   return true;
 }
 
-bool ChevalleyGenerator::Test::all() {
-  ChevalleyGenerator::Test::basic();
+bool ChevalleyGeneratorTest::all() {
+  ChevalleyGeneratorTest::basic();
   return true;
 }
 
-bool ChevalleyGenerator::Test::basic() {
+bool ChevalleyGeneratorTest::basic() {
   HashedList<ChevalleyGenerator> allGenerators;
   SemisimpleLieAlgebra lieAlgebra;
   lieAlgebra.weylGroup.makeArbitrarySimple('B', 3);
@@ -397,8 +382,7 @@ bool ChevalleyGenerator::Test::basic() {
   return true;
 }
 
-template < >
-bool Vectors<Rational>::Test::TestCaseLinearDependence::test() {
+bool VectorsTest::TestCaseLinearDependence::test() {
   Vectors<Rational> vectors;
   vectors.fromStringListNoFail(this->input);
   Vector<Rational> linearDependence;
@@ -431,9 +415,8 @@ bool Vectors<Rational>::Test::TestCaseLinearDependence::test() {
   return true;
 }
 
-template < >
-bool Vectors<Rational>::Test::linearDependence() {
-  Vectors<Rational>::Test::TestCaseLinearDependence testCase;
+bool VectorsTest::linearDependence() {
+  VectorsTest::TestCaseLinearDependence testCase;
   testCase.input = {"(1,3)", "(3,1)", "(1,1)", "(1,2)"};
   testCase.expectedHomogeneous = "(-7/8, -3/8, 1, 1)";
   testCase.expectedLexicographic = "(-1/4, -1/4, 1, 0)";
@@ -445,19 +428,18 @@ bool Vectors<Rational>::Test::linearDependence() {
   return true;
 }
 
-template < >
-bool Vectors<Rational>::Test::all() {
-  Vectors<Rational>::Test::linearDependence();
+bool VectorsTest::all() {
+  VectorsTest::linearDependence();
   return true;
 }
 
-bool PartialFractions::Test::all() {
-  PartialFractions::Test::splitTwoDimensional();
+bool PartialFractionsTest::all() {
+  PartialFractionsTest::splitTwoDimensional();
   return true;
 }
 
-bool PartialFractions::Test::splitTwoDimensional() {
-  STACK_TRACE("PartialFractions::Test::splitTwoDimensional");
+bool PartialFractionsTest::splitTwoDimensional() {
+  STACK_TRACE("PartialFractionsTest::splitTwoDimensional");
   SplitTestCase testCase;
   testCase.vectors = {"(1,0)", "(0,1)", "(1,1)",};
   testCase.expected =
@@ -485,8 +467,8 @@ bool PartialFractions::Test::splitTwoDimensional() {
   return true;
 }
 
-bool PartialFractions::Test::SplitTestCase::test() {
-  STACK_TRACE("PartialFractions::Test::SplitTestCase::test");
+bool PartialFractionsTest::SplitTestCase::test() {
+  STACK_TRACE("PartialFractionsTest::SplitTestCase::test");
   PartialFractions splitter;
   Vectors<Rational> input;
   input.fromStringListNoFail(this->vectors);
@@ -506,3 +488,4 @@ bool PartialFractions::Test::SplitTestCase::test() {
   }
   return true;
 }
+} // namespace: Testing.

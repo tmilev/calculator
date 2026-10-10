@@ -1227,18 +1227,6 @@ public:
   Vectors() {}
   Vectors(const List<Vector<Coefficient> >& other):
   List<Vector<Coefficient> >(other) {}
-  class Test {
-  public:
-    static bool all();
-    static bool linearDependence();
-    class TestCaseLinearDependence {
-    public:
-      List<std::string> input;
-      std::string expectedHomogeneous;
-      std::string expectedLexicographic;
-      bool test();
-    };
-  };
 };
 
 template <class Coefficient>

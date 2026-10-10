@@ -302,16 +302,6 @@ public:
   void operator=(const MonomialPolynomial& other) {
     this->monomialBody = other.monomialBody;
   }
-  class Test {
-  public:
-    static bool all();
-    static bool testMonomialOrdersSatisfyTheDefinitionOne(
-      const MonomialPolynomial& mustBeSmaller,
-      const MonomialPolynomial& mustBeLarger,
-      List<MonomialPolynomial>::Comparator& order
-    );
-    static bool testMonomialOrdersSatisfyTheDefinition();
-  };
 };
 
 class MonomialWeylAlgebra {
@@ -750,36 +740,6 @@ public:
   bool checkInitialization() const {
     return true;
   }
-  class Test {
-  public:
-    FormatExpressions format;
-    FormatExpressions formatDifferentials;
-    static bool all();
-    void initialize();
-    bool oneLeastCommonMultiple(
-      const std::string& left,
-      const std::string& right,
-      const std::string& expected
-    );
-    bool leastCommonMultiple();
-    bool oneFactorizationKronecker(
-      const std::string& input, const std::string& expectedFactors
-    );
-    bool factorizationKronecker();
-    bool oneDifferential(
-      const std::string& input, const std::string& expected
-    );
-    bool differential();
-    static Polynomial<Coefficient> fromString(const std::string& input);
-    Vector<Polynomial<Coefficient> > fromStringCommonContext(
-      const std::string& first, const std::string& second
-    );
-    Vector<Polynomial<Coefficient> > fromStringCommonContext(
-      const List<std::string>& input
-    );
-    bool fromStringTest();
-    bool fromStringCommonContextTest();
-  };
 };
 
 template < >
@@ -839,38 +799,6 @@ public:
   );
 };
 
-template < >
-bool Polynomial<Rational>::Test::differential();
-template < >
-bool Polynomial<Rational>::Test::oneDifferential(
-  const std::string& input, const std::string& expected
-);
-template < >
-bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
-  const std::string& left,
-  const std::string& right,
-  const std::string& expected
-);
-template < >
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
-fromStringCommonContext(const std::string& first, const std::string& second);
-template < >
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
-fromStringCommonContext(const List<std::string>& input);
-template < >
-bool Polynomial<Rational>::Test::fromStringCommonContextTest();
-template < >
-void Polynomial<Rational>::Test::initialize();
-template < >
-bool Polynomial<Rational>::Test::leastCommonMultiple();
-template < >
-bool Polynomial<Rational>::Test::all();
-template < >
-Polynomial<Rational> Polynomial<Rational>::Test::fromString(
-  const std::string& input
-);
-template < >
-bool Polynomial<Rational>::Test::fromStringTest();
 template < >
 bool Polynomial<Rational>::findOneVariableRationalRoots(
   List<Rational>& output

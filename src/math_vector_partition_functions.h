@@ -950,17 +950,6 @@ public:
     const PartialFractions::HighlightInformation* highlightInformation,
     FormatExpressions* format
   ) const;
-  class Test {
-  public:
-    static bool all();
-    static bool splitTwoDimensional();
-    class SplitTestCase {
-    public:
-      std::string expected;
-      List<std::string> vectors;
-      bool test();
-    };
-  };
 };
 
 class BernoulliSumComputer {

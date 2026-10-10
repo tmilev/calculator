@@ -54,7 +54,7 @@ bool PolynomialFactorizationFiniteFieldsTest::gelfondBound(
 ) {
   STACK_TRACE("PolynomialFactorizationFiniteFieldsTest::gelfondBound");
   PolynomialFactorizationFiniteFields algorithm;
-  algorithm.current = Polynomial<Rational>::Test::fromString(inputPolynomial);
+  algorithm.current = PolynomialTest::fromString(inputPolynomial);
   algorithm.degree = algorithm.current.totalDegreeInt();
   algorithm.computeCoefficientBoundsGelfond();
   if (algorithm.coefficientBound.toString() != desiredBound) {
@@ -277,8 +277,7 @@ bool PolynomialUnivariateModularTest::testOneDerivative(
 
 PolynomialUnivariateModular PolynomialUnivariateModularTest::
 fromStringAndModulus(const std::string& input, IntegerModulusSmall* modulus) {
-  Polynomial<Rational> polynomialRational =
-  Polynomial<Rational>::Test::fromString(input);
+  Polynomial<Rational> polynomialRational = PolynomialTest::fromString(input);
   PolynomialUnivariateModular result;
   result.makeFromPolynomialAndModulusNoFailure(modulus, polynomialRational);
   return result;

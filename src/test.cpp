@@ -74,13 +74,13 @@ void Test::run() {
     RationalTest::all();
     ElementZmodPTest::all();
     RationalFractionTest::all();
-    Vectors<Rational>::Test::all();
+    VectorsTest::all();
     VectorTest::all();
     SelectionTest::all();
     // Also tested in calculator test suite.
     CalculatorExamplesTest::all();
-    ChevalleyGenerator::Test::all();
-    PartialFractions::Test::all();
+    ChevalleyGeneratorTest::all();
+    PartialFractionsTest::all();
     MatrixTest::all();
     global << Logger::green << "Basic tests completed." << Logger::endL;
   }
@@ -102,8 +102,8 @@ void Test::run() {
     PolynomialModuloPolynomialModuloIntegerTest::all();
     PolynomialFactorizationCantorZassenhausTest::all();
     PolynomialConversionsTest::all();
-    MonomialPolynomial::Test::all();
-    Polynomial<Rational>::Test::all();
+    MonomialPolynomialTest::all();
+    PolynomialTest::all();
     PolynomialUnivariateModularTest::all();
     PolynomialFactorizationFiniteFieldsTest::all();
     global << Logger::green << "Polynomial tests completed." << Logger::endL;

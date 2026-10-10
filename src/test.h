@@ -234,13 +234,42 @@ public:
   );
 };
 
+class PolynomialTest {
+public:
+  FormatExpressions format;
+  FormatExpressions formatDifferentials;
+  static bool all();
+  void initialize();
+  bool oneLeastCommonMultiple(
+    const std::string& left,
+    const std::string& right,
+    const std::string& expected
+  );
+  bool leastCommonMultiple();
+  bool oneFactorizationKronecker(
+    const std::string& input, const std::string& expectedFactors
+  );
+  bool factorizationKronecker();
+  bool oneDifferential(const std::string& input, const std::string& expected);
+  bool differential();
+  static Polynomial<Rational> fromString(const std::string& input);
+  Vector<Polynomial<Rational> > fromStringCommonContext(
+    const std::string& first, const std::string& second
+  );
+  Vector<Polynomial<Rational> > fromStringCommonContext(
+    const List<std::string>& input
+  );
+  bool fromStringTest();
+  bool fromStringCommonContextTest();
+};
+
 class PolynomialFactorizationFiniteFieldsTest {
 public:
   class TestCase {
   public:
     std::string toBeFactored;
     std::string desiredFactorization;
-    Polynomial<Rational>::Test parser;
+    PolynomialTest parser;
     bool run();
   };
 
@@ -387,6 +416,48 @@ class SelectionTest {
 public:
   static bool all();
   static bool testNElements(int n);
+};
+
+class MonomialPolynomialTest {
+public:
+  static bool all();
+  static bool testMonomialOrdersSatisfyTheDefinitionOne(
+    const MonomialPolynomial& mustBeSmaller,
+    const MonomialPolynomial& mustBeLarger,
+    List<MonomialPolynomial>::Comparator& order
+  );
+  static bool testMonomialOrdersSatisfyTheDefinition();
+};
+
+class ChevalleyGeneratorTest {
+public:
+  static bool all();
+  static bool basic();
+};
+
+class VectorsTest {
+public:
+  static bool all();
+  static bool linearDependence();
+  class TestCaseLinearDependence {
+  public:
+    List<std::string> input;
+    std::string expectedHomogeneous;
+    std::string expectedLexicographic;
+    bool test();
+  };
+};
+
+class PartialFractionsTest {
+public:
+  static bool all();
+  static bool splitTwoDimensional();
+  class SplitTestCase {
+  public:
+    std::string expected;
+    List<std::string> vectors;
+    bool test();
+  };
 };
 } // namespace: Testing.
 #endif

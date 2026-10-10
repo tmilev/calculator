@@ -72,11 +72,6 @@ public:
   // is not in the Cartan subalgebra.
   // If the element is in the Cartan subalgebra, returns the zero vector.
   bool isInRootSpace(Vector<Rational>* whichRoot) const;
-  class Test {
-  public:
-    static bool all();
-    static bool basic();
-  };
 };
 
 class DynkinSimpleType {

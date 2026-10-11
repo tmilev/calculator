@@ -556,6 +556,7 @@ public:
   ) const;
   bool toMathMLWithAtomHandler(
     std::stringstream& out,
+      FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
   ) const;
   bool toStringWithCompositeHandler(
@@ -565,6 +566,7 @@ public:
   ) const;
   bool toMathMLWithCompositeHandler(
     std::stringstream& out,
+      FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
   ) const;
   static bool toStringLnAbsoluteInsteadOfLogarithm(
@@ -1219,32 +1221,51 @@ public:
     const FormatExpressions* format = nullptr,
     JSData* outputJS = nullptr
   ) const;
-  std::string toMathML(
+
+  std::string toTableMathML(
+      Expression& startingExpression ,
     FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr,
-    Expression* startingExpression = nullptr,
-    bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const {
     std::stringstream out;
-    this->toMathML(
+    this->toTableMathML(
+        startingExpression,
       out,
       format,
       outputProperties,
-      startingExpression,
-      unfoldCommandEnclosures,
       outputJS
     );
     return out.str();
   }
+  void toTableMathML(
+      Expression& startingExpression ,
+      std::stringstream& out,
+      FormatExpressions* format = nullptr,
+      MathExpressionFormattingProperties* outputProperties = nullptr,
+      JSData* outputJS = nullptr
+      ) const;
+
+  void toTableMathMLUnfold(
+      Expression& startingExpression ,
+      std::stringstream& out,
+      FormatExpressions* format = nullptr,
+      MathExpressionFormattingProperties* outputProperties = nullptr,
+      JSData* outputJS = nullptr
+      ) const;
+
   void toMathML(
-    std::stringstream& out,
-    FormatExpressions* format = nullptr,
-    MathExpressionFormattingProperties* outputProperties = nullptr,
-    Expression* startingExpression = nullptr,
-    bool unfoldCommandEnclosures = false,
-    JSData* outputJS = nullptr
-  ) const;
+      std::stringstream& out,
+      FormatExpressions* format = nullptr,  MathExpressionFormattingProperties* outputProperties=nullptr
+
+      ) const;
+  std::string toMathML(
+      FormatExpressions* format = nullptr,  MathExpressionFormattingProperties* outputProperties=nullptr
+      ) const {
+    std::stringstream out;
+     this->toMathML(out, format, outputProperties);
+    return out.str();
+  }
   std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
   bool toStringGeneral(
     std::stringstream& out,
@@ -1266,12 +1287,6 @@ public:
     std::stringstream& out, FormatExpressions* format
   ) const;
   bool toStringEndStatementTopLevel(
-    std::stringstream& out,
-    Expression* startingExpression,
-    JSData* outputJS,
-    FormatExpressions* format
-  ) const;
-  bool toMathMLEndStatement(
     std::stringstream& out,
     Expression* startingExpression,
     JSData* outputJS,

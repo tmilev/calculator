@@ -1864,15 +1864,13 @@ void Calculator::evaluateCommandsDefault(
   result.elementType = JSData::Type::tokenObject;
   std::string resultString;
   if (this->flagUseMathML) {
-    resultString =
-    this->programExpression.toMathML(
+    this->programExpression.toTableMathMLUnfold(
+        startingExpression,
+        out,
       &global.defaultFormat.getElement(),
       nullptr,
-      &startingExpression,
-      true,
       &result
     );
-    out << resultString;
   } else {
     this->programExpression.toTableWithUnfoldedCommandEnclosures(
       startingExpression, out, &global.defaultFormat.getElement(), &result

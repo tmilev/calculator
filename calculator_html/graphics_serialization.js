@@ -603,7 +603,7 @@ class GraphicsSerialization {
             evaluatedNumberOfSegments,
             color,
             lineWidth,
-          ),
+          ), layer
         );
         return;
       case "surface":

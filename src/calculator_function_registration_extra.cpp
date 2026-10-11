@@ -465,7 +465,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsEncoding::convertHexToInteger,
     "",
     "Converts a hex string to an integer. ",
-    "ConvertHexToInteger(Base64ToHex(\"AQAB\"));",
+    "ConvertHexToInteger(ConvertBase64ToHex(\"AQAB\"));",
     "CalculatorFunctionsEncoding::hexToInteger",
     "ConvertHexToInteger",
     innerStandard

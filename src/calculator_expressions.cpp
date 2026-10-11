@@ -5653,7 +5653,7 @@ bool Expression::toStringWithAtomHandler(
 }
 
 bool Expression::toMathMLWithAtomHandler(
-  std::stringstream& out, MathExpressionFormattingProperties* outputProperties
+  std::stringstream& out,   FormatExpressions* format, MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toMathMLWithAtomHandler");
   if (!this->isList()) {
@@ -5668,13 +5668,12 @@ bool Expression::toMathMLWithAtomHandler(
   if (this->owner->toMathMLHandlersAtoms.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toMathMLHandlersAtoms.getValueNoFail(atom);
-    return handler(*this, out, nullptr, outputProperties);
+    return handler(*this, out, format, outputProperties);
   }
   return false;
 }
 
-bool Expression::toMathMLWithCompositeHandler(
-  std::stringstream& out, MathExpressionFormattingProperties* outputProperties
+bool Expression::toMathMLWithCompositeHandler(std::stringstream& out, FormatExpressions* format, MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toMathMLWithCompositeHandler");
   if (!this->isList()) {
@@ -5690,7 +5689,7 @@ bool Expression::toMathMLWithCompositeHandler(
   if (this->owner->toMathMLHandlersComposite.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toMathMLHandlersComposite.getValueNoFail(atom);
-    return handler(*this, out, nullptr, outputProperties);
+    return handler(*this, out, format, outputProperties);
   }
   return false;
 }

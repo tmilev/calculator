@@ -4300,9 +4300,9 @@ ConvertStringToHex(Sha256(Sha256("hello")));
 Converts a bitstream (not necessarily UTF-8 encoded) to hex. 
 
 *ConvertHexToInteger* [ConvertHexToInteger] {CalculatorFunctionsEncoding::hexToInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertHexToInteger%28Base64ToHex%28%5c%22AQAB%5c%22%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertHexToInteger%28ConvertBase64ToHex%28%5c%22AQAB%5c%22%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-ConvertHexToInteger(Base64ToHex("AQAB"));
+ConvertHexToInteger(ConvertBase64ToHex("AQAB"));
 ```
 Converts a hex string to an integer. 
 

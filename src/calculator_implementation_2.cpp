@@ -1865,8 +1865,8 @@ void Calculator::evaluateCommandsDefault(
   std::string resultString;
   if (this->flagUseMathML) {
     this->programExpression.toTableMathMLUnfold(
-        startingExpression,
-        out,
+      startingExpression,
+      out,
       &global.defaultFormat.getElement(),
       nullptr,
       &result

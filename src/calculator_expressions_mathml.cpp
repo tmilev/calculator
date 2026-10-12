@@ -993,40 +993,38 @@ std::string Expression::toMathMLFinal(FormatExpressions* format) const {
 }
 
 void Expression::toTableMathMLUnfold(
-    Expression& startingExpression ,
-    std::stringstream& out,
-    FormatExpressions* format ,
-    MathExpressionFormattingProperties* outputProperties ,
-    JSData* outputJS
-    ) const {
+  Expression& startingExpression,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties,
+  JSData* outputJS
+) const {
   STACK_TRACE("Expression::toTableMathMLUnfold");
-
-    Expression newStart;
-    Expression newMe;
-    if (
-        CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
-            *this->owner, *this, newMe
-            ) &&
-        CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
-            *this->owner, startingExpression, newStart
-            )
-        ) {
-      newMe.toTableMathML(newStart,
-          out, format, outputProperties, outputJS
-          );
-      return;
-    }
-    this->toTableMathML(startingExpression,out, format, outputProperties, outputJS );
-
+  Expression newStart;
+  Expression newMe;
+  if (
+    CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
+      *this->owner, *this, newMe
+    ) &&
+    CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
+      *this->owner, startingExpression, newStart
+    )
+  ) {
+    newMe.toTableMathML(newStart, out, format, outputProperties, outputJS);
+    return;
+  }
+  this->toTableMathML(
+    startingExpression, out, format, outputProperties, outputJS
+  );
 }
 
 void Expression::toTableMathML(
-    Expression& startingExpression ,
-    std::stringstream& out,
-    FormatExpressions* format ,
-    MathExpressionFormattingProperties* outputProperties ,
-    JSData* outputJS
-    ) const {
+  Expression& startingExpression,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties,
+  JSData* outputJS
+) const {
   STACK_TRACE("Expression::toTableMathML");
   RecursionDepthCounter recursionCounter;
   recursionCounter.initialize(&this->owner->recursionDepth);
@@ -1045,38 +1043,40 @@ void Expression::toTableMathML(
     format = &formatContainer.getElement();
     format->flagUseQuotes = false;
   }
-
   if (
-      !this->isOfType<std::string>() &&
-      !this->startsWith(this->owner->opCommandSequence())
-      ) {
-      format->flagUseQuotes = false;
+    !this->isOfType<std::string>() &&
+    !this->startsWith(this->owner->opCommandSequence())
+  ) {
+    format->flagUseQuotes = false;
   }
   if (outputJS != nullptr) {
     outputJS->reset();
   }
   int notationIndex =
-      owner->objectContainer.expressionsWithNotation.getIndex(*this);
+  owner->objectContainer.expressionsWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
     out
-        << owner->objectContainer.expressionsWithNotation.values[notationIndex].
-           mathML;
+    << owner->objectContainer.expressionsWithNotation.values[notationIndex].
+    mathML;
     return;
   }
   if (this->toMathMLData(out, format, outputProperties)) {
     return;
-  } else if (this->toMathMLWithAtomHandler(out,format, outputProperties)) {
+  } else if (this->toMathMLWithAtomHandler(out, format, outputProperties)) {
     return;
-  } else if (this->toMathMLWithCompositeHandler(out,format, outputProperties)) {} else
-    if (this->toMathMLEndStatementTopLevel(out, startingExpression, outputJS, format)) {
-      return;
-    } else if (this->size() == 1) {
-      (*this)[0].toMathML(
-          out, format, outputProperties
-          );
-    } else if (this->toMathMLGeneral(out, format, outputProperties)) {} else {
-      out << "<ms>(ProgrammingError:NotDocumented)</ms>";
-    }
+  } else if (
+    this->toMathMLWithCompositeHandler(out, format, outputProperties)
+  ) {} else if (
+    this->toMathMLEndStatementTopLevel(
+      out, startingExpression, outputJS, format
+    )
+  ) {
+    return;
+  } else if (this->size() == 1) {
+    (*this)[0].toMathML(out, format, outputProperties);
+  } else if (this->toMathMLGeneral(out, format, outputProperties)) {} else {
+    out << "<ms>(ProgrammingError:NotDocumented)</ms>";
+  }
 }
 
 void Expression::toMathML(
@@ -1102,13 +1102,11 @@ void Expression::toMathML(
     format = &formatContainer.getElement();
     format->flagUseQuotes = false;
   }
-
   if (
     !this->isOfType<std::string>() &&
     !this->startsWith(this->owner->opCommandSequence())
-
   ) {
-      format->flagUseQuotes = true;
+    format->flagUseQuotes = true;
     format->flagExpressionIsTopLevel = false;
   }
   int notationIndex =
@@ -1121,18 +1119,16 @@ void Expression::toMathML(
   }
   if (this->toMathMLData(out, format, outputProperties)) {
     return;
-  } else if (this->toMathMLWithAtomHandler(out,format, outputProperties)) {
+  } else if (this->toMathMLWithAtomHandler(out, format, outputProperties)) {
     return;
-  } else if (this->toMathMLWithCompositeHandler(out,format, outputProperties)) {}
-  else if (this->size() == 1) {
-    (*this)[0].toMathML(
-      out, format, outputProperties
-    );
+  } else if (
+    this->toMathMLWithCompositeHandler(out, format, outputProperties)
+  ) {} else if (this->size() == 1) {
+    (*this)[0].toMathML(out, format, outputProperties);
   } else if (this->toMathMLGeneral(out, format, outputProperties)) {} else {
     out << "<ms>(ProgrammingError:NotDocumented)</ms>";
   }
 }
-
 
 bool Expression::toMathMLEndStatementTopLevel(
   std::stringstream& out,
@@ -1191,7 +1187,6 @@ bool Expression::toMathMLEndStatementOneRowTopLevel(
   FormatExpressions& format
 ) const {
   STACK_TRACE("Expression::toMathMLEndStatementOneRowTopLevel");
-
   std::string currentInput;
   std::string currentOutput;
   const Expression currentExpression = (*this)[index];
@@ -1199,7 +1194,7 @@ bool Expression::toMathMLEndStatementOneRowTopLevel(
   if (!this->owner->flagHideLHS) {
     if (index < (*startingExpression).size()) {
       format.flagDontCollalpseProductsByUnits = true;
-      format.flagExpressionIsTopLevel=true;
+      format.flagExpressionIsTopLevel = true;
       currentInput = (*startingExpression)[index].toMathMLFinal(&format);
     } else {
       currentInput =
@@ -1224,7 +1219,7 @@ bool Expression::toMathMLEndStatementOneRowTopLevel(
     );
   } else if (currentExpression.requiresNoMathTagsNonConstRunTime()) {
     format.flagDontCollalpseProductsByUnits = false;
-    format.flagExpressionIsTopLevel=true;
+    format.flagExpressionIsTopLevel = true;
     currentOutput = currentExpression.toString(&format);
   } else {
     format.flagDontCollalpseProductsByUnits = false;
@@ -1382,6 +1377,65 @@ bool Expression::toMathMLGeneral(
     outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
   }
   out << "</mrow>";
+  return true;
+}
+
+bool Expression::toExpressionPrintoutNodeGeneral(
+  ExpressionPrintoutNode& output,
+  ExpressionPrintout& container,
+  List<int>& children,
+  FormatExpressions* format
+) const {
+  if (container.useMathML) {
+    return
+    this->toMathMLExpressionPrintoutNodeGeneral(
+      output, container, children, format
+    );
+  } else {
+    return
+    this->toStringExpressionPrintoutNodeGeneral(
+      output, container, children, format
+    );
+  }
+}
+
+bool Expression::toMathMLExpressionPrintoutNodeGeneral(
+  ExpressionPrintoutNode& output,
+  ExpressionPrintout& container,
+  List<int>& children,
+  FormatExpressions* format
+) const {
+  (void) format;
+  if (this->size() < 2) {
+    return false;
+  }
+  container.appendStringTo("<mrow>", output);
+  output.children.addOnTop(children[0]);
+  bool needParenthesis = true;
+  if (this->size() == 2) {
+    if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].isAtom();
+    }
+    if ((*this)[0].isPowerOfAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].isAtom();
+    }
+  }
+  if (needParenthesis) {
+    container.appendStringTo(MathML::leftParenthesis, output);
+    container.appendStringTo("<mrow>", output);
+  }
+  for (int i = 1; i < this->children.size; i ++) {
+    output.children.addOnTop(children[i]);
+    if (i != this->children.size - 1) {
+      container.appendStringTo("<mo>,</mo>", output);
+    }
+  }
+  if (needParenthesis) {
+    container.appendStringTo("</mrow>", output);
+    container.appendStringTo(MathML::rightParenthesis, output);
+  }
+  output.properties.needsParenthesesForMultiplicationOnTheRight = true;
+  container.appendStringTo("</mrow>", output);
   return true;
 }
 

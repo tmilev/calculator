@@ -5,7 +5,7 @@
 #include "general_maps.h"
 #include <sstream>
 
-// Properties of a printed mathml expression.
+// Properties of a printed math expression.
 class MathExpressionFormattingProperties {
 public:
   bool startsWithMinus;

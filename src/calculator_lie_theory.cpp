@@ -322,7 +322,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       totalTime += global.getElapsedSeconds() - currentTime;
       weylFormat.customCoefficientMonomialSeparator = "\\otimes ";
       weylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
-      weylFormat.maximumLineLength = -1;
+      weylFormat.maximumLineLength = - 1;
       out
       << "<td>"
       << HtmlRoutines::getMathNoDisplay(

@@ -1989,6 +1989,7 @@ struct MathMLAndLatex {
   }
   std::string latex;
   std::string mathML;
+  MathExpressionFormattingProperties properties;
   MathMLAndLatex(
     const std::string& inputLatexLetter, const std::string& inputMathMLLetter
   ):

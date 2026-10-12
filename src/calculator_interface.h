@@ -1,6 +1,7 @@
 #ifndef header_calculator_interface_ALREADY_INCLUDED
 #define header_calculator_interface_ALREADY_INCLUDED
 
+#include "expression_printout.h"
 #include "general_list_references.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_elliptic_curves.h"
@@ -153,6 +154,15 @@ public:
     std::stringstream& out,
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
+  );
+  // A function that converts an expression to string and writes the string
+  // into the given stream.
+  typedef bool(*ToExpressionPrintoutNodeHandler)(
+    const Expression& input,
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    const List<int>& children,
+    FormatExpressions* format
   );
   // A function that converts an expression to mathML and writes the string
   // into the given stream.
@@ -515,6 +525,11 @@ public:
     FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
+  bool toExpressionPrintoutNodeData(
+    ExpressionPrintoutNode& output,
+    bool useMathML,
+    FormatExpressions* format = nullptr
+  ) const;
   bool toStringData(
     std::stringstream& out,
     FormatExpressions* format = nullptr,
@@ -554,9 +569,33 @@ public:
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
   ) const;
+  bool toExpressionPrintoutNodeWithAtomHandler(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    const List<int>& childIndices,
+    FormatExpressions* format
+  ) const;
+  bool toStringExpressionPrintoutNodeWithAtomHandler(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    const List<int>& childIndices,
+    FormatExpressions* format
+  ) const;
+  bool toMathMLExpressionPrintoutNodeWithAtomHandler(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    const List<int>& childIndices,
+    FormatExpressions* format
+  ) const;
+  bool toExpressionPrintoutNodeWithCompositeHandler(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    const List<int>& childIndices,
+    FormatExpressions* format
+  ) const;
   bool toMathMLWithAtomHandler(
     std::stringstream& out,
-      FormatExpressions* format,
+    FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
   ) const;
   bool toStringWithCompositeHandler(
@@ -566,7 +605,7 @@ public:
   ) const;
   bool toMathMLWithCompositeHandler(
     std::stringstream& out,
-      FormatExpressions* format,
+    FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
   ) const;
   static bool toStringLnAbsoluteInsteadOfLogarithm(
@@ -1211,6 +1250,23 @@ public:
     JSData* outputJS = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
   ) const;
+  // Prints an expression to a printout node embedded inside the
+  // full expression printout.
+  void toExpressionPrintout(
+    ExpressionPrintout& output, const FormatExpressions* format = nullptr
+  ) const;
+  void toStringExpressionPrintoutNode(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    List<int>& children,
+    const FormatExpressions* format = nullptr
+  ) const;
+  void toMathMLExpressionPrintoutNode(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& childContainer,
+    List<int>& children,
+    const FormatExpressions* format = nullptr
+  ) const;
   std::string toString(
     const FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr
@@ -1221,49 +1277,43 @@ public:
     const FormatExpressions* format = nullptr,
     JSData* outputJS = nullptr
   ) const;
-
   std::string toTableMathML(
-      Expression& startingExpression ,
+    Expression& startingExpression,
     FormatExpressions* format = nullptr,
     MathExpressionFormattingProperties* outputProperties = nullptr,
     JSData* outputJS = nullptr
   ) const {
     std::stringstream out;
     this->toTableMathML(
-        startingExpression,
-      out,
-      format,
-      outputProperties,
-      outputJS
+      startingExpression, out, format, outputProperties, outputJS
     );
     return out.str();
   }
   void toTableMathML(
-      Expression& startingExpression ,
-      std::stringstream& out,
-      FormatExpressions* format = nullptr,
-      MathExpressionFormattingProperties* outputProperties = nullptr,
-      JSData* outputJS = nullptr
-      ) const;
-
+    Expression& startingExpression,
+    std::stringstream& out,
+    FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr,
+    JSData* outputJS = nullptr
+  ) const;
   void toTableMathMLUnfold(
-      Expression& startingExpression ,
-      std::stringstream& out,
-      FormatExpressions* format = nullptr,
-      MathExpressionFormattingProperties* outputProperties = nullptr,
-      JSData* outputJS = nullptr
-      ) const;
-
+    Expression& startingExpression,
+    std::stringstream& out,
+    FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr,
+    JSData* outputJS = nullptr
+  ) const;
   void toMathML(
-      std::stringstream& out,
-      FormatExpressions* format = nullptr,  MathExpressionFormattingProperties* outputProperties=nullptr
-
-      ) const;
+    std::stringstream& out,
+    FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const;
   std::string toMathML(
-      FormatExpressions* format = nullptr,  MathExpressionFormattingProperties* outputProperties=nullptr
-      ) const {
+    FormatExpressions* format = nullptr,
+    MathExpressionFormattingProperties* outputProperties = nullptr
+  ) const {
     std::stringstream out;
-     this->toMathML(out, format, outputProperties);
+    this->toMathML(out, format, outputProperties);
     return out.str();
   }
   std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
@@ -1276,6 +1326,24 @@ public:
     std::stringstream& out,
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
+  ) const;
+  bool toExpressionPrintoutNodeGeneral(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    List<int>& children,
+    FormatExpressions* format
+  ) const;
+  bool toMathMLExpressionPrintoutNodeGeneral(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    List<int>& children,
+    FormatExpressions* format
+  ) const;
+  bool toStringExpressionPrintoutNodeGeneral(
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    List<int>& childrenPrintouts,
+    FormatExpressions* format
   ) const;
   std::string toTableWithStartingExpression(
     FormatExpressions* format,
@@ -2755,10 +2823,16 @@ public:
   toStringHandlersAtoms;
   MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>
   toMathMLHandlersAtoms;
+  MapList<int, Expression::ToExpressionPrintoutNodeHandler>
+  toStringExpressionPrintoutNodeHandlersAtoms;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringHandlersComposite;
   MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>
   toMathMLHandlersComposite;
+  MapList<int, Expression::ToExpressionPrintoutNodeHandler>
+  toStringExpressionPrintoutNodeHandlersComposite;
+  MapList<int, Expression::ToExpressionPrintoutNodeHandler>
+  toMathMLExpressionPrintoutNodeHandlersComposite;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringDataHandlers;
   MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>

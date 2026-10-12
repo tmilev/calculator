@@ -188,6 +188,7 @@ SOURCES_RELATIVE_PATH=\
     email_user.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \
+    expression_printout.cpp \
     global_objects.cpp \
     global_test.cpp \
     html_snippets.cpp \

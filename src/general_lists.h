@@ -1962,7 +1962,7 @@ void List<Object>::slice(
   if (sizeOfSlice < 0) {
     sizeOfSlice = 0;
   }
-  if (sizeOfSlice > this->size - startingIndex) {
+  if (sizeOfSlice + startingIndex > this->size) {
     sizeOfSlice = this->size - startingIndex;
   }
   if (output.size < sizeOfSlice) {

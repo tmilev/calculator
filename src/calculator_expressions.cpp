@@ -3439,6 +3439,23 @@ bool Expression::toStringAtom(
   return true;
 }
 
+bool Expression::toExpressionPrintoutNodeData(
+  ExpressionPrintoutNode& output, bool useMathML, FormatExpressions* format
+) const {
+  std::stringstream out;
+  MathExpressionFormattingProperties properties;
+  bool result =
+  useMathML ?
+  this->toMathMLData(out, format, &properties) :
+  this->toStringData(out, format, &properties);
+  if (!result) {
+    return false;
+  }
+  output.properties = properties;
+  output.content = out.str();
+  return true;
+}
+
 bool Expression::toStringData(
   std::stringstream& out,
   FormatExpressions* format,
@@ -4206,6 +4223,44 @@ bool Expression::toStringGeneral(
   if (outputProperties != nullptr) {
     outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
   }
+  return true;
+}
+
+bool Expression::toStringExpressionPrintoutNodeGeneral(
+  ExpressionPrintoutNode& output,
+  ExpressionPrintout& container,
+  List<int>& childrenPrintouts,
+  FormatExpressions* format
+) const {
+  (void) format;
+  if (this->size() < 2) {
+    return false;
+  }
+  output.children.clear();
+  output.children.addOnTop(childrenPrintouts[0]);
+  bool needParenthesis = true;
+  if (this->size() == 2) {
+    if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].isAtom();
+    }
+    if ((*this)[0].isPowerOfAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].isAtom();
+    }
+  }
+  container.appendStringTo("{}", output);
+  if (needParenthesis) {
+    container.appendStringTo("\\left(", output);
+  }
+  for (int i = 1; i < this->children.size; i ++) {
+    output.children.addOnTop(childrenPrintouts[i]);
+    if (i != this->children.size - 1) {
+      output.children.addOnTop(container.addString(", "));
+    }
+  }
+  if (needParenthesis) {
+    output.children.addOnTop(container.addString("\\right)"));
+  }
+  output.properties.needsParenthesesForMultiplicationOnTheRight = true;
   return true;
 }
 
@@ -5629,6 +5684,32 @@ bool Expression::toStringEqualEqualEqual(
   return true;
 }
 
+bool Expression::toExpressionPrintoutNodeWithAtomHandler(
+  ExpressionPrintoutNode& output,
+  ExpressionPrintout& container,
+  const List<int>& childIndices,
+  FormatExpressions* format
+) const {
+  STACK_TRACE("Expression::toExpressionPrintoutNodeWithAtomHandler");
+  if (!this->isList()) {
+    return false;
+  }
+  if (!(*this)[0].isAtom()) {
+    return false;
+  }
+  int atom = (*this)[0].data;
+  // The handlers are initialized in:
+  // Calculator::initializeToStringHandlers
+  if (this->owner->toStringHandlersAtoms.contains(atom)) {
+    Expression::ToExpressionPrintoutNodeHandler handler =
+    this->owner->toStringExpressionPrintoutNodeHandlersAtoms.getValueNoFail(
+      atom
+    );
+    return handler(*this, output, container, childIndices, format);
+  }
+  return false;
+}
+
 bool Expression::toStringWithAtomHandler(
   std::stringstream& out,
   FormatExpressions* format,
@@ -5653,7 +5734,9 @@ bool Expression::toStringWithAtomHandler(
 }
 
 bool Expression::toMathMLWithAtomHandler(
-  std::stringstream& out,   FormatExpressions* format, MathExpressionFormattingProperties* outputProperties
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toMathMLWithAtomHandler");
   if (!this->isList()) {
@@ -5673,7 +5756,10 @@ bool Expression::toMathMLWithAtomHandler(
   return false;
 }
 
-bool Expression::toMathMLWithCompositeHandler(std::stringstream& out, FormatExpressions* format, MathExpressionFormattingProperties* outputProperties
+bool Expression::toMathMLWithCompositeHandler(
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toMathMLWithCompositeHandler");
   if (!this->isList()) {
@@ -5692,6 +5778,36 @@ bool Expression::toMathMLWithCompositeHandler(std::stringstream& out, FormatExpr
     return handler(*this, out, format, outputProperties);
   }
   return false;
+}
+
+bool Expression::toExpressionPrintoutNodeWithCompositeHandler(
+  ExpressionPrintoutNode& output,
+  ExpressionPrintout& container,
+  const List<int>& childIndices,
+  FormatExpressions* format
+) const {
+  STACK_TRACE("Expression::toExpressionPrintoutNodeWithCompositeHandler");
+  if (!this->isList()) {
+    return false;
+  }
+  if (!(*this)[0].isList()) {
+    return false;
+  }
+  if (!(*this)[0][0].isAtom()) {
+    return false;
+  }
+  int atom = (*this)[0][0].data;
+  MapList<int, Expression::ToExpressionPrintoutNodeHandler>& handlers =
+  container.useMathML ?
+  this->owner->toStringExpressionPrintoutNodeHandlersComposite :
+  this->owner->toMathMLExpressionPrintoutNodeHandlersComposite;
+  int index = handlers.getIndex(atom);
+  if (index < 0) {
+    return false;
+  }
+  Expression::ToExpressionPrintoutNodeHandler handler =
+  handlers.values[index];
+  return handler(*this, output, container, childIndices, format);
 }
 
 bool Expression::toStringWithCompositeHandler(
@@ -5824,6 +5940,11 @@ std::string Expression::toString(
   MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toString");
+  if (true) {
+    ExpressionPrintout printout;
+    this->toExpressionPrintout(printout, format);
+    return printout.toStringRootNode();
+  }
   MemorySaving<FormatExpressions> formatContainer;
   if (format == nullptr) {
     format = &formatContainer.getElement();
@@ -7006,4 +7127,181 @@ const Expression& Expression::operator[](int n) const {
     << global.fatal;
   }
   return this->owner->allChildExpressions[childIndex];
+}
+
+namespace {
+
+struct ExpressionAndPrintoutData {
+public:
+  ExpressionAndPrintoutData(): expression(nullptr), printoutIndex(0) {}
+  ExpressionAndPrintoutData(const Expression& inputExpression):
+  expression(&inputExpression),
+  printoutIndex(0) {}
+  const Expression* expression;
+  int printoutIndex;
+  List<int> childrenPrintoutIndices;
+};
+
+struct ExpressionPrintoutWalker {
+public:
+  ExpressionPrintout& output;
+  MapReferences<Expression, MathMLAndLatex>& expressionsWithNotation;
+  List<ExpressionAndPrintoutData> stack;
+  bool useMathML;
+  ExpressionPrintoutWalker(
+    ExpressionPrintout& outputTarget,
+    MapReferences<Expression, MathMLAndLatex>& ownerExpressionsWithNotation
+  ):
+  output(outputTarget),
+  expressionsWithNotation(ownerExpressionsWithNotation),
+  useMathML(false) {}
+  void initialize(const Expression& input);
+  bool maybeConsumeExpressionWithNotation();
+  bool consumeNext(const FormatExpressions* format);
+  void removeAndPrintStackTop(int newPrintoutIndex);
+};
+
+bool ExpressionPrintoutWalker::maybeConsumeExpressionWithNotation() {
+  if (this->stack.size == 0) {
+    return false;
+  }
+  ExpressionAndPrintoutData & lastCandidate = *this->stack.lastObject();
+  const Expression& lastParent = *lastCandidate.expression;
+  int index = expressionsWithNotation.getIndex(lastParent);
+  if (index == - 1) {
+    // Not an expression with notation.
+    return false;
+  }
+  ExpressionPrintoutNode printout;
+  MathMLAndLatex& mathMLAndLatex = expressionsWithNotation.values[index];
+  printout.content = mathMLAndLatex.latex;
+  printout.properties = mathMLAndLatex.properties;
+  int newPrintoutIndex = output.allPrintouts.size;
+  this->output.allPrintouts.addOnTop(printout);
+  this->removeAndPrintStackTop(newPrintoutIndex);
+  return true;
+}
+
+void ExpressionPrintoutWalker::removeAndPrintStackTop(int newPrintoutIndex) {
+  this->stack.removeLastObject();
+  if (this->stack.size == 0) {
+    return;
+  }
+  ExpressionAndPrintoutData& current = *this->stack.lastObject();
+  current.childrenPrintoutIndices.addOnTop(newPrintoutIndex);
+}
+
+void ExpressionPrintoutWalker::initialize(const Expression& input) {
+  this->output.clear();
+  this->stack.clear();
+  ExpressionPrintoutNode empty;
+  this->output.allPrintouts.addOnTop(empty);
+  ExpressionAndPrintoutData inputWithPrintout(input);
+  this->stack.addOnTop(inputWithPrintout);
+}
+
+bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
+  if (this->stack.size == 0) {
+    return false;
+  }
+  ExpressionAndPrintoutData & current = *this->stack.lastObject();
+  const Expression& currentExpression = *current.expression;
+  int totalChildrenProcessed = current.childrenPrintoutIndices.size;
+  if (totalChildrenProcessed == 0) {
+    // Check whether expression has a shortcut conversion before processing
+    // children expressions.
+    if (this->maybeConsumeExpressionWithNotation()) {
+      return true;
+    }
+  }
+  if (totalChildrenProcessed < currentExpression.size()) {
+    // Next child to process.
+    this->stack.addOnTop(
+      ExpressionAndPrintoutData(currentExpression[totalChildrenProcessed])
+    );
+    return true;
+  }
+  // All children of the current expression are printed.
+  // Print the current one.
+  ExpressionPrintoutNode printout;
+  currentExpression.toStringExpressionPrintoutNode(
+    printout, this->output, current.childrenPrintoutIndices, format
+  );
+  int indexLast = this->output.allPrintouts.size;
+  this->output.allPrintouts.addOnTop(printout);
+  this->stack.removeLastObject();
+  if (this->stack.size == 0) {
+    this->output.indexRootNode = indexLast;
+  } else {
+    this->stack.lastObject()->childrenPrintoutIndices.addOnTop(indexLast);
+  }
+  return true;
+}
+}
+
+void Expression::toExpressionPrintout(
+  ExpressionPrintout& output, const FormatExpressions* format
+) const {
+  STACK_TRACE("Expression::toExpressionPrintout");
+  output.clear();
+  if (this->owner == nullptr) {
+    output.indexRootNode = output.addString("(Error:NoOwner)");
+    return;
+  }
+  ExpressionPrintoutWalker walker(
+    output, this->owner->objectContainer.expressionsWithNotation
+  );
+  walker.initialize(*this);
+  while (walker.consumeNext(format)) {}
+}
+
+void Expression::toStringExpressionPrintoutNode(
+  ExpressionPrintoutNode& output,
+  ExpressionPrintout& container,
+  List<int>& children,
+  const FormatExpressions* format
+) const {
+  if (this->owner == nullptr) {
+    output.content = "(Error:NoOwner)";
+    return;
+  }
+  MemorySaving<FormatExpressions> formatContainer;
+  if (format == nullptr) {
+    format = &formatContainer.getElement();
+    formatContainer.getElement().flagUseQuotes = false;
+    formatContainer.getElement().flagExpressionIsInMainDisplay = true;
+  }
+  RecursionDepthCounter recursionCounter;
+  recursionCounter.initialize(&this->owner->recursionDepth);
+  this->checkConsistency();
+  FormatExpressions formatCopy;
+  formatCopy = *format;
+  if (
+    !this->isOfType<std::string>() &&
+    !this->startsWith(this->owner->opCommandSequence())
+  ) {
+    formatCopy.flagUseQuotes = true;
+  }
+  if (
+    this->toExpressionPrintoutNodeData(
+      output, container.useMathML, &formatCopy
+    )
+  ) {} else if (
+    this->toExpressionPrintoutNodeWithAtomHandler(
+      output, container, children, &formatCopy
+    )
+  ) {} else if (
+    this->toExpressionPrintoutNodeWithCompositeHandler(
+      output, container, children, &formatCopy
+    )
+  ) {} else if (this->size() == 1) {
+    output = container.allPrintouts[children[0]];
+  } else if (
+    this->toExpressionPrintoutNodeGeneral(
+      output, container, children, &formatCopy
+    )
+  ) {} else {
+    output.content = "(ProgrammingError:NotDocumented)";
+    // <-not sure if this case is possible
+  }
 }

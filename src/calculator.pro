@@ -29,6 +29,7 @@ HEADERS += \
     calculator_weyl_group_characters.h \
     crypto_calculator.h \
     database.h \
+  expression_printout.h \
     general_database_system_independent.h \
     general_file_operations_encodings.h \
     general_list_references.h \
@@ -738,6 +739,7 @@ SOURCES += \
     email_user.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \
+  expression_printout.cpp \
   general_list_test.cpp \
     general_strings_test.cpp \
     global_objects.cpp \

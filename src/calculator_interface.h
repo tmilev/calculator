@@ -161,7 +161,7 @@ public:
     const Expression& input,
     ExpressionPrintoutNode& output,
     ExpressionPrintout& container,
-    const List<int>& children,
+    const List<int>& childrenIndices,
     FormatExpressions* format
   );
   // A function that converts an expression to mathML and writes the string
@@ -575,18 +575,6 @@ public:
     const List<int>& childIndices,
     FormatExpressions* format
   ) const;
-  bool toStringExpressionPrintoutNodeWithAtomHandler(
-    ExpressionPrintoutNode& output,
-    ExpressionPrintout& container,
-    const List<int>& childIndices,
-    FormatExpressions* format
-  ) const;
-  bool toMathMLExpressionPrintoutNodeWithAtomHandler(
-    ExpressionPrintoutNode& output,
-    ExpressionPrintout& container,
-    const List<int>& childIndices,
-    FormatExpressions* format
-  ) const;
   bool toExpressionPrintoutNodeWithCompositeHandler(
     ExpressionPrintoutNode& output,
     ExpressionPrintout& container,
@@ -664,6 +652,20 @@ public:
     std::stringstream& out,
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties
+  );
+  static bool toStringExpressionPrintoutDefine(
+    const Expression& input,
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    const List<int>& childrenIndices,
+    FormatExpressions* format
+  );
+  static bool toMathMLExpressionPrintoutDefine(
+    const Expression& input,
+    ExpressionPrintoutNode& output,
+    ExpressionPrintout& container,
+    const List<int>& childrenIndices,
+    FormatExpressions* format
   );
   static bool toMathMLDefine(
     const Expression& input,
@@ -1536,6 +1538,10 @@ public:
     MapList<Expression, Expression>& substitutions
   );
   static void initializeToMathMLHandlers(Calculator& toBeInitialized);
+  static void initializeToStringHandlers(Calculator& toBeInitialized);
+  static void initializeToExpressionPrintoutNodeHandlers(
+    Calculator& toBeInitialized
+  );
   typedef Expression* ExpressionPointer;
 };
 
@@ -2825,6 +2831,8 @@ public:
   toMathMLHandlersAtoms;
   MapList<int, Expression::ToExpressionPrintoutNodeHandler>
   toStringExpressionPrintoutNodeHandlersAtoms;
+  MapList<int, Expression::ToExpressionPrintoutNodeHandler>
+  toMathMLExpressionPrintoutNodeHandlersAtoms;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringHandlersComposite;
   MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>
@@ -2849,8 +2857,7 @@ public:
   // If a function returns true this means that output contains the result of
   // the function.
   // Note that the output of a function may be of type Error. Error results
-  // come, like any other
-  // result, with a true return from the function.
+  // come, like any other result, with a true return from the function.
   // -----------------------------------------------
   //
   // The concept of an inner and outer function is **deprecated**.
@@ -2860,8 +2867,7 @@ public:
   // functions.
   //
   // In addition, built-in functions are split into two flavors:
-  // inner functions (or just "functions")
-  // and outer functions (or "laws").
+  // inner functions (or just "functions") and outer functions (or "laws").
   // The only difference between inner functions and outer functions is the
   // way they are applied when the calculator reduces an expression.
   //
@@ -3031,8 +3037,7 @@ public:
   // The Expression object records the type string and an integer that
   // represents the position of the object in a global array held in
   // calculator.objectContainer.
-  // A built in object is atomic
-  // from the standpoint of a calculator user.
+  // A built in object is atomic from the standpoint of a calculator user.
   // The built in type is not allowed to be used as a function.
   template <class Type>
   static std::string builtInName();
@@ -3850,6 +3855,11 @@ public:
     const std::string& inputCalculatorIdentifier,
     const FunctionOptions& inputOptions
   );
+  void addAtomExpressionPrintoutHandlers(
+    int atom,
+    Expression::ToExpressionPrintoutNodeHandler toStringHandler,
+    Expression::ToExpressionPrintoutNodeHandler toMathMLHandler
+  );
   void addOneStringAtomHandler(int atom, Expression::ToStringHandler handler);
   void addOneMathMLAtomHandler(int atom, Expression::ToMathMLHandler handler);
   void addOneStringCompositeHandler(
@@ -3873,7 +3883,6 @@ public:
   void reset();
   void initialize(Calculator::Mode desiredMode);
   void initializeLogDuration(Calculator::Mode desiredMode);
-  void initializeToStringHandlers();
   void initializeAtomsThatFreezeArguments();
   void initializeBuiltInsFreezeArguments();
   void initializeAtomsNonCacheable();

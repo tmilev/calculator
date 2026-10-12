@@ -142,6 +142,8 @@ SOURCES_RELATIVE_PATH=\
     calculator_conversions_1.cpp \
     calculator_educational_functions_1.cpp \
     calculator_expressions.cpp \
+    calculator_expressions_to_string.cpp \
+    calculator_expressions_to_expression_printout.cpp \
     calculator_expression_context.cpp \
     calculator_expressions_mathml.cpp \
     calculator_expressions_test.cpp \

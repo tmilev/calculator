@@ -28,7 +28,9 @@ public:
   startsWithFraction(false),
   needsParenthesesForMultiplicationOnTheRight(true),
   needsParenthesesWhenLastAndMultipliedOnTheLeft(true),
-      needsProductSignForMultiplication(false), startsWithAbsoluteValue(false) , needsParenthesesForAddition(false){}
+  needsProductSignForMultiplication(false),
+  startsWithAbsoluteValue(false),
+  needsParenthesesForAddition(false) {}
   std::string toString() const;
 };
 

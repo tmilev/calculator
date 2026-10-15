@@ -3452,7 +3452,7 @@ bool Expression::toExpressionPrintoutNodeData(
     return false;
   }
   output.properties = properties;
-  output.setContent( out.str());
+  output.setContent(out.str());
   return true;
 }
 
@@ -3824,9 +3824,6 @@ bool Expression::requiresNoMathTagsNonConstRunTime() const {
   return false;
 }
 
-
-
-
 std::string Expression::toStringTreeHtml(int depth) const {
   std::stringstream out;
   if (depth > 100) {
@@ -3850,8 +3847,6 @@ std::string Expression::toStringTreeHtml(int depth) const {
   }
   return out.str();
 }
-
-
 
 bool Expression::toStringGeneral(
   std::stringstream& out,
@@ -4101,9 +4096,6 @@ bool Expression::toStringEndStatementNested(
   }
   return true;
 }
-
-
-
 
 std::string Expression::toTableWithStartingExpression(
   FormatExpressions* format,
@@ -4584,23 +4576,21 @@ bool Expression::isAtomUserDefined(std::string* whichAtom) const {
   return this->isOperation(whichAtom);
 }
 
-bool Expression::needsMutationForPrinting(Expression&whichMutation)const{
-  if (this->owner==nullptr){
+bool Expression::needsMutationForPrinting(Expression& whichMutation) const {
+  if (this->owner == nullptr) {
     return false;
   }
-  int opPlus =this->owner->opPlus();
+  int opPlus = this->owner->opPlus();
   if (!this->startsWith(opPlus)) {
     return false;
   }
-  if (this->size()<3) {
+  if (this->size() < 3) {
     return false;
   }
   List<Expression> opands;
-
-  this->owner->collectOpands(*this,opPlus, opands);
+  this->owner->collectOpands(*this, opPlus, opands);
   whichMutation.makeOXdotsX(*this->owner, opPlus, opands);
   return true;
-
 }
 
 bool Expression::isOperation(std::string* outputWhichOperation) const {

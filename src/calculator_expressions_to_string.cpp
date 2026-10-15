@@ -67,8 +67,7 @@ bool Expression::toStringExpressionPrintoutMinus2(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
-  (void)format;
-
+  (void) format;
   if (!input.startsWith(input.owner->opMinus(), 2)) {
     return false;
   }
@@ -90,8 +89,8 @@ bool Expression::toStringExpressionPrintoutMinus3(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opMinus(), 3)) {
     return false;
   }
@@ -1634,7 +1633,7 @@ bool Expression::toStringExpressionPrintoutIsDenotedBy(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
-  (void)format;
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opIsDenotedBy())) {
     return false;
   }
@@ -1825,8 +1824,8 @@ bool Expression::toStringExpressionPrintoutDefineConditional(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opDefineConditional(), 4)) {
     return false;
   }
@@ -1962,8 +1961,8 @@ bool Expression::toStringExpressionPrintoutIn(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opIn(), 3)) {
     return false;
   }
@@ -2022,8 +2021,8 @@ bool Expression::toStringExpressionPrintoutBinom(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opBinom(), 3)) {
     return false;
   }
@@ -2038,8 +2037,8 @@ bool Expression::toStringExpressionPrintoutUnderscore(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opUnderscore(), 3)) {
     return false;
   }
@@ -2064,8 +2063,8 @@ bool Expression::toStringExpressionPrintoutSetMinus(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opSetMinus(), 3)) {
     return false;
   }
@@ -2079,8 +2078,8 @@ bool Expression::toStringExpressionPrintoutLimitBoundary(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opLimitBoundary(), 3)) {
     return false;
   }
@@ -2232,8 +2231,8 @@ bool Expression::toStringExpressionPrintoutSqrt2(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opSqrt(), 2)) {
     return false;
   }
@@ -2560,8 +2559,8 @@ bool Expression::toStringExpressionPrintoutBind(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opBind(), 2)) {
     return false;
   }
@@ -2574,8 +2573,8 @@ bool Expression::toStringExpressionPrintoutEqualEqual(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opEqualEqual())) {
     return false;
   }
@@ -2590,8 +2589,8 @@ bool Expression::toStringExpressionPrintoutEqualEqualEqual(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opEqualEqualEqual())) {
     return false;
   }
@@ -2606,8 +2605,8 @@ bool Expression::toStringExpressionPrintoutDifferentiate(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
     return false;
   }
@@ -2716,8 +2715,8 @@ bool Expression::toStringExpressionPrintoutGreaterThan(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opGreaterThan())) {
     return false;
   }
@@ -2732,8 +2731,8 @@ bool Expression::toStringExpressionPrintoutGreaterThanOrEqualTo(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
     return false;
   }
@@ -2748,8 +2747,8 @@ bool Expression::toStringExpressionPrintoutLessThanOrEqualTo(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
     return false;
   }
@@ -2764,8 +2763,8 @@ bool Expression::toStringExpressionPrintoutLimit(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.startsWith(input.owner->opLimit(), 3)) {
     return false;
   }
@@ -2793,8 +2792,8 @@ bool Expression::toStringExpressionPrintoutLimitProcess(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opLimitProcess())) {
     return false;
   }
@@ -2809,8 +2808,8 @@ bool Expression::toStringExpressionPrintoutLessThan(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opLessThan())) {
     return false;
   }
@@ -2871,8 +2870,8 @@ bool Expression::toStringExpressionPrintoutLieBracket(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opLieBracket())) {
     return false;
   }
@@ -2886,8 +2885,8 @@ bool Expression::toStringExpressionPrintoutMod(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opMod())) {
     return false;
   }
@@ -2909,8 +2908,8 @@ bool Expression::toStringExpressionPrintoutUnion(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   if (
     !input.isListStartingWithAtom(input.owner->opUnion()) || input.size() != 3
   ) {
@@ -3035,8 +3034,8 @@ bool Expression::toStringExpressionPrintoutDifferential2(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   STACK_TRACE("Expression::toStringExpressionPrintoutDifferential2");
   if (!input.startsWith(input.owner->opDifferential(), 2)) {
     return false;
@@ -3058,8 +3057,8 @@ bool Expression::toStringExpressionPrintoutDifferential3(
   ExpressionPrintoutNode& output,
   const List<int>& childrenIndices,
   FormatExpressions* format
-) {  (void)format;
-
+) {
+  (void) format;
   STACK_TRACE("Expression::toStringExpressionPrintoutDifferential3");
   if (!input.startsWith(input.owner->opDifferential(), 3)) {
     return false;
@@ -3103,14 +3102,14 @@ bool Expression::toStringExpressionPrintoutDifferential3(
   return true;
 }
 
-std::string ExpressionPrintoutNode::toString()const{
+std::string ExpressionPrintoutNode::toString() const {
   std::stringstream out;
-  if (this->children.size==0) {
-    out<<"[" <<this->content << "]";
+  if (this->children.size == 0) {
+    out << "[" << this->content << "]";
     return out.str();
   }
   out << "(";
-  for (int i  =0; i < this->children.size; i ++){
+  for (int i = 0; i < this->children.size; i ++) {
     out << this->getOwner().allPrintouts[this->children[i]].toString();
   }
   out << ")";

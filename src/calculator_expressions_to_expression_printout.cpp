@@ -265,8 +265,8 @@ bool Expression::toExpressionPrintoutNodeWithCompositeHandler(
   int atom = (*this)[0][0].data;
   MapList<int, Expression::ToExpressionPrintoutNodeHandler>& handlers =
   container.useMathML ?
-  this->owner->toStringExpressionPrintoutNodeHandlersComposite :
-  this->owner->toMathMLExpressionPrintoutNodeHandlersComposite;
+  this->owner->toMathMLExpressionPrintoutNodeHandlersComposite :
+  this->owner->toStringExpressionPrintoutNodeHandlersComposite;
   int index = handlers.getIndex(atom);
   if (index < 0) {
     return false;
@@ -329,7 +329,7 @@ void Calculator::addCompositeExpressionPrintoutHandlers(
       << global.fatal;
     }
   }
-  toStringHandlerCollection. setKeyValue(atom, toStringHandler);
+  toStringHandlerCollection.setKeyValue(atom, toStringHandler);
   if (toMathMLHandlerCollection.contains(atom)) {
     if (toMathMLHandlerCollection.getValueNoFail(atom) != toMathMLHandler) {
       global.fatal

@@ -30,7 +30,7 @@ public:
   ExpressionPrintoutNode(ExpressionPrintout& inputOwner): owner(&inputOwner) {}
   ExpressionPrintoutNode& addChildIndex(int index);
   ExpressionPrintoutNode& addString(const std::string& input);
-  ExpressionPrintout& getOwner()const;
+  ExpressionPrintout& getOwner() const;
   bool checkConsistency() const;
   ExpressionPrintoutNode& getChild(int childIndex);
   bool isAtomic() const;
@@ -39,10 +39,8 @@ public:
     this->clear();
     this->content = inputContent;
   }
-
-  std::string toString()const;
+  std::string toString() const;
 };
-
 
 // A class for non-recursively printing possibly deeply nested
 // math expressions in linear time.

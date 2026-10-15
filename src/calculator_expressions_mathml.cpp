@@ -1410,7 +1410,7 @@ bool Expression::toMathMLExpressionPrintoutNodeGeneral(
     return false;
   }
   container.appendStringTo("<mrow>", output);
-  output.children.addOnTop(children[0]);
+  output.addChildIndex(children[0]);
   bool needParenthesis = true;
   if (this->size() == 2) {
     if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -1425,7 +1425,7 @@ bool Expression::toMathMLExpressionPrintoutNodeGeneral(
     container.appendStringTo("<mrow>", output);
   }
   for (int i = 1; i < this->children.size; i ++) {
-    output.children.addOnTop(children[i]);
+    output.addChildIndex(children[i]);
     if (i != this->children.size - 1) {
       container.appendStringTo("<mo>,</mo>", output);
     }
@@ -3104,4 +3104,1227 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
   toBeInitialized.addOneMathMLCompositeHandler(
     toBeInitialized.opMatrix(), Expression::toMathMLMatrix
   );
+}
+
+
+
+bool Expression::toMathMLExpressionPrintoutDefine(
+    const Expression& input,
+    ExpressionPrintoutNode& output,
+
+    const List<int>& childrenIndices,
+    FormatExpressions* format
+    ) {
+  if (!input.startsWith(input.owner->opDefine(), 3)) {
+    return false;
+  }
+  FormatExpressions formatForSubexpressions;
+  if (format != nullptr) {
+    formatForSubexpressions = *format;
+  }
+  formatForSubexpressions.flagExpressionIsTopLevel = false;
+  output.addString("<mrow>");
+  if (
+      input[1].isListStartingWithAtom(input.owner->opDefine()) ||
+      input[1].isListStartingWithAtom(input.owner->opGreaterThan()) ||
+      input[1].isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo()) ||
+      input[1].isListStartingWithAtom(input.owner->opLessThan()) ||
+      input[1].isListStartingWithAtom(input.owner->opLessThanOrEqualTo())
+      ) {
+    output.addString(MathML::leftParenthesis).addChildIndex(childrenIndices[1]).addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[1]);
+  }
+  output.addString("<mo>=</mo>");
+  if (input[2].isListStartingWithAtom(input.owner->opDefine())) {
+    output.addString(MathML::leftParenthesis).addChildIndex(childrenIndices[2]).addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[2]);
+  }
+  output.addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutIsDenotedBy(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opIsDenotedBy())) {
+    return false;
+  }
+  output.addString("<mrow>").addChildIndex(childrenIndices[1]).addString("<mo>=:</mo>").addChildIndex(childrenIndices[2]).addString("</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutLnAbsoluteInsteadOfLogarithm(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (
+      !input.owner->flagUseLnAbsInsteadOfLogForIntegrationNotation ||
+      !input.startsWith(input.owner->opLog(), 2)
+      ) {
+    return false;
+  }
+  const Expression& firstExpression = input[1];
+  int argumentIndex = childrenIndices[1];
+  output.addString(
+      "<mrow>");
+  if (firstExpression.startsWith(input.owner->opAbsoluteValue())) {
+    output.addString("<mo>ln</mo> ").addChildIndex(argumentIndex);
+  } else {
+    output.addString( "<mo>ln</mo> <mo>|</mo>").addChildIndex(argumentIndex).addString( "<mo>|</mo>");
+  }
+  output.addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutLogBase(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opLogBase(), 3)) {
+    return false;
+  }
+  output.addString(
+      "<mrow>").addString(
+              "<msub><mo>log</mo>").addChildIndex(childrenIndices[1])
+      .addString(
+          MathML::leftParenthesis).addChildIndex(childrenIndices[2]).addString(MathML::rightParenthesis);
+  return true;}
+bool Expression::toMathMLExpressionPrintoutIntervalOpen(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opIntervalOpen(), 3)) {
+    return false;
+  }
+  output.addString("<mrow>");
+  if (!input.owner->flagUseBracketsForIntervals) {
+    output.addString( "<mo>IntervalOpen</mo>");
+  }
+  output.addString(MathML::leftParenthesis).addChildIndex(childrenIndices[1])
+
+          .addString("<mo>,</mo>").addChildIndex(childrenIndices[2]).addString(
+          MathML::rightParenthesis);
+  output.addString( "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutIntervalRightClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (input.startsWith(input.owner->opIntervalRightClosed(), 3)) {
+    output.addString(
+        "<mrow>").addString(
+                MathML::leftParenthesis).addChildIndex(childrenIndices[1]).addString("<mo>,</mo>").addChildIndex(childrenIndices[2])
+            .addString(MathML::rightBracket).addString(
+            "</mrow>");
+    return true;
+  }
+  if (input.startsWith(input.owner->opIntervalRightClosed(), 2)) {
+    output.addString("<mrow>");
+    if (input[1].isSequenceNElements(2)) {
+
+      ExpressionPrintoutNode& firstChild=output.getOwner().allPrintouts[childrenIndices[1]];
+      output.addString(MathML::leftParenthesis ).addChildIndex(
+                                                   firstChild.childrenExpressionIndices[1]).addString("<mo>,</mo>").addChildIndex(
+                                                                                                                            firstChild.childrenExpressionIndices[2]).addString(
+MathML::rightBracket);
+
+
+
+
+    } else {
+      output.addString("<ms>IntervalRightClosed</ms><mo>{}</mo>").addChildIndex(childrenIndices[1]);
+    }
+    output.addString("</mrow>");
+    return true;
+  }
+  return false;}
+bool Expression::toMathMLExpressionPrintoutIntervalLeftClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (input.startsWith(input.owner->opIntervalLeftClosed(), 2)) {
+    output.addString("<mrow>");
+    if (input[1].isSequenceNElements(2)) {
+      ExpressionPrintoutNode& firstChild=output.getOwner().allPrintouts[childrenIndices[1]];
+      output.addString(MathML::leftBracket ).addChildIndex(
+                                               firstChild.childrenExpressionIndices[1]).addString("<mo>,</mo>").addChildIndex(
+                                                                                                                        firstChild.childrenExpressionIndices[2]).addString(
+              MathML::rightParenthesis);
+
+
+
+    } else {
+      output.addString("<ms>IntervalLeftClosed</ms><mo>{}</mo>").addChildIndex(childrenIndices[1]);
+
+    }
+    output.addString("</mrow>");
+    return true;
+  }
+  if (input.startsWith(input.owner->opIntervalLeftClosed(), 3)) {
+    output.addString("<mrow>").addString(MathML::leftBracket).addChildIndex(childrenIndices[1])
+        .addString(
+
+        "<mo>,</mo>").addChildIndex(childrenIndices[2]).addString(
+
+                MathML::rightParenthesis).addString(
+             "</mrow>");
+    return true;
+  }
+  return false;}
+bool Expression::toMathMLExpressionPrintoutIntervalClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (input.startsWith(input.owner->opIntervalClosed(), 2)) {
+    output.addString( "<mrow>");
+    if (input[1].isSequenceNElements(2)) {
+      ExpressionPrintoutNode& firstChild=output.getOwner().allPrintouts[childrenIndices[1]];
+      output.addString(MathML::leftBracket ).addChildIndex(
+                                               firstChild.childrenExpressionIndices[1]).addString("<mo>,</mo>").addChildIndex(
+                                                                                                                        firstChild.childrenExpressionIndices[2]).addString(
+              MathML::rightBracket);
+
+
+
+          } else {
+      output.addString("<ms>IntervalClosed<ms/><mo>{}</mo>").addChildIndex(childrenIndices[1]);
+    }
+          output.addString("</mrow>");
+    return true;
+  }
+  if (input.startsWith(input.owner->opIntervalClosed(), 3)) {
+    output.addString(
+        "<mrow>").addString(
+                MathML::leftBracket)
+        .addChildIndex(childrenIndices[1])
+.addString(
+                "<mo>,</mo>").addChildIndex(childrenIndices[2]).addString(
+
+                MathML::rightBracket).addString(
+            "</mrow>");
+    return true;
+  }
+  return false;}
+bool Expression::toMathMLExpressionPrintoutQuote(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  (void) format;
+  if (!input.startsWith(input.owner->opQuote(), 2)) {
+    return false;
+  }
+  std::string content;
+  if (input[1].isOperation(&content)) {
+    output.addString("<mtext>\"").addString(content).addString("\"</mtext>");
+  } else {
+    output.addString("<mtext>(Corrupt string)</mtext>");
+  }
+  return true;}
+bool Expression::toMathMLExpressionPrintoutDefineConditional(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opDefineConditional(), 4)) {
+    return false;
+  }
+  output.addString(
+      "<mrow>").addChildIndex(childrenIndices[1])
+      .addString(
+              "<mo>:</mo><mo>if</mo>").addString(
+              MathML::leftParenthesis).addChildIndex(childrenIndices[2]).addString(
+              MathML::rightParenthesis).addString(
+          "<mo>=</mo>").addChildIndex(childrenIndices[3]).addString(
+          "</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutDivide(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  Calculator& commands = *input.owner;
+  if (!input.startsWith(commands.opDivide(), 3)) {
+    return false;
+  }
+  bool doUseFrac = !commands.flagDontUseFracInRational;
+  if (
+      doUseFrac && (
+          input[1].startsWith(commands.opTimes()) ||
+          input[1].startsWith(commands.opDivide())
+          )
+      ) {
+    List<Expression> multiplicandsLeft;
+    input.getMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
+    for (int i = 0; i < multiplicandsLeft.size; i ++) {
+      if (
+          multiplicandsLeft[i].startsWith(commands.opIntegral()) ||
+          multiplicandsLeft[i].isOperationGiven(commands.opIntegral())
+          ) {
+        doUseFrac = false;
+        break;
+      }
+    }
+  }
+  if (!doUseFrac) {
+    std::string firstMathML = input[1].toMathML(format);
+    std::string secondMathML = input[2].toMathML(format);
+    bool firstNeedsBrackets =
+        !(
+            input[1].isListStartingWithAtom(commands.opTimes()) ||
+            input[1].isListStartingWithAtom(commands.opDivide())
+            );
+    bool secondNeedsBrackets = true;
+    if (input[2].isOfType<Rational>()) {
+      if (input[2].getValue<Rational>().isInteger()) {
+        secondNeedsBrackets = false;
+      }
+    }
+    if (firstNeedsBrackets) {
+      output.addString(MathML::leftParenthesis).addChildIndex(childrenIndices[1]).addString(
+          MathML::rightParenthesis);
+    } else {
+      output.addChildIndex(childrenIndices[1]);
+    }
+    output.addString("<mo>/</mo>");
+    if (secondNeedsBrackets) {
+      output. addString(MathML::leftParenthesis).addChildIndex(childrenIndices[2]).addString(MathML::rightParenthesis);
+    } else {
+      output.addChildIndex(childrenIndices[2]);
+    }
+  } else {
+    StateMaintainer<bool> maintain;
+    if (format != nullptr) {
+      maintain.initialize(format->flagExpressionNewLineAllowed);
+      format->flagExpressionNewLineAllowed = false;
+    } else {
+      // Compilers will complain at certain optimization levels about
+      // maintain not being initialized.
+      maintain.toMaintain = nullptr;
+      maintain.contentAtStart = false;
+    }
+    std::string firstMathML = input[1].toMathML(format);
+    std::string secondMathML = input[2].toMathML(format);
+    output.addString( "<mfrac>").addChildIndex(childrenIndices[1]).addChildIndex(childrenIndices[2])
+        .addString("</mfrac>");
+  }
+  return true;}
+bool Expression::toMathMLExpressionPrintoutTensor(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opTensor(), 3)) {
+    return false;
+  }
+  input.toMathMLExpressionPrintoutOpMultiplicative(output,childrenIndices,  "<mo>&otimes;</mo>", format);
+  return true;}
+bool Expression::toMathMLExpressionPrintoutIn(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opIn(), 3)) {
+    return false;
+  }
+  output.addString(
+      "<mrow>").addChildIndex(childrenIndices[1]).addString(
+              "<mo>&in;</mo> ").addChildIndex(childrenIndices[2]).addString(
+          "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutOr (const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  (void) format;
+  if (!input.startsWith(input.owner->opOr(), 3)) {
+    return false;
+  }
+  output.addString("<mrow>");
+  if (!input[1].isSequenceNElements()) {
+    output.addString( MathML::leftParenthesis).addChildIndex(childrenIndices[1])
+        .addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[1]);
+  }
+  output.addString(
+      "<mtext> or </mtext>");
+  if (!input[2].isSequenceNElements()) {
+    output.addString(
+        MathML::leftParenthesis).addChildIndex(childrenIndices[2])
+        .addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[2]);
+  }
+  output.addString("</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutAnd (const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  (void) format;
+  if (!input.startsWith(input.owner->opAnd(), 3)) {
+    return false;
+  }
+  output.addString("<mrow>").addString(MathML::leftParenthesis)
+          .addChildIndex(childrenIndices[1]).addString(MathML::rightParenthesis)
+          .addString("<mtext>and</mtext>")
+          .addString(MathML::leftParenthesis)
+      .addChildIndex(childrenIndices[2])
+          .addString(MathML::rightParenthesis).addString(
+      "</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutBinom(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opBinom(), 3)) {
+    return false;
+  }
+  output.addString(
+            "<mrow>").addString(MathML::leftParenthesis)
+          .addString("<mfrac linethickness='0'>")
+      .addChildIndex(childrenIndices[1]).addChildIndex(childrenIndices[2])
+          .addString("</mfrac>")
+          .addString(MathML::rightParenthesis)
+      .addString("</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutUnderscore(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opUnderscore())) {
+    return false;
+  }
+  if (!input[1].startsWith(input.owner->opPower())) {
+    output.addString("<msub>").addChildIndex(childrenIndices[1]).addChildIndex(childrenIndices[2]).addString("</msub>");
+    return true;
+  }
+  // We have an expression along the lines of {x^2}_1.
+  // In latex, this would render with the subscript
+  // being to the right of the superscript.
+  // We shall render that as the latex of x^2_1 which
+  // looks identical as the latex of x_1^2 and has
+  // the super- and sub- scripts with the same indentation levels.
+  output.addString("<msubsup>");
+  ExpressionPrintoutNode& base = output.getOwner().allPrintouts[childrenIndices[1]];
+  // The base of the exponent:
+  output.addChildIndex(base.childrenExpressionIndices[1]);
+  // The subscript:
+  output.addChildIndex(childrenIndices[2]);
+
+  // The power of the exponent:
+  output.addChildIndex(base.childrenExpressionIndices[2]);
+  output.addString( "</msubsup>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutSetMinus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opSetMinus(), 3)) {
+    return false;
+  }
+  output.addString(
+      "<mrow>").addChildIndex(childrenIndices[1])
+
+.addString(
+              "<mo>&setminus;</mo>")
+          .addChildIndex(childrenIndices[2]).addString(
+          "</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutLimitBoundary(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opLimitBoundary(), 3)) {
+    return false;
+  }
+  output.addString("<munderover><mo></mo>")
+      .addChildIndex(childrenIndices[1])
+      .addChildIndex(childrenIndices[2])
+      .addString("</munderover>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutTimes(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.startsWith(input.owner->opTimes(), 3)) {
+    return false;
+  }
+
+  output.properties.needsParenthesesForMultiplicationOnTheRight = false;
+
+  ExpressionPrintoutNode& firstPrintout = output.getOwner().allPrintouts[childrenIndices[1]];
+  ExpressionPrintoutNode& secondPrintout = output.getOwner().allPrintouts[childrenIndices[2]];
+
+
+  if (input[1].isOperationGiven(input.owner->opSqrt())) {
+    // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
+    // and later corrected to "\sqrt{3}".
+    output.addString( "<msqrt>").addChildIndex(childrenIndices[2]).addString( "</msqrt>");
+    return true;
+  }
+  bool firstNeedsParentheses =
+      firstPrintout.properties.needsParenthesesForMultiplicationOnTheRight;
+  bool secondNeedsBrackets =
+      input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
+          &(input[1])
+          );
+  if (secondPrintout.properties.startsWithMinus) {
+    secondNeedsBrackets = true;
+  }
+  bool mustHaveTimes = false;
+  bool collapseUnits = true;
+  if (format != nullptr) {
+    collapseUnits = !format->flagDontCollalpseProductsByUnits;
+  }
+  output.addString( "<mrow>");
+  bool firstPrintoutIsCollapsedEntirely=false;
+  if (collapseUnits) {
+    if (firstPrintout.properties.isNegativeOne) {
+      output.addString("-");
+    } else if
+     (firstPrintout.properties.isOne) {
+      firstPrintoutIsCollapsedEntirely=true;
+    }else if (firstNeedsParentheses) {
+      output.addString(MathML::leftParenthesis).addChildIndex(childrenIndices[1]).addString(MathML::rightParenthesis);
+
+    } else {
+      output.addChildIndex(childrenIndices[1]);
+
+    }
+  }
+    output.properties.startsWithMinus =
+        firstPrintout.properties.startsWithMinus;
+    output.properties.startsWithDigit =
+        firstPrintout.properties.startsWithDigit;
+
+  if (!firstNeedsParentheses && !secondNeedsBrackets && !firstPrintoutIsCollapsedEntirely) {
+    if (secondPrintout.properties.startsWithDigit) {
+      mustHaveTimes = true;
+    }
+    if (firstPrintout.properties.endsWithDigit &&
+        secondPrintout.properties.startsWithFraction
+        ) {
+      mustHaveTimes = true;
+    }
+    if (secondPrintout.properties.needsProductSignForMultiplication) {
+      mustHaveTimes = true;
+    }
+  }
+  if (input[1].isSumLikeOperatorAtom()) {
+    mustHaveTimes = false;
+  }
+  if (mustHaveTimes) {
+    output.addString("<mo>&sdot;</mo>");
+  }
+  if (secondNeedsBrackets) {
+    output.addString(MathML::leftParenthesis)
+        .addChildIndex(childrenIndices[2]).addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[2]);
+  }
+  output.addString("</mrow>");
+  return true;}
+
+
+void Expression::toMathMLExpressionPrintoutOpMultiplicative(ExpressionPrintoutNode& output,const List<int>& childrenIndices,const std::string& operation, FormatExpressions* format) const {
+  ExpressionPrintoutNode& firstPrintout = output.getOwner().allPrintouts[childrenIndices[1]];
+  ExpressionPrintoutNode& secondPrintout = output.getOwner().allPrintouts[childrenIndices[2]];
+  if (firstPrintout.properties.isNegativeOne) {
+    output.addString("-");
+  }else  if (firstPrintout.properties.isOne) {
+  }else  if (firstPrintout.properties.needsParenthesesForMultiplicationOnTheRight) {
+    output.addString( MathML::leftParenthesis ).addChildIndex(childrenIndices[1])
+        .addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[1]);
+  }
+  output.addString( operation);
+  if (secondPrintout.properties.needsParenthesesForMultiplicationOnTheRight) {
+    output.addString( MathML::leftParenthesis ).addChildIndex(childrenIndices[2])
+        .addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[2]);
+  }
+}
+
+bool Expression::toMathMLExpressionPrintoutCrossProduct
+    (const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opCrossProduct())) {
+    return false;
+  }
+  input.toMathMLExpressionPrintoutOpMultiplicative(output,childrenIndices, "<mo>&otimes;</mo>", format);
+  return true;
+
+}
+bool Expression::toMathMLExpressionPrintoutSqrt(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.startsWith(input.owner->opSqrt())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toMathMLExpressionPrintoutSqrt2(input, output, childrenIndices, format);
+  }
+  return Expression::toMathMLExpressionPrintoutSqrt3(input, output, childrenIndices, format);
+}
+bool Expression::toMathMLExpressionPrintoutFactorial(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opFactorial(), 2)) {
+    return false;
+  }
+  output.addString( "<mrow>");
+  if (input[1].needsParenthesisForBaseOfExponent()) {
+    output.addString(MathML::leftParenthesis);
+    output.addChildIndex(childrenIndices[1]);
+        output.addString( MathML::rightParenthesis);
+  } else {
+        output.addChildIndex(childrenIndices[1]);
+  }
+  output.addString( "<mo>!</mo>").addString( "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutAbsoluteValue(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.startsWith(input.owner->opAbsoluteValue(), 2)) {
+    return false;
+  }
+  output.addString(
+       MathML::leftAbsoluteValueDelimiter
+            ).addChildIndex(childrenIndices[1]).addString(
+          MathML::rightAbsoluteValueDelimiter);
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutPower(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  Calculator& commands = *input.owner;
+  if (!input.startsWith(commands.opPower(), 3)) {
+    return false;
+  }
+  const Expression& baseExpression = input[1];
+  const Expression& powerExpression = input[2];
+  int baseIndex = childrenIndices[1];
+  int powerIndex = childrenIndices[2];
+  bool isSuperScriptOfUnderscoredOperator = false;
+  if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
+    if (baseExpression[1].isOperationGiven(commands.opIntegral())) {
+      isSuperScriptOfUnderscoredOperator = true;
+    }
+  }
+  MathExpressionFormattingProperties leftProperties;
+  std::string firstMathML = baseExpression.toMathML(format, &leftProperties);
+
+    if (
+        baseExpression.children.size > 0 &&
+        baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction()
+        ) {
+      output.properties.needsParenthesesForMultiplicationOnTheRight = true;
+      output.properties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+    } else {
+      output.properties.needsParenthesesForMultiplicationOnTheRight = false;
+      output.properties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+    }
+  if (isSuperScriptOfUnderscoredOperator) {
+
+      output.addString( "<msubsup>");
+      output.addChildIndex(childrenIndices[1]);
+      output.addChildIndex(childrenIndices[2]);
+      output.addString( "</msubsup>");
+    return true;
+  }
+  bool involvesExponentsInterpretedAsFunctions = false;
+  if (baseExpression.startsWith(- 1, 2)) {
+    involvesExponentsInterpretedAsFunctions =
+        baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
+        !powerExpression.isEqualToMOne() &&
+        powerExpression.isRational();
+    if (
+        involvesExponentsInterpretedAsFunctions &&
+        baseExpression[0].isOperationGiven(commands.opLog()) &&
+        commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
+        ) {
+      involvesExponentsInterpretedAsFunctions = false;
+    }
+  }
+  if (involvesExponentsInterpretedAsFunctions) {
+    ExpressionPrintoutNode& basePrintout = output.getOwner().allPrintouts[childrenIndices[1]];
+    int functionIndex = basePrintout.childrenExpressionIndices[0];
+    int argumentIndex = basePrintout.childrenExpressionIndices[1];
+    int exponentIndex = childrenIndices[2];
+    std::string exponentMathML = powerExpression.toMathML(format);
+    output.addString(
+        "<mrow><msup>"
+        ) .addChildIndex(functionIndex)   .addChildIndex(exponentIndex).addString(
+            "</msup>");
+
+    if (
+        baseExpression[1].
+        needsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
+        baseExpression[1].startsWith(commands.opTimes())
+        ) {
+      output.addString("<mrow>").addString(
+          MathML::leftParenthesis ). addChildIndex(argumentIndex)
+.addString(
+                  MathML::rightParenthesis ).addString(
+              "</mrow>");
+    }else {
+      output.addChildIndex(argumentIndex);
+    }
+    output.addString("</mrow>");
+    return true;
+  }
+  bool isSqrt = powerExpression.isOfType<Rational>() &&
+                powerExpression.getValue<Rational>().isEqualTo(Rational(1, 2));
+  if (isSqrt) {
+    output.addString(
+ "<msqrt>");
+    output.addChildIndex(childrenIndices[1]);
+    output.addString( "</msqrt>");
+    return true;
+  }
+  output.addString( "<msup>");
+  bool needsParentheses = baseExpression.needsParenthesisForBaseOfExponent();
+  if (needsParentheses) {
+    output.addString("<mrow>").addString( MathML::leftParenthesis);
+  }
+  MathExpressionFormattingProperties baseProperties;
+  output.addChildIndex(baseIndex);
+  if (needsParentheses) {
+    output.addString(MathML::rightParenthesis ).addString( "</mrow>");
+  }
+  output.addChildIndex(powerIndex);
+  output.addString( "</msup>");
+  if (
+      !needsParentheses &&
+      baseProperties.startsWithDigit
+      ) {
+    output.properties.startsWithDigit=true;
+  }
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutPlus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opPlus())) {
+    return false;
+  }
+  output.addString( "<mrow>");
+  for (int i = 1; i < input.size(); i ++) {
+    int childIndex = childrenIndices[i];
+    ExpressionPrintoutNode& summandPrintout = output.getOwner().allPrintouts[childIndex];
+    bool needsParenthesesForAddition = summandPrintout.properties.needsParenthesesForAddition;
+    if (i > 0) {
+      if (needsParenthesesForAddition || !summandPrintout.properties.startsWithMinus) {
+        output.addString( "<mo>+</mo>");
+      }
+    }
+    if (needsParenthesesForAddition) {
+      output.addString( MathML::leftParenthesis);
+    }
+    output.addChildIndex(childIndex);
+    if (needsParenthesesForAddition) {
+      output.addString( MathML::rightParenthesis);
+    }
+  }
+  output.addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutDirectSum(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.isListStartingWithAtom(input.owner->opDirectSum())) {
+    return false;
+  }
+  if (input.children.size < 3) {
+    global.fatal
+        << "Direct sum operation takes at least 2 arguments, "
+        << "whereas this expression has "
+        << input.children.size
+        << " arguments. "
+        << global.fatal;
+  }
+  const Expression& left = input[1];
+  const Expression& right = input[2];
+  if (left.needsParenthesisForAddition()) {
+    output.addString(
+        "<mrow>" ).addString(
+                MathML::leftParenthesis).addChildIndex(childrenIndices[1]).addString(
+            MathML::rightParenthesis ).addString(
+            "</mrow>");
+  } else {
+    output.addChildIndex(childrenIndices[1]);
+  }
+  int rightIndex = childrenIndices[2];
+  output.addString("<mo>&oplus;</mo>");
+  ExpressionPrintoutNode& rightPrintout = output.getOwner().allPrintouts[rightIndex];
+
+  if (rightPrintout.properties.needsParenthesesForAddition ||rightPrintout.properties.startsWithMinus ){
+output.addString(
+          "<mrow>" ).addString(
+          MathML::leftParenthesis).addChildIndex(rightIndex).addString(
+          MathML::rightParenthesis ).addString(
+            "</mrow>");}else {
+output.addChildIndex(rightIndex);
+  }
+  return true;}
+
+bool Expression::toMathMLExpressionPrintoutMinus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opMinus())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toMathMLExpressionPrintoutMinus2(input, output, childrenIndices, format);
+  }
+  return Expression::toMathMLExpressionPrintoutMinus3(input, output, childrenIndices, format);
+}
+bool Expression::toMathMLExpressionPrintoutBind(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.startsWith(input.owner->opBind(), 2)) {
+    return false;
+  }
+  output.addString("<mrow>" ).addChildIndex(childrenIndices[1]).addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutEqualEqual(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opEqualEqual())) {
+    return false;
+  }
+output.addString(
+      "<mrow>").addChildIndex(childrenIndices[1]).addString(
+              "<mo>==</mo>").addChildIndex(childrenIndices[2]).addString(
+          "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutEqualEqualEqual(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.isListStartingWithAtom(input.owner->opEqualEqualEqual())) {
+    return false;
+  }
+output.addString(
+       "<mrow>").addChildIndex(childrenIndices[1]).addString(
+          "<mo>===</mo>").addChildIndex(childrenIndices[2]).addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutDifferentiate(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
+    return false;
+  }
+  MathExpressionFormattingProperties secondProperties;
+  output.addString( "<mfrac><mrow><mtext>d</mtext>");
+  int secondChildIndex = childrenIndices[2];
+  ExpressionPrintoutNode& secondPrintout = output.getOwner().allPrintouts[secondChildIndex];
+  if (secondProperties.needsParenthesesForMultiplicationOnTheRight) {
+    output.addString(MathML::leftParenthesis ).addChildIndex(secondChildIndex).addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(secondChildIndex);
+  }
+  output.addString(
+      "</mrow><mrow><mtext>d</mtext>"
+      ).addChildIndex(childrenIndices[1]).addString(
+          "</mrow></mfrac>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutDifferential(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opDifferential())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toMathMLExpressionPrintoutDifferential2(input, output, childrenIndices, format);
+  }
+  return Expression::toMathMLExpressionPrintoutDifferential3(input, output, childrenIndices ,format);
+}
+bool Expression::toMathMLExpressionPrintoutSumOrIntegral(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (
+      !input.startsWith(input.owner->opSum()) &&
+      !input.startsWith(input.owner->opIntegral())
+      ) {
+    return false;
+  }
+int  operatorChildIndex = childrenIndices[0];
+  int firstIndex = 2;
+output.addString("<mrow>");
+
+  if (input.size() >= 2) {
+    if (input[1].startsWith(input.owner->opLimitBoundary(), 3)) {
+      output .addString( "<munderover>").addChildIndex(operatorChildIndex);
+      ExpressionPrintoutNode& argumentPrintout = output.getOwner().allPrintouts[childrenIndices[1]];
+      output.addChildIndex(argumentPrintout.childrenExpressionIndices[1]);
+      output.addChildIndex(argumentPrintout.childrenExpressionIndices[2]);
+      output .addString( "</munderover>");
+
+    } else if (
+        input[1].isOperationGiven(input.owner->opIndefiniteIndicator())
+        ) {
+      output.addChildIndex(operatorChildIndex);
+      firstIndex = 2;
+    } else {
+      output.addChildIndex(operatorChildIndex);
+      firstIndex = 1;
+    }
+  }
+  if (input.size() == firstIndex + 1) {
+    output.addChildIndex(childrenIndices[firstIndex]);
+  } else if (input.size()>firstIndex+1){
+    output.addString(MathML::leftParenthesis);
+    for (int i = firstIndex; i < input.size(); i ++) {
+      output.addChildIndex(childrenIndices[i]);
+      if (i != input.size() - 1) {
+        output.addString( "<mo>,</mo>");
+      }
+    }
+    output.addString( MathML::rightParenthesis );
+  }
+  output.addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutGreaterThan(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opGreaterThan())) {
+    return false;
+  }
+  output.addString("<mrow>").addChildIndex(childrenIndices[1])
+.addString(
+      "<mo>&gt;</mo>"
+                                                                         ).addChildIndex(childrenIndices[2] ).addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutGreaterThanOrEqualTo(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
+    return false;
+  }
+  output.addString(
+      "<mrow>").addChildIndex(childrenIndices[1])
+.addString("<mo>&geq;</mo>"
+                     ).addChildIndex(childrenIndices[2])
+      .addString( "</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutLessThanOrEqualTo(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
+    return false;
+  }
+  output.addString(
+       "<mrow>").addChildIndex(childrenIndices[1]).addString(
+          "<mo>&leq;</mo>").addChildIndex(childrenIndices[2]).addString(
+          "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutLimit(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+  if (!input.startsWith(input.owner->opLimit(), 3)) {
+    return false;
+  }
+  output.addString(
+
+      "<mrow><munder><mo>lim</mo>");
+  if (!input[1].isSequenceNElements()) {
+    output.addChildIndex(childrenIndices[1]);
+  } else {
+    output.addString( "<mrow>");
+    ExpressionPrintoutNode &argumentPrintout= output.getOwner().allPrintouts[childrenIndices[1]];
+    for (int i = 1; i < input[1].size(); i ++) {
+      output.addChildIndex(argumentPrintout.childrenExpressionIndices[i]);
+      if (i != input[1].size() - 1) {
+        output.addString( "<mo>,</mo>");
+      }
+    }
+    output.addString(  "</mrow>");
+  }
+  output.addString( "</munder>").addChildIndex(childrenIndices[2]).addString( "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutLimitProcess(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opLimitProcess())) {
+    return false;
+  }
+  output.addString(
+       "<mrow>").addChildIndex(childrenIndices[1])
+.addString(       "<mo>&to;</mo>"
+                 ).addChildIndex(childrenIndices[2]).addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutLessThan(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opLessThan())) {
+    return false;
+  }
+  output.addString(
+      "<mrow>").addChildIndex(childrenIndices[1]).addString(
+
+              "<mo>&lt;</mo>").addChildIndex(childrenIndices[2]).addString(
+          "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutSequence(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opSequence())) {
+    return false;
+  }
+  if (input.size() == 2){
+    output.addString("<mrow><ms>Sequence{}</ms>").addChildIndex(childrenIndices[1]).addString("</mrow>");
+    return true;
+  }
+  (void) format;
+  output.addString("<mrow>" ).addString( MathML::leftParenthesis);
+  for (int i = 1; i < input.size(); i ++) {
+    output.addChildIndex(childrenIndices[i]);
+    if (i != input.children.size - 1) {
+      output.addString( "<mo>,</mo>");
+    }
+  }
+  output.addString(MathML::rightParenthesis).addString("</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutLieBracket(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opLieBracket())) {
+    return false;
+  }
+  output.addString(
+      "<mrow>").addString(
+          MathML::leftBracket).addChildIndex(childrenIndices[1])
+.addString(
+      "<mo>,</mo>"
+          ).addChildIndex(childrenIndices[2]).addString(
+          MathML::rightBracket).addString(
+          "</mrow>");
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutMod(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opMod())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    output.addString( "<mrow>").addString(
+                                  "<mo>mod</mo>").addChildIndex(childrenIndices[1])
+        .addString(
+            "</mrow>");
+    return true;
+  }
+  if (input.size() == 3) {
+    output.addString(
+              "<mrow>").addChildIndex(childrenIndices[1])
+        .addString(
+            "<mo>mod</mo>").addChildIndex(childrenIndices[2])
+       .addString(
+            "</mrow>");
+    return true;
+  }
+  return false;
+}
+bool Expression::toMathMLExpressionPrintoutUnion(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (
+      !input.isListStartingWithAtom(input.owner->opUnion()) || input.size() != 3
+      ) {
+    return false;
+  }
+  if (input[1].startsWith(input.owner->opIntersection())) {
+    output.addString(
+         "<mrow>").addString(
+            MathML::leftParenthesis).addChildIndex(childrenIndices[1])
+        .addString(
+            MathML::rightParenthesis).addString(
+            "<mo>&cup;</mo>").addChildIndex(childrenIndices[2]).addString(
+            "</mrow>");
+  } else {
+    output.addString("<mrow>").addChildIndex(childrenIndices[1])
+        .addString(
+        "<mo>&cup;</mo>"
+                                                                           ).addChildIndex(childrenIndices[2])
+        .addString(
+        "</mrow>");
+  }
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutIntersection(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+
+  if (
+      !input.isListStartingWithAtom(input.owner->opIntersection()) ||
+      input.size() != 3
+      ) {
+    return false;
+  }
+  if (input[1].startsWith(input.owner->opUnion())) {
+    output.addString(
+              "<mrow>").addString(
+            MathML::leftParenthesis)
+        .addChildIndex(childrenIndices[1])
+        .addString(
+            MathML::rightParenthesis)
+        .addString(
+            "<mo>&cap;</mo>")
+        .addChildIndex(childrenIndices[2])
+        .addString(
+            "</mrow>");
+  } else {
+    output.addString(
+              "<mrow>").addChildIndex(childrenIndices[1])
+        .addString(
+            "<mo>&cap;</mo>").addChildIndex(childrenIndices[2])
+        .addString(
+            "</mrow>");
+  }
+  return true;
+}
+bool Expression::toMathMLExpressionPrintoutUnionNoRepetition(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.isListStartingWithAtom(input.owner->opUnionNoRepetition())) {
+    return false;
+  }
+  output.addString(
+            "<mrow>").addChildIndex(childrenIndices[1])
+      .addString(
+          "<mo>&sqcup;</mo>")
+      .addChildIndex(childrenIndices[2]).addString(
+          "</mrow>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutError(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+  if (!input.startsWith(input.owner->opError(), 2)) {
+    return false;
+  }
+  input.checkInitialization();
+  output.addString("<mtext>Error: ").addChildIndex(childrenIndices[1])
+      .addString("</mtext>");
+  return true;}
+bool Expression::toMathMLExpressionPrintoutMatrix(
+
+    const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format){
+
+
+  if (!input.isMatrix()) {
+    return false;
+  }
+  output.addString(  "<mrow>").addString(  MathML::leftParenthesis).addString(
+      "<mtable>");
+  for (int i = 1; i < input.size(); i ++) {
+    output.addString( "<mtr>");
+    ExpressionPrintoutNode& row = output.getOwner().allPrintouts[childrenIndices[i]];
+    for (int j = 1; j < input[i].size(); j ++) {
+      output.addString( "<mtd>").addChildIndex(row.childrenExpressionIndices[j])
+          .addString("</mtd>");
+    }
+    output.addString("</mtr>");
+  }
+  output.addString("</mtable>").addString(MathML::rightParenthesis).addString(
+      "</mrow>");
+  return true;
+}
+
+
+bool Expression::toMathMLExpressionPrintoutSqrt2(
+    const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+    ) {
+  if (!input.startsWith(input.owner->opSqrt(), 2)) {
+    return false;
+  }
+  output.addString( "<msqrt>").addChildIndex(childrenIndices[1]).addString("</msqrt>");
+  return true;
+}
+
+bool Expression::toMathMLExpressionPrintoutSqrt3(
+    const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+    ) {
+  if (!input.startsWith(input.owner->opSqrt(), 3)) {
+    return false;
+  }
+  int power = 0;
+  bool hasPowerTwo = input[1].isSmallInteger(&power);
+  if (hasPowerTwo) {
+    hasPowerTwo = (power == 2);
+  }
+  if (hasPowerTwo) {
+    output.addString( "<msqrt>" ).addChildIndex(childrenIndices[2]).addString("</msqrt>");
+  } else {
+output.addString(
+              "<mroot>").addChildIndex(childrenIndices[2]).addChildIndex(childrenIndices[1])
+        .addString(
+            "</mroot>");
+  }
+  return true;
+}
+
+
+bool Expression::toMathMLExpressionPrintoutMinus3(
+    const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+
+    ) {
+  if (!input.startsWith(input.owner->opMinus(), 3)) {
+return false;
+  }
+  if (input.children.size != 3) {
+global.fatal
+    << "The minus function expects 1 or 2 arguments, "
+    << "instead there are "
+    << input.children.size - 1
+    << ". "
+    << global.fatal;
+  }
+  output.addString( "<mrow>" ).addChildIndex(childrenIndices[1])
+      .addString(MathML::negativeSign);
+  if (
+      input[2].startsWith(input.owner->opPlus()) ||
+      input[2].startsWith(input.owner->opMinus())
+      ) {
+output.addString(
+          MathML::leftParenthesis).addChildIndex(childrenIndices[2]).addString(
+
+        MathML::rightParenthesis);
+  } else {
+output.addChildIndex(childrenIndices[2]);
+
+  }
+  output.addString( "</mrow>");
+  return true;
+}
+
+bool Expression::toMathMLExpressionPrintoutMinus2(
+    const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+
+    ) {
+  if (!input.startsWith(input.owner->opMinus(), 2)) {
+return false;
+  }
+
+  output.properties.needsParenthesesForMultiplicationOnTheRight = true;
+output.properties.needsParenthesesWhenLastAndMultipliedOnTheLeft = true;
+output.properties.startsWithMinus = true;
+
+if (
+      input[1].startsWith(input.owner->opPlus()) ||
+      input[1].startsWith(input.owner->opMinus())
+      ) {
+output.addString(
+          "<mrow>").addString(
+        MathML::negativeSign).addString(
+        MathML::leftParenthesis).addChildIndex(childrenIndices[1]).addString(
+        MathML::rightParenthesis).addString(
+        "</mrow>");
+  } else {
+output.addString(
+          "<mrow>").addString(
+        MathML::negativeSign).addChildIndex(childrenIndices[1]).addString(
+        "</mrow>");
+  }
+  return true;
+}
+
+bool Expression::toMathMLExpressionPrintoutDifferential2(
+
+    const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+    ) {
+  if (!input.startsWith(input.owner->opDifferential(), 2)) {
+return false;
+  }
+  bool needsParentheses = (!input[1].isAtom()) && (!input[1].isBuiltInType());
+  output.addString( "<mrow><mtext>d</mtext> ");
+  if (needsParentheses) {
+output.addString( MathML::leftParenthesis);
+  }
+  output.addChildIndex(childrenIndices[1]);
+
+  if (needsParentheses) {
+output.addString( MathML::rightParenthesis);
+  }
+  output.addString("</mrow>");
+  return true;
+}
+
+bool Expression::toMathMLExpressionPrintoutDifferential3(
+    const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+    ) {
+  if (!input.startsWith(input.owner->opDifferential(), 3)) {
+return false;
+  }
+  ExpressionPrintoutNode& coefficientPrintout = output.getOwner().allPrintouts[childrenIndices[2]];
+  bool needsParentheses =
+      coefficientPrintout.properties.needsParenthesesForMultiplicationOnTheRight ||
+      coefficientPrintout.properties.needsParenthesesWhenLastAndMultipliedOnTheLeft;
+  if (input[2].startsWith(input.owner->opDivide())) {
+needsParentheses = false;
+  }
+  output.addString( "<mrow>");
+  bool rightNeedsParentheses = (!input[1].isAtom()) && (!input[1].isBuiltInType());
+  if (coefficientPrintout.properties.isOne) {
+needsParentheses = false;
+
+  }
+  if (needsParentheses) {
+output.addString(
+    MathML::leftParenthesis);
+  }
+  if (!coefficientPrintout.properties.isOne){
+  output.addChildIndex(childrenIndices[2]);
+  }
+  if (needsParentheses) {
+  output.addString( MathML::rightParenthesis);
+  }
+  output.addString( "<mtext>d</mtext>");
+  if (rightNeedsParentheses) {
+  output.addString( MathML::leftParenthesis);
+  }
+  output.addChildIndex(childrenIndices[1]);
+  if (rightNeedsParentheses) {
+  output.addString( MathML::rightParenthesis);
+  }
+
+  output.addString( "</mrow>");
+  return true;
 }

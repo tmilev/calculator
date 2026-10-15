@@ -3452,7 +3452,7 @@ bool Expression::toExpressionPrintoutNodeData(
     return false;
   }
   output.properties = properties;
-  output.content = out.str();
+  output.setContent( out.str());
   return true;
 }
 
@@ -3824,147 +3824,8 @@ bool Expression::requiresNoMathTagsNonConstRunTime() const {
   return false;
 }
 
-bool Expression::toStringTimes(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  return
-  Expression::toStringTimesInContext(
-    input, out, format, outputProperties, false
-  );
-}
 
-bool Expression::toStringTimesInContext(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties,
-  bool outputMustStartMultiplicatively
-) {
-  if (!input.startsWith(input.owner->opTimes(), 3)) {
-    return false;
-  }
-  if (outputProperties != nullptr) {
-    outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
-  }
-  MathExpressionFormattingProperties leftProperties;
-  MathExpressionFormattingProperties rightProperties;
-  std::string secondString = input[2].toString(format, &rightProperties);
-  if (input[1].isOperationGiven(input.owner->opSqrt())) {
-    // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
-    // and later corrected to "\sqrt{3}".
-    out << "\\sqrt{" << secondString << "}";
-    return true;
-  }
-  std::string firstString = input[1].toString(format, &leftProperties);
-  bool firstNeedsParentheses =
-  leftProperties.needsParenthesesForMultiplicationOnTheRight;
-  bool secondNeedsParentheses =
-  input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
-    &(input[1])
-  );
-  if (secondString.size() > 0) {
-    if (secondString[0] == '-') {
-      secondNeedsParentheses = true;
-    }
-  }
-  bool mustHaveTimes = false;
-  bool collapseUnits = true;
-  if (format != nullptr) {
-    collapseUnits = !format->flagDontCollalpseProductsByUnits;
-  }
-  if (collapseUnits) {
-    if (firstString == "-1" || firstString == "- 1") {
-      firstString = "-";
-      firstNeedsParentheses = false;
-    }
-    if (firstString == "1") {
-      firstString = "";
-    }
-  }
-  if (outputMustStartMultiplicatively && leftProperties.startsWithMinus) {
-    firstNeedsParentheses = true;
-  }
-  if (firstNeedsParentheses) {
-    out << "\\left(" << firstString << "\\right)";
-  } else {
-    out << firstString;
-  }
-  if (!firstNeedsParentheses && outputProperties != nullptr) {
-    outputProperties->startsWithMinus = leftProperties.startsWithMinus;
-    outputProperties->startsWithDigit = leftProperties.startsWithDigit;
-    outputProperties->startsWithFraction = leftProperties.startsWithFraction;
-  }
-  bool mustHaveSpace = true;
-  if (
-    !firstNeedsParentheses &&
-    !secondNeedsParentheses &&
-    firstString != "" &&
-    firstString != "-"
-  ) {
-    if (MathRoutines::isDigit(secondString[0])) {
-      mustHaveTimes = true;
-    }
-    if (MathRoutines::isDigit(firstString[firstString.size() - 1])) {
-      if (StringRoutines::stringBeginsWith(secondString, "\\frac")) {
-        mustHaveTimes = true;
-      }
-    }
-    if (rightProperties.needsProductSignForMultiplication) {
-      mustHaveTimes = true;
-    }
-  }
-  if (
-    firstNeedsParentheses ||
-    mustHaveTimes ||
-    firstString == "" ||
-    firstString == "-"
-  ) {
-    mustHaveSpace = false;
-  }
-  if (input[1].isSumLikeOperatorAtom()) {
-    mustHaveTimes = false;
-  }
-  if (mustHaveTimes) {
-    out << "\\cdot ";
-  } else if (mustHaveSpace) {
-    out << " ";
-  }
-  if (secondNeedsParentheses) {
-    out << "\\left(" << secondString << "\\right)";
-  } else {
-    out << secondString;
-  }
-  return true;
-}
 
-void Expression::toStringOpMultiplicative(
-  std::stringstream& out,
-  const std::string& operation,
-  FormatExpressions* format
-) const {
-  MathExpressionFormattingProperties secondProperties;
-  MathExpressionFormattingProperties firstProperties;
-  std::string secondE = (*this)[2].toString(format, &secondProperties);
-  std::string firstE = (*this)[1].toString(format, &firstProperties);
-  bool firstNeedsBrackets =
-  firstProperties.needsParenthesesForMultiplicationOnTheRight;
-  bool secondNeedsBrackets =
-  secondProperties.needsParenthesesForMultiplicationOnTheRight;
-  if (firstNeedsBrackets) {
-    out << "\\left(" << firstE << "\\right)";
-  } else {
-    out << firstE;
-  }
-  out << operation << " ";
-  if (secondNeedsBrackets) {
-    out << "\\left(" << secondE << "\\right)";
-  } else {
-    out << secondE;
-  }
-}
 
 std::string Expression::toStringTreeHtml(int depth) const {
   std::stringstream out;
@@ -3990,204 +3851,7 @@ std::string Expression::toStringTreeHtml(int depth) const {
   return out.str();
 }
 
-bool Expression::toStringDivide(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  Calculator& commands = *input.owner;
-  if (!input.startsWith(commands.opDivide(), 3)) {
-    return false;
-  }
-  if (outputProperties != nullptr) {
-    if (input[1] == "Differential") {
-      outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
-    }
-  }
-  bool doUseFrac = !commands.flagDontUseFracInRational;
-  if (
-    doUseFrac && (
-      input[1].startsWith(commands.opTimes()) ||
-      input[1].startsWith(commands.opDivide())
-    )
-  ) {
-    List<Expression> multiplicandsLeft;
-    input.getMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
-    for (int i = 0; i < multiplicandsLeft.size; i ++) {
-      if (
-        multiplicandsLeft[i].startsWith(commands.opIntegral()) ||
-        multiplicandsLeft[i].isOperationGiven(commands.opIntegral())
-      ) {
-        doUseFrac = false;
-        break;
-      }
-    }
-  }
-  if (!doUseFrac) {
-    std::string firstE = input[1].toString(format);
-    std::string secondE = input[2].toString(format);
-    bool firstNeedsBrackets =
-    !(
-      input[1].isListStartingWithAtom(commands.opTimes()) ||
-      input[1].isListStartingWithAtom(commands.opDivide())
-    );
-    bool secondNeedsBrackets = true;
-    if (input[2].isOfType<Rational>()) {
-      if (input[2].getValue<Rational>().isInteger()) {
-        secondNeedsBrackets = false;
-      }
-    }
-    if (firstNeedsBrackets) {
-      out << "(" << firstE << ")";
-    } else {
-      out << firstE;
-    }
-    out << "/";
-    if (secondNeedsBrackets) {
-      out << "(" << secondE << ")";
-    } else {
-      out << secondE;
-    }
-  } else {
-    StateMaintainer<bool> maintain;
-    if (format != nullptr) {
-      maintain.initialize(format->flagExpressionNewLineAllowed);
-      format->flagExpressionNewLineAllowed = false;
-    } else {
-      // Compilers will complain at certain optimization levels about
-      // maintain not being initialized.
-      maintain.toMaintain = nullptr;
-      maintain.contentAtStart = false;
-    }
-    std::string firstE = input[1].toString(format);
-    std::string secondE = input[2].toString(format);
-    out << "\\frac{" << firstE << "}{" << secondE << "}";
-  }
-  return true;
-}
 
-bool Expression::toStringPower(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  input.checkInitialization();
-  Calculator& commands = *input.owner;
-  if (!input.startsWith(commands.opPower(), 3)) {
-    return false;
-  }
-  const Expression& baseExpression = input[1];
-  const Expression& exponentExpression = input[2];
-  bool isSuperScriptOfUnderscoredOperator = false;
-  if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
-    if (baseExpression[1].isOperationGiven(commands.opIntegral())) {
-      isSuperScriptOfUnderscoredOperator = true;
-    }
-  }
-  if (outputProperties != nullptr) {
-    if (
-      baseExpression.children.size > 0 &&
-      baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction()
-    ) {
-      outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
-      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
-    } else {
-      outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
-      outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
-    }
-  }
-  bool involvesExponentsInterpretedAsFunctions = false;
-  if (baseExpression.startsWith(- 1, 2)) {
-    involvesExponentsInterpretedAsFunctions =
-    baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
-    !exponentExpression.isEqualToMOne() &&
-    exponentExpression.isRational();
-    if (
-      involvesExponentsInterpretedAsFunctions &&
-      baseExpression[0].isOperationGiven(commands.opLog()) &&
-      commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
-    ) {
-      involvesExponentsInterpretedAsFunctions = false;
-    }
-  }
-  if (involvesExponentsInterpretedAsFunctions) {
-    Expression newFunctionExpression;
-    newFunctionExpression.makeXOX(
-      *input.owner, commands.opPower(), baseExpression[0], input[2]
-    );
-    newFunctionExpression.checkConsistency();
-    out << "{" << newFunctionExpression.toString(format) << "}{}";
-    if (
-      baseExpression[1].
-      needsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
-      baseExpression[1].startsWith(commands.opTimes())
-    ) {
-      out << "\\left(" << baseExpression[1].toString(format) << "\\right)";
-    } else {
-      out << baseExpression[1].toString(format);
-    }
-    return true;
-  }
-  if (isSuperScriptOfUnderscoredOperator) {
-    out
-    << baseExpression[1].toString(format)
-    << "_{"
-    << baseExpression[2].toString(format)
-    << "}^{"
-    << exponentExpression.toString(format)
-    << "}";
-    return true;
-  }
-  int opLimit = commands.opLimitBoundary();
-  if (
-    baseExpression.startsWith(opLimit) ||
-    baseExpression.isOperationGiven(opLimit)
-  ) {
-    out
-    << "(\\ "
-    << baseExpression.toString(format)
-    << ")^{"
-    << exponentExpression.toString(format)
-    << "}";
-    return true;
-  }
-  bool isSqrt = false;
-  if (exponentExpression.isOfType<Rational>()) {
-    if (exponentExpression.getValue<Rational>().isEqualTo(Rational(1, 2))) {
-      isSqrt = true;
-    }
-  }
-  if (isSqrt) {
-    out << "\\sqrt{" << baseExpression.toString(format) << "}";
-    return true;
-  }
-  MathExpressionFormattingProperties baseProperties;
-  std::string baseString = baseExpression.toString(format, &baseProperties);
-  std::string secondExpressionString = exponentExpression.toString(format);
-  if (baseExpression.needsParenthesisForBaseOfExponent()) {
-    bool useBigParenthesis = true;
-    if (baseExpression.startsWith(commands.opDivide())) {
-      useBigParenthesis = true;
-    }
-    if (useBigParenthesis) {
-      out << "\\left(";
-    } else {
-      out << "(";
-    }
-    out << baseString;
-    if (useBigParenthesis) {
-      out << "\\right)";
-    } else {
-      out << ")";
-    }
-  } else {
-    out << baseString;
-  }
-  out << "^{" << secondExpressionString << "}";
-  return true;
-}
 
 bool Expression::toStringGeneral(
   std::stringstream& out,
@@ -4236,8 +3900,8 @@ bool Expression::toStringExpressionPrintoutNodeGeneral(
   if (this->size() < 2) {
     return false;
   }
-  output.children.clear();
-  output.children.addOnTop(childrenPrintouts[0]);
+  output.clear();
+  output.addChildIndex(childrenPrintouts[0]);
   bool needParenthesis = true;
   if (this->size() == 2) {
     if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -4252,13 +3916,13 @@ bool Expression::toStringExpressionPrintoutNodeGeneral(
     container.appendStringTo("\\left(", output);
   }
   for (int i = 1; i < this->children.size; i ++) {
-    output.children.addOnTop(childrenPrintouts[i]);
+    output.addChildIndex(childrenPrintouts[i]);
     if (i != this->children.size - 1) {
-      output.children.addOnTop(container.addString(", "));
+      output.addString(", ");
     }
   }
   if (needParenthesis) {
-    output.children.addOnTop(container.addString("\\right)"));
+    output.addString("\\right)");
   }
   output.properties.needsParenthesesForMultiplicationOnTheRight = true;
   return true;
@@ -4438,209 +4102,8 @@ bool Expression::toStringEndStatementNested(
   return true;
 }
 
-bool Expression::toStringPlus(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  if (!input.startsWith(input.owner->opPlus())) {
-    return false;
-  }
-  if (outputProperties != nullptr) {
-    outputProperties->needsParenthesesForMultiplicationOnTheRight = true;
-  }
-  if (input.children.size < 3) {
-    global.fatal
-    << "Plus operation takes at least 2 arguments, "
-    << "whereas this expression has "
-    << input.children.size - 1
-    << " arguments. "
-    << global.fatal;
-  }
-  const Expression& left = input[1];
-  const Expression& right = input[2];
-  std::string leftString;
-  if (left.needsParenthesisForAddition()) {
-    leftString = "\\left(" + left.toString(format) + "\\right)";
-  } else {
-    leftString = left.toString(format);
-  }
-  out << leftString;
-  bool allowNewLine = false;
-  if (format != nullptr) {
-    allowNewLine = format->flagExpressionNewLineAllowed;
-  }
-  bool useFrac = !input.owner->flagDontUseFracInRational;
-  if (
-    allowNewLine &&
-    !useFrac &&
-    leftString.size() > static_cast<unsigned>(
-      FormatExpressions::expressionLineBreak
-    )
-  ) {
-    out << "\\\\\n";
-  }
-  std::string rightString = right.toString(format);
-  if (right.needsParenthesisForAddition()) {
-    rightString = "\\left(" + right.toString(format) + "\\right)";
-  }
-  if (rightString.size() > 0) {
-    if (rightString[0] != '-') {
-      out << "+";
-    }
-  }
-  out << rightString;
-  return true;
-}
 
-bool Expression::toStringDirectSum(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  (void) outputProperties;
-  if (!input.isListStartingWithAtom(input.owner->opDirectSum())) {
-    return false;
-  }
-  if (input.children.size < 3) {
-    global.fatal
-    << "Direct sum operation takes at least 2 arguments, "
-    << "whereas this expression has "
-    << input.children.size
-    << " arguments. "
-    << global.fatal;
-  }
-  const Expression& left = input[1];
-  const Expression& right = input[2];
-  std::string leftString;
-  if (left.needsParenthesisForAddition()) {
-    leftString = "\\left(" + left.toString(format) + "\\right)";
-  } else {
-    leftString = left.toString(format);
-  }
-  out << leftString;
-  bool allowNewLine = false;
-  if (format != nullptr) {
-    allowNewLine = format->flagExpressionNewLineAllowed;
-  }
-  bool useFrac = !input.owner->flagDontUseFracInRational;
-  if (
-    allowNewLine &&
-    !useFrac &&
-    leftString.size() > static_cast<unsigned>(
-      FormatExpressions::expressionLineBreak
-    )
-  ) {
-    out << "\\\\\n";
-  }
-  std::string rightString =
-  right.needsParenthesisForAddition() ? (
-    "\\left(" + right.toString(format) + "\\right)"
-  ) : right.toString(format);
-  if (rightString.size() > 0) {
-    if (rightString[0] != '-') {
-      out << "\\oplus ";
-    }
-  }
-  out << rightString;
-  return true;
-}
 
-bool Expression::toStringSequence(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  if (!input.isListStartingWithAtom(input.owner->opSequence())) {
-    return false;
-  }
-  if (outputProperties != nullptr) {
-    outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
-  }
-  if (input.size() == 2) {
-    out << "{Sequence{}";
-  }
-  out << "\\left(";
-  int charCounter = 0;
-  bool allowNewLine = false;
-  if (format != nullptr) {
-    allowNewLine = format->flagExpressionNewLineAllowed;
-  }
-  for (int i = 1; i < input.size(); i ++) {
-    std::string currentChildString = input[i].toString(format);
-    out << currentChildString;
-    charCounter += currentChildString.size();
-    if (i != input.children.size - 1) {
-      out << ", ";
-      if (format != nullptr) {
-        if (allowNewLine && charCounter > 50) {
-          if (format->flagUseLatex) {
-            out << "\\\\\n";
-          }
-          if (format->flagUseHTML) {
-            out << "\n<br>\n";
-          }
-        }
-      }
-    }
-    charCounter %= 50;
-  }
-  out << "\\right)";
-  if (input.size() == 2) {
-    out << "}";
-  }
-  return true;
-}
-
-bool Expression::toStringMatrix(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
-) {
-  if (outputProperties != nullptr) {
-    outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
-  }
-  if (!input.isMatrix()) {
-    return false;
-  }
-  if (format->flagUseLatex && !format->flagUsePmatrix) {
-    out << "\\left(";
-  }
-  if (!format->flagUsePmatrix) {
-    int numberOfColumns = input.getNumberOfColumns();
-    out << "\\begin{array}{";
-    for (int i = 0; i < numberOfColumns; i ++) {
-      out << "c";
-    }
-    out << "} ";
-  } else {
-    out << "\\begin{pmatrix}";
-  }
-  for (int i = 1; i < input.size(); i ++) {
-    for (int j = 1; j < input[i].size(); j ++) {
-      out << input[i][j].toString(format);
-      if (j != input[i].size() - 1) {
-        out << " & ";
-      }
-    }
-    if (i != input.size() - 1) {
-      out << "\\\\ \n";
-    }
-  }
-  if (format->flagUsePmatrix) {
-    out << " \\end{pmatrix}";
-  } else {
-    out << " \\end{array}";
-  }
-  if (format->flagUseLatex && !format->flagUsePmatrix) {
-    out << "\\right)";
-  }
-  return true;
-}
 
 std::string Expression::toTableWithStartingExpression(
   FormatExpressions* format,
@@ -5119,6 +4582,25 @@ bool Expression::isAtomUserDefined(std::string* whichAtom) const {
     return false;
   }
   return this->isOperation(whichAtom);
+}
+
+bool Expression::needsMutationForPrinting(Expression&whichMutation)const{
+  if (this->owner==nullptr){
+    return false;
+  }
+  int opPlus =this->owner->opPlus();
+  if (!this->startsWith(opPlus)) {
+    return false;
+  }
+  if (this->size()<3) {
+    return false;
+  }
+  List<Expression> opands;
+
+  this->owner->collectOpands(*this,opPlus, opands);
+  whichMutation.makeOXdotsX(*this->owner, opPlus, opands);
+  return true;
+
 }
 
 bool Expression::isOperation(std::string* outputWhichOperation) const {

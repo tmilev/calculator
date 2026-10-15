@@ -18,20 +18,41 @@ public:
   ExpressionPrintout& output;
   MapReferences<Expression, MathMLAndLatex>& expressionsWithNotation;
   List<ExpressionAndPrintoutData> stack;
+  ListReferences<Expression> constructed;
   bool useMathML;
+  int maximumExpressionDepth;
   ExpressionPrintoutWalker(
     ExpressionPrintout& outputTarget,
     MapReferences<Expression, MathMLAndLatex>& ownerExpressionsWithNotation
   ):
   output(outputTarget),
   expressionsWithNotation(ownerExpressionsWithNotation),
-  useMathML(false) {}
+      useMathML(false) , maximumExpressionDepth(1000){}
   void initialize(const Expression& input);
   bool maybeConsumeExpressionWithNotation();
+  bool maybeConsumeExpressionTooDeep();
   bool consumeNext(const FormatExpressions* format);
   void removeAndPrintStackTop(int newPrintoutIndex);
 };
 
+bool ExpressionPrintoutWalker::maybeConsumeExpressionTooDeep() {
+  if (this->stack.size <=this->maximumExpressionDepth){
+    return false;
+  }
+  int newPrintoutIndex = output.allPrintouts.size;
+    ExpressionPrintoutNode printout(this->output);
+    if(this->output.useMathML) {
+      printout.setContent("<ms>...</ms>");
+    }else{
+      printout.setContent( "...");
+    }
+
+    this->output.allPrintouts.addOnTop(printout);
+    this->removeAndPrintStackTop(newPrintoutIndex);
+    return true;
+
+
+  }
 bool ExpressionPrintoutWalker::maybeConsumeExpressionWithNotation() {
   if (this->stack.size == 0) {
     return false;
@@ -43,9 +64,13 @@ bool ExpressionPrintoutWalker::maybeConsumeExpressionWithNotation() {
     // Not an expression with notation.
     return false;
   }
-  ExpressionPrintoutNode printout;
+  ExpressionPrintoutNode printout(this->output);
   MathMLAndLatex& mathMLAndLatex = expressionsWithNotation.values[index];
-  printout.content = mathMLAndLatex.latex;
+  if(this->output.useMathML) {
+    printout.setContent(mathMLAndLatex.mathML);
+}else{
+  printout.setContent( mathMLAndLatex.latex);
+}
   printout.properties = mathMLAndLatex.properties;
   int newPrintoutIndex = output.allPrintouts.size;
   this->output.allPrintouts.addOnTop(printout);
@@ -65,7 +90,7 @@ void ExpressionPrintoutWalker::removeAndPrintStackTop(int newPrintoutIndex) {
 void ExpressionPrintoutWalker::initialize(const Expression& input) {
   this->output.clear();
   this->stack.clear();
-  ExpressionPrintoutNode empty;
+  ExpressionPrintoutNode empty(this->output);
   this->output.allPrintouts.addOnTop(empty);
   ExpressionAndPrintoutData inputWithPrintout(input);
   this->stack.addOnTop(inputWithPrintout);
@@ -84,17 +109,30 @@ bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
     if (this->maybeConsumeExpressionWithNotation()) {
       return true;
     }
+    if (this->maybeConsumeExpressionTooDeep()){
+      return true;
+    }
   }
   if (totalChildrenProcessed < currentExpression.size()) {
+const    Expression* nextChildToProcess = &currentExpression[totalChildrenProcessed];
+    Expression transformed;
+bool needsMutationForPrinting = nextChildToProcess->needsMutationForPrinting(transformed);
+if (needsMutationForPrinting){
+      this->constructed.addOnTop(transformed);
+      nextChildToProcess= &this->constructed.lastObject();
+}
+
     // Next child to process.
     this->stack.addOnTop(
-      ExpressionAndPrintoutData(currentExpression[totalChildrenProcessed])
+      ExpressionAndPrintoutData(*nextChildToProcess)
     );
     return true;
   }
   // All children of the current expression are printed.
   // Print the current one.
-  ExpressionPrintoutNode printout;
+  ExpressionPrintoutNode printout(this->output);
+  printout.childrenExpressionIndices = current.childrenPrintoutIndices;
+
   currentExpression.toStringExpressionPrintoutNode(
     printout, this->output, current.childrenPrintoutIndices, format
   );
@@ -133,7 +171,7 @@ void Expression::toStringExpressionPrintoutNode(
   const FormatExpressions* format
 ) const {
   if (this->owner == nullptr) {
-    output.content = "(Error:NoOwner)";
+    output.setContent( "(Error:NoOwner)");
     return;
   }
   MemorySaving<FormatExpressions> formatContainer;
@@ -172,7 +210,7 @@ void Expression::toStringExpressionPrintoutNode(
       output, container, children, &formatCopy
     )
   ) {} else {
-    output.content = "(ProgrammingError:NotDocumented)";
+    output.setContent( "(ProgrammingError:NotDocumented)");
     // <-not sure if this case is possible
   }
 }
@@ -197,7 +235,7 @@ bool Expression::toExpressionPrintoutNodeWithAtomHandler(
     if (index >= 0) {
       Expression::ToExpressionPrintoutNodeHandler handler =
       this->owner->toMathMLExpressionPrintoutNodeHandlersAtoms.values[index];
-      return handler(*this, output, container, childIndices, format);
+      return handler(*this, output,  childIndices, format);
     }
   } else {
     int index =
@@ -205,7 +243,7 @@ bool Expression::toExpressionPrintoutNodeWithAtomHandler(
     if (index >= 0) {
       Expression::ToExpressionPrintoutNodeHandler handler =
       this->owner->toStringExpressionPrintoutNodeHandlersAtoms.values[index];
-      return handler(*this, output, container, childIndices, format);
+      return handler(*this, output,  childIndices, format);
     }
   }
   return false;
@@ -238,7 +276,7 @@ bool Expression::toExpressionPrintoutNodeWithCompositeHandler(
   }
   Expression::ToExpressionPrintoutNodeHandler handler =
   handlers.values[index];
-  return handler(*this, output, container, childIndices, format);
+  return handler(*this, output, childIndices, format);
 }
 
 void Calculator::addAtomExpressionPrintoutHandlers(
@@ -273,86 +311,39 @@ void Calculator::addAtomExpressionPrintoutHandlers(
   toMathMLHandlerCollection.setKeyValue(atom, toMathMLHandler);
 }
 
-bool Expression::toStringExpressionPrintoutDefine(
-  const Expression& input,
-  ExpressionPrintoutNode& output,
-  ExpressionPrintout& container,
-  const List<int>& childrenIndices,
-  FormatExpressions* format
-) {
-  if (!input.startsWith(input.owner->opDefine(), 3)) {
-    return false;
+void Calculator::addCompositeExpressionPrintoutHandlers(
+    int atom,
+    Expression::ToExpressionPrintoutNodeHandler toStringHandler,
+    Expression::ToExpressionPrintoutNodeHandler toMathMLHandler
+    ) {
+  MapList<int, Expression::ToExpressionPrintoutNodeHandler>&
+      toStringHandlerCollection =
+      this->toStringExpressionPrintoutNodeHandlersComposite;
+  MapList<int, Expression::ToExpressionPrintoutNodeHandler>&
+      toMathMLHandlerCollection =
+      this->toMathMLExpressionPrintoutNodeHandlersComposite;
+  if (toStringHandlerCollection.contains(atom)) {
+    if (toStringHandlerCollection.getValueNoFail(atom) != toStringHandler) {
+      global.fatal
+          << "More than one ToExpressionPrintoutNodeHandler for composite "
+          << this->operations.keys[atom]
+          << "."
+          << global.fatal;
+    }
   }
-  output.properties.needsParenthesesForMultiplicationOnTheRight = true;
-  FormatExpressions formatForSubexpressions;
-  if (format != nullptr) {
-    formatForSubexpressions = *format;
+  if (toMathMLHandlerCollection.contains(atom)) {
+    if (toMathMLHandlerCollection.getValueNoFail(atom) != toMathMLHandler) {
+      global.fatal
+          << "More than one ToExpressionPrintoutNodeHandler for composite "
+          << this->operations.keys[atom]
+          << "."
+          << global.fatal;
+    }
   }
-  formatForSubexpressions.flagExpressionIsTopLevel = false;
-  if (
-    input[1].isListStartingWithAtom(input.owner->opDefine()) ||
-    input[1].isListStartingWithAtom(input.owner->opGreaterThan()) ||
-    input[1].isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo()) ||
-    input[1].isListStartingWithAtom(input.owner->opLessThan()) ||
-    input[1].isListStartingWithAtom(input.owner->opLessThanOrEqualTo())
-  ) {
-    container.appendStringTo("\\left(", output);
-    output.children.addOnTop(childrenIndices[1]);
-    container.appendStringTo("\\right)", output);
-  } else {
-    output.children.addOnTop(childrenIndices[1]);
-  }
-  container.appendStringTo("=", output);
-  if (input[2].isListStartingWithAtom(input.owner->opDefine())) {
-    container.appendStringTo("\\left(", output);
-    output.children.addOnTop(childrenIndices[2]);
-    container.appendStringTo("\\right)", output);
-  } else {
-    output.children.addOnTop(childrenIndices[2]);
-  }
-  return true;
+  toMathMLHandlerCollection.setKeyValue(atom, toMathMLHandler);
 }
 
-bool Expression::toMathMLExpressionPrintoutDefine(
-  const Expression& input,
-  ExpressionPrintoutNode& output,
-  ExpressionPrintout& container,
-  const List<int>& childrenIndices,
-  FormatExpressions* format
-) {
-  if (!input.startsWith(input.owner->opDefine(), 3)) {
-    return false;
-  }
-  FormatExpressions formatForSubexpressions;
-  if (format != nullptr) {
-    formatForSubexpressions = *format;
-  }
-  formatForSubexpressions.flagExpressionIsTopLevel = false;
-  container.appendStringTo("<mrow>", output);
-  if (
-    input[1].isListStartingWithAtom(input.owner->opDefine()) ||
-    input[1].isListStartingWithAtom(input.owner->opGreaterThan()) ||
-    input[1].isListStartingWithAtom(input.owner->opGreaterThanOrEqualTo()) ||
-    input[1].isListStartingWithAtom(input.owner->opLessThan()) ||
-    input[1].isListStartingWithAtom(input.owner->opLessThanOrEqualTo())
-  ) {
-    container.appendStringTo(MathML::leftParenthesis, output);
-    output.children.addOnTop(childrenIndices[1]);
-    container.appendStringTo(MathML::rightParenthesis, output);
-  } else {
-    output.children.addOnTop(childrenIndices[1]);
-  }
-  container.appendStringTo("<mo>=</mo>", output);
-  if (input[2].isListStartingWithAtom(input.owner->opDefine())) {
-    container.appendStringTo(MathML::leftParenthesis, output);
-    output.children.addOnTop(childrenIndices[2]);
-    container.appendStringTo(MathML::rightParenthesis, output);
-  } else {
-    output.children.addOnTop(childrenIndices[2]);
-  }
-  container.appendStringTo("</mrow>", output);
-  return true;
-}
+
 
 void Expression::initializeToExpressionPrintoutNodeHandlers(
   Calculator& toBeInitialized
@@ -363,156 +354,165 @@ void Expression::initializeToExpressionPrintoutNodeHandlers(
     Expression::toStringExpressionPrintoutDefine,
     Expression::toMathMLExpressionPrintoutDefine
   );
-  /*
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opIsDenotedBy(), Expression::toMathMLIsDenotedBy
+
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opIsDenotedBy(), Expression::toStringExpressionPrintoutIsDenotedBy,Expression::toMathMLExpressionPrintoutIsDenotedBy
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opLog(), Expression::toMathMLLnAbsoluteInsteadOfLogarithm
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opLog(), Expression::toStringExpressionPrintoutLnAbsoluteInsteadOfLogarithm
+      , Expression::toMathMLExpressionPrintoutLnAbsoluteInsteadOfLogarithm
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opLogBase(), Expression::toMathMLLogBase
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opLogBase(),
+      Expression::toStringExpressionPrintoutLogBase,
+          Expression::toMathMLExpressionPrintoutLogBase
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opIntervalOpen(), Expression::toMathMLIntervalOpen
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opIntervalOpen(), Expression::toStringExpressionPrintoutIntervalOpen, Expression::toMathMLExpressionPrintoutIntervalOpen
       );
-  toBeInitialized.addOneMathMLAtomHandler(
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
       toBeInitialized.opIntervalRightClosed(),
-      Expression::toMathMLIntervalRightClosed
+      Expression::toStringExpressionPrintoutIntervalRightClosed,
+      Expression::toMathMLExpressionPrintoutIntervalRightClosed
       );
-  toBeInitialized.addOneMathMLAtomHandler(
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
       toBeInitialized.opIntervalLeftClosed(),
-      Expression::toMathMLIntervalLeftClosed
+      Expression::toStringExpressionPrintoutIntervalLeftClosed,
+      Expression::toMathMLExpressionPrintoutIntervalLeftClosed
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opIntervalClosed(), Expression::toMathMLIntervalClosed
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opIntervalClosed(), Expression::toStringExpressionPrintoutIntervalClosed, Expression::toMathMLExpressionPrintoutIntervalClosed
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opQuote(), Expression::toMathMLQuote
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opQuote(), Expression::toStringExpressionPrintoutQuote, Expression::toMathMLExpressionPrintoutQuote
       );
-  toBeInitialized.addOneMathMLAtomHandler(
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
       toBeInitialized.opDefineConditional(),
-      Expression::toMathMLDefineConditional
+      Expression::toStringExpressionPrintoutDefineConditional,
+      Expression::toMathMLExpressionPrintoutDefineConditional
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opDivide(), Expression::toMathMLDivide
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opDivide(), Expression::toStringExpressionPrintoutDivide, Expression::toMathMLExpressionPrintoutDivide
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opTensor(), Expression::toMathMLTensor
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opTensor(), Expression::toStringExpressionPrintoutTensor, Expression::toMathMLExpressionPrintoutTensor
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opIn(), Expression::toMathMLIn
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opIn(), Expression::toStringExpressionPrintoutIn, Expression::toMathMLExpressionPrintoutIn
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opOr(), Expression::toMathMLOr
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opOr(), Expression::toStringExpressionPrintoutOr, Expression::toMathMLExpressionPrintoutOr
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opAnd(), Expression::toMathMLAnd
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opAnd(), Expression::toStringExpressionPrintoutAnd, Expression::toMathMLExpressionPrintoutAnd
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opBinom(), Expression::toMathMLBinom
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opBinom(), Expression::toStringExpressionPrintoutBinom, Expression::toMathMLExpressionPrintoutBinom
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opUnderscore(), Expression::toMathMLUnderscore
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opUnderscore(), Expression::toStringExpressionPrintoutUnderscore, Expression::toMathMLExpressionPrintoutUnderscore
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opSetMinus(), Expression::toMathMLSetMinus
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opSetMinus(), Expression::toStringExpressionPrintoutSetMinus, Expression::toMathMLExpressionPrintoutSetMinus
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opLimitBoundary(), Expression::toMathMLLimitBoundary
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opLimitBoundary(), Expression::toStringExpressionPrintoutLimitBoundary, Expression::toMathMLExpressionPrintoutLimitBoundary
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opTimes(), Expression::toMathMLTimes
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opTimes(), Expression::toStringExpressionPrintoutTimes, Expression::toMathMLExpressionPrintoutTimes
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opCrossProduct(), Expression::toMathMLCrossProduct
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opCrossProduct(), Expression::toStringExpressionPrintoutCrossProduct, Expression::toMathMLExpressionPrintoutCrossProduct
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opSqrt(), Expression::toMathMLSqrt
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opSqrt(), Expression::toStringExpressionPrintoutSqrt, Expression::toMathMLExpressionPrintoutSqrt
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opFactorial(), Expression::toMathMLFactorial
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opFactorial(), Expression::toStringExpressionPrintoutFactorial, Expression::toMathMLExpressionPrintoutFactorial
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opAbsoluteValue(), Expression::toMathMLAbsoluteValue
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opAbsoluteValue(), Expression::toStringExpressionPrintoutAbsoluteValue, Expression::toMathMLExpressionPrintoutAbsoluteValue
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opPower(), Expression::toMathMLPower
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opPower(), Expression::toStringExpressionPrintoutPower, Expression::toMathMLExpressionPrintoutPower
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opPlus(), Expression::toMathMLPlus
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opPlus(), Expression::toStringExpressionPrintoutPlus, Expression::toMathMLExpressionPrintoutPlus
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opDirectSum(), Expression::toMathMLDirectSum
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opDirectSum(), Expression::toStringExpressionPrintoutDirectSum, Expression::toMathMLExpressionPrintoutDirectSum
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opMinus(), Expression::toMathMLMinus
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opMinus(), Expression::toStringExpressionPrintoutMinus, Expression::toMathMLExpressionPrintoutMinus
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opBind(), Expression::toMathMLBind
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opBind(), Expression::toStringExpressionPrintoutBind, Expression::toMathMLExpressionPrintoutBind
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opEqualEqual(), Expression::toMathMLEqualEqual
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opEqualEqual(), Expression::toStringExpressionPrintoutEqualEqual, Expression::toMathMLExpressionPrintoutEqualEqual
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opEqualEqualEqual(), Expression::toMathMLEqualEqualEqual
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opEqualEqualEqual(), Expression::toStringExpressionPrintoutEqualEqualEqual, Expression::toMathMLExpressionPrintoutEqualEqualEqual
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opDifferentiate(), Expression::toMathMLDifferentiate
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opDifferentiate(), Expression::toStringExpressionPrintoutDifferentiate, Expression::toMathMLExpressionPrintoutDifferentiate
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opDifferential(), Expression::toMathMLDifferential
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opDifferential(), Expression::toStringExpressionPrintoutDifferential, Expression::toMathMLExpressionPrintoutDifferential
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opSum(), Expression::toMathMLSumOrIntegral
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opSum(), Expression::toStringExpressionPrintoutSumOrIntegral, Expression::toMathMLExpressionPrintoutSumOrIntegral
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opIntegral(), Expression::toMathMLSumOrIntegral
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opIntegral(), Expression::toStringExpressionPrintoutSumOrIntegral, Expression::toMathMLExpressionPrintoutSumOrIntegral
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opGreaterThan(), Expression::toMathMLGreaterThan
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opGreaterThan(), Expression::toStringExpressionPrintoutGreaterThan, Expression::toMathMLExpressionPrintoutGreaterThan
       );
-  toBeInitialized.addOneMathMLAtomHandler(
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
       toBeInitialized.opGreaterThanOrEqualTo(),
-      Expression::toMathMLGreaterThanOrEqualTo
+      Expression::toStringExpressionPrintoutGreaterThanOrEqualTo,
+      Expression::toMathMLExpressionPrintoutGreaterThanOrEqualTo
       );
-  toBeInitialized.addOneMathMLAtomHandler(
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
       toBeInitialized.opLessThanOrEqualTo(),
-      Expression::toMathMLLessThanOrEqualTo
+      Expression::toStringExpressionPrintoutLessThanOrEqualTo,
+      Expression::toMathMLExpressionPrintoutLessThanOrEqualTo
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opLimit(), Expression::toMathMLLimit
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opLimit(), Expression::toStringExpressionPrintoutLimit, Expression::toMathMLExpressionPrintoutLimit
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opLimitProcess(), Expression::toMathMLLimitProcess
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opLimitProcess(), Expression::toStringExpressionPrintoutLimitProcess, Expression::toMathMLExpressionPrintoutLimitProcess
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opLessThan(), Expression::toMathMLLessThan
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opLessThan(), Expression::toStringExpressionPrintoutLessThan, Expression::toMathMLExpressionPrintoutLessThan
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opSequence(), Expression::toMathMLSequence
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opSequence(), Expression::toStringExpressionPrintoutSequence, Expression::toMathMLExpressionPrintoutSequence
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opLieBracket(), Expression::toMathMLLieBracket
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opLieBracket(), Expression::toStringExpressionPrintoutLieBracket, Expression::toMathMLExpressionPrintoutLieBracket
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opMod(), Expression::toMathMLMod
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opMod(), Expression::toStringExpressionPrintoutMod, Expression::toMathMLExpressionPrintoutMod
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opUnion(), Expression::toMathMLUnion
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opUnion(), Expression::toStringExpressionPrintoutUnion, Expression::toMathMLExpressionPrintoutUnion
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opIntersection(), Expression::toMathMLIntersection
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opIntersection(), Expression::toStringExpressionPrintoutIntersection, Expression::toMathMLExpressionPrintoutIntersection
       );
-  toBeInitialized.addOneMathMLAtomHandler(
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
       toBeInitialized.opUnionNoRepetition(),
-      Expression::toMathMLUnionNoRepetition
+      Expression::toStringExpressionPrintoutUnionNoRepetition,
+      Expression::toMathMLExpressionPrintoutUnionNoRepetition
       );
-  toBeInitialized.addOneMathMLAtomHandler(
-      toBeInitialized.opError(), Expression::toMathMLError
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+      toBeInitialized.opError(), Expression::toStringExpressionPrintoutError, Expression::toMathMLExpressionPrintoutError
       );
-  toBeInitialized.addOneMathMLCompositeHandler(
-      toBeInitialized.opMatrix(), Expression::toMathMLMatrix
+  toBeInitialized.addCompositeExpressionPrintoutHandlers(
+      toBeInitialized.opMatrix(), Expression::toStringExpressionPrintoutMatrix, Expression::toMathMLExpressionPrintoutMatrix
       );
-  */
+
 }

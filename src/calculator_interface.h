@@ -160,7 +160,6 @@ public:
   typedef bool(*ToExpressionPrintoutNodeHandler)(
     const Expression& input,
     ExpressionPrintoutNode& output,
-    ExpressionPrintout& container,
     const List<int>& childrenIndices,
     FormatExpressions* format
   );
@@ -258,6 +257,7 @@ public:
   bool isMatrixOfType(
     int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr
   ) const;
+  bool needsMutationForPrinting(Expression& whichMutation)const;
   bool isAtom() const;
   bool isAtomUserDefined(std::string* whichAtom = nullptr) const;
   bool isOperationGiven(const std::string& desiredAtom) const;
@@ -656,14 +656,12 @@ public:
   static bool toStringExpressionPrintoutDefine(
     const Expression& input,
     ExpressionPrintoutNode& output,
-    ExpressionPrintout& container,
     const List<int>& childrenIndices,
     FormatExpressions* format
   );
   static bool toMathMLExpressionPrintoutDefine(
     const Expression& input,
     ExpressionPrintoutNode& output,
-    ExpressionPrintout& container,
     const List<int>& childrenIndices,
     FormatExpressions* format
   );
@@ -685,6 +683,134 @@ public:
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties = nullptr
   );
+  static bool  toStringExpressionPrintoutIsDenotedBy(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool  toMathMLExpressionPrintoutIsDenotedBy
+
+
+      (  const Expression& input,
+       ExpressionPrintoutNode& output,
+
+       const List<int>& childrenIndices,
+       FormatExpressions* format);
+
+
+
+  static bool toStringExpressionPrintoutLnAbsoluteInsteadOfLogarithm(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLnAbsoluteInsteadOfLogarithm(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutLogBase(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLogBase(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutIntervalOpen(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutIntervalOpen(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutIntervalRightClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutIntervalRightClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutIntervalLeftClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutIntervalLeftClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutIntervalClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutIntervalClosed(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutQuote(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutQuote(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutDefineConditional(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutDefineConditional(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutDivide(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutDivide(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutTensor(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutTensor(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutIn(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutIn(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutOr(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutOr (const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutAnd(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutAnd (const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutBinom(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutBinom(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutUnderscore(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutUnderscore(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutSetMinus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutSetMinus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutLimitBoundary(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLimitBoundary(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutTimes(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutTimes(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutCrossProduct(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutCrossProduct(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutSqrt(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutSqrt(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutSqrt2(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutSqrt2(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutSqrt3(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutSqrt3(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutFactorial(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutFactorial(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutAbsoluteValue(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutAbsoluteValue(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutPower(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutPower(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutPlus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutPlus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutDirectSum(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutDirectSum(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutMinus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutMinus(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutMinus2(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutMinus2(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutMinus3(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutMinus3(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutBind(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutBind(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutEqualEqual(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutEqualEqual(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutEqualEqualEqual(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutEqualEqualEqual(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutDifferentiate(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutDifferentiate(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutDifferential(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutDifferential(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutDifferential2(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutDifferential2(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutDifferential3(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutDifferential3(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutSumOrIntegral(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutSumOrIntegral(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutGreaterThan(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutGreaterThan(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutGreaterThanOrEqualTo(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutGreaterThanOrEqualTo(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutLessThanOrEqualTo(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLessThanOrEqualTo(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutLimit(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLimit(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutLimitProcess(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLimitProcess(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutLessThan(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLessThan(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutSequence(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutSequence(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutLieBracket(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutLieBracket(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutMod(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutMod(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutUnion(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutUnion(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutIntersection(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutIntersection(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutUnionNoRepetition(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutUnionNoRepetition(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutError(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutError(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toStringExpressionPrintoutMatrix(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutMatrix(
+      const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+      );
+
+  static bool toStringExpressionPrintoutTimesInContext(const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format);
+  static bool toMathMLExpressionPrintoutTimesInContext(
+      const Expression& input,ExpressionPrintoutNode& output,const List<int>& childrenIndices, FormatExpressions* format
+      );
+
+
+
+
+
   static bool toStringLogBase(
     const Expression& input,
     std::stringstream& out,
@@ -1236,15 +1362,26 @@ public:
     MathExpressionFormattingProperties* outputProperties = nullptr
   );
   void toStringOpMultiplicative(
-    std::stringstream& out,
-    const std::string& operation,
-    FormatExpressions* format
-  ) const;
+      std::stringstream& out,
+      const std::string& operation,
+      FormatExpressions* format
+      ) const;
+  bool toStringExpressionPrintoutOpMultiplicative(ExpressionPrintoutNode& output,
+      const List<int>& childrenIndices,
+      const std::string& operation,
+
+      FormatExpressions* format
+      ) const;
+  void toMathMLExpressionPrintoutOpMultiplicative(
+       ExpressionPrintoutNode& output,const List<int>& childrenIndices,      const std::string& operation,
+ FormatExpressions* format
+      ) const;
+
   void toMathMLOpMultiplicative(
-    std::stringstream& out,
-    const std::string& operation,
-    FormatExpressions* format
-  ) const;
+      std::stringstream& out,
+      const std::string& operation,
+      FormatExpressions* format
+      ) const;
   std::string toStringTreeHtml(int depth) const;
   std::string toTable(
     Expression& startingExpression,
@@ -3688,7 +3825,7 @@ public:
     VectorSparse<Expression>& outputPositionJIsCoefficientXtoJth
   );
   bool collectOpands(
-    const Expression& input, int operation, List<Expression>& outputOpands
+      const Expression& input, int operation, List<Expression>& outputOpands
   );
   bool collectOpandsAccumulate(
     const Expression& input, int operation, List<Expression>& outputOpands
@@ -3856,10 +3993,15 @@ public:
     const FunctionOptions& inputOptions
   );
   void addAtomExpressionPrintoutHandlers(
-    int atom,
-    Expression::ToExpressionPrintoutNodeHandler toStringHandler,
-    Expression::ToExpressionPrintoutNodeHandler toMathMLHandler
-  );
+      int atom,
+      Expression::ToExpressionPrintoutNodeHandler toStringHandler,
+      Expression::ToExpressionPrintoutNodeHandler toMathMLHandler
+      );
+  void addCompositeExpressionPrintoutHandlers(
+      int atom,
+      Expression::ToExpressionPrintoutNodeHandler toStringHandler,
+      Expression::ToExpressionPrintoutNodeHandler toMathMLHandler
+      );
   void addOneStringAtomHandler(int atom, Expression::ToStringHandler handler);
   void addOneMathMLAtomHandler(int atom, Expression::ToMathMLHandler handler);
   void addOneStringCompositeHandler(

@@ -32,24 +32,52 @@ public:
   void initialize(const Expression& input);
   bool maybeConsumeExpressionWithNotation();
   bool maybeConsumeExpressionTooDeep();
+  bool maybeIgnore();
   bool consumeNext(const FormatExpressions* format);
   void removeAndPrintStackTop(int newPrintoutIndex);
+  bool consumePrintout(ExpressionPrintoutNode& printout);
 };
 
+bool ExpressionPrintoutWalker::consumePrintout(
+  ExpressionPrintoutNode& printout
+) {
+  int newPrintoutIndex = output.allPrintouts.size;
+  this->output.allPrintouts.addOnTop(printout);
+  this->removeAndPrintStackTop(newPrintoutIndex);
+  return true;
+}
+
+bool ExpressionPrintoutWalker::maybeIgnore() {
+  STACK_TRACE("ExpressionPrintoutWalker::maybeIgnore");
+  if (this->stack.size == 0) {
+    return false;
+  }
+  ExpressionAndPrintoutData& lastCandidate = *this->stack.lastObject();
+  const Expression& lastExpression = *lastCandidate.expression;
+  if (!lastExpression.isContext()) {
+    return false;
+  }
+  ExpressionPrintoutNode printout(this->output);
+  if (this->output.useMathML) {
+    printout.setContent("<ms>Context...</ms>");
+  } else {
+    printout.setContent("Context");
+  }
+  return this->consumePrintout(printout);
+}
+
 bool ExpressionPrintoutWalker::maybeConsumeExpressionTooDeep() {
+  STACK_TRACE("ExpressionPrintoutWalker::maybeConsumeExpressionTooDeep");
   if (this->stack.size <= this->maximumExpressionDepth) {
     return false;
   }
-  int newPrintoutIndex = output.allPrintouts.size;
   ExpressionPrintoutNode printout(this->output);
   if (this->output.useMathML) {
     printout.setContent("<ms>...</ms>");
   } else {
     printout.setContent("...");
   }
-  this->output.allPrintouts.addOnTop(printout);
-  this->removeAndPrintStackTop(newPrintoutIndex);
-  return true;
+  return this->consumePrintout(printout);
 }
 
 bool ExpressionPrintoutWalker::maybeConsumeExpressionWithNotation() {
@@ -71,15 +99,13 @@ bool ExpressionPrintoutWalker::maybeConsumeExpressionWithNotation() {
     printout.setContent(mathMLAndLatex.latex);
   }
   printout.properties = mathMLAndLatex.properties;
-  int newPrintoutIndex = output.allPrintouts.size;
-  this->output.allPrintouts.addOnTop(printout);
-  this->removeAndPrintStackTop(newPrintoutIndex);
-  return true;
+  return this->consumePrintout(printout);
 }
 
 void ExpressionPrintoutWalker::removeAndPrintStackTop(int newPrintoutIndex) {
   this->stack.removeLastObject();
   if (this->stack.size == 0) {
+    this->output.indexRootNode = newPrintoutIndex;
     return;
   }
   ExpressionAndPrintoutData& current = *this->stack.lastObject();
@@ -96,10 +122,11 @@ void ExpressionPrintoutWalker::initialize(const Expression& input) {
 }
 
 bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
+  STACK_TRACE("ExpressionPrintoutWalker::consumeNext");
   if (this->stack.size == 0) {
     return false;
   }
-  ExpressionAndPrintoutData & current = *this->stack.lastObject();
+  ExpressionAndPrintoutData& current = *this->stack.lastObject();
   const Expression& currentExpression = *current.expression;
   int totalChildrenProcessed = current.childrenPrintoutIndices.size;
   if (totalChildrenProcessed == 0) {
@@ -109,6 +136,9 @@ bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
       return true;
     }
     if (this->maybeConsumeExpressionTooDeep()) {
+      return true;
+    }
+    if (this->maybeIgnore()) {
       return true;
     }
   }
@@ -133,15 +163,7 @@ bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
   currentExpression.toStringExpressionPrintoutNode(
     printout, this->output, current.childrenPrintoutIndices, format
   );
-  int indexLast = this->output.allPrintouts.size;
-  this->output.allPrintouts.addOnTop(printout);
-  this->stack.removeLastObject();
-  if (this->stack.size == 0) {
-    this->output.indexRootNode = indexLast;
-  } else {
-    this->stack.lastObject()->childrenPrintoutIndices.addOnTop(indexLast);
-  }
-  return true;
+  return this->consumePrintout(printout);
 }
 }
 
@@ -167,6 +189,7 @@ void Expression::toStringExpressionPrintoutNode(
   List<int>& children,
   const FormatExpressions* format
 ) const {
+  STACK_TRACE("Expression::toStringExpressionPrintoutNode");
   if (this->owner == nullptr) {
     output.setContent("(Error:NoOwner)");
     return;
@@ -585,6 +608,11 @@ void Expression::initializeToExpressionPrintoutNodeHandlers(
     toBeInitialized.opError(),
     Expression::toStringExpressionPrintoutError,
     Expression::toMathMLExpressionPrintoutError
+  );
+  toBeInitialized.addAtomExpressionPrintoutHandlers(
+    toBeInitialized.opCommandSequence(),
+    Expression::toStringExpressionPrintoutEndStatementNested,
+    Expression::toMathMLExpressionPrintoutEndStatementNested
   );
   toBeInitialized.addCompositeExpressionPrintoutHandlers(
     toBeInitialized.opMatrix(),

@@ -2648,6 +2648,8 @@ void Rational::computeFormattingProperties(
   outputProperties->startsWithMinus = this->isNegative();
   outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft =
   this->isNegative();
+  outputProperties->isNegativeOne = this->isNegativeOne();
+  outputProperties->startsWithDigit = !outputProperties->startsWithMinus;
 }
 
 std::string Rational::toString(const FormatExpressions* format) const {

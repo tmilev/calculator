@@ -738,6 +738,12 @@ public:
       return this->extended->numerator.isNegative();
     }
   }
+  bool isNegativeOne() const {
+    if (this->extended != nullptr) {
+      return false;
+    }
+    return this->numeratorShort == - 1 && this->denominatorShort == 1;
+  }
   bool isNonPositive() const {
     if (this->extended == nullptr) {
       return this->numeratorShort <= 0;

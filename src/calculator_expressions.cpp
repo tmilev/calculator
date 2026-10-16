@@ -1369,8 +1369,7 @@ bool Expression::checkConsistency() const {
       global.fatal
       << "At the moment of writing, "
       << "an expression of built-in type must have 3 "
-      <<
-      "children: type, context, and index in Calculator. The raw expression is: "
+      << "children: type, context, and index in Calculator. "
       << "The present expression has: "
       << this->size()
       << " children. "
@@ -3042,11 +3041,11 @@ bool Expression::toStringBuiltIn<MatrixTensor<Rational> >(
     20
   ) {
     out
-    << "MatrixRationalsTensorForm{}("
+    << "MatrixRationalsTensorForm{}"
     << input.getValue<MatrixTensor<Rational> >().toStringMatrixForm(
       &formatLocal
     )
-    << ")";
+    << "";
   } else {
     out << input.getValue<MatrixTensor<Rational> >().toString();
   }
@@ -4577,6 +4576,7 @@ bool Expression::isAtomUserDefined(std::string* whichAtom) const {
 }
 
 bool Expression::needsMutationForPrinting(Expression& whichMutation) const {
+  STACK_TRACE("Expression::needsMutationForPrinting");
   if (this->owner == nullptr) {
     return false;
   }

@@ -9,6 +9,7 @@
 class MathExpressionFormattingProperties {
 public:
   bool startsWithMinus;
+  // Whether the expression is to be rendered as -1.
   bool isNegativeOne;
   bool isOne;
   bool startsWithDigit;

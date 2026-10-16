@@ -1103,6 +1103,18 @@ public:
     const List<int>& childrenIndices,
     FormatExpressions* format
   );
+  static bool toStringExpressionPrintoutEndStatementNested(
+    const Expression& input,
+    ExpressionPrintoutNode& output,
+    const List<int>& childrenIndices,
+    FormatExpressions* format
+  );
+  static bool toMathMLExpressionPrintoutEndStatementNested(
+    const Expression& input,
+    ExpressionPrintoutNode& output,
+    const List<int>& childrenIndices,
+    FormatExpressions* format
+  );
   static bool toStringExpressionPrintoutDifferential(
     const Expression& input,
     ExpressionPrintoutNode& output,

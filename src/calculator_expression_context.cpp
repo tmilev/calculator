@@ -267,21 +267,21 @@ bool Expression::contextSetDifferentialOperatorVariable(
   polynomialPart.reset(*this->owner, 2);
   polynomialPart.addChildAtomOnTop(this->owner->opPolynomialVariables());
   polynomialPart.addChildOnTop(polynomialVariable);
-  bool foundDiffVarsE = false;
-  bool foundPolyVarsE = false;
+  bool foundDifferentialVariablesExpression = false;
+  bool foundPolynomialVariablesExpression = false;
   for (int i = 0; i < this->children.size; i ++) {
     if ((*this)[i].startsWith(this->owner->opWeylAlgebraVariables())) {
       this->setChild(i, differentialPart);
-      foundDiffVarsE = true;
+      foundDifferentialVariablesExpression = true;
     } else if ((*this)[i].startsWith(this->owner->opPolynomialVariables())) {
       this->setChild(i, polynomialPart);
-      foundPolyVarsE = true;
+      foundPolynomialVariablesExpression = true;
     }
   }
-  if (!foundPolyVarsE) {
+  if (!foundPolynomialVariablesExpression) {
     this->addChildOnTop(polynomialPart);
   }
-  if (!foundDiffVarsE) {
+  if (!foundDifferentialVariablesExpression) {
     this->addChildOnTop(differentialPart);
   }
   return true;

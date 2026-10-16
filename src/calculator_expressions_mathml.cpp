@@ -298,7 +298,7 @@ bool Expression::toMathMLBuiltIn<VectorPartitionFunction>(
   FormatExpressions* format,
   MathExpressionFormattingProperties* outputProperties
 ) {
-  STACK_TRACE("Expression::toMathMLBuiltIn_VectorPartitionFunction");
+  STACK_TRACE("Expression::toMathMLBuiltIn");
   (void) format;
   (void) outputProperties;
   const VectorPartitionFunction& vectorPartitionFunction =
@@ -3152,6 +3152,7 @@ bool Expression::toMathMLExpressionPrintoutIsDenotedBy(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.isListStartingWithAtom(input.owner->opIsDenotedBy())) {
     return false;
   }
@@ -3167,6 +3168,7 @@ bool Expression::toMathMLExpressionPrintoutLnAbsoluteInsteadOfLogarithm(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (
     !input.owner->flagUseLnAbsInsteadOfLogForIntegrationNotation ||
     !input.startsWith(input.owner->opLog(), 2)
@@ -3192,6 +3194,7 @@ bool Expression::toMathMLExpressionPrintoutLogBase(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.startsWith(input.owner->opLogBase(), 3)) {
     return false;
   }
@@ -3208,6 +3211,7 @@ bool Expression::toMathMLExpressionPrintoutIntervalOpen(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.startsWith(input.owner->opIntervalOpen(), 3)) {
     return false;
   }
@@ -3229,6 +3233,7 @@ bool Expression::toMathMLExpressionPrintoutIntervalRightClosed(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (input.startsWith(input.owner->opIntervalRightClosed(), 3)) {
     output.addString("<mrow>").addString(MathML::leftParenthesis).addChildIndex
     (childrenIndices[1]).addString("<mo>,</mo>").addChildIndex(
@@ -3262,6 +3267,7 @@ bool Expression::toMathMLExpressionPrintoutIntervalLeftClosed(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (input.startsWith(input.owner->opIntervalLeftClosed(), 2)) {
     output.addString("<mrow>");
     if (input[1].isSequenceNElements(2)) {
@@ -3297,6 +3303,7 @@ bool Expression::toMathMLExpressionPrintoutIntervalClosed(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (input.startsWith(input.owner->opIntervalClosed(), 2)) {
     output.addString("<mrow>");
     if (input[1].isSequenceNElements(2)) {
@@ -3333,6 +3340,7 @@ bool Expression::toMathMLExpressionPrintoutQuote(
   FormatExpressions* format
 ) {
   (void) format;
+  (void) childrenIndices;
   if (!input.startsWith(input.owner->opQuote(), 2)) {
     return false;
   }
@@ -3545,6 +3553,7 @@ bool Expression::toMathMLExpressionPrintoutUnderscore(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.startsWith(input.owner->opUnderscore())) {
     return false;
   }
@@ -3956,7 +3965,6 @@ bool Expression::toMathMLExpressionPrintoutDirectSum(
     << global.fatal;
   }
   const Expression& left = input[1];
-  const Expression& right = input[2];
   if (left.needsParenthesisForAddition()) {
     output.addString("<mrow>").addString(MathML::leftParenthesis).addChildIndex
     (childrenIndices[1]).addString(MathML::rightParenthesis).addString(
@@ -4008,12 +4016,15 @@ bool Expression::toMathMLExpressionPrintoutBind(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.startsWith(input.owner->opBind(), 2)) {
     return false;
   }
   output.addString("<mrow>").addChildIndex(childrenIndices[1]).addString(
     "</mrow>"
   );
+  output.properties =
+  output.getOwner().allPrintouts[childrenIndices[1]].properties;
   return true;
 }
 
@@ -4059,12 +4070,11 @@ bool Expression::toMathMLExpressionPrintoutDifferentiate(
   if (!input.startsWith(input.owner->opDifferentiate(), 3)) {
     return false;
   }
-  MathExpressionFormattingProperties secondProperties;
   output.addString("<mfrac><mrow><mtext>d</mtext>");
   int secondChildIndex = childrenIndices[2];
   ExpressionPrintoutNode& secondPrintout =
   output.getOwner().allPrintouts[secondChildIndex];
-  if (secondProperties.needsParenthesesForMultiplicationOnTheRight) {
+  if (secondPrintout.properties.needsParenthesesForMultiplicationOnTheRight) {
     output.addString(MathML::leftParenthesis).addChildIndex(secondChildIndex).
     addString(MathML::rightParenthesis);
   } else {
@@ -4525,6 +4535,7 @@ bool Expression::toMathMLExpressionPrintoutMinus2(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.startsWith(input.owner->opMinus(), 2)) {
     return false;
   }
@@ -4576,10 +4587,11 @@ bool Expression::toMathMLExpressionPrintoutDifferential3(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.startsWith(input.owner->opDifferential(), 3)) {
     return false;
   }
-  ExpressionPrintoutNode & coefficientPrintout =
+  ExpressionPrintoutNode& coefficientPrintout =
   output.getOwner().allPrintouts[childrenIndices[2]];
   bool needsParentheses =
   coefficientPrintout.properties.needsParenthesesForMultiplicationOnTheRight
@@ -4614,5 +4626,23 @@ bool Expression::toMathMLExpressionPrintoutDifferential3(
     output.addString(MathML::rightParenthesis);
   }
   output.addString("</mrow>");
+  return true;
+}
+
+bool Expression::toMathMLExpressionPrintoutEndStatementNested(
+  const Expression& input,
+  ExpressionPrintoutNode& output,
+  const List<int>& childrenIndices,
+  FormatExpressions* format
+) {
+  STACK_TRACE("Expression::toMathMLExpressionPrintoutEndStatementNested");
+  (void) format;
+  output.addString("<mtable>");
+  for (int i = 1; i < input.size(); i ++) {
+    output.addString("<mtr><mtd>");
+    output.addChildIndex(childrenIndices[i]);
+    output.addString("</mtd></mtr>");
+  }
+  output.addString("</mtable>");
   return true;
 }

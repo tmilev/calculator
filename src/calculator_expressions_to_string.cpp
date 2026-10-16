@@ -81,6 +81,7 @@ bool Expression::toStringExpressionPrintoutMinus2(
   } else {
     output.addString("-").addChildIndex(childrenIndices[1]);
   }
+  output.properties.startsWithMinus = true;
   return true;
 }
 
@@ -2158,10 +2159,12 @@ bool Expression::toStringExpressionPrintoutTimes(
     output.properties.startsWithFraction = leftProperties.startsWithFraction;
   }
   bool mustHaveSpace = true;
+  if (
+    !isCollapsed && !secondNeedsParentheses && rightProperties.startsWithDigit
+  ) {
+    mustHaveTimes = true;
+  }
   if (!firstNeedsParentheses && !secondNeedsParentheses && !isCollapsed) {
-    if (rightProperties.startsWithDigit) {
-      mustHaveTimes = true;
-    }
     if (leftProperties.endsWithDigit && rightProperties.startsWithFraction) {
       mustHaveTimes = true;
     }
@@ -2312,16 +2315,17 @@ bool Expression::toStringExpressionPrintoutPower(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  STACK_TRACE("Expression::toStringExpressionPrintoutPower");
   input.checkInitialization();
-  Calculator& commands = *input.owner;
-  if (!input.startsWith(commands.opPower(), 3)) {
+  Calculator& calculator = *input.owner;
+  if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
   const Expression& baseExpression = input[1];
   const Expression& exponentExpression = input[2];
   bool isSuperScriptOfUnderscoredOperator = false;
-  if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
-    if (baseExpression[1].isOperationGiven(commands.opIntegral())) {
+  if (baseExpression.startsWith(calculator.opUnderscore(), 3)) {
+    if (baseExpression[1].isOperationGiven(calculator.opIntegral())) {
       isSuperScriptOfUnderscoredOperator = true;
     }
   }
@@ -2343,8 +2347,8 @@ bool Expression::toStringExpressionPrintoutPower(
     exponentExpression.isRational();
     if (
       involvesExponentsInterpretedAsFunctions &&
-      baseExpression[0].isOperationGiven(commands.opLog()) &&
-      commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
+      baseExpression[0].isOperationGiven(calculator.opLog()) &&
+      calculator.flagUseLnAbsInsteadOfLogForIntegrationNotation
     ) {
       involvesExponentsInterpretedAsFunctions = false;
     }
@@ -2353,10 +2357,10 @@ bool Expression::toStringExpressionPrintoutPower(
     ExpressionPrintoutNode& basePrintout =
     output.getOwner().allPrintouts[childrenIndices[1]];
     output.addString("{{").addChildIndex(
-      basePrintout.childrenExpressionIndices[1]
+      basePrintout.childrenExpressionIndices[0]
     ).addString("}^{").addChildIndex(childrenIndices[2]).addString("}}{}");
     for (int i = 1; i < baseExpression.children.size; i ++) {
-      output.addChildIndex(baseExpression.children[i]);
+      output.addChildIndex(basePrintout.childrenExpressionIndices[i]);
     }
     return true;
   }
@@ -2370,7 +2374,7 @@ bool Expression::toStringExpressionPrintoutPower(
     ).addString("}^{").addChildIndex(childrenIndices[2]).addString("}");
     return true;
   }
-  int opLimit = commands.opLimitBoundary();
+  int opLimit = calculator.opLimitBoundary();
   if (
     baseExpression.startsWith(opLimit) ||
     baseExpression.isOperationGiven(opLimit)
@@ -2397,7 +2401,7 @@ bool Expression::toStringExpressionPrintoutPower(
   std::string secondExpressionString = exponentExpression.toString(format);
   if (baseExpression.needsParenthesisForBaseOfExponent()) {
     bool useBigParenthesis = true;
-    if (baseExpression.startsWith(commands.opDivide())) {
+    if (baseExpression.startsWith(calculator.opDivide())) {
       useBigParenthesis = true;
     }
     if (useBigParenthesis) {
@@ -2565,6 +2569,8 @@ bool Expression::toStringExpressionPrintoutBind(
     return false;
   }
   output.addString("{{").addChildIndex(childrenIndices[1]).addString("}}");
+  output.properties =
+  output.getOwner().allPrintouts[childrenIndices[1]].properties;
   return true;
 }
 
@@ -3025,6 +3031,32 @@ bool Expression::toStringExpressionPrintoutMatrix(
   }
   if (format->flagUseLatex && !format->flagUsePmatrix) {
     output.addString("\\right)");
+  }
+  return true;
+}
+
+bool Expression::toStringExpressionPrintoutEndStatementNested(
+  const Expression& input,
+  ExpressionPrintoutNode& output,
+  const List<int>& childrenIndices,
+  FormatExpressions* format
+) {
+  (void) format;
+  if (!input.isListStartingWithAtom(input.owner->opCommandSequence())) {
+    return false;
+  }
+  if (input.size() > 2) {
+    output.addString("(");
+  }
+  std::string currentOutput;
+  for (int i = 1; i < input.size(); i ++) {
+    output.addChildIndex(childrenIndices[i]);
+    if (i != input.size() - 1) {
+      output.addString(";");
+    }
+  }
+  if (input.size() > 2) {
+    output.addString(")");
   }
   return true;
 }

@@ -115,6 +115,9 @@ void ExpressionPrintoutWalker::removeAndPrintStackTop(int newPrintoutIndex) {
 void ExpressionPrintoutWalker::initialize(const Expression& input) {
   this->output.clear();
   this->stack.clear();
+  if (input.owner != nullptr) {
+    this->maximumExpressionDepth = input.owner->maximumRecursionDepth * 2;
+  }
   ExpressionPrintoutNode empty(this->output);
   this->output.allPrintouts.addOnTop(empty);
   ExpressionAndPrintoutData inputWithPrintout(input);
@@ -127,9 +130,15 @@ bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
     return false;
   }
   ExpressionAndPrintoutData& current = *this->stack.lastObject();
-  const Expression& currentExpression = *current.expression;
   int totalChildrenProcessed = current.childrenPrintoutIndices.size;
   if (totalChildrenProcessed == 0) {
+    Expression transformed;
+    bool needsMutationForPrinting =
+    current.expression->needsMutationForPrinting(transformed);
+    if (needsMutationForPrinting) {
+      this->constructed.addOnTop(transformed);
+      current.expression = &this->constructed.lastObject();
+    }
     // Check whether expression has a shortcut conversion before processing
     // children expressions.
     if (this->maybeConsumeExpressionWithNotation()) {
@@ -142,18 +151,12 @@ bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
       return true;
     }
   }
+  const Expression& currentExpression = *current.expression;
   if (totalChildrenProcessed < currentExpression.size()) {
-    const Expression* nextChildToProcess =
-    &currentExpression[totalChildrenProcessed];
-    Expression transformed;
-    bool needsMutationForPrinting =
-    nextChildToProcess->needsMutationForPrinting(transformed);
-    if (needsMutationForPrinting) {
-      this->constructed.addOnTop(transformed);
-      nextChildToProcess = &this->constructed.lastObject();
-    }
+    const Expression& nextChildToProcess =
+    currentExpression[totalChildrenProcessed];
     // Next child to process.
-    this->stack.addOnTop(ExpressionAndPrintoutData(*nextChildToProcess));
+    this->stack.addOnTop(ExpressionAndPrintoutData(nextChildToProcess));
     return true;
   }
   // All children of the current expression are printed.

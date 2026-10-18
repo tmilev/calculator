@@ -702,11 +702,9 @@ bool Expression::toMathMLBuiltIn<MatrixTensor<Rational> >(
   ) {
     out
     << "<mrow><mi>MatrixRationalsTensorForm</mi>"
-    << MathML::leftParenthesis
     << input.getValue<MatrixTensor<Rational> >().toMathMLMatrixForm(
       &formatLocal, outputProperties
     )
-    << MathML::rightParenthesis
     << "</mrow>";
   } else {
     out
@@ -1085,6 +1083,13 @@ void Expression::toMathML(
   MathExpressionFormattingProperties* outputProperties
 ) const {
   STACK_TRACE("Expression::toMathML");
+  if (true) {
+    ExpressionPrintout printout;
+    printout.useMathML = true;
+    this->toExpressionPrintout(printout, format);
+    out << printout.toStringRootNode();
+    return;
+  }
   RecursionDepthCounter recursionCounter;
   recursionCounter.initialize(&this->owner->recursionDepth);
   this->checkConsistency();
@@ -3441,8 +3446,6 @@ bool Expression::toMathMLExpressionPrintoutDivide(
       maintain.toMaintain = nullptr;
       maintain.contentAtStart = false;
     }
-    std::string firstMathML = input[1].toMathML(format);
-    std::string secondMathML = input[2].toMathML(format);
     output.addString("<mfrac>").addChildIndex(childrenIndices[1]).addChildIndex
     (childrenIndices[2]).addString("</mfrac>");
   }
@@ -3651,18 +3654,16 @@ bool Expression::toMathMLExpressionPrintoutTimes(
   }
   output.addString("<mrow>");
   bool firstPrintoutIsCollapsedEntirely = false;
-  if (collapseUnits) {
-    if (firstPrintout.properties.isNegativeOne) {
-      output.addString("-");
-    } else if (firstPrintout.properties.isOne) {
-      firstPrintoutIsCollapsedEntirely = true;
-    } else if (firstNeedsParentheses) {
-      output.addString(MathML::leftParenthesis).addChildIndex(
-        childrenIndices[1]
-      ).addString(MathML::rightParenthesis);
-    } else {
-      output.addChildIndex(childrenIndices[1]);
-    }
+  if (collapseUnits && firstPrintout.properties.isNegativeOne) {
+    output.addString("-");
+  } else if (collapseUnits && firstPrintout.properties.isOne) {
+    firstPrintoutIsCollapsedEntirely = true;
+  } else if (firstNeedsParentheses) {
+    output.addString(MathML::leftParenthesis).addChildIndex(
+      childrenIndices[1]
+    ).addString(MathML::rightParenthesis);
+  } else {
+    output.addChildIndex(childrenIndices[1]);
   }
   output.properties.startsWithMinus = firstPrintout.properties.startsWithMinus;
   output.properties.startsWithDigit = firstPrintout.properties.startsWithDigit;
@@ -3869,11 +3870,8 @@ bool Expression::toMathMLExpressionPrintoutPower(
     std::string exponentMathML = powerExpression.toMathML(format);
     output.addString("<mrow><msup>").addChildIndex(functionIndex).addChildIndex
     (exponentIndex).addString("</msup>");
-    if (
-      baseExpression[1].
-      needsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
-      baseExpression[1].startsWith(commands.opTimes())
-    ) {
+    bool argumentNeedsParentheses = !baseExpression[1].isAtom();
+    if (argumentNeedsParentheses) {
       output.addString("<mrow>").addString(MathML::leftParenthesis).
       addChildIndex(argumentIndex).addString(MathML::rightParenthesis).
       addString("</mrow>");
@@ -3921,18 +3919,21 @@ bool Expression::toMathMLExpressionPrintoutPlus(
   }
   output.addString("<mrow>");
   for (int i = 1; i < input.size(); i ++) {
+    if (i >= childrenIndices.size) {
+      output.addString("<ms>...</ms>");
+      return true;
+    }
     int childIndex = childrenIndices[i];
     ExpressionPrintoutNode& summandPrintout =
     output.getOwner().allPrintouts[childIndex];
     bool needsParenthesesForAddition =
     summandPrintout.properties.needsParenthesesForAddition;
-    if (i > 0) {
-      if (
+    if ((i > 1) && (
         needsParenthesesForAddition ||
         !summandPrintout.properties.startsWithMinus
-      ) {
-        output.addString("<mo>+</mo>");
-      }
+      )
+    ) {
+      output.addString("<mo>+</mo>");
     }
     if (needsParenthesesForAddition) {
       output.addString(MathML::leftParenthesis);
@@ -3942,6 +3943,7 @@ bool Expression::toMathMLExpressionPrintoutPlus(
       output.addString(MathML::rightParenthesis);
     }
   }
+  output.properties.needsParenthesesForMultiplicationOnTheRight = true;
   output.addString("</mrow>");
   return true;
 }

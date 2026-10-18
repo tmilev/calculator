@@ -194,7 +194,7 @@ bool CalculatorTest::builtInFunctionsABTest(
     crashFile
     << "<!DOCTYPE html>"
     << "<link rel='stylesheet' href='../calculator_html/crash_report.css'>"
-    << "<body><div style='overflow:auto;height:100%'>"
+    << "<body><div style='height:100%'>"
     << test.reportHtml
     << "</div></body></html>";
     FileOperations::writeFileVirtual(

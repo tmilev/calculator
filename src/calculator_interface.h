@@ -5990,7 +5990,7 @@ bool CalculatorConversions::expressionFromRationalFraction(
   ExpressionContext* inputContext
 ) {
   STACK_TRACE("CalculatorConversions::expressionFromRationalFraction");
-  Rational aConst;
+  Coefficient aConst;
   if (input.isConstant(&aConst)) {
     return output.assignValue(calculator, aConst);
   }

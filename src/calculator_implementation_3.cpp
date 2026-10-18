@@ -916,10 +916,21 @@ bool Calculator::Test::processResults() {
     << this->commands.size()
     << " processed. </b>";
   }
+  std::string stringUnexpected = "<b style='color:red'>unexpected string</b>";
+  std::string mathMLUnexpected = "<b style='color:red'>unexpected mathML</b>";
+  std::string mathMLOK = "<b style='color:green;'>mathML OK</b>";
+  std::string stringOK = "<b style='color:green;'>string OK</b>";
+  std::string expectedResultUnknown =
+  "<b style='color:orange;'>expected result unknown</b>";
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     Calculator::Test::OneTest& currentTest = this->commands.values[i];
+    const std::string& currentCommand = this->commands.keys[i];
+    std::string currentCommandMathML =
+    "%UseMathML\n" + this->commands.keys[i];
     std::stringstream currentLine;
     std::stringstream currentLineConsole;
+    std::string toStringDifference;
+    std::string toMathMLDifference;
     currentLine << "<tr>";
     currentLine << "<td style='min-width:25px;'>" << i << "</td>";
     currentLineConsole << "Test " << i << "\n";
@@ -939,16 +950,10 @@ bool Calculator::Test::processResults() {
     << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.keys[i] << "\n";
     currentLine
-    << "<td style='min-width:200px;'>"
-    << HtmlRoutines::getCalculatorComputationAnchorThisServer(
-      this->commands.keys[i], this->commands.keys[i], true
-    )
-    << "</td>"
-    << "<td>"
-    << HtmlRoutines::getCalculatorComputationAnchorThisServer(
-      "%UseMathML\n" + this->commands.keys[i], "mathML link", true
-    )
-    << "</td>";
+    <<
+    "<td ><div style='max-height:50px;max-width:300px;overflow-x:auto;overflow-y:auto'>"
+    << currentCommand
+    << "</div></td>";
     bool isBad = false;
     bool isUnknown = false;
     currentLine << "<td>Run time: " << currentTest.actualDuration << " ms.";
@@ -966,10 +971,18 @@ bool Calculator::Test::processResults() {
     currentLine << "</td>";
     if (currentTest.actualResult == currentTest.expectedResult) {
       currentLine
-      << "<td style='min-width:30px;'><b style='color:green;'>OK</b></td>";
+      << "<td>"
+      << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+        currentCommand, stringOK, true
+      )
+      << "</td>";
     } else if (currentTest.expectedResult == "") {
       currentLine
-      << "<td><b style='color:orange;'>expected result unknown</b></td>";
+      << "<td>"
+      << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+        currentCommand, expectedResultUnknown, true
+      )
+      << "</td>";
       isUnknown = true;
       this->unknown ++;
     } else {
@@ -982,10 +995,15 @@ bool Calculator::Test::processResults() {
       );
       currentLine
       << "<td style='min-width:100px;'>"
-      << "<b style='color:red'>unexpected result</b></td>"
-      << "<td class='cellCalculatorResult' style='border:1px solid black;'>";
-      currentLine << differ.differenceHTML("actual", "expected");
+      << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+        currentCommand, stringUnexpected, true
+      )
+      << "</td>";
       currentLine << "</td>";
+      toStringDifference =
+      "<div style='border:1px solid black;'>" +
+      differ.differenceHTML("actual string", "expected string") +
+      "</div>";
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
       currentLineConsole
       << "Expected:\n"
@@ -997,11 +1015,17 @@ bool Calculator::Test::processResults() {
     if (currentTest.actualResultMathML == currentTest.expectedResultMathML) {
       currentLine
       << "<td style='min-width:30px;'>"
-      << "<b style='color:green;'>mathml OK</b>"
+      << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+        currentCommandMathML, mathMLOK, true
+      )
       << "</td>";
     } else if (currentTest.expectedResultMathML == "") {
       currentLine
-      << "<td><b style='color:orange;'>expected mathml unknown</b></td>";
+      << "<td>"
+      << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+        currentCommandMathML, expectedResultUnknown, true
+      )
+      << "</td>";
       isUnknown = true;
       this->unknownMathML ++;
     } else {
@@ -1016,9 +1040,15 @@ bool Calculator::Test::processResults() {
       );
       currentLine
       << "<td style='min-width:100px;'>"
-      << "<b style='color:red'>unexpected mathml</b></td>"
-      << "<td class='cellCalculatorResult'>";
-      currentLine << differ.differenceHTML("actual", "expected");
+      << "<b style='color:red'>"
+      << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+        currentCommandMathML, mathMLUnexpected, true
+      )
+      << "</b>";
+      toMathMLDifference =
+      "<div style='border:1px solid black;'>" +
+      differ.differenceHTML("actual", "expected") +
+      "</div>";
       currentLine << "</td>";
       currentLineConsole << "Got:\n" << currentTest.actualResultMathML << "\n";
       currentLineConsole
@@ -1028,6 +1058,8 @@ bool Calculator::Test::processResults() {
       isBad = true;
       this->inconsistenciesMathML ++;
     }
+    currentLine << "<td>" << toStringDifference << "</td>";
+    currentLine << "<td>" << toMathMLDifference << "</td>";
     currentLine << "</tr>";
     if (isBad) {
       badCommands << currentLine.str();

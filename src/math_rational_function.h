@@ -161,7 +161,7 @@ public:
     }
     return true;
   }
-  bool isConstant(Rational* whichConstant = nullptr) const;
+  bool isConstant(Coefficient* whichConstant = nullptr) const;
   bool isInteger() const;
   bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isEqualToZero() const {
@@ -1171,7 +1171,8 @@ void RationalFraction<Coefficient>::simplifyLeadingCoefficientOnly() {
 }
 
 template <class Coefficient>
-bool RationalFraction<Coefficient>::isConstant(Rational* whichConstant) const {
+bool RationalFraction<Coefficient>::isConstant(Coefficient* whichConstant)
+const {
   if (this->expressionType != TypeExpression::typeConstant) {
     return false;
   }

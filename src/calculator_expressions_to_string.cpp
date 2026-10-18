@@ -2316,6 +2316,7 @@ bool Expression::toStringExpressionPrintoutPower(
   FormatExpressions* format
 ) {
   STACK_TRACE("Expression::toStringExpressionPrintoutPower");
+  (void) format;
   input.checkInitialization();
   Calculator& calculator = *input.owner;
   if (!input.startsWith(calculator.opPower(), 3)) {
@@ -2356,11 +2357,19 @@ bool Expression::toStringExpressionPrintoutPower(
   if (involvesExponentsInterpretedAsFunctions) {
     ExpressionPrintoutNode& basePrintout =
     output.getOwner().allPrintouts[childrenIndices[1]];
-    output.addString("{{").addChildIndex(
+    output.addString("{").addChildIndex(
       basePrintout.childrenExpressionIndices[0]
-    ).addString("}^{").addChildIndex(childrenIndices[2]).addString("}}{}");
+    ).addString("^{").addChildIndex(childrenIndices[2]).addString("}}{}");
+    bool needsParentheses = baseExpression.size() != 2 ||
+    !baseExpression[1].isAtom();
+    if (needsParentheses) {
+      output.addString("\\left(");
+    }
     for (int i = 1; i < baseExpression.children.size; i ++) {
       output.addChildIndex(basePrintout.childrenExpressionIndices[i]);
+    }
+    if (needsParentheses) {
+      output.addString("\\right)");
     }
     return true;
   }
@@ -2396,9 +2405,8 @@ bool Expression::toStringExpressionPrintoutPower(
     );
     return true;
   }
-  MathExpressionFormattingProperties baseProperties;
-  std::string baseString = baseExpression.toString(format, &baseProperties);
-  std::string secondExpressionString = exponentExpression.toString(format);
+  ExpressionPrintoutNode& basePrintout =
+  output.getOwner().allPrintouts[childrenIndices[1]];
   if (baseExpression.needsParenthesisForBaseOfExponent()) {
     bool useBigParenthesis = true;
     if (baseExpression.startsWith(calculator.opDivide())) {
@@ -2417,6 +2425,8 @@ bool Expression::toStringExpressionPrintoutPower(
     }
   } else {
     output.addChildIndex(childrenIndices[1]);
+    output.properties.startsWithDigit =
+    basePrintout.properties.startsWithDigit;
   }
   output.addString("^{").addChildIndex(childrenIndices[2]).addString("}");
   return true;
@@ -2428,6 +2438,7 @@ bool Expression::toStringExpressionPrintoutPlus(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   if (!input.startsWith(input.owner->opPlus())) {
     return false;
   }
@@ -2440,41 +2451,29 @@ bool Expression::toStringExpressionPrintoutPlus(
     << " arguments. "
     << global.fatal;
   }
-  const Expression& left = input[1];
-  const Expression& right = input[2];
-  ExpressionPrintoutNode& leftPrintout =
-  output.getOwner().allPrintouts[childrenIndices[1]];
-  ExpressionPrintoutNode& rightPrintout =
-  output.getOwner().allPrintouts[childrenIndices[2]];
-  if (left.needsParenthesisForAddition()) {
-    output.addString("\\left(").addChildIndex(childrenIndices[1]).addString(
-      "\\right)"
-    );
-  } else {
-    output.addChildIndex(childrenIndices[1]);
-  }
-  bool allowNewLine = false;
-  if (format != nullptr) {
-    allowNewLine = format->flagExpressionNewLineAllowed;
-  }
-  bool useFrac = !input.owner->flagDontUseFracInRational;
-  if (
-    allowNewLine &&
-    !useFrac &&
-    leftPrintout.stringSize > FormatExpressions::expressionLineBreak
-  ) {
-    leftPrintout.addString("\\\\\n");
-  }
-  if (right.needsParenthesisForAddition()) {
-    output.addString("+");
-    output.addString("\\left(").addChildIndex(childrenIndices[2]).addString(
-      "\\right)"
-    );
-  } else {
-    if (!rightPrintout.properties.startsWithMinus) {
+  for (int i = 1; i < input.size(); i ++) {
+    if (i >= childrenIndices.size) {
+      output.addString("...");
+      return true;
+    }
+    int printoutIndex = childrenIndices[i];
+    ExpressionPrintoutNode& childPrintout =
+    output.getOwner().allPrintouts[printoutIndex];
+    if (
+      i > 1 && (
+        childPrintout.properties.needsParenthesesForAddition ||
+        !childPrintout.properties.startsWithMinus
+      )
+    ) {
       output.addString("+");
     }
-    output.addChildIndex(childrenIndices[2]);
+    if (childPrintout.properties.needsParenthesesForAddition) {
+      output.addString("\\left(").addChildIndex(printoutIndex).addString(
+        "\\right)"
+      );
+    } else {
+      output.addChildIndex(printoutIndex);
+    }
   }
   return true;
 }
@@ -3022,7 +3021,9 @@ bool Expression::toStringExpressionPrintoutMatrix(
         output.addString(" & ");
       }
     }
-    output.addString("\\\\ \n");
+    if (i != input.size() - 1) {
+      output.addString("\\\\ \n");
+    }
   }
   if (format->flagUsePmatrix) {
     output.addString(" \\end{pmatrix}");

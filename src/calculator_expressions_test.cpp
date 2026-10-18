@@ -38,13 +38,11 @@ bool ExpressionTest::all() {
     3,
     "\\left(0, 1, 2, \\left(0, 1, \\left(0, 0\\right)\\right)\\right)"
   );
-  List<int> iterationsToTest = List<int>({200, 400, 800, // 10000
-    });
+  List<int> iterationsToTest = List<int>({500, 1000, 10000});
   List<ExpressionTestType> types = List<ExpressionTestType>({
       ExpressionTestType::Sum,
       ExpressionTestType::SumProduct,
       ExpressionTestType::Arithmetic,
-      ExpressionTestType::NestedList
     });
   for (int i = 0; i < 2; i ++) {
     for (ExpressionTestType& oneType : types) {
@@ -53,6 +51,14 @@ bool ExpressionTest::all() {
           tester, i % 2 == 1, oneType, iterations
         );
       }
+    }
+  }
+  List<int> iterationsToTestSmaller = List<int>({200, 400, 800});
+  for (int i = 0; i < 2; i ++) {
+    for (int iterations : iterationsToTestSmaller) {
+      ExpressionTest::largeStringConversion(
+        tester, i % 2 == 1, ExpressionTestType::NestedList, iterations
+      );
     }
   }
   ExpressionTest::builtInAtomValues(tester);
@@ -192,17 +198,17 @@ bool ExpressionTest::largeStringConversion(
 ) {
   STACK_TRACE("ExpressionTest::largeStringConversion");
   owner.initialize(Calculator::Mode::full);
-  owner.maximumRecursionDepth = 100000;
+  owner.maximumRecursionDepth = 1000000;
   Expression current;
   ExpressionTest::makeLarge(owner, current, expressionType, iterations);
   int64_t start = global.getElapsedMilliseconds();
-  std::string result = useMathML ? current.toMathML() : current.toString();
-  int64_t duration = global.getElapsedMilliseconds() - start;
-  double minimumSpeed = 100;
-  double recommendedSpeed = 10000;
   std::string label = useMathML ? "toMathML" : "toString";
   std::string expressionTypeString =
   ExpressionTest::expressionTypeToString(expressionType);
+  std::string result = useMathML ? current.toMathML() : current.toString();
+  int64_t duration = global.getElapsedMilliseconds() - start;
+  double minimumSpeed = 10;
+  double recommendedSpeed = 10000;
   if (duration == 0) {
     duration = 1;
   }

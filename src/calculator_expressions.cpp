@@ -2881,18 +2881,20 @@ bool Expression::toStringBuiltIn<RationalFraction<AlgebraicNumber> >(
   bool showContext = input.owner ==
   nullptr ? false : input.owner->flagDisplayContext;
   (void) format;
-  (void) outputProperties;
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   formatLocal.flagUseFrac = true;
-  out
-  << "MakeRationalFunction{}("
-  << input.getValue<RationalFraction<AlgebraicNumber> >().toString(
-    &formatLocal
-  )
-  << ")";
+  const RationalFraction<AlgebraicNumber>& value =
+  input.getValue<RationalFraction<AlgebraicNumber> >();
+  out << "MakeRationalFunction{}(" << value.toString(&formatLocal) << ")";
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
+  }
+  if (outputProperties != nullptr) {
+    AlgebraicNumber whichConstant;
+    if (value.isConstant(&whichConstant)) {
+      whichConstant.computeFormattingProperties(format, outputProperties);
+    }
   }
   return true;
 }
@@ -3425,7 +3427,7 @@ bool Expression::toStringAtom(
     out << "\\ln";
     return true;
   }
-  if (this->data > this->owner->getOperations().size || this->data < 0) {
+  if (this->data >= this->owner->getOperations().size || this->data < 0) {
     out << "[unknown atom of value " << this->data << "]";
     return true;
   }
@@ -3441,6 +3443,7 @@ bool Expression::toStringAtom(
 bool Expression::toExpressionPrintoutNodeData(
   ExpressionPrintoutNode& output, bool useMathML, FormatExpressions* format
 ) const {
+  STACK_TRACE("Expression::toExpressionPrintoutNodeData");
   std::stringstream out;
   MathExpressionFormattingProperties properties;
   bool result =
@@ -4589,7 +4592,14 @@ bool Expression::needsMutationForPrinting(Expression& whichMutation) const {
   }
   List<Expression> opands;
   this->owner->collectOpands(*this, opPlus, opands);
-  whichMutation.makeOXdotsX(*this->owner, opPlus, opands);
+  if (opands.size < 3) {
+    return false;
+  }
+  whichMutation.reset(*this->owner);
+  whichMutation.addChildAtomOnTop(opPlus);
+  for (int i = 0; i < opands.size; i ++) {
+    whichMutation.addChildOnTop(opands[i]);
+  }
   return true;
 }
 

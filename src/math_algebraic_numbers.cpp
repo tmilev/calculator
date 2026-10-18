@@ -834,10 +834,24 @@ void AlgebraicNumber::computeFormattingProperties(
   this->needsParenthesisForMultiplication(format);
   outputProperties->needsParenthesesWhenLastAndMultipliedOnTheLeft =
   this->needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
-  Rational element;
-  if (this->isRational(&element)) {
-    outputProperties->startsWithMinus = element.isNegative();
+  Rational rational;
+  if (this->isRational(&rational)) {
+    outputProperties->isNegativeOne = rational.isNegativeOne();
   }
+  if (this->element.size() == 0) {
+    return;
+  }
+  int indexFirstMonomial = 0;
+  for (int i = 0; i < this->element.size(); i ++) {
+    if (
+      this->element.monomials[i] >
+      this->element.monomials[indexFirstMonomial]
+    ) {
+      indexFirstMonomial = i;
+    }
+  }
+  outputProperties->startsWithMinus =
+  this->element.coefficients[indexFirstMonomial].isNegative();
 }
 
 bool AlgebraicNumber::

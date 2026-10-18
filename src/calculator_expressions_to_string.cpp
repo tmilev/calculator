@@ -2172,7 +2172,7 @@ bool Expression::toStringExpressionPrintoutTimes(
       mustHaveTimes = true;
     }
   }
-  if (firstNeedsParentheses || mustHaveTimes || isCollapsed) {
+  if (firstNeedsParentheses  || isCollapsed) {
     mustHaveSpace = false;
   }
   if (input[1].isSumLikeOperatorAtom()) {
@@ -3050,15 +3050,19 @@ bool Expression::toStringExpressionPrintoutEndStatementNested(
   if (!input.isListStartingWithAtom(input.owner->opCommandSequence())) {
     return false;
   }
+  if (input.size()>2){
     output.addString("(");
+  }
   std::string currentOutput;
-  for (int i = 1; i < input.size(); i ++) {
+  for (int i = 1; i < childrenIndices.size; i ++) {
     output.addChildIndex(childrenIndices[i]);
-    if (i != input.size() - 1) {
+    if (i != childrenIndices.size - 1) {
       output.addString(";");
     }
   }
+  if (input.size()>2){
     output.addString(")");
+  }
   return true;
 }
 

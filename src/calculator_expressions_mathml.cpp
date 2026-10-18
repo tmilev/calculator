@@ -4656,12 +4656,18 @@ bool Expression::toMathMLExpressionPrintoutEndStatementNested(
   STACK_TRACE("Expression::toMathMLExpressionPrintoutEndStatementNested");
   (void) format;
   output.addString("<mrow>");
+  if (input.size()>2) {
   output.addString(MathML::leftParenthesis);
-  for (int i = 1; i < input.size(); i ++) {
+  }
+  for (int i = 1; i < childrenIndices.size; i ++) {
     output.addChildIndex(childrenIndices[i]);
+  if (i != childrenIndices.size-1){
     output.addString("<mo>;</mo>");
   }
+  }
+  if (input.size()>2) {
   output.addString(MathML::rightParenthesis);
+  }
   output.addString("</mrow>");
   return true;
 }

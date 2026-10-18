@@ -299,9 +299,10 @@ bool CalculatorParserTest::whitespace() {
   if (result != expected) {
     global.fatal
     << "Parsed white space: got:\n"
-    << HtmlRoutines::convertStringToURLString(result, false)
+    << result
     << "\nexpected:\n"
-    << HtmlRoutines::convertStringToURLString(expected, false)
+    << expected
+        << "\nFull output: "
     << output.toStringSemiFull()
     << global.fatal;
   }

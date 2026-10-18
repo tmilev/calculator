@@ -1464,9 +1464,7 @@ bool Expression::toMathMLSequence(
     }
   }
   out << MathML::rightParenthesis;
-  if (input.size() == 2) {
-    out << "}";
-  }
+    out << "</mrow>";
   return true;
 }
 
@@ -3560,6 +3558,9 @@ bool Expression::toMathMLExpressionPrintoutUnderscore(
   if (!input.startsWith(input.owner->opUnderscore())) {
     return false;
   }
+  output.properties.needsParenthesesForMultiplicationOnTheRight = false;
+  output.properties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
+
   if (!input[1].startsWith(input.owner->opPower())) {
     output.addString("<msub>").addChildIndex(childrenIndices[1]).addChildIndex(
       childrenIndices[2]
@@ -3655,7 +3656,7 @@ bool Expression::toMathMLExpressionPrintoutTimes(
   output.addString("<mrow>");
   bool firstPrintoutIsCollapsedEntirely = false;
   if (collapseUnits && firstPrintout.properties.isNegativeOne) {
-    output.addString("-");
+    output.addString(MathML::negativeSign);
   } else if (collapseUnits && firstPrintout.properties.isOne) {
     firstPrintoutIsCollapsedEntirely = true;
   } else if (firstNeedsParentheses) {
@@ -3824,9 +3825,7 @@ bool Expression::toMathMLExpressionPrintoutPower(
   int powerIndex = childrenIndices[2];
   bool isSuperScriptOfUnderscoredOperator = false;
   if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
-    if (baseExpression[1].isOperationGiven(commands.opIntegral())) {
       isSuperScriptOfUnderscoredOperator = true;
-    }
   }
   MathExpressionFormattingProperties leftProperties;
   std::string firstMathML = baseExpression.toMathML(format, &leftProperties);
@@ -3841,10 +3840,20 @@ bool Expression::toMathMLExpressionPrintoutPower(
     output.properties.needsParenthesesWhenLastAndMultipliedOnTheLeft = false;
   }
   if (isSuperScriptOfUnderscoredOperator) {
+    ExpressionPrintoutNode& basePrintout=output.getOwner().allPrintouts[childrenIndices[1]];
+    if (basePrintout.childrenExpressionIndices.size!=3) {
     output.addString("<msubsup>");
     output.addChildIndex(childrenIndices[1]);
     output.addChildIndex(childrenIndices[2]);
     output.addString("</msubsup>");
+    return true;
+    }
+    output.addString("<msubsup>");
+    output.addChildIndex(basePrintout.childrenExpressionIndices[1]);
+    output.addChildIndex(basePrintout.childrenExpressionIndices[2]);
+    output.addChildIndex(childrenIndices[2]);
+    output.addString("</msubsup>");
+
     return true;
   }
   bool involvesExponentsInterpretedAsFunctions = false;
@@ -4123,6 +4132,11 @@ bool Expression::toMathMLExpressionPrintoutSumOrIntegral(
     return false;
   }
   int operatorChildIndex = childrenIndices[0];
+  if (input.size() < 2 || childrenIndices.size<2) {
+    output.addString("<mrow>") .addChildIndex(operatorChildIndex).addString(MathML::leftParenthesis).addString(MathML::rightParenthesis)
+        .addString("</mrow>");
+    return true;
+  }
   int firstIndex = 2;
   output.addString("<mrow>");
   if (input.size() >= 2) {
@@ -4281,9 +4295,9 @@ bool Expression::toMathMLExpressionPrintoutSequence(
     return false;
   }
   if (input.size() == 2) {
-    output.addString("<mrow><ms>Sequence{}</ms>").addChildIndex(
+    output.addString("<mrow><ms>Sequence</ms>").addString(MathML::leftParenthesis).addChildIndex(
       childrenIndices[1]
-    ).addString("</mrow>");
+    ).addString(MathML::rightParenthesis).addString("</mrow>");
     return true;
   }
   (void) format;
@@ -4295,6 +4309,7 @@ bool Expression::toMathMLExpressionPrintoutSequence(
     }
   }
   output.addString(MathML::rightParenthesis).addString("</mrow>");
+  output.properties.needsParenthesesForMultiplicationOnTheRight=false;
   return true;
 }
 
@@ -4451,6 +4466,7 @@ bool Expression::toMathMLExpressionPrintoutMatrix(
   output.addString("</mtable>").addString(MathML::rightParenthesis).addString(
     "</mrow>"
   );
+  output.properties.needsParenthesesForMultiplicationOnTheRight=false;
   return true;
 }
 
@@ -4639,12 +4655,13 @@ bool Expression::toMathMLExpressionPrintoutEndStatementNested(
 ) {
   STACK_TRACE("Expression::toMathMLExpressionPrintoutEndStatementNested");
   (void) format;
-  output.addString("<mtable>");
+  output.addString("<mrow>");
+  output.addString(MathML::leftParenthesis);
   for (int i = 1; i < input.size(); i ++) {
-    output.addString("<mtr><mtd>");
     output.addChildIndex(childrenIndices[i]);
-    output.addString("</mtd></mtr>");
+    output.addString("<mo>;</mo>");
   }
-  output.addString("</mtable>");
+  output.addString(MathML::rightParenthesis);
+  output.addString("</mrow>");
   return true;
 }

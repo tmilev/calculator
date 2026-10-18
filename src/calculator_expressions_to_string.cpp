@@ -2658,7 +2658,7 @@ bool Expression::toStringExpressionPrintoutSumOrIntegral(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
-  STACK_TRACE("Expression::toStringSumOrIntegral");
+  STACK_TRACE("Expression::toStringExpressionPrintoutSumOrIntegral");
   if (
     !input.startsWith(input.owner->opSum()) &&
     !input.startsWith(input.owner->opIntegral())
@@ -2666,6 +2666,10 @@ bool Expression::toStringExpressionPrintoutSumOrIntegral(
     return false;
   }
   output.addChildIndex(childrenIndices[0]).addString(" ");
+  if (childrenIndices.size <2) {
+    output.addString("()");
+    return true;
+  }
   ExpressionPrintoutNode& limits =
   output.getOwner().allPrintouts[childrenIndices[1]];
   int firstIndex = 2;
@@ -3046,9 +3050,7 @@ bool Expression::toStringExpressionPrintoutEndStatementNested(
   if (!input.isListStartingWithAtom(input.owner->opCommandSequence())) {
     return false;
   }
-  if (input.size() > 2) {
     output.addString("(");
-  }
   std::string currentOutput;
   for (int i = 1; i < input.size(); i ++) {
     output.addChildIndex(childrenIndices[i]);
@@ -3056,9 +3058,7 @@ bool Expression::toStringExpressionPrintoutEndStatementNested(
       output.addString(";");
     }
   }
-  if (input.size() > 2) {
     output.addString(")");
-  }
   return true;
 }
 

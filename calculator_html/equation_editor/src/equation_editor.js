@@ -9243,6 +9243,7 @@ class MathNode {
     result.appendChild(superscript.toMathML());
     return result;
   }
+
   toMathMLDigits(/** @type {string} */ content) {
     const interval = latexConstants.mathMLMaximumConsecutiveDigits;
     if (content.length < interval) {
@@ -9418,6 +9419,9 @@ class MathNode {
       }
       let childLatex = child.toLatexWithAnnotation(options);
       toJoin.push(childLatex.latex);
+      if (!childLatex.latex.endsWith(' ')) {
+        toJoin.push(' ');
+      }
     }
     result.latex = toJoin.join('');
     return result;

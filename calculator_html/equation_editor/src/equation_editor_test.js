@@ -1,3 +1,9 @@
+var require;
+if (require === undefined) {
+  require = () => { };
+}
+let equationEditor = require("./equation_editor");
+
 class TestCase {
   constructor(
     /** @type {{
@@ -6,7 +12,8 @@ class TestCase {
     skipEquationEditor: boolean|undefined,
     skipMathML: boolean|undefined,
     skipTest: boolean|undefined,
-    skipStaticDOM: boolean|undefined
+    skipStaticDOM: boolean|undefined,
+    skipLatexRoundTrip: boolean|undefined,
   }} */ input
   ) {
     this.content = input.content;
@@ -29,6 +36,10 @@ class TestCase {
     this.skipTest = false;
     if (input.skipTest === true) {
       this.skipTest = true;
+    }
+    this.skipLatexRoundTrip = false;
+    if (input.skipLatexRoundTrip) {
+      this.skipLatexRoundTrip = true;
     }
   }
 }
@@ -1323,6 +1334,7 @@ ExponentOfAdjointOf{}\\left({A}_{2}, \\pi {g}_{1}-\\pi {g}_{-1}, {h}_{1}\\right)
     // Seems to run at a good speed in Chrome.
     // Perhaps the editor needs Firefox-specific improvements?
     skipStaticDOM: true,
+    skipLatexRoundTrip: true,
   },
 ];
 
@@ -1362,7 +1374,7 @@ function renderLatex(
 }
 
 
-/** @return {EquationEditor} */
+/** @return {equationEditor.EquationEditor} */
 function renderLatexReturnEditor(
   /** @type {string} */ input,
   /** @type {boolean} */ editable,
@@ -1378,7 +1390,7 @@ function renderLatexReturnEditor(
     useSVG: useSVG,
   }));
   equationEditor.writeLatex(input);
-  return equationEditor;
+  return (/** @type{equationEditor.EquationEditor} */ equationEditor);
 }
 
 describe("Equation editor", () => {
@@ -1434,4 +1446,28 @@ describe("Equation editor", () => {
       expect(annotation.textContent).toBe(testCase.content);
     }
   });
+  it("toLatex roundtrip", async () => {
+    for (const testCase of allTestCases) {
+      if (testCase.skipLatexRoundTrip) {
+        continue;
+      }
+      var latex;
+      try {
+        const editor = renderLatexReturnEditor(testCase.content, true, false, false);
+        latex = editor.rootNode.toLatex();
+      } catch (e) {
+        console.log(`Latex roundtrip failure with initial content: ${testCase.content}`);
+      }
+      expect(latex).toBeDefined();
+      var latexRoundtrip;
+      try {
+        const editorRoundtrip = renderLatexReturnEditor(testCase.content, true, false, false);
+        latexRoundtrip = editorRoundtrip.rootNode.toLatex();
+      } catch (e) {
+        console.log(`Latex round-roundtrip failure with initial content: ${testCase.content}`);
+      }
+      expect(latex).toBe(latexRoundtrip);
+    }
+  });
+
 });

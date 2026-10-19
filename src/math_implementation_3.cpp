@@ -2596,7 +2596,7 @@ std::string StringRoutines::Differ::differenceHTMLPartTwo(
 }
 
 StringRoutines::Differ::Differ() {
-  this->maximumMatrixSize = 400000000;
+  this->maximumMatrixSize = 10000000;
   this->currentCommonStringLength = 0;
 }
 

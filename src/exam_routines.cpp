@@ -898,11 +898,14 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
     << "Expected 3 arguments: "
     << "problem filename, answer id and randomSeed string. ";
   }
+  FormatExpressions format;
+  format.flagExpressionIsTopLevel = true;
+  format.flagUseQuotes = false;
   std::string oldProblem = global.getWebInput(WebAPI::Problem::fileName);
-  std::string testedProblem = input[1].toString();
+  std::string testedProblem = input[1].toString(&format);
   global.setWebInput(WebAPI::Problem::fileName, testedProblem);
-  std::string randomSeed = input[3].toString();
-  std::string answerId = input[2].toString();
+  std::string randomSeed = input[3].toString(&format);
+  std::string answerId = input[2].toString(&format);
   global.setWebInput(
     WebAPI::Problem::calculatorAnswerPrefix + answerId, "not used"
   );

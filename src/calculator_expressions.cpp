@@ -3651,12 +3651,12 @@ bool Expression::needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
     return false;
   }
   if (this->size() > 1) {
-    const Expression& firstE = (*this)[0];
-    if (firstE.isOperationGiven(this->owner->opTimes())) {
+    const Expression& firstExpression = (*this)[0];
+    if (firstExpression.isOperationGiven(this->owner->opTimes())) {
       return (*this)[1].
       needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     }
-    if (firstE.isOperationGiven(this->owner->opPower())) {
+    if (firstExpression.isOperationGiven(this->owner->opPower())) {
       return false;
     }
     return false;

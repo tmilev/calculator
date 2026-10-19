@@ -182,8 +182,11 @@ bool Calculator::ExpressionHistoryEnumerator::processTransformation(
   this->output.addOnTop(current[1]);
   this->rulesNames.setSize(this->rulesNames.size + 1);
   this->rulesNames.lastObject()->setSize(0);
+  FormatExpressions format;
+  format.flagExpressionIsTopLevel = true;
+  format.flagUseQuotes = false;
   if (current.size() >= 3) {
-    std::string incoming = current[2].toString();
+    std::string incoming = current[2].toString(&format);
     if (incoming != "") {
       this->rulesNames.lastObject()->addOnTop(incoming);
     }

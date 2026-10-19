@@ -302,7 +302,7 @@ bool CalculatorParserTest::whitespace() {
     << result
     << "\nexpected:\n"
     << expected
-        << "\nFull output: "
+    << "\nFull output: "
     << output.toStringSemiFull()
     << global.fatal;
   }

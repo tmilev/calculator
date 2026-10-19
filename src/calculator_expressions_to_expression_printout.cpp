@@ -20,6 +20,7 @@ public:
   List<ExpressionAndPrintoutData> stack;
   ListReferences<Expression> constructed;
   bool useMathML;
+  bool startsAtTopLevel;
   int maximumExpressionDepth;
   ExpressionPrintoutWalker(
     ExpressionPrintout& outputTarget,
@@ -28,12 +29,13 @@ public:
   output(outputTarget),
   expressionsWithNotation(ownerExpressionsWithNotation),
   useMathML(false),
+  startsAtTopLevel(false),
   maximumExpressionDepth(1000) {}
   void initialize(const Expression& input);
   bool maybeConsumeExpressionWithNotation();
   bool maybeConsumeExpressionTooDeep();
   bool maybeIgnore();
-  bool consumeNext(const FormatExpressions* format);
+  bool consumeNext(FormatExpressions* format);
   void removeAndPrintStackTop(int newPrintoutIndex);
   bool consumePrintout(ExpressionPrintoutNode& printout);
 };
@@ -86,13 +88,14 @@ bool ExpressionPrintoutWalker::maybeConsumeExpressionWithNotation() {
   }
   ExpressionAndPrintoutData & lastCandidate = *this->stack.lastObject();
   const Expression& lastParent = *lastCandidate.expression;
-  int index = expressionsWithNotation.getIndex(lastParent);
+  int index = this->expressionsWithNotation.getIndex(lastParent);
   if (index == - 1) {
     // Not an expression with notation.
     return false;
   }
   ExpressionPrintoutNode printout(this->output);
-  MathMLAndLatex& mathMLAndLatex = expressionsWithNotation.values[index];
+  MathMLAndLatex& mathMLAndLatex =
+  this->expressionsWithNotation.values[index];
   if (this->output.useMathML) {
     printout.setContent(mathMLAndLatex.mathML);
   } else {
@@ -124,7 +127,7 @@ void ExpressionPrintoutWalker::initialize(const Expression& input) {
   this->stack.addOnTop(inputWithPrintout);
 }
 
-bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
+bool ExpressionPrintoutWalker::consumeNext(FormatExpressions* format) {
   STACK_TRACE("ExpressionPrintoutWalker::consumeNext");
   if (this->stack.size == 0) {
     return false;
@@ -150,6 +153,12 @@ bool ExpressionPrintoutWalker::consumeNext(const FormatExpressions* format) {
     if (this->maybeIgnore()) {
       return true;
     }
+  }
+  if (this->stack.size > 2 && format != nullptr) {
+    format->flagExpressionIsTopLevel = false;
+  }
+  if (this->stack.size <= 2 && format != nullptr) {
+    format->flagExpressionIsTopLevel = this->startsAtTopLevel;
   }
   const Expression& currentExpression = *current.expression;
   if (totalChildrenProcessed < currentExpression.size()) {
@@ -183,7 +192,12 @@ void Expression::toExpressionPrintout(
     output, this->owner->objectContainer.expressionsWithNotation
   );
   walker.initialize(*this);
-  while (walker.consumeNext(format)) {}
+  FormatExpressions workingFormat;
+  if (format != nullptr) {
+    workingFormat = *format;
+  }
+  walker.startsAtTopLevel = workingFormat.flagExpressionIsTopLevel;
+  while (walker.consumeNext(&workingFormat)) {}
 }
 
 void Expression::toStringExpressionPrintoutNode(

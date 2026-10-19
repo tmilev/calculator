@@ -950,10 +950,15 @@ bool Calculator::Test::processResults() {
     << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.keys[i] << "\n";
     currentLine
-    <<
-    "<td ><div style='max-height:50px;max-width:300px;overflow-x:auto;overflow-y:auto'>"
+    << "<td>"
+    << "<div style='"
+    << "max-height:50px;"
+    << "max-width:300px;"
+    << "overflow-x:auto;"
+    << "overflow-y:auto'>"
     << currentCommand
-    << "</div></td>";
+    << "</div>"
+    << "</td>";
     bool isBad = false;
     bool isUnknown = false;
     currentLine << "<td>Run time: " << currentTest.actualDuration << " ms.";
@@ -999,7 +1004,6 @@ bool Calculator::Test::processResults() {
         currentCommand, stringUnexpected, true
       )
       << "</td>";
-      currentLine << "</td>";
       toStringDifference =
       "<div style='border:1px solid black;'>" +
       differ.differenceHTML("actual string", "expected string") +
@@ -1093,8 +1097,8 @@ bool Calculator::Test::processResults() {
     << " and rerun the present test to store the expected results. "
     << "Alternatively, run: ./calculator test update";
     out
-    <<
-    "<table class='tableCalculatorOutput' style='border-collapse: collapse;'>"
+    << "<table class='tableCalculatorOutput' "
+    << "style='border-collapse: collapse;'>"
     << badCommands.str()
     << "</table>";
     global

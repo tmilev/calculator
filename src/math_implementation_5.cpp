@@ -1437,8 +1437,8 @@ std::string MonomialPolynomial::toMathML(
     }
     out << "<msup>" << base << exponentString << "</msup>";
   }
-  if (outputProperties!= nullptr){
-    outputProperties->needsParenthesesForMultiplicationOnTheRight=false;
+  if (outputProperties != nullptr) {
+    outputProperties->needsParenthesesForMultiplicationOnTheRight = false;
   }
   return out.str();
 }

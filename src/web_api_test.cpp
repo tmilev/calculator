@@ -10,6 +10,7 @@
 namespace Testing {
 
 bool WebAPIResponseTest::all() {
+  STACK_TRACE("WebAPIResponseTest::all");
   StateMaintainer<std::string> databaseName(Database::name);
   WebAPIResponseTest::addUsersFromData();
   WebAPIResponseTest::scoredQuiz(DatabaseType::fallback);
@@ -25,6 +26,7 @@ bool WebAPIResponseTest::all() {
 }
 
 bool WebAPIResponseTest::solveJSON() {
+  STACK_TRACE("WebAPIResponseTest::solveJSON");
   WebAPIResponse response;
   global.calculator().freeMemory();
   global.calculator().getElement().initialize(Calculator::Mode::educational);
@@ -33,9 +35,9 @@ bool WebAPIResponseTest::solveJSON() {
   JSData result = response.solveJSON();
   std::string expected =
   "{\"solution\":{\"solution\":{\"input\":\"1+1\",\"solutionSteps\":"
-  "[{\"transformation\":\"2\",\"stepType\":\"=\",\"annotations\":"
-  "[\"AddRationals\"]}],\"finalExpression\":\"2\",\"comments\":"
-  "\"\",\"error\":\"\"}},\"commentsGlobal\":\"\"}";
+  "[{\"transformation\":\"2\",\"stepType\":\"=\","
+  "\"annotations\":[\"AddRationals\"]}],\"finalExpression\":\"2\","
+  "\"comments\":\"\",\"error\":\"\"}},\"commentsGlobal\":\"\"}";
   std::string got = result.toString();
   if (got != expected) {
     global.fatal

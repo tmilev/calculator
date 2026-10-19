@@ -601,15 +601,20 @@ public:
       std::string errorLoad;
       std::string errorInterpretation;
       std::string errorAnswers;
+      std::string outputHtmlBodyNoTag;
+      std::string outputHtmlHeadNoTag;
+      std::string diffHtmlBody;
       bool flagInterpretationSuccess;
       bool flagAllBuiltInAnswersOK;
       bool flagSuccess;
+      bool flagDetectedChanges;
+      bool flagHasPreviousInterpretationOnRecord;
       int randomSeed;
       List<OneAnswer> answers;
       MapList<std::string, std::string> visibleCalculatorTags;
       OneProblemTest();
-      bool run(JSData* outputComplete);
-      JSData toJSON(CalculatorHTML& problem);
+      bool run();
+      JSData toJSON();
       std::string toStringHTMLTableRow(int rowIndex);
     };
 
@@ -631,6 +636,7 @@ public:
       int inputFilesToInterpret,
       int inputRandomSeed,
       int numberOfRepetitions,
+      JSData* expectedFullResult,
       JSData* outputFullResult,
       std::stringstream* comments
     );
@@ -638,7 +644,15 @@ public:
       int inputFirstFileIndex,
       int inputFilesToInterpret,
       int inputRandomSeed,
-      JSData* output
+      JSData* output,
+      JSData* expectedOutput
+    );
+    bool processOne(
+      int testIndex,
+      int& badSoFar,
+      ProgressReport& progressReport,
+      JSData* output,
+      JSData* expectedOutput
     );
     std::string toStringSummary();
     std::string toHTMLBuiltIn();

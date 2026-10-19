@@ -55,7 +55,8 @@ std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(
   out << CalculatorHTML::toStringLinkFromProblem(this->fileName) << "</td>";
   if (this->errorLoad != "") {
     out
-    << "<td style = 'min-width:300px'><b>Couldn't load.</b> "
+    << "<td style = 'min-width:300px'>"
+    << "<b>Couldn't load.</b> "
     << this->errorLoad
     << "</td>";
     out << "</tr>";
@@ -65,33 +66,50 @@ std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(
   << "<td style = 'min-width:60px'><b style = 'color:green'>Success</b></td>";
   if (!this->flagInterpretationSuccess) {
     out
-    << "<td style = 'min-width:400px'><b style='color:red'>Failure.</b> "
+    << "<td style = 'min-width:400px'>"
+    << "<b style='color:red'>Failure.</b> "
     << "Comments: "
     << this->errorInterpretation;
     out << "</td></tr>";
     return out.str();
   }
-  out << "<td style='min-width:60px'><b style='color:green'>Success</b></td>";
+  out
+  << "<td style='min-width:60px'>"
+  << "<b style='color:green'>Success</b>"
+  << "</td>";
   if (this->answers.size == 0) {
-    out << "<td><b style = 'color:red'>No built-in answer.</b></td>";
+    out << "<td><b style='color:red'>No built-in answer.</b></td>";
+  } else if (this->flagAllBuiltInAnswersOK) {
+    out
+    << "<td style='min-width:60px'>"
+    << "<b style='color:green'>Success</b>"
+    << "</td>";
   } else {
-    if (this->flagAllBuiltInAnswersOK) {
+    out
+    << "<td style = 'min-width:60px'>"
+    << "<b style = 'color:red'>Failure.</b>"
+    << "</td>";
+    out << "<td style = 'min-width:400px'>";
+    for (int i = 0; i < this->answers.size; i ++) {
+      out << this->answers[i].builtInAnswer;
+    }
+    if (this->errorAnswers != "") {
+      out << this->errorAnswers;
+    }
+    out << "</td>" << "</tr>";
+    return out.str();
+  }
+  if (this->flagHasPreviousInterpretationOnRecord) {
+    if (this->flagDetectedChanges) {
       out
-      << "<td style = 'min-width:60px'><b style = 'color:green'>"
-      << "Success</b></td>";
+      << "<td>"
+      << "<b style='color:red'>Interpretation changed</b>"
+      << "</td>"
+      << "<td>"
+      << this->diffHtmlBody
+      << "</td>";
     } else {
-      out
-      << "<td style = 'min-width:60px'><b style = 'color:red'>"
-      << "Failure.</b></td>";
-      out << "<td style = 'min-width:400px'>";
-      for (int i = 0; i < this->answers.size; i ++) {
-        out << this->answers[i].builtInAnswer;
-      }
-      if (this->errorAnswers != "") {
-        out << this->errorAnswers;
-      }
-      out << "</td>" << "</tr>";
-      return out.str();
+      out << "<td>No changes detected</td>";
     }
   }
   return out.str();
@@ -166,6 +184,8 @@ CalculatorHTML::Test::OneProblemTest::OneProblemTest() {
   this->flagInterpretationSuccess = false;
   this->flagAllBuiltInAnswersOK = false;
   this->flagSuccess = false;
+  this->flagDetectedChanges = false;
+  this->flagHasPreviousInterpretationOnRecord = false;
 }
 
 CalculatorHTML::Test::OneProblemTest::OneAnswer::OneAnswer() {
@@ -173,7 +193,7 @@ CalculatorHTML::Test::OneProblemTest::OneAnswer::OneAnswer() {
   this->flagBuiltInGenerated = false;
 }
 
-bool CalculatorHTML::Test::OneProblemTest::run(JSData* outputComplete) {
+bool CalculatorHTML::Test::OneProblemTest::run() {
   CalculatorHTML problem;
   std::stringstream commentsOnFailure;
   std::stringstream randomSeedStringStarting;
@@ -251,17 +271,16 @@ bool CalculatorHTML::Test::OneProblemTest::run(JSData* outputComplete) {
     }
   }
   this->errorAnswers = commentsOnFailure.str();
-  if (outputComplete != nullptr) {
-    *outputComplete = this->toJSON(problem);
-  }
+  this->outputHtmlBodyNoTag = problem.outputHtmlBodyNoTag;
+  this->outputHtmlHeadNoTag = problem.outputHtmlHeadNoTag;
   return this->flagSuccess;
 }
 
-JSData CalculatorHTML::Test::OneProblemTest::toJSON(CalculatorHTML& problem) {
+JSData CalculatorHTML::Test::OneProblemTest::toJSON() {
   JSData result;
   result["randomSeed"] = this->randomSeed;
-  result["body"] = problem.outputHtmlBodyNoTag;
-  result["head"] = problem.outputHtmlHeadNoTag;
+  result["body"] = this->outputHtmlBodyNoTag;
+  result["head"] = this->outputHtmlHeadNoTag;
   return result;
 }
 
@@ -290,14 +309,19 @@ bool CalculatorHTML::Test::builtInMultiple(
   int inputFilesToInterpret,
   int inputRandomSeed,
   int numberOfRepetitions,
+  JSData* expectedFullResult,
   JSData* outputFullResult,
   std::stringstream* comments
 ) {
+  STACK_TRACE("CalculatorHTML::Test::builtInMultiple");
   List<int> randomSeeds;
   randomSeeds.setSize(numberOfRepetitions);
   ProgressReport report;
   for (int i = 0; i < numberOfRepetitions; i ++) {
     randomSeeds[i] = inputRandomSeed + i;
+    std::stringstream intToStringConverter;
+    intToStringConverter << randomSeeds[i];
+    std::string randomSeedKey = intToStringConverter.str();
     std::stringstream reportStream;
     reportStream
     << "Testing problems, round "
@@ -309,16 +333,19 @@ bool CalculatorHTML::Test::builtInMultiple(
     << ". ";
     report.report(reportStream.str());
     CalculatorHTML::Test tester;
-    JSData resultForRandomSeed;
-    JSData* outputResultForRandomSeed = (outputFullResult != nullptr) ?
-    &resultForRandomSeed :
-    nullptr;
+    JSData* resultForRandomSeed = nullptr;
+    JSData* expectedResultForRandomSeed = nullptr;
+    if (outputFullResult != nullptr) {
+      resultForRandomSeed = &(*outputFullResult)[randomSeedKey];
+      expectedResultForRandomSeed = &(*expectedFullResult)[randomSeedKey];
+    }
     if (
       !tester.builtIn(
         inputFirstFileIndex,
         inputFilesToInterpret,
         randomSeeds[i],
-        outputResultForRandomSeed
+        resultForRandomSeed,
+        expectedResultForRandomSeed
       )
     ) {
       if (comments != nullptr) {
@@ -339,11 +366,6 @@ bool CalculatorHTML::Test::builtInMultiple(
       }
       return false;
     }
-    if (outputFullResult != nullptr) {
-      std::stringstream intToStringConverter;
-      intToStringConverter << randomSeeds[i];
-      (*outputFullResult)[intToStringConverter.str()] = resultForRandomSeed;
-    }
     if (i == numberOfRepetitions - 1 && comments != nullptr) {
       *comments
       << numberOfRepetitions
@@ -357,11 +379,107 @@ bool CalculatorHTML::Test::builtInMultiple(
   return true;
 }
 
+bool CalculatorHTML::Test::processOne(
+  int testIndex,
+  int& badSoFar,
+  ProgressReport& progressReport,
+  JSData* output,
+  JSData* expectedOutput
+) {
+  bool isOK = true;
+  this->results.setSize(this->results.size + 1);
+  OneProblemTest& currentTest = *this->results.lastObject();
+  currentTest.fileName = "problems/" + this->fileNames[testIndex];
+  currentTest.randomSeed = this->randomSeed;
+  std::stringstream reportStream;
+  if (badSoFar > 0) {
+    reportStream
+    << "<b style='color:red'>Found "
+    << badSoFar
+    << " bad files so far. </b><br>";
+  }
+  reportStream
+  << "File: "
+  << testIndex
+  << " out of "
+  << this->fileNames.size
+  << ". ";
+  reportStream
+  << currentTest.fileName
+  << ". Random seed: "
+  << this->randomSeed
+  << ".";
+  if (global.runMode == GlobalVariables::RunMode::consoleTest) {
+    global << reportStream.str() << Logger::endL;
+  }
+  progressReport.report(reportStream.str());
+  if (!currentTest.run()) {
+    isOK = false;
+  }
+  JSData actualJSON = currentTest.toJSON();
+  if (output != nullptr) {
+    (*output)[currentTest.fileName] = actualJSON;
+  }
+  std::string expectedBody;
+  std::string expectedHead;
+  currentTest.flagDetectedChanges = false;
+  if (
+    expectedOutput != nullptr && expectedOutput->hasKey(currentTest.fileName)
+  ) {
+    currentTest.flagHasPreviousInterpretationOnRecord = true;
+    JSData expectedJSON = (*expectedOutput)[currentTest.fileName];
+    currentTest.flagDetectedChanges = expectedJSON != actualJSON;
+    expectedBody = expectedJSON["body"].stringValue;
+    expectedHead = expectedJSON["head"].stringValue;
+  }
+  if (currentTest.flagDetectedChanges) {
+    StringRoutines::Differ differ;
+    differ.left =
+    HtmlRoutines::convertStringToHtmlString(
+      currentTest.outputHtmlBodyNoTag, false
+    );
+    differ.right =
+    HtmlRoutines::convertStringToHtmlString(expectedBody, false);
+    currentTest.diffHtmlBody = differ.differenceHTML("actual", "expected");
+  }
+  if (!currentTest.flagSuccess) {
+    badSoFar ++;
+    if (global.runMode == GlobalVariables::RunMode::consoleTest) {
+      global
+      << Logger::red
+      << "Failure @ index: "
+      << testIndex
+      << ". "
+      << "Elapsed ms: "
+      << global.getElapsedMilliseconds()
+      << ". "
+      << Logger::endL;
+      global
+      << Logger::yellow
+      << "https://localhost:8166"
+      << HtmlRoutines::getProblemURLRelative(currentTest.fileName)
+      << Logger::endL;
+    }
+  } else if (global.runMode == GlobalVariables::RunMode::consoleTest) {
+    global
+    << Logger::green
+    << "Success @ index: "
+    << testIndex
+    << ". "
+    << "Elapsed ms: "
+    << global.getElapsedMilliseconds()
+    << ". "
+    << Logger::endL;
+  }
+  return isOK;
+}
+
 bool CalculatorHTML::Test::builtIn(
   int inputFirstFileIndex,
   int inputFilesToInterpret,
   int inputRandomSeed,
-  JSData* output
+  JSData* output,
+  JSData* expectedOutput
 ) {
   STACK_TRACE("CalculatorHTML::Test::builtIn");
   this->firstFileIndex = inputFirstFileIndex;
@@ -392,69 +510,7 @@ bool CalculatorHTML::Test::builtIn(
   std::stringstream commentsOnFailure;
   int badSoFar = 0;
   for (int i = this->firstFileIndex; i < lastIndex; i ++) {
-    this->results.setSize(this->results.size + 1);
-    OneProblemTest& currentTest = *this->results.lastObject();
-    currentTest.fileName = "problems/" + this->fileNames[i];
-    currentTest.randomSeed = this->randomSeed;
-    std::stringstream reportStream;
-    if (badSoFar > 0) {
-      reportStream
-      << "<b style = 'color:red'>Found "
-      << badSoFar
-      << " bad files so far. </b><br>";
-    }
-    reportStream
-    << "File: "
-    << i
-    << " out of "
-    << this->fileNames.size
-    << ". ";
-    reportStream
-    << currentTest.fileName
-    << ". Random seed: "
-    << this->randomSeed
-    << ".";
-    if (global.runMode == GlobalVariables::RunMode::consoleTest) {
-      global << reportStream.str() << Logger::endL;
-    }
-    report.report(reportStream.str());
-    JSData oneProblemHolder;
-    JSData* oneProblem = output == nullptr ? nullptr : &oneProblemHolder;
-    if (!currentTest.run(oneProblem)) {
-      result = false;
-    }
-    if (output != nullptr) {
-      (*output)[currentTest.fileName] = oneProblemHolder;
-    }
-    if (!currentTest.flagSuccess) {
-      badSoFar ++;
-      if (global.runMode == GlobalVariables::RunMode::consoleTest) {
-        global
-        << Logger::red
-        << "Failure @ index: "
-        << i
-        << ". "
-        << "Elapsed ms: "
-        << global.getElapsedMilliseconds()
-        << ". "
-        << Logger::endL;
-        global
-        << Logger::yellow
-        << "https://localhost:8166"
-        << HtmlRoutines::getProblemURLRelative(currentTest.fileName)
-        << Logger::endL;
-      }
-    } else if (global.runMode == GlobalVariables::RunMode::consoleTest) {
-      global
-      << Logger::green
-      << "Success @ index: "
-      << i
-      << ". "
-      << "Elapsed ms: "
-      << global.getElapsedMilliseconds()
-      << ". "
-      << Logger::endL;
-    }
+    this->processOne(i, badSoFar, report, output, expectedOutput);
   }
   this->errorComments += commentsOnFailure.str();
   return result;

@@ -1,5 +1,4 @@
 #include "calculator_html_interpretation.h"
-#include "calculator_inner_functions.h"
 #include "general_file_operations_encodings.h"
 #include "html_routines.h"
 #include "string_constants.h"
@@ -125,9 +124,14 @@ bool CalculatorHTMLTest::builtInCrashOnFailure() {
     false,
     nullptr
   );
+  JSData parsedDesiredOutput;
+  if (desiredOutputString != "") {
+    parsedDesiredOutput.parse(desiredOutputString);
+  }
+  global.displayApplicationNoCache = "https://localhost:8166/appNoCache";
   if (
     !CalculatorHTML::Test::builtInMultiple(
-      0, 0, 0, 3, &actualOutput, &comments
+      0, 0, 0, 3, &parsedDesiredOutput, &actualOutput, &comments
     )
   ) {
     FileOperations::writeFileVirtual(
@@ -144,6 +148,27 @@ bool CalculatorHTMLTest::builtInCrashOnFailure() {
   }
   std::string actualOutputString = actualOutput.toStringPretty();
   if (actualOutputString != desiredOutputString) {
+    std::stringstream fileContent;
+    fileContent
+    << "<html>"
+    << "<style>"
+    << "span.spanStringEqual {\n"
+    << "font-weight: bold;\n"
+    << "font-family: 'Courier New', Courier, monospace;\n"
+    << "color: green\n"
+    << "}\n"
+    << "span.spanStringDifferent {\n"
+    << "font-weight: bold;\n"
+    << "font-family: 'Courier New', Courier, monospace;\n"
+    << "color: red\n"
+    << "}\n"
+    << "</style>"
+    << "<body>"
+    << comments.str()
+    << "</body></html>";
+    FileOperations::writeFileVirtual(
+      "output/crash_test.html", fileContent.str(), nullptr
+    );
     if (desiredResultKnown) {
       std::string newFileName =
       CalculatorHTML::Test::filenameFullOutput + ".new";
@@ -163,7 +188,9 @@ bool CalculatorHTMLTest::builtInCrashOnFailure() {
       << "looks OK, simply delete file "
       << CalculatorHTML::Test::filenameFullOutput
       << " and rerun the unit tests, along the lines of "
-      << "`./calculator test problems` "
+      << "`./calculator test problems`.\n"
+      << "An html report should be here: "
+      << "https://localhost:8166/output/crash_test.html"
       << global.fatal;
     }
     global
@@ -303,7 +330,10 @@ void CalculatorFunctionsFreecalcTest::crawl() {
     "Crawl(\"freecalc/homework/referenceallproblemsbycourse"
     "/calculusimasterproblemsheet.tex\")"
   );
-  std::string result = calculator.programExpression.toString();
+  FormatExpressions format;
+  format.flagExpressionIsTopLevel = true;
+  format.flagUseQuotes = false;
+  std::string result = calculator.programExpression.toString(&format);
   std::string expected =
   "Output file: "
   "<a href='/output/latexOutput.tex'>latexOutput.tex</a>";

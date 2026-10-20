@@ -2362,8 +2362,18 @@ bool Expression::toStringExpressionPrintoutPower(
     output.addString("{").addChildIndex(
       basePrintout.childrenExpressionIndices[0]
     ).addString("^{").addChildIndex(childrenIndices[2]).addString("}}{}");
-    bool needsParentheses = baseExpression.size() != 2 ||
-    !baseExpression[1].isAtom();
+    bool needsParentheses = true;
+    if (baseExpression.size() == 2) {
+      if (baseExpression[1].isAtom()) {
+        needsParentheses = false;
+      }
+      if (
+        baseExpression[1].startsWith(input.owner->opBind(), 2) &&
+        baseExpression[1][1].isAtom()
+      ) {
+        needsParentheses = false;
+      }
+    }
     if (needsParentheses) {
       output.addString("\\left(");
     }

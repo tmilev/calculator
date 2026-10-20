@@ -55,6 +55,7 @@ public:
     const std::string& input, ExpressionPrintoutNode& appendTo
   );
   std::string toStringRootNode();
+  ExpressionPrintoutNode& rootNode();
   ExpressionPrintout(): indexRootNode(- 1), useMathML(false) {}
 };
 

@@ -931,8 +931,6 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->parser.initializePredefinedWordSplits();
   this->parser.initializeStringsThatSplitIfFollowedByDigit();
   Expression::initializeToExpressionPrintoutNodeHandlers(*this);
-  Expression::initializeToStringHandlers(*this);
-  Expression::initializeToMathMLHandlers(*this);
   this->ruleStack.reset(*this, 100);
   this->ruleStack.addChildAtomOnTop(this->opCommandSequence());
   this->numberOfPredefinedAtoms = this->operations.size();

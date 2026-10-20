@@ -58,6 +58,10 @@ void ExpressionPrintout::appendStringTo(
   appendTo.addChildIndex(this->addString(input));
 }
 
+ExpressionPrintoutNode& ExpressionPrintout::rootNode(){
+  return this->allPrintouts[this->indexRootNode];
+}
+
 std::string ExpressionPrintout::toStringRootNode() {
   if (this->indexRootNode < 0) {
     return "(Printout:failure)";

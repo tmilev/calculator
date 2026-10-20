@@ -4362,63 +4362,13 @@ std::string Expression::toTable(
 }
 
 std::string Expression::toString(
-  const FormatExpressions* format,
-  MathExpressionFormattingProperties* outputProperties
+  const FormatExpressions* format
 ) const {
   STACK_TRACE("Expression::toString");
-  if (true) {
     ExpressionPrintout printout;
     this->toExpressionPrintout(printout, format);
     return printout.toStringRootNode();
-  }
-  MemorySaving<FormatExpressions> formatContainer;
-  if (format == nullptr) {
-    format = &formatContainer.getElement();
-    formatContainer.getElement().flagUseQuotes = false;
-    formatContainer.getElement().flagExpressionIsInMainDisplay = true;
-  }
-  if (this->owner != nullptr) {
-    if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
-      return "(...)";
-    }
-  } else {
-    return "(Error:NoOwner)";
-  }
-  RecursionDepthCounter recursionCounter;
-  recursionCounter.initialize(&this->owner->recursionDepth);
-  this->checkConsistency();
-  std::stringstream out;
-  int notationIndex =
-  this->owner->objectContainer.expressionsWithNotation.getIndex(*this);
-  if (notationIndex != - 1) {
-    return
-    this->owner->objectContainer.expressionsWithNotation.values[
-      notationIndex
-    ].latex;
-  }
-  FormatExpressions formatCopy;
-  if (format != nullptr) {
-    formatCopy = *format;
-  }
-  if (
-    !this->isOfType<std::string>() &&
-    !this->startsWith(this->owner->opCommandSequence())
-  ) {
-    formatCopy.flagUseQuotes = true;
-  }
-  if (this->toStringData(out, &formatCopy, outputProperties)) {} else if (
-    this->toStringWithAtomHandler(out, &formatCopy, outputProperties)
-  ) {} else if (this->toStringWithCompositeHandler(out, &formatCopy, nullptr)) {
-  } else if (this->toStringEndStatementNested(out, &formatCopy)) {} else if (
-    this->size() == 1
-  ) {
-    out << (*this)[0].toString(&formatCopy);
-  } else if (this->toStringGeneral(out, &formatCopy, outputProperties)) {} else
-  {
-    // <-not sure if this case is possible
-    out << "(ProgrammingError:NotDocumented)";
-  }
-  return out.str();
+
 }
 
 std::string Expression::lispify() const {
@@ -5169,10 +5119,10 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
       out << "sqrt(" << secondUTF8String << ")";
     } else {
       std::string firstExpression = (*this)[1].toUTF8String(format);
-      MathExpressionFormattingProperties firstExpressionProperties;
-      std::string firstExpressionLatex = (*this)[1].toString(
-        format, &firstExpressionProperties
-      );
+      ExpressionPrintout printout;
+      (*this)[1].toExpressionPrintout(printout, format);
+      std::string firstExpressionLatex = printout.toStringRootNode();
+      MathExpressionFormattingProperties firstExpressionProperties = printout.rootNode().properties;
       bool firstNeedsBrackets =
       firstExpressionProperties.needsParenthesesForMultiplicationOnTheRight;
       bool secondNeedsBrackets = (*this)[2].

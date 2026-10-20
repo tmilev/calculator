@@ -56,18 +56,6 @@ bool Expression::toStringExpressionPrintoutMinus3(
   return true;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 bool Expression::toStringExpressionPrintoutDefine(
   const Expression& input,
   ExpressionPrintoutNode& output,
@@ -106,14 +94,6 @@ bool Expression::toStringExpressionPrintoutDefine(
   }
   return true;
 }
-
-
-
-
-
-
-
-
 
 bool Expression::toStringExpressionPrintoutIsDenotedBy(
   const Expression& input,
@@ -1650,5 +1630,3 @@ std::string ExpressionPrintoutNode::toString() const {
   out << ")";
   return out.str();
 }
-
-

@@ -58,7 +58,7 @@ void ExpressionPrintout::appendStringTo(
   appendTo.addChildIndex(this->addString(input));
 }
 
-ExpressionPrintoutNode& ExpressionPrintout::rootNode(){
+ExpressionPrintoutNode& ExpressionPrintout::rootNode() {
   return this->allPrintouts[this->indexRootNode];
 }
 

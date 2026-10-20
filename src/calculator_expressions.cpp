@@ -4361,14 +4361,11 @@ std::string Expression::toTable(
   );
 }
 
-std::string Expression::toString(
-  const FormatExpressions* format
-) const {
+std::string Expression::toString(const FormatExpressions* format) const {
   STACK_TRACE("Expression::toString");
-    ExpressionPrintout printout;
-    this->toExpressionPrintout(printout, format);
-    return printout.toStringRootNode();
-
+  ExpressionPrintout printout;
+  this->toExpressionPrintout(printout, format);
+  return printout.toStringRootNode();
 }
 
 std::string Expression::lispify() const {
@@ -5122,7 +5119,8 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
       ExpressionPrintout printout;
       (*this)[1].toExpressionPrintout(printout, format);
       std::string firstExpressionLatex = printout.toStringRootNode();
-      MathExpressionFormattingProperties firstExpressionProperties = printout.rootNode().properties;
+      MathExpressionFormattingProperties firstExpressionProperties =
+      printout.rootNode().properties;
       bool firstNeedsBrackets =
       firstExpressionProperties.needsParenthesesForMultiplicationOnTheRight;
       bool secondNeedsBrackets = (*this)[2].

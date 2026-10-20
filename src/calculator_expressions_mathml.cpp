@@ -879,11 +879,6 @@ std::string ElementZmodP::toMathMLPolynomialCalculator(
   return out.str();
 }
 
-
-
-
-
-
 std::string Expression::toMathMLFinal(FormatExpressions* format) const {
   return
   MathML::toMathMLFinal(
@@ -978,14 +973,13 @@ void Expression::toTableMathML(
   }
 }
 
-void Expression::toMathML(std::stringstream& out,
-  FormatExpressions* format) const {
+void Expression::toMathML(std::stringstream& out, FormatExpressions* format)
+const {
   STACK_TRACE("Expression::toMathML");
-    ExpressionPrintout printout;
-    printout.useMathML = true;
-    this->toExpressionPrintout(printout, format);
-    out << printout.toStringRootNode();
-
+  ExpressionPrintout printout;
+  printout.useMathML = true;
+  this->toExpressionPrintout(printout, format);
+  out << printout.toStringRootNode();
 }
 
 bool Expression::toMathMLEndStatementTopLevel(
@@ -1297,7 +1291,6 @@ bool Expression::toMathMLExpressionPrintoutNodeGeneral(
   return true;
 }
 
-
 std::string ExpressionContext::toMathML() const {
   std::stringstream out;
   // this->checkInitialization();
@@ -1318,16 +1311,6 @@ std::string ExpressionContext::toMathML() const {
   }
   return out.str();
 }
-
-
-
-
-
-
-
-
-
-
 
 bool Expression::toMathMLExpressionPrintoutDefine(
   const Expression& input,

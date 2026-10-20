@@ -1274,7 +1274,6 @@ public:
     FormatExpressions* format,
     MathExpressionFormattingProperties* outputProperties = nullptr
   );
-
   bool toStringExpressionPrintoutOpMultiplicative(
     ExpressionPrintoutNode& output,
     const List<int>& childrenIndices,
@@ -1344,13 +1343,9 @@ public:
     MathExpressionFormattingProperties* outputProperties = nullptr,
     JSData* outputJS = nullptr
   ) const;
-  void toMathML(
-    std::stringstream& out,
-    FormatExpressions* format = nullptr
-  ) const;
-  std::string toMathML(
-    FormatExpressions* format = nullptr
-  ) const {
+  void toMathML(std::stringstream& out, FormatExpressions* format = nullptr)
+  const;
+  std::string toMathML(FormatExpressions* format = nullptr) const {
     std::stringstream out;
     this->toMathML(out, format);
     return out.str();

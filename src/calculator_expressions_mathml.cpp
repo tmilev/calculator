@@ -3412,8 +3412,6 @@ bool Expression::toMathMLExpressionPrintoutDivide(
     }
   }
   if (!doUseFrac) {
-    std::string firstMathML = input[1].toMathML(format);
-    std::string secondMathML = input[2].toMathML(format);
     bool firstNeedsBrackets =
     !(
       input[1].isListStartingWithAtom(commands.opTimes()) ||
@@ -3821,6 +3819,7 @@ bool Expression::toMathMLExpressionPrintoutPower(
   const List<int>& childrenIndices,
   FormatExpressions* format
 ) {
+  (void) format;
   Calculator& commands = *input.owner;
   if (!input.startsWith(commands.opPower(), 3)) {
     return false;
@@ -3833,8 +3832,6 @@ bool Expression::toMathMLExpressionPrintoutPower(
   if (baseExpression.startsWith(commands.opUnderscore(), 3)) {
     isSuperScriptOfUnderscoredOperator = true;
   }
-  MathExpressionFormattingProperties leftProperties;
-  std::string firstMathML = baseExpression.toMathML(format, &leftProperties);
   if (
     baseExpression.children.size > 0 &&
     baseExpression[0].isAtomWhoseExponentsAreInterpretedAsFunction()
@@ -3882,7 +3879,6 @@ bool Expression::toMathMLExpressionPrintoutPower(
     int functionIndex = basePrintout.childrenExpressionIndices[0];
     int argumentIndex = basePrintout.childrenExpressionIndices[1];
     int exponentIndex = childrenIndices[2];
-    std::string exponentMathML = powerExpression.toMathML(format);
     output.addString("<mrow><msup>").addChildIndex(functionIndex).addChildIndex
     (exponentIndex).addString("</msup>");
     bool argumentNeedsParentheses = !baseExpression[1].isAtom();

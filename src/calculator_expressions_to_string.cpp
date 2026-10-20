@@ -1916,14 +1916,16 @@ bool Expression::toStringExpressionPrintoutOpMultiplicative(
   const std::string& operation,
   FormatExpressions* format
 ) const {
-  MathExpressionFormattingProperties secondProperties;
-  MathExpressionFormattingProperties firstProperties;
-  std::string secondE = (*this)[2].toString(format, &secondProperties);
-  std::string firstE = (*this)[1].toString(format, &firstProperties);
+  STACK_TRACE("Expression::toStringExpressionPrintoutOpMultiplicative");
+  (void) format;
+  ExpressionPrintoutNode& secondPrintout =
+  output.getOwner().allPrintouts[childrenIndices[2]];
+  ExpressionPrintoutNode& firstPrintout =
+  output.getOwner().allPrintouts[childrenIndices[1]];
   bool firstNeedsBrackets =
-  firstProperties.needsParenthesesForMultiplicationOnTheRight;
+  firstPrintout.properties.needsParenthesesForMultiplicationOnTheRight;
   bool secondNeedsBrackets =
-  secondProperties.needsParenthesesForMultiplicationOnTheRight;
+  secondPrintout.properties.needsParenthesesForMultiplicationOnTheRight;
   if (firstNeedsBrackets) {
     output.addString("\\left(").addChildIndex(childrenIndices[1]).addString(
       "\\right)"
@@ -2659,6 +2661,7 @@ bool Expression::toStringExpressionPrintoutSumOrIntegral(
   FormatExpressions* format
 ) {
   STACK_TRACE("Expression::toStringExpressionPrintoutSumOrIntegral");
+  (void) format;
   if (
     !input.startsWith(input.owner->opSum()) &&
     !input.startsWith(input.owner->opIntegral())
@@ -2703,10 +2706,9 @@ bool Expression::toStringExpressionPrintoutSumOrIntegral(
   }
   const Expression& differential = input[firstIndex];
   if (!differential.startsWith(input.owner->opTimes(), 3)) {
-    MathExpressionFormattingProperties differentialProperties;
-    std::string differentialString =
-    differential.toString(format, &differentialProperties);
-    if (differentialProperties.startsWithMinus) {
+    ExpressionPrintoutNode& differentialPrintout =
+    output.getOwner().allPrintouts[childrenIndices[firstIndex]];
+    if (differentialPrintout.properties.startsWithMinus) {
       output.addString("\\left(").addChildIndex(childrenIndices[firstIndex]).
       addString("\\right)");
     } else {

@@ -3907,12 +3907,18 @@ bool Expression::toStringExpressionPrintoutNodeGeneral(
   output.clear();
   output.addChildIndex(childrenPrintouts[0]);
   bool needParenthesis = true;
-  if (this->size() == 2) {
-    if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
-      needParenthesis = !(*this)[1].isAtom();
+  if (
+    this->size() == 2 && ((*this)[0].
+      isAtomWhoseExponentsAreInterpretedAsFunction() || (*this)[0].
+      isPowerOfAtomWhoseExponentsAreInterpretedAsFunction()
+    )
+  ) {
+    const Expression& argument = (*this)[1];
+    if (argument.isAtom()) {
+      needParenthesis = false;
     }
-    if ((*this)[0].isPowerOfAtomWhoseExponentsAreInterpretedAsFunction()) {
-      needParenthesis = !(*this)[1].isAtom();
+    if (argument.startsWith(this->owner->opBind(), 2)) {
+      needParenthesis = !argument[1].isAtom();
     }
   }
   container.appendStringTo("{}", output);

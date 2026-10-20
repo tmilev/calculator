@@ -333,7 +333,7 @@ void CalculatorFunctionsFreecalcTest::crawl() {
   FormatExpressions format;
   format.flagExpressionIsTopLevel = true;
   format.flagUseQuotes = false;
-  std::string result = calculator.programExpression.toString(&format);
+  std::string result = calculator.programExpression[1].toString(&format);
   std::string expected =
   "Output file: "
   "<a href='/output/latexOutput.tex'>latexOutput.tex</a>";

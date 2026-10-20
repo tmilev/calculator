@@ -518,7 +518,10 @@ public:
     const std::string& fileName, const std::string& stringToDisplay = ""
   );
   static std::string toStringLinkFromProblem(
-    const std::string& fileName, bool practiceMode = true, int randomSeed = - 1
+    const std::string& fileName,
+    bool practiceMode = true,
+    int randomSeed = - 1,
+    bool targetBlank = false
   );
   std::string toStringLinkFromFileName(const std::string& fileName);
   std::string toStringLinkCurrentAdmin(

@@ -2714,8 +2714,7 @@ bool Expression::toStringExpressionPrintoutSumOrIntegral(
     }
     return true;
   }
-  output.addString("\\left(").addChildIndex(childrenIndices[firstIndex]).
-  addString("\\right)");
+  output.addChildIndex(childrenIndices[firstIndex]);
   return true;
 }
 

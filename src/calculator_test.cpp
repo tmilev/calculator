@@ -13,7 +13,7 @@ bool CalculatorTest::all(bool updateABTestFile) {
   CalculatorTest::parseAllExamples(tester);
   CalculatorTest::numberOfTestFunctions(tester);
   CalculatorTest::parseDecimal(tester);
-  CalculatorTest::builtInFunctionsABTest(tester, updateABTestFile);
+  CalculatorTest::builtInFunctionsGoldenTest(tester, updateABTestFile);
   return true;
 }
 } // namespace: Testing.

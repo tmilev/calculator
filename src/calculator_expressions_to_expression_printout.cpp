@@ -154,10 +154,10 @@ bool ExpressionPrintoutWalker::consumeNext(FormatExpressions* format) {
       return true;
     }
   }
-  if (this->stack.size > 2 && format != nullptr) {
+  if (this->stack.size > 1 && format != nullptr) {
     format->flagExpressionIsTopLevel = false;
   }
-  if (this->stack.size <= 2 && format != nullptr) {
+  if (this->stack.size <= 1 && format != nullptr) {
     format->flagExpressionIsTopLevel = this->startsAtTopLevel;
   }
   const Expression& currentExpression = *current.expression;
@@ -211,17 +211,16 @@ void Expression::toStringExpressionPrintoutNode(
     output.setContent("(Error:NoOwner)");
     return;
   }
-  MemorySaving<FormatExpressions> formatContainer;
-  if (format == nullptr) {
-    format = &formatContainer.getElement();
-    formatContainer.getElement().flagUseQuotes = false;
-    formatContainer.getElement().flagExpressionIsInMainDisplay = true;
-  }
   RecursionDepthCounter recursionCounter;
   recursionCounter.initialize(&this->owner->recursionDepth);
   this->checkConsistency();
   FormatExpressions formatCopy;
-  formatCopy = *format;
+  if (format == nullptr) {
+    formatCopy.flagUseQuotes = false;
+    formatCopy.flagExpressionIsInMainDisplay = true;
+  } else {
+    formatCopy = *format;
+  }
   if (
     !this->isOfType<std::string>() &&
     !this->startsWith(this->owner->opCommandSequence())

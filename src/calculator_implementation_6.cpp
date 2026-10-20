@@ -17,7 +17,10 @@
 #include <iomanip>
 
 std::string CalculatorHTML::toStringLinkFromProblem(
-  const std::string& fileName, bool practiceMode, int randomSeed
+  const std::string& fileName,
+  bool practiceMode,
+  int randomSeed,
+  bool targetBlank
 ) {
   JSData request;
   request[WebAPI::Problem::fileName] = fileName;
@@ -38,9 +41,11 @@ std::string CalculatorHTML::toStringLinkFromProblem(
   << global.displayApplicationNoCache
   << "#"
   << request.toString()
-  << "'>"
-  << fileName
-  << "</a>";
+  << "'";
+  if (targetBlank) {
+    out << " target='_blank'";
+  }
+  out << ">" << fileName << "</a>";
   return out.str();
 }
 
@@ -2481,7 +2486,7 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
     slTwoSubalgebras.writeHTML();
     Plot plot;
     algebra.weylGroup.dynkinType.plot(plot);
-    std::string plotDynkinType = plot.getPlotHtml2d(calculator);
+    std::string plotDynkinType = plot.getPlotHtml2d(calculator, false);
     algebra.writeHTML(true, false, plotDynkinType);
     if (
       shouldComputeSemisimpleSubalgebras &&

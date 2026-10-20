@@ -440,25 +440,32 @@ bool Expression::toMathMLBuiltIn<Plot>(
   MathExpressionFormattingProperties* outputProperties
 ) {
   (void) outputProperties;
-  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
-  if (isFinal) {
-    Plot& plot = input.getValueNonConst<Plot>();
-    plot.flagIncludeExtraHtmlDescriptions = (format == nullptr) ?
-    true :
-    format->flagIncludeExtraHtmlDescriptionsInPlots;
-    plot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
-    out << plot.getPlotHtml(*input.owner);
-    if (input.owner->flagWriteLatexPlots) {
-      out
-      << input.owner->writeDefaultLatexFileReturnHtmlLink(
-        plot.getPlotStringAddLatexCommands(false), nullptr, true
-      );
-      out
-      << "<br><b>LaTeX code used to generate the output. </b><br>"
-      << plot.getPlotStringAddLatexCommands(true);
-    }
-  } else {
+  bool isFinal = true;
+  bool rerenderCanvasIfAlreadyRendered = false;
+  if (format != nullptr) {
+    isFinal = format->flagExpressionIsTopLevel;
+    rerenderCanvasIfAlreadyRendered = format->flagRerenderCanvas;
+  }
+  if (!isFinal && !rerenderCanvasIfAlreadyRendered) {
     out << "<ms>(plot not shown)</ms>";
+    return true;
+  }
+  Plot& plot = input.getValueNonConst<Plot>();
+  plot.flagIncludeExtraHtmlDescriptions = true;
+  if (format != nullptr) {
+    plot.flagIncludeExtraHtmlDescriptions =
+    format->flagIncludeExtraHtmlDescriptionsInPlots;
+  }
+  plot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
+  out << plot.getPlotHtml(*input.owner, rerenderCanvasIfAlreadyRendered);
+  if (input.owner->flagWriteLatexPlots) {
+    out
+    << input.owner->writeDefaultLatexFileReturnHtmlLink(
+      plot.getPlotStringAddLatexCommands(false), nullptr, true
+    );
+    out
+    << "<br><b>LaTeX code used to generate the output. </b><br>"
+    << plot.getPlotStringAddLatexCommands(true);
   }
   return true;
 }

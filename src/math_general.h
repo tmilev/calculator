@@ -2040,6 +2040,7 @@ public:
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
   bool flagExpressionIsTopLevel;
+  bool flagRerenderCanvas;
   bool flagExpressionIsInMainDisplay;
   bool flagIncludeMutableInformation;
   bool flagExpressionNewLineAllowed;

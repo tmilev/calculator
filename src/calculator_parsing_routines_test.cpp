@@ -176,9 +176,10 @@ bool CalculatorTest::parseDecimal(Calculator& ownerInitialized) {
   return true;
 }
 
-bool CalculatorTest::builtInFunctionsABTest(
-  Calculator& ownerInitialized, bool updateABTestFile
+bool CalculatorTest::builtInFunctionsGoldenTest(
+  Calculator& ownerInitialized, bool updateGoldenTestFile
 ) {
+  STACK_TRACE("CalculatorTest::builtInFunctionsGoldenTest");
   Calculator::Test test(ownerInitialized);
   test.initialize();
   global.userInputStringIfAvailable = "";
@@ -188,7 +189,7 @@ bool CalculatorTest::builtInFunctionsABTest(
   // These are used so as to track via our repository the evolution of
   // the test cases and are not used to verify AB behavior.
   test.writeGoldenOutputFiles();
-  if (!success && !updateABTestFile) {
+  if (!success && !updateGoldenTestFile) {
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;
     crashFile
@@ -202,7 +203,7 @@ bool CalculatorTest::builtInFunctionsABTest(
     );
     global.fatal
     << crashFileWriteReport.str()
-    << "Calculator AB test failed with "
+    << "Calculator golden test failed with "
     << test.inconsistencies
     << " inconsistencies,  "
     << test.inconsistenciesMathML

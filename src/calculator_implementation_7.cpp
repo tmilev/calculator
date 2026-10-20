@@ -8476,9 +8476,9 @@ bool CalculatorFunctionsPlot::plotPolarRFunctionThetaExtended(
     return false;
   }
   std::string result =
-  plotXYEvaluated.getValueNonConst<Plot>().getPlotHtml(calculator);
+  plotXYEvaluated.getValueNonConst<Plot>().getPlotHtml(calculator, false);
   result +=
-  plotRThetaExpression.getValueNonConst<Plot>().getPlotHtml(calculator);
+  plotRThetaExpression.getValueNonConst<Plot>().getPlotHtml(calculator, false);
   return output.assignValue(calculator, result);
 }
 
@@ -10738,7 +10738,7 @@ bool Calculator::Test::calculatorTestRun() {
     int64_t caseStartTime = global.getElapsedMilliseconds();
     tester.evaluate(currentTest.command);
     FormatExpressions format;
-    JSData unused;
+    format.flagRerenderCanvas = true;
     currentTest.actualResult = tester.programExpression.toString(&format);
     currentTest.actualResultMathML =
     tester.programExpression.toMathML(&format);

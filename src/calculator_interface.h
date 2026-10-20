@@ -2933,10 +2933,16 @@ public:
   );
   std::string getCanvasName() const;
   std::string toStringDebug();
-  std::string getPlotHtml(Calculator& owner);
+  std::string getPlotHtml(
+    Calculator& owner, bool rerenderCanvasIfAlreadyRendered
+  );
   void computeCanvasNameIfNecessary(int& canvasCounter);
-  std::string getPlotHtml3d(Calculator& owner);
-  std::string getPlotHtml2d(Calculator& owner);
+  std::string getPlotHtml3d(
+    Calculator& owner, bool rerenderCanvasIfAlreadyRendered
+  );
+  std::string getPlotHtml2d(
+    Calculator& owner, bool rerenderCanvasIfAlreadyRendered
+  );
   JSData plotJSON2d(Calculator& owner);
   JSData plotJSON3d(Calculator& owner);
   JSData plotJSON(Calculator& owner);

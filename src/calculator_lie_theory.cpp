@@ -5082,11 +5082,13 @@ bool CalculatorLieTheory::cartanInvolution(
   involution.plotVoganDiagram(plotVogan);
   involution.plotSatakeDiagram(plotSatake, 0);
   std::stringstream result;
-  result << "Vogan diagram:\n<br>\n" << plotVogan.getPlotHtml(calculator);
+  result
+  << "Vogan diagram:\n<br>\n"
+  << plotVogan.getPlotHtml(calculator, false);
   if (plotSatake.getPlots().size > 0) {
     result
     << "\n<br>\nSatake diagram:\n<br>\n"
-    << plotSatake.getPlotHtml(calculator);
+    << plotSatake.getPlotHtml(calculator, false);
   }
   result << "\n<br>\n" + involution.toString();
   return output.assignValue(calculator, result.str());
@@ -5265,7 +5267,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     Plot plot;
     semisimpleLieAlgebra.content->weylGroup.dynkinType.plot(plot);
     semisimpleLieAlgebra.content->writeHTML(
-      true, false, plot.getPlotHtml2d(calculator)
+      true, false, plot.getPlotHtml2d(calculator, false)
     );
   } else {
     out << "The tables are precomputed and served from the hard disk. <br>";
@@ -6867,7 +6869,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     CalculatorConversions::stringFromSemisimpleSubalgebras,
     &out,
     options,
-    plot.getPlotHtml(calculator)
+    plot.getPlotHtml(calculator, false)
   );
   return output.assignValue(calculator, out.str());
 }
@@ -7212,7 +7214,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   std::stringstream out;
   Plot plot;
   semisimpleAlgebra.weylGroup.dynkinType.plot(plot);
-  std::string plotHTML = plot.getPlotHtml2d(calculator);
+  std::string plotHTML = plot.getPlotHtml2d(calculator, false);
   if (writeToHD) {
     semisimpleAlgebra.writeHTML(
       verbose, calculator.flagWriteLatexPlots, plotHTML

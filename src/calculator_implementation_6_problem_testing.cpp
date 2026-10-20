@@ -52,7 +52,11 @@ std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(
   out << "<tr>";
   out << "<td style='min-width:25px'>" << rowIndex << ". </td>";
   out << "<td style='min-width:200px'>";
-  out << CalculatorHTML::toStringLinkFromProblem(this->fileName) << "</td>";
+  out
+  << CalculatorHTML::toStringLinkFromProblem(
+    this->fileName, true, this->randomSeed, true
+  )
+  << "</td>";
   if (this->errorLoad != "") {
     out
     << "<td style = 'min-width:300px'>"

@@ -164,7 +164,7 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
   << "\\right)"
   << "\\)";
   out << "<br>";
-  out << escapeMap.getPlotHtml2d(calculator);
+  out << escapeMap.getPlotHtml2d(calculator, false);
   return output.assignValue(calculator, out.str());
 }
 

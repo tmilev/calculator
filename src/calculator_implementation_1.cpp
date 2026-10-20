@@ -692,8 +692,11 @@ bool Plot::isOKVector(const Vector<double>& input) {
   return true;
 }
 
-std::string Plot::getPlotHtml3d(Calculator& owner) {
+std::string Plot::getPlotHtml3d(
+  Calculator& owner, bool rerenderCanvasIfAlreadyRendered
+) {
   STACK_TRACE("Plot::getPlotHtml3d");
+  (void) rerenderCanvasIfAlreadyRendered;
   owner.flagHasGraphics = true;
   this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
   JSData result = this->plotJSON3d(owner);
@@ -845,12 +848,14 @@ JSData PlotObject::toJSONSurfaceImmersion() {
   return result;
 }
 
-std::string Plot::getPlotHtml(Calculator& owner) {
+std::string Plot::getPlotHtml(
+  Calculator& owner, bool rerenderCanvasIfAlreadyRendered
+) {
   STACK_TRACE("Plot::getPlotHtml");
   if (this->dimension == 3) {
-    return this->getPlotHtml3d(owner);
+    return this->getPlotHtml3d(owner, rerenderCanvasIfAlreadyRendered);
   } else if (this->dimension == 2) {
-    return this->getPlotHtml2d(owner);
+    return this->getPlotHtml2d(owner, rerenderCanvasIfAlreadyRendered);
   } else {
     std::stringstream out;
     out << "Error:dimension =" << this->dimension;
@@ -1174,10 +1179,12 @@ JSData Plot::getSetViewWindow() {
   return result;
 }
 
-std::string Plot::getPlotHtml2d(Calculator& owner) {
+std::string Plot::getPlotHtml2d(
+  Calculator& owner, bool rerenderCanvasIfAlreadyRendered
+) {
   STACK_TRACE("Plot::getPlotHtml2d");
   owner.flagHasGraphics = true;
-  if (this->flagDivAlreadyDisplayed) {
+  if (this->flagDivAlreadyDisplayed && !rerenderCanvasIfAlreadyRendered) {
     return "[plot already displayed]";
   }
   this->flagDivAlreadyDisplayed = true;

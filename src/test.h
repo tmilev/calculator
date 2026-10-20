@@ -179,8 +179,8 @@ public:
   static bool parseDecimal(Calculator& ownerInitialized);
   static bool parseQuotes(Calculator& ownerInitialized);
   static bool parseAllExamples(Calculator& ownerInitialized);
-  static bool builtInFunctionsABTest(
-    Calculator& ownerInitialized, bool updateABTestFile
+  static bool builtInFunctionsGoldenTest(
+    Calculator& ownerInitialized, bool updateGoldenTestFile
   );
   static bool checkBuiltInInitializations(Calculator& ownerInitialized);
 };

@@ -159,3 +159,13 @@ and the public info in (copy+paste contents):
 ```
 certificates/recaptcha-public.txt
 ```
+
+## Development & Local Guidelines
+
+Whether developing directly or using AI pair programmers (e.g. Google Antigravity), project guidelines, architecture notes, and code conventions are maintained in:
+- [`AGENTS.md`](AGENTS.md): Entry point and overview of development instructions.
+- [`.agents/rules/`](.agents/rules/): Modular documentation covering:
+  - [`general.md`](.agents/rules/general.md): Build targets, multi-port web server architecture, and development invariants.
+  - [`codestyle.md`](.agents/rules/codestyle.md): C++ and JavaScript formatting rules and coding standards.
+  - `personal/`: Local, uncommitted personal workflow configurations and developer notes.
+

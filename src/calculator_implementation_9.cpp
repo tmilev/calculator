@@ -121,9 +121,9 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
         workingMatrix.elements[leavingVariableRow][enteringVariable]
       );
       scalar.invert();
-      for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
+      for (int j = 0; j < workingMatrix.numberOfRows; j ++) {
         if (
-          !workingMatrix.elements[i][baseVariables.elements[i]].isEqualTo(1)
+          !workingMatrix.elements[j][baseVariables.elements[j]].isEqualTo(1)
         ) {
           global.fatal
           << "The base variable coefficient is "
@@ -297,10 +297,10 @@ bool CalculatorFunctions::conesIntersect(
     << input.size() - 1
     << " instead. ";
   }
-  Matrix<Rational> coneNonStrictMatForm;
+  Matrix<Rational> coneNonStrictMatrixForm;
   Matrix<Rational> coneStrictMatrixForm;
   Vectors<Rational> coneNonStrictGenerators;
-  Vectors<Rational> coneStrictGens;
+  Vectors<Rational> coneStrictGenerators;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
       calculator, input[1], coneStrictMatrixForm
@@ -313,7 +313,7 @@ bool CalculatorFunctions::conesIntersect(
   }
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, input[2], coneNonStrictMatForm
+      calculator, input[2], coneNonStrictMatrixForm
     )
   ) {
     return
@@ -323,29 +323,29 @@ bool CalculatorFunctions::conesIntersect(
   }
   std::stringstream out;
   if (
-    coneNonStrictMatForm.numberOfColumns !=
+    coneNonStrictMatrixForm.numberOfColumns !=
     coneStrictMatrixForm.numberOfColumns
   ) {
     out
     << "I got as input vectors of different dimensions, "
     << "first groups had vectors of dimension "
-    << coneNonStrictMatForm.numberOfColumns
+    << coneNonStrictMatrixForm.numberOfColumns
     << " and second of dimension "
     << coneStrictMatrixForm.numberOfColumns
     << " which is not allowed. ";
     return output.assignError(calculator, out.str());
   }
-  coneNonStrictMatForm.getVectorsFromRows(coneNonStrictGenerators);
-  coneStrictMatrixForm.getVectorsFromRows(coneStrictGens);
+  coneNonStrictMatrixForm.getVectorsFromRows(coneNonStrictGenerators);
+  coneStrictMatrixForm.getVectorsFromRows(coneStrictGenerators);
   out << "<br>Input non-strict (i.e., over Z_{&gt;= 0}) cone: ";
-  for (int i = 0; i < coneStrictGens.size; i ++) {
-    out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].toString() << ";";
+  for (int i = 0; i < coneStrictGenerators.size; i ++) {
+    out << "<br>v_{" << i + 1 << "}=" << coneStrictGenerators[i].toString() << ";";
   }
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
   for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
     out
     << "<br>v_{"
-    << coneStrictGens.size + i + 1
+    << coneStrictGenerators.size + i + 1
     << "}="
     << coneNonStrictGenerators[i].toString()
     << ";";
@@ -354,7 +354,7 @@ bool CalculatorFunctions::conesIntersect(
   Vector<Rational> outputSeparatingNormal;
   bool conesDoIntersect =
   coneNonStrictGenerators.conesIntersect(
-    coneStrictGens,
+    coneStrictGenerators,
     coneNonStrictGenerators,
     &outputIntersection,
     &outputSeparatingNormal
@@ -362,12 +362,12 @@ bool CalculatorFunctions::conesIntersect(
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
     checkVector.makeZero(coneStrictMatrixForm.numberOfColumns);
-    for (int i = 0; i < coneStrictGens.size; i ++) {
-      checkVector += coneStrictGens[i] * outputIntersection[i];
+    for (int i = 0; i < coneStrictGenerators.size; i ++) {
+      checkVector += coneStrictGenerators[i] * outputIntersection[i];
     }
     for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
       checkVector +=
-      coneNonStrictGenerators[i] * outputIntersection[coneStrictGens.size + i];
+      coneNonStrictGenerators[i] * outputIntersection[coneStrictGenerators.size + i];
     }
     if (!checkVector.isEqualToZero()) {
       global.fatal
@@ -388,17 +388,17 @@ bool CalculatorFunctions::conesIntersect(
     << "<br>A normal separating the cones is: n ="
     << outputSeparatingNormal.toString()
     << ". Indeed, ";
-    for (int i = 0; i < coneStrictGens.size; i ++) {
+    for (int i = 0; i < coneStrictGenerators.size; i ++) {
       out
       << "<br>\\langle v_{"
       << i + 1
       << "}, n\\rangle = "
-      << outputSeparatingNormal.scalarEuclidean(coneStrictGens[i]).toString();
+      << outputSeparatingNormal.scalarEuclidean(coneStrictGenerators[i]).toString();
     }
     for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
       out
       << "<br>\\langle v_{"
-      << i + 1 + coneStrictGens.size
+      << i + 1 + coneStrictGenerators.size
       << "}, n\\rangle = "
       << outputSeparatingNormal.scalarEuclidean(coneNonStrictGenerators[i]).
       toString();
@@ -760,11 +760,10 @@ bool CalculatorFunctions::operationBinary(
   return false;
 }
 
-bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
-  Calculator& calculator,
+bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool assignPoly
+  bool assignPolynomial
 ) {
   STACK_TRACE("CalculatorFunctions::elementWeylAlgebraOrPolynomial");
   if (!input.isListNElements(3)) {
@@ -800,7 +799,7 @@ bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
     startContext.getVariable(letterDifferential)
   );
   ElementWeylAlgebra<Rational> outputElementWeylAlgebra;
-  if (assignPoly) {
+  if (assignPolynomial) {
     outputElementWeylAlgebra.makexi(0);
   } else {
     outputElementWeylAlgebra.makedi(0);

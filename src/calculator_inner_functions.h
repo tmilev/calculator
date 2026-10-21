@@ -1443,7 +1443,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool assignPoly
+    bool assignPolynomial
   );
   static bool operationBinary(
     Calculator& calculator,

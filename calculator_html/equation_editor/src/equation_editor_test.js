@@ -6,15 +6,17 @@ let equationEditor = require("./equation_editor");
 
 class TestCase {
   constructor(
-    /** @type {{
-    content: string,
-    skipSVG: boolean|undefined,
-    skipEquationEditor: boolean|undefined,
-    skipMathML: boolean|undefined,
-    skipTest: boolean|undefined,
-    skipStaticDOM: boolean|undefined,
-    skipLatexRoundTrip: boolean|undefined,
-  }} */ input
+    /** 
+     * @type {{
+     * content: string,
+     * skipSVG: boolean|undefined,
+     * skipEquationEditor: boolean|undefined,
+     * skipMathML: boolean|undefined,
+     * skipTest: boolean|undefined,
+     * skipStaticDOM: boolean|undefined,
+     * skipLatexRoundTrip: boolean|undefined,
+     * }} 
+     */ input
   ) {
     this.content = input.content;
     this.skipSVG = false;
@@ -44,10 +46,13 @@ class TestCase {
   }
 }
 
-function constructTestCase(/** @type {string|{{
-    content: string,
-    dontTestSVG: boolean|undefined,
-  }}} */ input) {
+function constructTestCase(
+  /** 
+   * @type {string|{{
+   * content: string,
+   * dontTestSVG: boolean|undefined,
+   * }}} 
+   */ input) {
   if (typeof input === "string") {
     return new TestCase({
       content: input
@@ -56,14 +61,16 @@ function constructTestCase(/** @type {string|{{
   return new TestCase(input);
 }
 
-/** @type {Array.<{
-   content: string,
-   skipSVG: boolean|undefined,
-   skipEquationEditor: boolean|undefined,
-   skipMathML: boolean|undefined,
-   skipTest: boolean|undefined,
-   skipStaticDOM: boolean|undefined
- }|string>} */
+/** 
+ * @type {Array.<{
+ * content: string,
+ * skipSVG: boolean|undefined,
+ * skipEquationEditor: boolean|undefined,
+ * skipMathML: boolean|undefined,
+ * skipTest: boolean|undefined,
+ * skipStaticDOM: boolean|undefined
+ * }|string>} 
+ */
 const allLatexSnippets = [
   `\\frac{1}{2}`,
   `f(x)=`,

@@ -9419,7 +9419,10 @@ class MathNode {
       }
       let childLatex = child.toLatexWithAnnotation(options);
       toJoin.push(childLatex.latex);
-      if (!childLatex.latex.endsWith(' ')) {
+      const lastCharacter = childLatex.latex[childLatex.latex.length - 1];
+      if (
+        latexConstants.isLatinCharacter(lastCharacter)
+      ) {
         toJoin.push(' ');
       }
     }

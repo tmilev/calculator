@@ -126,12 +126,13 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator*(
   return result;
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::operator/(unsigned int x) const {
+LargeIntegerUnsigned LargeIntegerUnsigned::operator/(unsigned int divisor)
+const {
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
-  LargeIntegerUnsigned tempX;
-  tempX.assignShiftedUInt(x, 0);
-  this->dividePositive(tempX, result, remainder);
+  LargeIntegerUnsigned divisorLarge;
+  divisorLarge.assignShiftedUInt(divisor, 0);
+  this->divideWithRemainder(divisorLarge, result, remainder);
   return result;
 }
 
@@ -140,7 +141,7 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator/(
 ) const {
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
-  this->dividePositive(x, result, remainder);
+  this->divideWithRemainder(x, result, remainder);
   return result;
 }
 
@@ -149,7 +150,7 @@ int LargeIntegerUnsigned::operator%(unsigned int x) {
   LargeIntegerUnsigned remainder;
   LargeIntegerUnsigned divisor;
   divisor.assignShiftedUInt(x, 0);
-  this->dividePositive(divisor, quotient, remainder);
+  this->divideWithRemainder(divisor, quotient, remainder);
   int result = 0;
   remainder.isIntegerFittingInInt(&result);
   return result;
@@ -676,7 +677,7 @@ void LargeIntegerUnsigned::operator%=(const LargeIntegerUnsigned& other) {
   }
   LargeIntegerUnsigned copyMe = *this;
   LargeIntegerUnsigned temp1;
-  copyMe.dividePositive(other, temp1, *this);
+  copyMe.divideWithRemainder(other, temp1, *this);
 }
 
 void LargeIntegerUnsigned::operator/=(const LargeIntegerUnsigned& other) {
@@ -686,7 +687,7 @@ void LargeIntegerUnsigned::operator/=(const LargeIntegerUnsigned& other) {
   }
   LargeIntegerUnsigned copyMe = *this;
   LargeIntegerUnsigned temp1;
-  copyMe.dividePositive(other, *this, temp1);
+  copyMe.divideWithRemainder(other, *this, temp1);
 }
 
 void LargeIntegerUnsigned::toString(std::string& output) const {
@@ -709,7 +710,7 @@ bool LargeIntegerUnsigned::isDivisibleBy(const LargeIntegerUnsigned& divisor) {
   }
   LargeIntegerUnsigned quotient;
   LargeIntegerUnsigned remainder;
-  this->dividePositive(divisor, quotient, remainder);
+  this->divideWithRemainder(divisor, quotient, remainder);
   return remainder.isEqualToZero();
 }
 
@@ -731,7 +732,7 @@ bool LargeIntegerUnsigned::remainderStartIsLargerThanOrEqualToDivisorStart(
   return true;
 }
 
-void LargeIntegerUnsigned::dividePositive(
+void LargeIntegerUnsigned::divideWithRemainder(
   const LargeIntegerUnsigned& divisor,
   LargeIntegerUnsigned& quotientOutput,
   LargeIntegerUnsigned& remainderOutput
@@ -758,14 +759,30 @@ void LargeIntegerUnsigned::dividePositive(
   ) {
     LargeIntegerUnsigned divisorCopy = divisor;
     LargeIntegerUnsigned thisCopy = *this;
-    thisCopy.dividePositive(divisorCopy, quotientOutput, remainderOutput);
+    thisCopy.divideWithRemainder(divisorCopy, quotientOutput, remainderOutput);
+    return;
+  }
+  LargeIntegerUnsigned::divideWithRemainderInternal(
+    divisor, quotientOutput, remainderOutput
+  );
+}
+
+void LargeIntegerUnsigned::divideWithRemainderInternal(
+  const LargeIntegerUnsigned& divisor,
+  LargeIntegerUnsigned& quotientOutput,
+  LargeIntegerUnsigned& remainderOutput
+) const {
+  if (divisor.isEqualToOne()) {
+    quotientOutput = *this;
+    remainderOutput.makeZero();
     return;
   }
   remainderOutput = *this;
   quotientOutput.makeZero();
   int32_t currentQuotientDigit = 0;
   uint32_t divisorLeadingDigit = *divisor.digits.lastObject();
-  uint32_t divisorLeadingDigitPlusOne = divisorLeadingDigit + 1;
+  uint32_t divisorLeadRoundedUp = divisor.digits.size >
+  1 ? divisorLeadingDigit + 1 : divisorLeadingDigit;
   uint64_t remainderLeadingTwoDigitNumber = 0;
   uint64_t remainderLeadingDigit = 0;
   int remainderBasePower = 0;
@@ -777,7 +794,7 @@ void LargeIntegerUnsigned::dividePositive(
     remainderBasePower = remainderOutput.digits.size - divisorDigits;
     if (remainderLeadingDigit > divisorLeadingDigit) {
       currentQuotientDigit = static_cast<int>(
-        remainderLeadingDigit / divisorLeadingDigitPlusOne
+        remainderLeadingDigit / divisorLeadRoundedUp
       );
     } else if (
       remainderStartIsLargerThanOrEqualToDivisorStart(
@@ -790,7 +807,7 @@ void LargeIntegerUnsigned::dividePositive(
       remainderLeadingDigit * LargeIntegerUnsigned::carryOverBound +
       remainderOutput.digits[remainderOutput.digits.size - 2];
       currentQuotientDigit = static_cast<int>(
-        remainderLeadingTwoDigitNumber / divisorLeadingDigitPlusOne
+        remainderLeadingTwoDigitNumber / divisorLeadRoundedUp
       );
       remainderBasePower --;
     }
@@ -1386,7 +1403,7 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator%(
 ) const {
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned temp;
-  this->dividePositive(other, temp, result);
+  this->divideWithRemainder(other, temp, result);
   return result;
 }
 
@@ -1428,7 +1445,7 @@ void LargeIntegerUnsigned::greatestCommonDivisor(
   dividend = a;
   divisor = b;
   while (!divisor.isEqualToZero()) {
-    dividend.dividePositive(divisor, temporary, remainder);
+    dividend.divideWithRemainder(divisor, temporary, remainder);
     dividend = divisor;
     divisor = remainder;
   }
@@ -1566,7 +1583,7 @@ void LargeIntegerUnsigned::leastCommonMultiple(
   LargeIntegerUnsigned::greatestCommonDivisor(a, b, divisor);
   a.multiplyByDigitByDigit(b, product);
   output = product;
-  output.dividePositive(divisor, output, product);
+  output.divideWithRemainder(divisor, output, product);
   if (output.isEqualToZero()) {
     global.fatal
     << "Least common multiple not allowed to be zero. "
@@ -1921,7 +1938,7 @@ LargeInteger LargeInteger::operator/(int x) const {
     absoluteValueOfX = - absoluteValueOfX;
   }
   xShifted.assignShiftedUInt(static_cast<unsigned>(absoluteValueOfX), 0);
-  this->value.dividePositive(xShifted, result.value, remainder);
+  this->value.divideWithRemainder(xShifted, result.value, remainder);
   result.sign = this->sign * signX;
   return result;
 }
@@ -1929,7 +1946,7 @@ LargeInteger LargeInteger::operator/(int x) const {
 LargeInteger LargeInteger::operator/(LargeInteger& x) const {
   LargeInteger result;
   LargeInteger remainder;
-  this->value.dividePositive(x.value, result.value, remainder.value);
+  this->value.divideWithRemainder(x.value, result.value, remainder.value);
   result.sign = this->sign * x.sign;
   if (!result.checkConsistensy()) {
     global.fatal << "Large integer corrupt. " << global.fatal;
@@ -1948,7 +1965,7 @@ int LargeInteger::operator%(int x) {
     x = - x;
   }
   xShifted.assignShiftedUInt(static_cast<unsigned>(x), 0);
-  this->value.dividePositive(xShifted, result, remainder);
+  this->value.divideWithRemainder(xShifted, result, remainder);
   if (remainder.digits.size == 0) {
     return 0;
   } else {
@@ -2167,7 +2184,7 @@ void Rational::assignFractionalValue() {
   }
   LargeIntegerUnsigned newNumerator;
   LargeIntegerUnsigned quotient;
-  this->extended->numerator.value.dividePositive(
+  this->extended->numerator.value.divideWithRemainder(
     this->extended->denominator, quotient, newNumerator
   );
   this->extended->numerator.value = newNumerator;
@@ -2679,12 +2696,12 @@ void Rational::simplify() {
       denominatorGreatestCommonDivisor
     );
     LargeIntegerUnsigned numeratorGreatestCommonDivisor;
-    this->extended->denominator.dividePositive(
+    this->extended->denominator.divideWithRemainder(
       denominatorGreatestCommonDivisor,
       this->extended->denominator,
       numeratorGreatestCommonDivisor
     );
-    this->extended->numerator.value.dividePositive(
+    this->extended->numerator.value.divideWithRemainder(
       denominatorGreatestCommonDivisor,
       this->extended->numerator.value,
       numeratorGreatestCommonDivisor

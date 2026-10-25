@@ -86,6 +86,11 @@ public:
   std::string toMathML(const FormatExpressions* format = nullptr) const;
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toStringAbbreviate(FormatExpressions* format = nullptr) const;
+  void divideWithRemainder(
+    const LargeIntegerUnsigned& divisor,
+    LargeIntegerUnsigned& quotientOutput,
+    LargeIntegerUnsigned& remainderOutput
+  ) const;
   // Divides with quotient and remainder two large integers.
   // The algorithm follows. This algorithm is different from, but inspired by,
   // Donald Knuth's algorithm for dividing large integers.
@@ -121,7 +126,11 @@ public:
   // 2.2. Set remainder = remainder - nextQuotientContribution*divisor
   // 2.3. Set quotient = quotient + nextQuotientContribution.
   // 2.4. Go back to step 2.
-  void dividePositive(
+  //
+  // Note: when the divisor is single-digit, the algorithm above can be
+  // optimized by replacing all occurrences of D+1 in the algorithm
+  // above with D. We have implemented this optimization.
+  void divideWithRemainderInternal(
     const LargeIntegerUnsigned& divisor,
     LargeIntegerUnsigned& quotientOutput,
     LargeIntegerUnsigned& remainderOutput
@@ -246,7 +255,7 @@ public:
   LargeIntegerUnsigned operator%(const LargeIntegerUnsigned& other) const;
   LargeIntegerUnsigned operator-(const LargeIntegerUnsigned& other) const;
   LargeIntegerUnsigned operator/(unsigned int x) const;
-  LargeIntegerUnsigned operator/(const LargeIntegerUnsigned& x) const;
+  LargeIntegerUnsigned operator/(const LargeIntegerUnsigned& divisor) const;
   LargeIntegerUnsigned operator*(const LargeIntegerUnsigned& x) const;
   LargeIntegerUnsigned(const std::string& input);
   LargeIntegerUnsigned(unsigned int x);
@@ -495,7 +504,7 @@ public:
     }
     this->sign *= other.sign;
     LargeIntegerUnsigned quotient, remainder;
-    this->value.dividePositive(other.value, quotient, remainder);
+    this->value.divideWithRemainder(other.value, quotient, remainder);
     this->value = quotient;
   }
   inline bool operator>(const LargeInteger& other) const {
@@ -507,7 +516,7 @@ public:
     }
     LargeIntegerUnsigned quotient;
     LargeIntegerUnsigned remainder;
-    this->value.dividePositive(other.value, quotient, remainder);
+    this->value.divideWithRemainder(other.value, quotient, remainder);
     this->value = remainder;
     if (this->isNegative()) {
       *this += other.value;

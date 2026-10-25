@@ -89,7 +89,7 @@ bool LargeIntegerUnsignedTest::divisionOnce(
   LargeIntegerUnsigned divisorInteger(divisor);
   LargeIntegerUnsigned quotient;
   LargeIntegerUnsigned remainder;
-  dividendInteger.dividePositive(divisor, quotient, remainder);
+  dividendInteger.divideWithRemainder(divisor, quotient, remainder);
   if (
     quotient.toString() != expectedQuotient ||
     remainder.toString() != expectedRemainder

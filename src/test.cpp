@@ -63,11 +63,11 @@ void Test::run() {
     ExpressionTest::all();
   }
   if (this->shouldTest(Test::Suites::basic)) {
+    LargeIntegerUnsignedTest::all();
     ListReferencesTest::all();
     HashedListTest::all();
     AlgebraicNumberTest::all();
     StringRoutinesTest::all();
-    LargeIntegerUnsignedTest::all();
     RationalTest::all();
     ElementZmodPTest::all();
     RationalFractionTest::all();

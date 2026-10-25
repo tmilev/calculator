@@ -310,6 +310,7 @@ Polynomial<ElementZmodP> PolynomialUnivariateModularTest::fromStringAndModulus(
 }
 
 bool PolynomialUnivariateModularAsModulusTest::all() {
+  STACK_TRACE("PolynomialUnivariateModularAsModulusTest::all");
   PolynomialUnivariateModularAsModulusTest::oneTest(
     5,
     "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1",

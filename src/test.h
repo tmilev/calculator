@@ -365,7 +365,53 @@ public:
 
 class LargeIntegerUnsignedTest {
 public:
+  enum LargePowerTestType {
+    ALL,
+    KARATSUBA_ONLY
+  };
+  struct LargePowerTestDuration {
+    LargeIntegerUnsigned::MultiplicationAlgorithm algorithm;
+    int64_t duration;
+  };
+
+  struct LargePowerTest {
+  public:
+    uint32_t base;
+    int iterations;
+    LargeIntegerUnsigned result;
+    List<LargeIntegerUnsignedTest::LargePowerTestDuration> durations;
+    bool checkPerformance();
+    LargePowerTest(uint32_t inputBase, int inputIterations):
+    base(inputBase),
+    iterations(inputIterations) {}
+    LargePowerTest() {}
+  };
+
   static bool all();
+  static bool division();
+  static bool divisionOnce(
+    const std::string& dividend,
+    const std::string& divisor,
+    const std::string& expectedQuotient,
+    const std::string& expectedRemainder
+  );
+  static bool karatsubaMultiplication();
+  static bool karatsubaMultiplicationOnce(
+    const std::string& leftInput,
+    const std::string& rightInput,
+    const std::string& desiredInput
+  );
+  static bool multiplicationLargePowers();
+  static bool multiplicationLargePowerOnce(
+    uint32_t base,
+    int iterations,
+    LargePowerTestType testType,
+    List<LargeIntegerUnsignedTest::LargePowerTest>& output
+  );
+  static bool multiplicationLargePowerOnceOneAlgorithm(
+    LargePowerTest& testCase,
+    LargeIntegerUnsigned::MultiplicationAlgorithm algorithm
+  );
   static bool serializationToHex(const LargeIntegerUnsigned& input);
   static bool serializationToHex();
   static bool comparisons();

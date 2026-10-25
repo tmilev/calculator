@@ -1922,6 +1922,7 @@ bool PrivateKeyRSA::computeFromTwoPrimes(
   bool verifyInputsArePrime,
   std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("PrivateKeyRSA::computeFromTwoPrimes");
   this->primeOne = inputPrimeOne;
   this->primeTwo = inputPrimeTwo;
   if (verifyInputsArePrime) {

@@ -20,6 +20,14 @@ class LargeIntegerUnsigned {
   void assignDigitsWhenCarryOverBoundIsPowerOfTen(
     const List<char>& inputDigits, int powerOfTen
   );
+  // Computes the product of the integers using the Karatsuba algorithm.
+  // The output reference must be distinct from the left and right reference.
+  static void karatsubaProductInternal(
+    const LargeIntegerUnsigned& left,
+    const LargeIntegerUnsigned& right,
+    LargeIntegerUnsigned& output
+  );
+  static const int karatsubaIntegerBound = 2;
 public:
   // The zero element is assumed to have length one array with a zero entry.
   //
@@ -34,7 +42,7 @@ public:
   // The first element of this array is the least significant digit of the
   // number;
   // the second element is the 10's digit and so on.
-  List<int32_t> digits;
+  List<uint32_t> digits;
   // static const int CarryOverBound =10; //<-for extreme "corner case" testing
   static const int carryOverBound = 1000000000;
   // the above choice of CarryOverBound facilitates very quick conversions of
@@ -62,6 +70,12 @@ public:
     return this->digits.byteSizeOwnedThroughPointers();
   }
   static const List<unsigned int>& allPrimesSmallerThan15Bits();
+  enum MultiplicationAlgorithm {
+    DIGIT_BY_DIGIT, KARATSUBA
+  };
+  static std::string multiplicationAlgorithmName(
+    MultiplicationAlgorithm input
+  );
   void padWithZeroesToAtLeastNDigits(int desiredMinimumDigits);
   void addLargeIntegerUnsignedShiftedTimesDigit(
     const LargeIntegerUnsigned& other, int digitShift, int constantTerm
@@ -72,11 +86,49 @@ public:
   std::string toMathML(const FormatExpressions* format = nullptr) const;
   std::string toString(const FormatExpressions* format = nullptr) const;
   std::string toStringAbbreviate(FormatExpressions* format = nullptr) const;
+  // Divides with quotient and remainder two large integers.
+  // The algorithm follows. This algorithm is different from, but inspired by,
+  // Donald Knuth's algorithm for dividing large integers.
+  // The difference between the present algorithm and Donald Knuth's algorithm
+  // is that, in the "happy path" of our algorithm,
+  // we divide the two-digit start of the
+  // dividend by the leading digit of the divisor plus one.
+  // By contrast, Donald Knuth's algorithm always
+  // divides by the leading digit of the divisor, which
+  // results in intermediate computations involving negative remainders,
+  // which he takes care by alternating quotient signs.
+  // Our algorithm is as follows.
+  // All divisions of the algorithm are integer division primitives.
+  // - Let N be the number of digits of the divisor have N digits
+  // - Let D be the divisor's leading digit.
+  // - Let B be the base of the our LargeInteger's
+  //   (i.e., B=LargeIntegerUnsinged::CarryOverBound).
+  //
+  // 1. Set the remainder be equal to the dividend and the quotient be zero.
+  // 2. While the remainder is greater than or equal to the divisor:
+  // 2.1. Process the following mutually exclusive alternatives.
+  // 2.1.1. If the leading digit of the remainder is greater than the leading
+  //      digit of the divisor, set
+  //      nextQuotientContribution = remainderLeadingDigit/(D+1) *
+  //                                 B^{remainderDigitCount- N}.
+  // 2.1.2 If the number formed by the first N digits of the remainder is
+  //       larger than or equal to the divisor, set
+  //       nextQuotientContribution = 1*B^{remainderDigitCount- N}.
+  // 2.1.3 In the remaining case, set
+  //       nextQuotientContribution =
+  //              (remainderLeadingDigit*B+secondLeadingDigit)/(D+1) *
+  //              B^{remainderDigitCount- N-1}.
+  // 2.2. Set remainder = remainder - nextQuotientContribution*divisor
+  // 2.3. Set quotient = quotient + nextQuotientContribution.
+  // 2.4. Go back to step 2.
   void dividePositive(
     const LargeIntegerUnsigned& divisor,
     LargeIntegerUnsigned& quotientOutput,
     LargeIntegerUnsigned& remainderOutput
   ) const;
+  static bool remainderStartIsLargerThanOrEqualToDivisorStart(
+    const LargeIntegerUnsigned& remainder, const LargeIntegerUnsigned& divisor
+  );
   bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
   void makeOne();
   void addUInt(unsigned int x);
@@ -87,7 +139,7 @@ public:
   bool tryIsPower(
     bool& outputIsPower, LargeInteger& outputBase, int& outputPower
   ) const;
-  bool isCompositePrimeDivision(
+  bool isCompositeUsingPrimeDivision(
     List<unsigned int>& primesGenerated,
     bool& outputGuaranteedPrime,
     std::stringstream* comments
@@ -133,11 +185,25 @@ public:
   void operator*=(unsigned int x);
   void operator+=(unsigned int x);
   void operator++(int);
+  // Computes the product of the two integers using the Karatsuba algorithm.
+  // Will create defensives copies if the output reference coincides with one
+  // of the input
+  // references.
+  static void karatsubaProduct(
+    const LargeIntegerUnsigned& left,
+    const LargeIntegerUnsigned& right,
+    LargeIntegerUnsigned& output
+  );
+  // "High school" table method to multiply (*this) by input digit by digit.
+  void multiplyByDigitByDigit(
+    const LargeIntegerUnsigned& input, LargeIntegerUnsigned& output
+  ) const;
   bool isIntegerFittingInInt(int* whichInt) const;
   void assignFactorial(unsigned int x);
-  void multiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output)
-  const;
   void multiplyByUInt(unsigned int x);
+  void multiplyByShiftedUInt(
+    uint32_t x, int shift, LargeIntegerUnsigned& output
+  ) const;
   void addShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void assignShiftedUInt(unsigned int x, int shift);
   void assignUnsignedInt(unsigned int x);
@@ -182,6 +248,7 @@ public:
   LargeIntegerUnsigned operator/(unsigned int x) const;
   LargeIntegerUnsigned operator/(const LargeIntegerUnsigned& x) const;
   LargeIntegerUnsigned operator*(const LargeIntegerUnsigned& x) const;
+  LargeIntegerUnsigned(const std::string& input);
   LargeIntegerUnsigned(unsigned int x);
   LargeIntegerUnsigned(const LargeIntegerUnsigned& x);
   // LargeIntUnsigned(LargeIntUnsigned x);

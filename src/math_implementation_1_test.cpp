@@ -7,6 +7,225 @@
 
 namespace Testing {
 
+bool LargeIntegerUnsignedTest::karatsubaMultiplication() {
+  STACK_TRACE("LargeIntegerUnsignedTest::karatsubaMultiplication");
+  LargeIntegerUnsignedTest::karatsubaMultiplicationOnce("0", "0", "0");
+  LargeIntegerUnsignedTest::karatsubaMultiplicationOnce("1", "0", "0");
+  LargeIntegerUnsignedTest::karatsubaMultiplicationOnce("0", "1", "0");
+  LargeIntegerUnsignedTest::karatsubaMultiplicationOnce("1", "1", "1");
+  LargeIntegerUnsignedTest::karatsubaMultiplicationOnce(
+    "123456789", "987654321", "121932631112635269"
+  );
+  LargeIntegerUnsignedTest::multiplicationLargePowers();
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::multiplicationLargePowers() {
+  STACK_TRACE(
+    "LargeIntegerUnsignedTest::"
+    "karatsubaMultiplicationLargePowers"
+  );
+  List<LargeIntegerUnsignedTest::LargePowerTest> results;
+  for (int i = 1; i <= 10; i ++) {
+    multiplicationLargePowerOnce(123, i, ALL, results);
+  }
+  for (int i = 11; i < 16; i ++) {
+    multiplicationLargePowerOnce(123, i, KARATSUBA_ONLY, results);
+  }
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::multiplicationLargePowerOnce(
+  uint32_t base,
+  int iterations,
+  LargeIntegerUnsignedTest::LargePowerTestType testType,
+  List<LargeIntegerUnsignedTest::LargePowerTest>& output
+) {
+  List<LargeIntegerUnsigned::MultiplicationAlgorithm> algorithms;
+  algorithms.addOnTop(
+    LargeIntegerUnsigned::MultiplicationAlgorithm::KARATSUBA
+  );
+  if (testType == LargeIntegerUnsignedTest::LargePowerTestType::ALL) {
+    algorithms.addOnTop(
+      LargeIntegerUnsigned::MultiplicationAlgorithm::DIGIT_BY_DIGIT
+    );
+  }
+  LargeIntegerUnsignedTest::LargePowerTest result(base, iterations);
+  for (
+    const LargeIntegerUnsigned::MultiplicationAlgorithm& algorithm :
+    algorithms
+  ) {
+    LargeIntegerUnsignedTest::multiplicationLargePowerOnceOneAlgorithm(
+      result, algorithm
+    );
+  }
+  result.checkPerformance();
+  output.addOnTop(result);
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::division() {
+  divisionOnce(
+    "865824543292632094632409683200683659928970742272",
+    "9956358115699982336",
+    "86961972764652836093113913948",
+    "7619180909546719744"
+  );
+  divisionOnce("1", "2", "0", "1");
+  divisionOnce("1", "1", "1", "0");
+  divisionOnce("2", "2", "1", "0");
+  divisionOnce("10000000000000", "1", "10000000000000", "0");
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::divisionOnce(
+  const std::string& dividend,
+  const std::string& divisor,
+  const std::string& expectedQuotient,
+  const std::string& expectedRemainder
+) {
+  STACK_TRACE("LargeIntegerUnsignedTest::divisionOnce");
+  LargeIntegerUnsigned dividendInteger(dividend);
+  LargeIntegerUnsigned divisorInteger(divisor);
+  LargeIntegerUnsigned quotient;
+  LargeIntegerUnsigned remainder;
+  dividendInteger.dividePositive(divisor, quotient, remainder);
+  if (
+    quotient.toString() != expectedQuotient ||
+    remainder.toString() != expectedRemainder
+  ) {
+    global.fatal
+    << "Division yielded unexpected results. "
+    << "\nDividend: "
+    << dividendInteger.toString()
+    << "\nDivisor: "
+    << divisorInteger.toString()
+    << "\nActual   quotient: "
+    << quotient.toString()
+    << "\nExpected quotient: "
+    << expectedQuotient
+    << "\nActual   remainder: "
+    << remainder.toString()
+    << "\nExpected remainder: "
+    << expectedRemainder
+    << global.fatal;
+  }
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::multiplicationLargePowerOnceOneAlgorithm(
+  LargeIntegerUnsignedTest::LargePowerTest& testCase,
+  LargeIntegerUnsigned::MultiplicationAlgorithm algorithm
+) {
+  LargeIntegerUnsigned result = testCase.base;
+  int64_t start = global.getElapsedMilliseconds();
+  for (int i = 0; i < testCase.iterations; i ++) {
+    switch (algorithm) {
+    case LargeIntegerUnsigned::MultiplicationAlgorithm::DIGIT_BY_DIGIT:
+      result.multiplyByDigitByDigit(result, result);
+      break;
+    case LargeIntegerUnsigned::MultiplicationAlgorithm::KARATSUBA:
+      LargeIntegerUnsigned::karatsubaProduct(result, result, result);
+      break;
+    }
+  }
+  LargeIntegerUnsignedTest::LargePowerTestDuration duration;
+  duration.algorithm = algorithm;
+  duration.duration = global.getElapsedMilliseconds() - start;
+  testCase.durations.addOnTop(duration);
+  if (testCase.durations.size == 1) {
+    testCase.result = result;
+  } else if (testCase.result != result) {
+    global.fatal
+    << "Rasing base^{2^iterations} with base="
+    << testCase.base
+    << ", iterations="
+    << testCase.iterations
+    << " gave different output for algorithm: "
+    << LargeIntegerUnsigned::multiplicationAlgorithmName(algorithm)
+    << global.fatal;
+  }
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::LargePowerTest::checkPerformance() {
+  int digits = result.digits.size;
+  double minimumSpeed = 1;
+  double recommendedSpeed = 10000;
+  for (
+    const LargeIntegerUnsignedTest::LargePowerTestDuration& duration :
+    this->durations
+  ) {
+    double speed = static_cast<double>(digits) / duration.duration;
+    std::string algorihtmName =
+    LargeIntegerUnsigned::multiplicationAlgorithmName(duration.algorithm);
+    if (speed < minimumSpeed) {
+      global.fatal
+      << "Rasing base^{2^iterations} with base="
+      << this->base
+      << ", iterations="
+      << this->iterations
+      << " using algorithm: "
+      << algorihtmName
+      << " results in "
+      << digits
+      << " digits which is too slow: "
+      << "speed in digits per millisecond: "
+      << FloatingPoint::doubleToString(speed)
+      << ", minimum allowed speed: "
+      << FloatingPoint::doubleToString(minimumSpeed)
+      << " result digits per millisecond. "
+      << global.fatal;
+    }
+    if (speed < recommendedSpeed) {
+      global
+      << Logger::yellow
+      << "Rasing base^{2^iterations} with base="
+      << this->base
+      << ", iterations="
+      << this->iterations
+      << " using algorithm: "
+      << algorihtmName
+      << " results in "
+      << digits
+      << " digits which is too slow: "
+      << "speed in digits per millisecond: "
+      << FloatingPoint::doubleToString(speed)
+      << ", recommended speed: "
+      << FloatingPoint::doubleToString(recommendedSpeed)
+      << " result digits per millisecond. "
+      << Logger::endL;
+    }
+  }
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::karatsubaMultiplicationOnce(
+  const std::string& leftInput,
+  const std::string& rightInput,
+  const std::string& desiredInput
+) {
+  STACK_TRACE("LargeIntegerUnsignedTest::karatsubaMultiplicationOnce");
+  LargeIntegerUnsigned left(leftInput);
+  LargeIntegerUnsigned right(rightInput);
+  LargeIntegerUnsigned desired(desiredInput);
+  LargeIntegerUnsigned actual;
+  LargeIntegerUnsigned::karatsubaProduct(left, right, actual);
+  if (desired != actual) {
+    global.fatal
+    << "Product of: "
+    << left.toString()
+    << " with: "
+    << right.toString()
+    << " equals:\n"
+    << actual.toString()
+    << "\nexpected:\n"
+    << desired.toString()
+    << global.fatal;
+  }
+  return true;
+}
+
 bool LargeIntegerUnsignedTest::serializationToHex(
   const LargeIntegerUnsigned& input
 ) {
@@ -41,11 +260,13 @@ bool LargeIntegerUnsignedTest::serializationToHex(
 
 bool LargeIntegerUnsignedTest::all() {
   STACK_TRACE("LargeIntegerUnsignedTest::all");
+  LargeIntegerUnsignedTest::division();
   LargeIntegerUnsignedTest::serializationToHex(LargeIntegerUnsigned(100));
   LargeIntegerUnsignedTest::comparisons();
   LargeIntegerUnsignedTest::guaranteedPrime();
   LargeIntegerUnsignedTest::factor();
   LargeIntegerUnsignedTest::isPossiblyPrime();
+  LargeIntegerUnsignedTest::karatsubaMultiplication();
   return true;
 }
 
@@ -205,7 +426,7 @@ bool LargeIntegerUnsignedTest::guaranteedPrime() {
     List<unsigned int> notUsed;
     bool mustBeTrue = false;
     bool mustBeFalse =
-    primes[i].isCompositePrimeDivision(notUsed, mustBeTrue, nullptr);
+    primes[i].isCompositeUsingPrimeDivision(notUsed, mustBeTrue, nullptr);
     if (mustBeFalse) {
       global.fatal
       << "Prime number: "
@@ -226,7 +447,9 @@ bool LargeIntegerUnsignedTest::guaranteedPrime() {
   bool guaranteed = true;
   List<unsigned int> notUsed;
   bool mustBeFalse =
-  notGuaranteedPrime.isCompositePrimeDivision(notUsed, guaranteed, nullptr);
+  notGuaranteedPrime.isCompositeUsingPrimeDivision(
+    notUsed, guaranteed, nullptr
+  );
   if (mustBeFalse) {
     global.fatal
     << "Prime number: "

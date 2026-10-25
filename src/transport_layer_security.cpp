@@ -2538,6 +2538,11 @@ bool TransportLayerSecurityServer::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("TransportLayerSecurityServer::handShakeIamServer");
+  global
+  << Logger::green
+  << "[Built-in TLS] Starting server handshake on socket: "
+  << inputSocketID
+  << Logger::endL;
   this->session.initialize();
   this->session.socketId = inputSocketID;
   bool success = this->readBytesDecodeOnce(commentsOnFailure);
@@ -2547,30 +2552,57 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     this->lastRead;
   }
   if (!success) {
-    global << Logger::red << commentsOnFailure->str() << Logger::endL;
+    global
+    << Logger::red
+    << "[Built-in TLS] Failed to read/decode ClientHello: "
+    << commentsOnFailure->str()
+    << Logger::endL;
     if (this->spoofer.flagDoSpoof) {
       this->spoofer.errorsOnIncoming.addOnTop(commentsOnFailure->str());
     }
     return false;
   }
+  global
+  << Logger::green
+  << "[Built-in TLS] ClientHello decoded successfully. Chosen cipher: "
+  << this->session.toStringChosenCipher()
+  << ". Replying to ClientHello..."
+  << Logger::endL;
   success =
   TransportLayerSecurityServer::replyToClientHello(commentsOnFailure);
   if (!success) {
-    global << Logger::red << commentsOnFailure->str() << Logger::endL;
+    global
+    << Logger::red
+    << "[Built-in TLS] Failed to send ServerHello sequence: "
+    << commentsOnFailure->str()
+    << Logger::endL;
     if (this->spoofer.flagDoSpoof) {
       this->spoofer.errorsOnOutgoing.addOnTop(commentsOnFailure->str());
     }
     return false;
   }
+  global
+  << Logger::green
+  << "[Built-in TLS] ServerHello sequence sent. Waiting for client response..."
+  << Logger::endL;
   success =
   TransportLayerSecurityServer::readBytesDecodeOnce(commentsOnFailure);
   if (!success) {
-    global << Logger::red << commentsOnFailure->str() << Logger::endL;
+    global
+    << Logger::red
+    << "[Built-in TLS] Failed reading client response: "
+    << commentsOnFailure->str()
+    << Logger::endL;
     if (this->spoofer.flagDoSpoof) {
       this->spoofer.errorsOnOutgoing.addOnTop(commentsOnFailure->str());
     }
     return false;
   }
+  global
+  << Logger::green
+  << "[Built-in TLS] Received client response record of type: "
+  << this->lastRead.toStringType()
+  << Logger::endL;
   return false;
 }
 

@@ -339,7 +339,12 @@ bool CalculatorFunctions::conesIntersect(
   coneStrictMatrixForm.getVectorsFromRows(coneStrictGenerators);
   out << "<br>Input non-strict (i.e., over Z_{&gt;= 0}) cone: ";
   for (int i = 0; i < coneStrictGenerators.size; i ++) {
-    out << "<br>v_{" << i + 1 << "}=" << coneStrictGenerators[i].toString() << ";";
+    out
+    << "<br>v_{"
+    << i + 1
+    << "}="
+    << coneStrictGenerators[i].toString()
+    << ";";
   }
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
   for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
@@ -367,7 +372,8 @@ bool CalculatorFunctions::conesIntersect(
     }
     for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
       checkVector +=
-      coneNonStrictGenerators[i] * outputIntersection[coneStrictGenerators.size + i];
+      coneNonStrictGenerators[i] *
+      outputIntersection[coneStrictGenerators.size + i];
     }
     if (!checkVector.isEqualToZero()) {
       global.fatal
@@ -393,7 +399,8 @@ bool CalculatorFunctions::conesIntersect(
       << "<br>\\langle v_{"
       << i + 1
       << "}, n\\rangle = "
-      << outputSeparatingNormal.scalarEuclidean(coneStrictGenerators[i]).toString();
+      << outputSeparatingNormal.scalarEuclidean(coneStrictGenerators[i]).
+      toString();
     }
     for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
       out
@@ -760,7 +767,8 @@ bool CalculatorFunctions::operationBinary(
   return false;
 }
 
-bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(Calculator& calculator,
+bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool assignPolynomial

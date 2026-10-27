@@ -1,5 +1,6 @@
 #include "calculator_interface.h"
 #include "crypto_calculator.h"
+#include "general_file_operations_encodings.h"
 #include "math_general.h"
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -03 optimization build.
 #include "math_rational_function.h"
@@ -16,14 +17,242 @@ bool LargeIntegerUnsignedTest::karatsubaMultiplication() {
   LargeIntegerUnsignedTest::karatsubaMultiplicationOnce(
     "123456789", "987654321", "121932631112635269"
   );
+  LargeIntegerUnsignedTest::karatsubaMultiplicationOnce(
+    "457900116811126352873011089540022279755972583"
+    "000354391376461571234820174288186226029720723",
+    "486534049742481021170947558622473009097156907",
+    "222783998209672419038130133918775405256331229"
+    "856266044162985668038819325175304672464180126"
+    "994191907675521988122959916236516062520483761"
+  );
+  LargeIntegerUnsignedTest::karatsubaMultiplicationOnce(
+    "486534049742481021170947558622473009097156907",
+    "457900116811126352873011089540022279755972583"
+    "000354391376461571234820174288186226029720723",
+    "222783998209672419038130133918775405256331229"
+    "856266044162985668038819325175304672464180126"
+    "994191907675521988122959916236516062520483761"
+  );
   LargeIntegerUnsignedTest::multiplicationLargePowers();
+  return true;
+}
+
+std::string LargeIntegerUnsignedTest::MultiplicationTest::toHTML() const {
+  if (this->durations.size < 2) {
+    return "N/A";
+  }
+  std::stringstream report;
+  int64_t durationDigitByDigit = this->durations[0].duration;
+  int64_t durationKaratsuba = this->durations[1].duration;
+  double ratio;
+  if (durationDigitByDigit == durationKaratsuba) {
+    ratio = 1;
+  } else if (durationKaratsuba == 0) {
+    ratio = static_cast<double>(durationDigitByDigit) / 0.4;
+  } else {
+    ratio = static_cast<double>(durationDigitByDigit) / static_cast<double>(
+      durationKaratsuba
+    );
+  }
+  if (ratio > 1) {
+    report << "<b style='color:green'>" << ratio << "</b>";
+  } else if (ratio == 1) {
+    report << "<b>" << 1 << "</b>";
+  } else {
+    report << "<b style='color:red'>" << ratio << "</b>";
+  }
+  return report.str();
+}
+
+LargeIntegerUnsigned LargeIntegerUnsignedTest::makeLarge(
+  UnsecurePseudoRandomGenerator& generator, int numberOfDigits
+) {
+  LargeIntegerUnsigned result;
+  result.digits.setSize(numberOfDigits);
+  for (int i = 0; i < numberOfDigits; i ++) {
+    uint32_t digit = static_cast<uint32_t>(generator.getRandom());
+    digit %= LargeIntegerUnsigned::carryOverBound;
+    if (i == numberOfDigits - 1 && digit == 0) {
+      digit = 1;
+    }
+    result.digits[i] = digit;
+  }
+  return result;
+}
+
+void LargeIntegerUnsignedTest::MultiplicationTest::multiply(
+  LargeIntegerUnsigned::MultiplicationAlgorithm algorithm
+) {
+  STACK_TRACE("LargeIntegerUnsignedTest::MultiplicationTest::multiply");
+  LargeIntegerUnsignedTest::LargePowerTestDuration duration;
+  duration.algorithm = algorithm;
+  int64_t start = global.getElapsedMicroseconds();
+  LargeIntegerUnsigned mustBeTheSameResult;
+  if (
+    algorithm == LargeIntegerUnsigned::MultiplicationAlgorithm::DIGIT_BY_DIGIT
+  ) {
+    this->left.multiplyByDigitByDigit(this->right, mustBeTheSameResult);
+  } else if (
+    algorithm == LargeIntegerUnsigned::MultiplicationAlgorithm::KARATSUBA
+  ) {
+    LargeIntegerUnsigned::karatsubaProduct(
+      this->left, this->right, mustBeTheSameResult
+    );
+  }
+  duration.duration = global.getElapsedMicroseconds() - start;
+  if (this->durations.size > 0 && this->result != mustBeTheSameResult) {
+    global.fatal
+    << "Digit by digit multiplication disagrees "
+    << "with previous result. "
+    << "Left:"
+    << this->left.toString()
+    << ", right: "
+    << this->right.toString()
+    << ".\nDigit by digit result:\n"
+    << this->result.toString()
+    << "\nKaratsuba result:\n"
+    << mustBeTheSameResult.toString()
+    << global.fatal;
+  } else {
+    this->result = mustBeTheSameResult;
+  }
+  this->durations.addOnTop(duration);
+}
+
+bool LargeIntegerUnsignedTest::multiplicationSpeedKaratsubaDigitBound() {
+  STACK_TRACE(
+    "LargeIntegerUnsignedTest::"
+    "multiplicationSpeedKaratsubaDigitBound"
+  );
+  MapList<int, int64_t> durations;
+  for (int bound = 5; bound < 50; bound ++) {
+    global
+    << "Bound comparison table: "
+    << bound
+    << " out of "
+    << 50
+    << Logger::endL;
+    int iterations = 100;
+    int delta = 5;
+    UnsecurePseudoRandomGenerator generator;
+    generator.setRandomSeedSmall(1);
+    LargeIntegerUnsigned::karatsubaIntegerBound = bound;
+    List<List<LargeIntegerUnsignedTest::MultiplicationTest> > toBeTested;
+    toBeTested.setSize(iterations);
+    for (int i = 0; i < iterations; i ++) {
+      toBeTested[i].setSize(iterations);
+      for (int j = 0; j < iterations; j ++) {
+        LargeIntegerUnsignedTest::MultiplicationTest& test = toBeTested[i][j];
+        test.left =
+        LargeIntegerUnsignedTest::makeLarge(generator, (i + 1) * delta);
+        test.right =
+        LargeIntegerUnsignedTest::makeLarge(generator, (j + 1) * delta);
+        test.multiply(LargeIntegerUnsigned::KARATSUBA);
+      }
+      global
+      << "Speed comparison table row: "
+      << (i + 1)
+      << " out of "
+      << iterations
+      << " complete."
+      << Logger::endL;
+    }
+    int64_t totalKaratsubaTime = 0;
+    for (int i = 0; i < iterations; i ++) {
+      for (int j = 0; j < iterations; j ++) {
+        totalKaratsubaTime += toBeTested[i][j].durations[0].duration;
+      }
+    }
+    durations[bound] = totalKaratsubaTime;
+  }
+  std::stringstream report;
+  report
+  << "<html><body><table><tr><td> Bound</td><td>Duration (ms)</td></tr>";
+  for (int i = 0; i < durations.size(); i ++) {
+    report
+    << "<tr><td>"
+    << durations.keys[i]
+    << "</td>"
+    << "<td>"
+    << (durations.values[i] / 1000)
+    << "</td></tr>";
+  }
+  report << "</table></body></html>";
+  FileOperations::writeFileVirtual(
+    "test/multiplication_karatsuba_bound_duration_table.html",
+    report.str(),
+    nullptr
+  );
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::multiplicationSpeedComparisonTable() {
+  STACK_TRACE(
+    "LargeIntegerUnsignedTest::"
+    "multiplicationSpeedComparisonTable"
+  );
+  int iterations = 100;
+  int delta = 5;
+  UnsecurePseudoRandomGenerator generator;
+  generator.setRandomSeedSmall(1);
+  List<List<LargeIntegerUnsignedTest::MultiplicationTest> > toBeTested;
+  toBeTested.setSize(iterations);
+  for (int i = 0; i < iterations; i ++) {
+    toBeTested[i].setSize(iterations);
+    for (int j = 0; j < iterations; j ++) {
+      LargeIntegerUnsignedTest::MultiplicationTest& test = toBeTested[i][j];
+      test.left =
+      LargeIntegerUnsignedTest::makeLarge(generator, (i + 1) * delta);
+      test.right =
+      LargeIntegerUnsignedTest::makeLarge(generator, (j + 1) * delta);
+      test.multiply(LargeIntegerUnsigned::DIGIT_BY_DIGIT);
+      test.multiply(LargeIntegerUnsigned::KARATSUBA);
+    }
+    global
+    << "Speed comparison table row: "
+    << (i + 1)
+    << " out of "
+    << iterations
+    << " complete."
+    << Logger::endL;
+  }
+  int64_t totalKaratsubaTime = 0;
+  for (int i = 0; i < iterations; i ++) {
+    for (int j = 0; j < iterations; j ++) {
+      totalKaratsubaTime += toBeTested[i][j].durations[1].duration;
+    }
+  }
+  std::stringstream report;
+  report
+  << "<html><body>"
+  << "Total time: "
+  << (totalKaratsubaTime / 1000)
+  << " milliseconds. "
+  << "<table>";
+  report << "<tr><td>digits</td>";
+  for (int i = 0; i < iterations; i ++) {
+    report << "<td>" << toBeTested[0][i].right.digits.size << "</td>";
+  }
+  report << "</tr>";
+  for (int i = 0; i < iterations; i ++) {
+    report << "<tr>";
+    report << "<td>" << toBeTested[i][0].left.digits.size << "</td>";
+    for (int j = 0; j < iterations; j ++) {
+      report << "<td>" << toBeTested[i][j].toHTML() << "</td>";
+    }
+    report << "</tr>";
+  }
+  report << "</table></body></html>";
+  FileOperations::writeFileVirtual(
+    "test/multiplication_speed_comparison_table.html", report.str(), nullptr
+  );
   return true;
 }
 
 bool LargeIntegerUnsignedTest::multiplicationLargePowers() {
   STACK_TRACE(
     "LargeIntegerUnsignedTest::"
-    "karatsubaMultiplicationLargePowers"
+    "multiplicationLargePowers"
   );
   List<LargeIntegerUnsignedTest::LargePowerTest> results;
   for (int i = 1; i <= 10; i ++) {
@@ -189,8 +418,15 @@ bool LargeIntegerUnsignedTest::LargePowerTest::checkPerformance() {
       << " results in "
       << digits
       << " digits which is too slow: "
+      << "took: "
+      << Logger::purple
+      << duration.duration
+      << " miliseconds; "
+      << Logger::normalColor
       << "speed in digits per millisecond: "
+      << Logger::purple
       << FloatingPoint::doubleToString(speed)
+      << Logger::normalColor
       << ", recommended speed: "
       << FloatingPoint::doubleToString(recommendedSpeed)
       << " result digits per millisecond. "
@@ -255,6 +491,13 @@ bool LargeIntegerUnsignedTest::serializationToHex(
     << ". "
     << global.fatal;
   }
+  return true;
+}
+
+bool LargeIntegerUnsignedTest::allPerformance() {
+  STACK_TRACE("LargeIntegerUnsignedTest::allPerformance");
+  LargeIntegerUnsignedTest::multiplicationSpeedKaratsubaDigitBound();
+  LargeIntegerUnsignedTest::multiplicationSpeedComparisonTable();
   return true;
 }
 

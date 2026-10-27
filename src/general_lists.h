@@ -1959,8 +1959,11 @@ void List<Object>::slice(
   if (startingIndex < 0) {
     startingIndex = 0;
   }
-  if (startingIndex >= this->size) {
-    startingIndex = this->size - 1;
+  if (sizeOfSlice < 0) {
+    sizeOfSlice = 0;
+  }
+  if (startingIndex > this->size) {
+    startingIndex = this->size;
   }
   if (sizeOfSlice < 0) {
     sizeOfSlice = 0;

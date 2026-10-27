@@ -39,6 +39,7 @@ const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::expressions = "expressions";
 const std::string Test::Suites::API = "api";
 const std::string Test::Suites::scientific = "scientific";
+const std::string Test::Suites::performance = "performance";
 
 void Test::run() {
   STACK_TRACE("Test::run");
@@ -93,6 +94,13 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::API)) {
     WebAPIResponseTest::all();
     global << Logger::green << "API tests completed." << Logger::endL;
+  }
+  if (this->shouldTest(Test::Suites::performance)) {
+    LargeIntegerUnsignedTest::allPerformance();
+    global
+    << Logger::green
+    << "Multiplication performance tests completed."
+    << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::polynomial)) {
     PolynomialUnivariateModularAsModulusTest::all();
@@ -172,6 +180,9 @@ void Test::run() {
 }
 
 bool Test::shouldTest(const std::string& testSuite) {
+  if (testSuite == Test::Suites::performance) {
+    return this->inputs.contains(testSuite);
+  }
   if (this->flagTestAll) {
     return true;
   }

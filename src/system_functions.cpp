@@ -8,23 +8,36 @@
 class SytemFunctionsGlobal {
 public:
   static timeval computationStartGlobal;
-  static timeval lastTimeMeasure;
 };
 
 timeval SytemFunctionsGlobal::computationStartGlobal;
-timeval SytemFunctionsGlobal::lastTimeMeasure;
 
 int64_t GlobalVariables::getElapsedMilliseconds() {
-  gettimeofday(&SytemFunctionsGlobal::lastTimeMeasure, nullptr);
+  timeval lastTimeMeasure;
+  gettimeofday(&lastTimeMeasure, nullptr);
   return (
-    SytemFunctionsGlobal::lastTimeMeasure.tv_sec -
+    lastTimeMeasure.tv_sec -
     SytemFunctionsGlobal::computationStartGlobal.tv_sec
   ) *
   1000 + (
-    SytemFunctionsGlobal::lastTimeMeasure.tv_usec -
+    lastTimeMeasure.tv_usec -
     SytemFunctionsGlobal::computationStartGlobal.tv_usec
   ) /
   1000 - global.millisecondOffset;
+}
+
+int64_t GlobalVariables::getElapsedMicroseconds() {
+  timeval lastTimeMeasure;
+  gettimeofday(&lastTimeMeasure, nullptr);
+  return (
+    lastTimeMeasure.tv_sec -
+    SytemFunctionsGlobal::computationStartGlobal.tv_sec
+  ) *
+  1000000 + (
+    lastTimeMeasure.tv_usec -
+    SytemFunctionsGlobal::computationStartGlobal.tv_usec
+  ) -
+  global.millisecondOffset * 1000;
 }
 
 void initializeTimer() {

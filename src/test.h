@@ -31,6 +31,7 @@ public:
     static const std::string expressions;
     static const std::string scientific;
     static const std::string courses;
+    static const std::string performance;
   };
 
   static std::string update;
@@ -387,7 +388,25 @@ public:
     LargePowerTest() {}
   };
 
+  struct MultiplicationTest {
+  public:
+    LargeIntegerUnsigned left;
+    LargeIntegerUnsigned right;
+    LargeIntegerUnsigned result;
+    List<LargeIntegerUnsignedTest::LargePowerTestDuration> durations;
+    void multiply(LargeIntegerUnsigned::MultiplicationAlgorithm algorithm);
+    MultiplicationTest(
+      const LargeIntegerUnsigned& inputLeft,
+      const LargeIntegerUnsigned& inputRight
+    ):
+    left(inputLeft),
+    right(inputRight) {}
+    MultiplicationTest() {}
+    std::string toHTML() const;
+  };
+
   static bool all();
+  static bool allPerformance();
   static bool division();
   static bool divisionOnce(
     const std::string& dividend,
@@ -401,7 +420,13 @@ public:
     const std::string& rightInput,
     const std::string& desiredInput
   );
+  static LargeIntegerUnsigned makeLarge(
+    UnsecurePseudoRandomGenerator& generator, int numberOfDigits
+  );
+  static bool multiplicationSpeedKaratsubaDigitBound();
+  static bool multiplicationSpeedComparisonTable();
   static bool multiplicationLargePowers();
+  static bool multiplicationLargeComparison();
   static bool multiplicationLargePowerOnce(
     uint32_t base,
     int iterations,

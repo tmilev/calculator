@@ -27,8 +27,8 @@ class LargeIntegerUnsigned {
     const LargeIntegerUnsigned& right,
     LargeIntegerUnsigned& output
   );
-  static const int karatsubaIntegerBound = 2;
 public:
+  static int karatsubaIntegerBound;
   // The zero element is assumed to have length one array with a zero entry.
   //
   // CarryOverBound is the "base" over which we work.

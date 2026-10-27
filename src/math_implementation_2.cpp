@@ -3,6 +3,13 @@
 #include "math_general.h"
 #include "math_general_implementation.h"
 
+// This value was computed as
+// the shortest run time of
+// LargeIntegerUnsignedTest::
+// multiplicationSpeedKaratsubaDigitBound.
+// This can be triggered as of writing by
+// running ./calculator test performance.
+int LargeIntegerUnsigned::karatsubaIntegerBound = 21;
 List<unsigned int> LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
 const unsigned int HashConstants::primeConstants[HashConstants::size] =
 {
@@ -266,9 +273,7 @@ void LargeIntegerUnsigned::multiplyByUInt(unsigned int x) {
 }
 
 void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x) {
-  LargeIntegerUnsigned result;
-  this->multiplyByDigitByDigit(x, result);
-  *this = result;
+  LargeIntegerUnsigned::karatsubaProduct(*this, x, *this);
 }
 
 void LargeIntegerUnsigned::addUInt(unsigned int x) {
@@ -1036,8 +1041,8 @@ void LargeIntegerUnsigned::assignShiftedUInt(unsigned int x, int shift) {
   }
   this->digits.initializeFillInObject(shift, 0);
   while (x != 0) {
-    uint32_t tempX = x % LargeIntegerUnsigned::carryOverBound;
-    this->digits.addOnTop(static_cast<uint32_t>(tempX));
+    uint32_t remainder = x % LargeIntegerUnsigned::carryOverBound;
+    this->digits.addOnTop(static_cast<uint32_t>(remainder));
     x = x / LargeIntegerUnsigned::carryOverBound;
   }
 }
@@ -1291,7 +1296,7 @@ void LargeIntegerUnsigned::karatsubaProductInternal(
     return;
   }
   int leftDigits = left.digits.size;
-  int rightDigits = left.digits.size;
+  int rightDigits = right.digits.size;
   if (leftDigits < rightDigits) {
     LargeIntegerUnsigned::karatsubaProductInternal(right, left, output);
     return;
@@ -1300,8 +1305,7 @@ void LargeIntegerUnsigned::karatsubaProductInternal(
     left.digits.size < LargeIntegerUnsigned::karatsubaIntegerBound ||
     right.digits.size < LargeIntegerUnsigned::karatsubaIntegerBound
   ) {
-    output = left;
-    output.multiplyBy(right);
+    left.multiplyByDigitByDigit(right, output);
     return;
   }
   int baseDigits = leftDigits % 2 == 0 ? leftDigits / 2 : (leftDigits + 1) / 2;
@@ -1311,8 +1315,10 @@ void LargeIntegerUnsigned::karatsubaProductInternal(
   LargeIntegerUnsigned rightLow;
   left.digits.slice(baseDigits, baseDigits, leftHigh.digits);
   left.digits.slice(0, baseDigits, leftLow.digits);
+  leftLow.fitSize();
   right.digits.slice(baseDigits, baseDigits, rightHigh.digits);
   right.digits.slice(0, baseDigits, rightLow.digits);
+  rightLow.fitSize();
   if (leftHigh.digits.size == 0) {
     leftHigh.makeZero();
   }

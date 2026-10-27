@@ -26,6 +26,9 @@ database_backups*
 database/*
 test/test_database.json
 test/failedinterpretation.html
+test/multiplication_speed_comparison_table_*
+test/multiplication_speed_comparison_table.html
+test/multiplication_karatsuba_bound_*
 
 bin/*
 calculator

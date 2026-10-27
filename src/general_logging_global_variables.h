@@ -541,6 +541,7 @@ public:
   bool configurationLoad();
   void configurationProcess();
   static int64_t getElapsedMilliseconds();
+  static int64_t getElapsedMicroseconds();
   double getElapsedSeconds() {
     return static_cast<double>(this->getElapsedMilliseconds()) / 1000;
   }
